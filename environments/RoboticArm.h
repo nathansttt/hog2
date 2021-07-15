@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <string.h>
+#include <cinttypes>
 #include "Map.h"
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
@@ -210,7 +211,7 @@ public:
 		//theSize = (uint32_t)pow(512/reductionPower, numArms);
 		printf("Using mask 0x%llX\n", theMask);
 		printf("Using result 0x%llX\n", theResult);
-		printf("%llu entries in table\n", theSize);
+		printf("%" PRId64 " entries in table\n", theSize);
 		distances = new uint16_t[theSize];
 		memset ( distances, 0xFFFF, theSize*sizeof(uint16_t) );
 	}
@@ -231,7 +232,7 @@ public:
 		theSize = (uint32_t)pow(512/reductionPower, numArms);
 		printf("Using mask 0x%llX\n", theMask);
 		printf("Using result 0x%llX\n", theResult);
-		printf("%llu entries in table\n", theSize);
+		printf("%" PRId64 " entries in table\n", theSize);
 		distances = new uint16_t[theSize];
 	}
 	~ArmToArmCompressedHeuristic()
@@ -379,7 +380,7 @@ public:
 	{
 		FILE *f = fopen(file, "w+");
 		if (f == 0) assert(!"file could not be opened");
-		fprintf(f, "%llu %llu %llu %d\n", theSize, theMask, theResult, (int)reduction.size());
+		fprintf(f, "%" PRId64 " %" PRId64 " %" PRId64 " %d\n", theSize, theMask, theResult, (int)reduction.size());
 		fwrite(&reduction[0], sizeof(int), reduction.size(), f);
 		fwrite(distances, sizeof(uint16_t), theSize, f);
 		fclose(f);
@@ -389,7 +390,7 @@ public:
 		int numArms;
 		FILE *f = fopen(file, "r");
 		if (f == 0) assert(!"file could not be opened");
-		fscanf(f, "%llu %llu %llu %d\n", &theSize, &theMask, &theResult, &numArms);
+		fscanf(f, "%" PRId64 " %" PRId64 " %" PRId64 " %d\n", &theSize, &theMask, &theResult, &numArms);
 		reduction.resize(numArms);
 		fread(&reduction[0], sizeof(int), reduction.size(), f);
 		distances = new uint16_t[theSize];

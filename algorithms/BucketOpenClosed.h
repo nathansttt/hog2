@@ -115,7 +115,7 @@ uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size()-1; // hashing to element list location
 	FindNewMin();
-	//printf("Added node to buckets %llu/%llu\n", newg+newh, newh);
+	//printf("Added node to buckets %" PRId64 "/%" PRId64 "\n", newg+newh, newh);
 	return elements.size()-1;
 }
 
@@ -143,7 +143,7 @@ void BucketOpenClosed<state, CmpKey, dataStructure>::KeyChanged(uint64_t val)
 //	uint64_t g, h;
 //	g = extractG(elements[val].openLocation);
 //	h = extractH(elements[val].openLocation);
-	//printf("-----\nChanging key of [%llu][%llu] to [%1.0f][%1.0f]\n", g+h, h, elements[val].g+elements[val].h, elements[val].h);
+	//printf("-----\nChanging key of [%" PRId64 "][%" PRId64 "] to [%1.0f][%1.0f]\n", g+h, h, elements[val].g+elements[val].h, elements[val].h);
 	//Print();
 	Remove(val, elements[val].openLocation);
 //	int len = pQueue[g+h][0].size();
@@ -163,7 +163,7 @@ void BucketOpenClosed<state, CmpKey, dataStructure>::KeyChanged(uint64_t val)
 //	pQueue[g+h][0].push_back(val);
 	elements[val].openLocation = Add(val, elements[val].g+elements[val].h);
 	//pQueue[g+h][h].push_back(val);
-	//printf("Removed and re-added node to buckets %llu/%llu\n", g+h, h);
+	//printf("Removed and re-added node to buckets %" PRId64 "/%" PRId64 "\n", g+h, h);
 
 //	FindNewMin();
 	//Print();
@@ -216,7 +216,7 @@ uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::Close()
 	if (pQueue[minBucket].entries.size() == 0)
 		pQueue[minBucket].fCost = -1;
 	elements[ans].where = kClosedList;
-	//printf("Removed item from %llu/%llu\n", minBucket, minSubBucket);
+	//printf("Removed item from %" PRId64 "/%" PRId64 "\n", minBucket, minSubBucket);
 	FindNewMin();
 	
 	return ans;

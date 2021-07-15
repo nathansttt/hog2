@@ -41,7 +41,7 @@ void LoadMap(Map *m);
 
 bool recording = false;
 bool running = false;
-bool mapChanged = true;
+bool mapChange = true;
 bool showDH = false;
 
 int stepsPerFrame = 1;
@@ -142,14 +142,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 	
-	if (mapChanged == true)
+	if (mapChange == true)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		if (showDH)
 			mo->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 
 	for (int x = 0; x < h.values.size(); x++)
@@ -311,14 +311,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'd':
 			showDH = !showDH;
-			mapChanged = true;
+			mapChange = true;
 			break;
 		case 'p':
 		{
 			if (showDH)
 			{
 				showDH = false;
-				mapChanged = true;
+				mapChange = true;
 			}
 			m = kFindPath;
 			start = goal = {0, 0};
@@ -417,7 +417,7 @@ void DHMouseHandler(tMouseEventType mType, point3d loc)
 			h.Clear();
 			xyLoc tmp = {static_cast<uint16_t>(x), static_cast<uint16_t>(y)};
 			AddDH(tmp);
-			mapChanged = true;
+			mapChange = true;
 			break;
 		}
 		case kMouseDrag:

@@ -748,7 +748,7 @@ void RubikEdge::MRUnrank(int n, uint64_t r, uint64_t &perm)
 {
 	if (n > 0)
 	{
-		//		printf("Swap %d %llu\n", n-1, r%n);
+		//		printf("Swap %d %" PRId64 "\n", n-1, r%n);
 		swap(perm, n-1, r%n);
 		MRUnrank(n-1, r/n, perm);
 	}
@@ -759,7 +759,7 @@ void RubikEdge::MRUnrank2(int n, uint64_t r, uint64_t &perm)
 {
 	for (int i = n; i > 0; i--)
 	{
-		//		printf("Swap %d %llu\n", i-1, r%i);
+		//		printf("Swap %d %" PRId64 "\n", i-1, r%i);
 		swap(perm, i-1, r%i);
 		r = r/i;
 	}

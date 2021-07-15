@@ -13,6 +13,7 @@
 #include "Graphics.h"
 #include <stdio.h>
 #include <cstring>
+#include <cinttypes>
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -355,5 +356,6 @@ void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, G
 void setPortCamera(pRecContext pContextInfo, int currPort);
 void setViewport(pRecContext pContextInfo, int currPort);
 //void rotateObject();
+
 
 #endif

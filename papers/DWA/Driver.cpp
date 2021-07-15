@@ -235,7 +235,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //			if (astar.DoSingleSearchStep(path) == true)
 //			{
 //				mode = kWaitPath;
-//				printf("Path found length %f; %llu nodes expanded\n",
+//				printf("Path found length %f; %" PRId64 " nodes expanded\n",
 //					   env->GetPathLength(path), astar.GetNodesExpanded());
 //				break;
 //			}
@@ -307,13 +307,13 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			exit(0);
 		}
 		auto a = new DWG::DynamicWeightedGrid<8>(argument[1]);
-		printf("MEMORY(8): %llu bytes; %d edges %d regions\n", a->EstimateMemoryInBytes(), a->GetNumEdges(), a->GetNumRegions());
+		printf("MEMORY(8): %" PRId64 " bytes; %d edges %d regions\n", a->EstimateMemoryInBytes(), a->GetNumEdges(), a->GetNumRegions());
 		
 		auto b = new DWG::DynamicWeightedGrid<16>(argument[1]);
-		printf("MEMORY(16): %llu bytes; %d edges %d regions\n", b->EstimateMemoryInBytes(), b->GetNumEdges(), b->GetNumRegions());
+		printf("MEMORY(16): %" PRId64 " bytes; %d edges %d regions\n", b->EstimateMemoryInBytes(), b->GetNumEdges(), b->GetNumRegions());
 
 		auto c =  new DWG::DynamicWeightedGrid<32>(argument[1]);
-		printf("MEMORY(32): %llu bytes; %d edges %d regions\n", c->EstimateMemoryInBytes(), c->GetNumEdges(), c->GetNumRegions());
+		printf("MEMORY(32): %" PRId64 " bytes; %d edges %d regions\n", c->EstimateMemoryInBytes(), c->GetNumEdges(), c->GetNumRegions());
 		exit(0);
 	}
 	if (strcmp(argument[0], "-timing") == 0)
@@ -441,20 +441,20 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		t.StartTimer();
 //		nbs.GetPath(env, start, goal, env, env, path);
 //		t.EndTimer();
-//		printf("NBS: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//		printf("NBS: Path found length %f; %" PRId64 " nodes expanded; time: %1.6f\n",
 //			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
 //		nbsNodes += nbs.GetNodesExpanded();
 //
 //		t.StartTimer();
 //		nbs.GetPath(env, start, goal, &z, &z, path);
 //		t.EndTimer();
-//		printf("NBS0: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//		printf("NBS0: Path found length %f; %" PRId64 " nodes expanded; time: %1.6f\n",
 //			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
 
 		t.StartTimer();
 		astar.GetPath(env, start, goal, path);
 		t.EndTimer();
-//		printf(" A*: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//		printf(" A*: Path found length %f; %" PRId64 " nodes expanded; time: %1.6f\n",
 //			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 		astarNodes += astar.GetNodesExpanded();
 		optimalPath += env->GetPathLength(path);
@@ -467,7 +467,7 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		t.StartTimer();
 //		astar.GetPath(env, start, goal, path);
 //		t.EndTimer();
-//		printf("WA*(4): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//		printf("WA*(4): Path found length %f; %" PRId64 " nodes expanded; time: %1.6f\n",
 //			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 //		wastarNodes += astar.GetNodesExpanded();
 //		suboptimalPath += env->GetPathLength(path);
@@ -477,7 +477,7 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		t.StartTimer();
 //		astar.GetPath(env, start, goal, path);
 //		t.EndTimer();
-//		printf("WA*(3): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//		printf("WA*(3): Path found length %f; %" PRId64 " nodes expanded; time: %1.6f\n",
 //			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 //		wastarNodes3 += astar.GetNodesExpanded();
 //		suboptimalPath3 += env->GetPathLength(path);
@@ -487,7 +487,7 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		t.StartTimer();
 //		astar.GetPath(env, start, goal, path);
 //		t.EndTimer();
-//		printf("WA*(2): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//		printf("WA*(2): Path found length %f; %" PRId64 " nodes expanded; time: %1.6f\n",
 //			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 //		wastarNodes2 += astar.GetNodesExpanded();
 //		suboptimalPath2 += env->GetPathLength(path);
@@ -500,10 +500,10 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		firstAbsNodes += tmp2;
 //		absNodes += tmpNodes;
 //		absPath += env->GetPathLength(path);
-//		printf("ABS: Path found length %f; %llu nodes expanded [%llu]; time: %1.6f\n",
+//		printf("ABS: Path found length %f; %" PRId64 " nodes expanded [%" PRId64 "]; time: %1.6f\n",
 //			   env->GetPathLength(path), tmpNodes, tmp2, t.GetElapsedTime());
 	}
-//	printf("A*: %llu\nNBS: %llu\nWA*(2): %llu\nWA*(3): %llu\nWA*(4): %llu\nABS: %llu [%llu]\n",
+//	printf("A*: %" PRId64 "\nNBS: %" PRId64 "\nWA*(2): %" PRId64 "\nWA*(3): %" PRId64 "\nWA*(4): %" PRId64 "\nABS: %" PRId64 " [%" PRId64 "]\n",
 //		   astarNodes/numProblems, nbsNodes/numProblems,
 //		   wastarNodes2/numProblems, wastarNodes3/numProblems, wastarNodes/numProblems,
 //		   absNodes/numProblems, firstAbsNodes/numProblems);
@@ -558,10 +558,10 @@ bool MyClickHandler(unsigned long , int, int, point3d p, tButtonType , tMouseEve
 				mode = kDoPathfinding;
 //				std::cout << "Searching from " << start << " to " << goal << "\n";
 //				nbs.GetPath(env, start, goal, env, env, path);
-//				printf("NBS: Path found length %f; %llu nodes expanded\n",
+//				printf("NBS: Path found length %f; %" PRId64 " nodes expanded\n",
 //					   env->GetPathLength(path), nbs.GetNodesExpanded());
 //				astar.GetPath(env, start, goal, path);
-//				printf(" A*: Path found length %f; %llu nodes expanded\n",
+//				printf(" A*: Path found length %f; %" PRId64 " nodes expanded\n",
 //					   env->GetPathLength(path), astar.GetNodesExpanded());
 //				astar.InitializeSearch(env, start, goal, path);
 				
@@ -581,14 +581,14 @@ bool MyClickHandler(unsigned long , int, int, point3d p, tButtonType , tMouseEve
 					mode = kWaitPath;
 					uint64_t total, init;
 					total = GetPathViaAbstraction(start, goal, path, init);
-					printf("ABS: %1.2f [%llu - %llu]\n", env->GetPathLength(path), total, init);
+					printf("ABS: %1.2f [%" PRId64 " - %" PRId64 "]\n", env->GetPathLength(path), total, init);
 
 					nbs.GetPath(env, start, goal, env, env, path);
-					printf("NBS: %1.2f [%d - %llu]\n", env->GetPathLength(path), path.size(), nbs.GetNodesExpanded());
+					printf("NBS: %1.2f [%d - %" PRId64 "]\n", env->GetPathLength(path), path.size(), nbs.GetNodesExpanded());
 
 					astar.SetWeight(10);
 					astar.GetPath(env, start, goal, wpath);
-					printf("WA*: %1.2f [%d - %llu]\n", env->GetPathLength(wpath), path.size(), astar.GetNodesExpanded());
+					printf("WA*: %1.2f [%d - %" PRId64 "]\n", env->GetPathLength(wpath), path.size(), astar.GetNodesExpanded());
 					astar.SetWeight(1);
 				}
 				break;

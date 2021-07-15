@@ -198,7 +198,7 @@ namespace PermutationPuzzle {
 //			printf("Error -- cannot reduce to 0 entries\n");
 //			return;
 //		}
-//		printf("Performing mod compression, reducing from %lu entries to %llu entries\n", PDB[whichPDB].size(), newEntries);
+//		printf("Performing mod compression, reducing from %lu entries to %" PRId64 " entries\n", PDB[whichPDB].size(), newEntries);
 //		std::vector<uint8_t> newPDB(newEntries);
 //		for (uint64_t x = 0; x < newEntries; x++)
 //			newPDB[x] = PDB[whichPDB][x];
@@ -280,7 +280,7 @@ namespace PermutationPuzzle {
 //		uint64_t COUNT = PDB[whichPDB].size();
 //		if (1) // use threads
 //		{
-//			printf("Starting threaded delta computation (%llu entries)\n", COUNT);
+//			printf("Starting threaded delta computation (%" PRId64 " entries)\n", COUNT);
 //			int numThreads = std::thread::hardware_concurrency();
 //			std::vector<std::thread*> threads(numThreads);
 //			uint64_t workSize = COUNT/numThreads+1;
@@ -571,7 +571,7 @@ namespace PermutationPuzzle {
 //				}
 //			}
 //			entries += newEntries;
-//			printf("Depth %d complete; %1.2fs elapsed. %llu new states seen; %llu of %llu total\n",
+//			printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states seen; %" PRId64 " of %" PRId64 " total\n",
 //				   depth, s.EndTimer(), newEntries, entries, COUNT);
 //			depth++;
 //			//		depth = coarseOpen[0];
@@ -584,7 +584,7 @@ namespace PermutationPuzzle {
 //		printf("%1.2fs elapsed\n", t.EndTimer());
 //		if (entries != COUNT)
 //		{
-//			printf("Entries: %llu; count: %llu\n", entries, COUNT);
+//			printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 //			assert(entries == COUNT);
 //		}
 //		
@@ -691,7 +691,7 @@ namespace PermutationPuzzle {
 //		printf("%1.2fs elapsed\n", t.EndTimer());
 //		if (entries != COUNT)
 //		{
-//			printf("Entries: %llu; count: %llu\n", entries, COUNT);
+//			printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 //			assert(entries == COUNT);
 //		}
 //		
@@ -785,7 +785,7 @@ namespace PermutationPuzzle {
 //				state next = q_curr.front();
 //				q_curr.pop_front();
 //				
-//				//printf("%llu\n", GetPDBHash(next, distinct));
+//				//printf("%" PRId64 "\n", GetPDBHash(next, distinct));
 //				assert(DB[GetPDBHash(next, distinct)] != 255);
 //				
 //				uint64_t closedHash = GetPDBHash(next, closedPattern);
@@ -905,7 +905,7 @@ namespace PermutationPuzzle {
 //		size_t index;
 //		if ((index = fread(&PDB.back()[0], sizeof(uint8_t), COUNT, f)) != COUNT)
 //		{
-//			printf("Error; did not correctly read %llu entries from PDB (%lu instead)\n", COUNT, index);
+//			printf("Error; did not correctly read %" PRId64 " entries from PDB (%lu instead)\n", COUNT, index);
 //			exit(0);
 //		}
 //		fclose(f);
@@ -1327,7 +1327,7 @@ namespace PermutationPuzzle {
 //		// outputs histogram of heuristic value counts
 //		for (uint64_t x = 0; x <= maxval; x++)
 //		{
-//			printf("%lld:\t%llu\n", x, values[x]);
+//			printf("%lld:\t%" PRId64 "\n", x, values[x]);
 //			average += x*values[x];
 //		}
 //		printf("Average value: %1.4f\n", average/PDB[which].size());

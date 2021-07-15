@@ -64,7 +64,7 @@ private:
 		for (int x = 0; x < gCostHistogram.size(); x++)
 		{
 			if (gCostHistogram[x] != 0)
-				printf("%d\t%llu\n", x, gCostHistogram[x]);
+				printf("%d\t%" PRId64 "\n", x, gCostHistogram[x]);
 			if (x*2 > gCostHistogram.size()-1)
 				late += gCostHistogram[x];
 			else
@@ -79,7 +79,7 @@ private:
 		for (int x = 0; x < fCostHistogram.size(); x++)
 		{
 			if (fCostHistogram[x] != 0)
-				printf("%d\t%llu\n", x, fCostHistogram[x]);
+				printf("%d\t%" PRId64 "\n", x, fCostHistogram[x]);
 		}
 		printf("\n");
 	}
@@ -146,7 +146,7 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 		fCostHistogram.resize(nextBound+1);
 		threads.resize(0);
 		
-		printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
+		printf("Starting iteration with bound %f; %" PRId64 " expanded, %" PRId64 " generated\n", nextBound, nodesExpanded, nodesTouched);
 		fflush(stdout);
 		
 		for (size_t x = 0; x < work.size(); x++)

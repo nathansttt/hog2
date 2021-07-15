@@ -20,7 +20,7 @@ enum drawing {
 
 int whichAlgorithm = 0;
 int numAlgorithms = 3;
-bool mapChanged = true;
+bool mapChange = true;
 
 MapEnvironment *me = 0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> AStarForward, AStarBackward;
@@ -113,11 +113,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		plot.AddLine(&nbsline);
 		plot.AddLine(&selection);
 		
-		forwardLine.SetWidth(10.0);
-		backwardLine.SetWidth(10.0);
-		totalLine.SetWidth(10.0);
-		nbsline.SetWidth(10.0);
-		selection.SetWidth(10.0);
+		forwardLine.SetWidth(2.0);
+		backwardLine.SetWidth(2.0);
+		totalLine.SetWidth(2.0);
+		nbsline.SetWidth(2.0);
+		selection.SetWidth(2.0);
 		
 //		selection.SetHidden(true);
 		nbsline.SetHidden(true);
@@ -139,12 +139,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		return;
 	}
 
-	if (mapChanged)
+	if (mapChange)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 		
 	if (!(start.x == 0xFFFF || running || showPerc))
@@ -262,7 +262,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				if (path.size() != 0)
 				{
 					char tmp[255];
-					sprintf(tmp, "A*f %llu, A*b %llu, A*avg %llu, NBS %llu\n", AStarForward.GetNodesExpanded(), AStarBackward.GetNodesExpanded(),
+					sprintf(tmp, "A*f %" PRId64 ", A*b %" PRId64 ", A*avg %" PRId64 ", NBS %" PRId64 "\n", AStarForward.GetNodesExpanded(), AStarBackward.GetNodesExpanded(),
 							(AStarForward.GetNodesExpanded()+AStarBackward.GetNodesExpanded())/2, nbs.GetNodesExpanded());
 					submitTextToBuffer(tmp);
 					nbsline.Clear();
@@ -531,15 +531,17 @@ void SetStartGoalHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 			{
 				goal.x = x;
 				goal.y = y;
-				AStarForward.SetHeuristic(&zero);
-				AStarBackward.SetHeuristic(&zero);
+//				AStarForward.SetHeuristic(&zero);
+//				AStarBackward.SetHeuristic(&zero);
+				AStarForward.SetHeuristic(me);
+				AStarBackward.SetHeuristic(me);
 				AStarForward.GetPath(me, start, goal, path);
 				AStarBackward.GetPath(me, goal, start, path);
 				DoLines();
 				if (showNBS)
 				{
-					nbs.InitializeSearch(me, start, goal, &zero, &zero, path);
-//					nbs.InitializeSearch(me, start, goal, me, me, path);
+//					nbs.InitializeSearch(me, start, goal, &zero, &zero, path);
+					nbs.InitializeSearch(me, start, goal, me, me, path);
 					running = true;
 					whichAlgorithm = 0;
 				}
@@ -565,7 +567,7 @@ void DrawHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 //	if (me->GetMap()->GetTerrainType(x, y) == kOutOfBounds)
 //		return;
 	
-	mapChanged = true;
+	mapChange = true;
 	if (mType == kMouseDown)
 	{
 		currentlyDrawing = true;
@@ -684,7 +686,7 @@ void BGMap2(Map *m)
 			which++;
 		}
 	}
-	mapChanged = true;
+	mapChange = true;
 }
 
 void MapAsymmetry(Map *m)
@@ -705,7 +707,7 @@ void MapAsymmetry(Map *m)
 			which++;
 		}
 	}
-	mapChanged = true;
+	mapChange = true;
 }
 
 void LocalMinima(Map *m)
@@ -726,7 +728,7 @@ void LocalMinima(Map *m)
 			which++;
 		}
 	}
-	mapChanged = true;
+	mapChange = true;
 }
 
 
@@ -737,7 +739,7 @@ void LoadMap(Map *m, int which)
 	showPerc = false;
 	frac = 0;
 	showNBS = false;
-	mapChanged = true;
+	mapChange = true;
 
 	if (which == 1)
 	{

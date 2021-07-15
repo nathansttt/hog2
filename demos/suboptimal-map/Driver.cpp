@@ -63,7 +63,7 @@ mode m = kFindPathAStar;
 int stepsPerFrame = 1;
 bool recording = false;
 bool running = false;
-bool mapChanged = true;
+bool mapChange = true;
 
 void StartSearch();
 Map *ReduceMap(Map *inputMap);
@@ -618,13 +618,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	if (viewport == 0)
 	{
-		if (mapChanged == true)
+		if (mapChange == true)
 		{
 			display.StartBackground();
 			display.FillRect({-1, -1, 1, 1}, Colors::pink);
 			me->Draw(display);
 			display.EndBackground();
-			mapChanged = false;
+			mapChange = false;
 		}
 		
 		
@@ -1164,7 +1164,7 @@ void GetMap2(Map *m)
 			which++;
 		}
 	}
-	mapChanged = true;
+	mapChange = true;
 }
 
 void GetMap1(Map *theMap)
@@ -1185,7 +1185,7 @@ void GetMap1(Map *theMap)
 			which++;
 		}
 	}
-	mapChanged = true;
+	mapChange = true;
 }
 
 void GetMap(Map *map)

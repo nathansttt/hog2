@@ -268,7 +268,7 @@ void Focal<state,action,environment>::GetPath(environment *_env, const state& fr
 	while (!DoSingleSearchStep(thePath))
 	{
 		//		if (0 == nodesExpanded%100000)
-		//			printf("%llu nodes expanded\n", nodesExpanded);
+		//			printf("%" PRId64 " nodes expanded\n", nodesExpanded);
 	}
 }
 

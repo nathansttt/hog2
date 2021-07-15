@@ -15,9 +15,9 @@
 #include <sstream>
 #include <iomanip>
 
-#ifdef __APPLE__
-#include "TargetConditionals.h"
-#endif
+// #ifdef __APPLE__
+// #include "TargetConditionals.h"
+// #endif
 
 #ifdef NO_OPENGL
 #include "gl.h"
@@ -32,14 +32,14 @@
 
 #ifdef OS_MAC
 #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#include <AGL/agl.h>
+//#include <OpenGL/glu.h>
+//#include <GLUT/glut.h>
+//#include <AGL/agl.h>
 #else
 
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
+//#include <GL/glu.h>
+//#include <GL/glut.h>
 #endif
 
 //#endif
@@ -177,6 +177,8 @@ void OutlineRect(GLdouble left, GLdouble top, GLdouble right, GLdouble bottom, d
 
 void DrawText(double x, double y, double z, double scale, const char *res);
 void DrawTextCentered(double x, double y, double z, double scale, const char *res);
+
+void SetLighting(GLfloat ambientf = 0.2f, GLfloat diffusef = 1.0f, GLfloat specularf = 1.0f);
 
 // Code from: https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values/16606128#16606128
 template <typename T>

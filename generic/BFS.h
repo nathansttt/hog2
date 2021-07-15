@@ -175,7 +175,7 @@ void BFS<state, action, environment>::GetPath(environment *env,
 				{
 					mOpen.push_back({thePath[x], currDepth+1});
 					//depth.push_back(currDepth+1);
-					//				printf("Setting parent of %llu to be %llu\n", env->GetStateHash(thePath[x]),
+					//				printf("Setting parent of %" PRId64 " to be %" PRId64 "\n", env->GetStateHash(thePath[x]),
 					//					   env->GetStateHash(s));
 					mClosed[thePath[x]] = s;
 				}
@@ -198,7 +198,7 @@ void BFS<state, action, environment>::GetPath(environment *env,
 		} while (!(s == parent));
 	}
 	std::reverse(thePath.begin(), thePath.end());
-	//	printf("Final depth: %d, Nodes Expanded %llu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
+	//	printf("Final depth: %d, Nodes Expanded %" PRId64 ", Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
 }
 
 //template <class state, class action, class environment>

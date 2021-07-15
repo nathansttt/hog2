@@ -14,6 +14,7 @@
 #include <functional>
 #include "SearchEnvironment.h"
 #include <unordered_map>
+#include <cinttypes>
 #include "FPUtil.h"
 #include "vectorCache.h"
 
@@ -52,7 +53,7 @@ private:
 //		uint64_t early = 0, late = 0;
 //		for (int x = 0; x < gCostHistogram.size(); x++)
 //		{
-//			printf("%d\t%llu\n", x, gCostHistogram[x]);
+//			printf("%d\t%" PRId64 "\n", x, gCostHistogram[x]);
 //			if (x*2 > gCostHistogram.size()-1)
 //				late += gCostHistogram[x];
 //			else
@@ -132,7 +133,7 @@ void IDAStar<state, action, verbose>::GetPath(SearchEnvironment<state, action> *
 		gCostHistogram.clear();
 		gCostHistogram.resize(nextBound+1);
 		if (verbose)
-			printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
+			printf("Starting iteration with bound %f; %" PRId64 " expanded, %" PRId64 " generated\n", nextBound, nodesExpanded, nodesTouched);
 		fflush(stdout);
 		DoIteration(env, act[0], from, thePath, nextBound, 0, 0, rootH);
 		PrintGHistogram();

@@ -33,7 +33,7 @@ NBS<xyLoc, tDirection, MapEnvironment> nbs;
 std::vector<xyLoc> path;
 
 xyLoc start, goal;
-bool mapChanged = true;
+bool mapChange = true;
 
 mode m = kFindPath;
 drawing d = kDrawGround;
@@ -100,12 +100,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 
-	if (mapChanged)
+	if (mapChange)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 
 	if (!(start.x == 0xFFFF || running))
@@ -134,7 +134,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				if (path.size() != 0)
 				{
 					char tmp[255];
-					sprintf(tmp, "A*f %llu, A*b %llu, A*avg %llu, NBS %llu\n", AStarForward.GetNodesExpanded(), AStarBackward.GetNodesExpanded(),
+					sprintf(tmp, "A*f %" PRId64 ", A*b %" PRId64 ", A*avg %" PRId64 ", NBS %" PRId64 "\n", AStarForward.GetNodesExpanded(), AStarBackward.GetNodesExpanded(),
 							(AStarForward.GetNodesExpanded()+AStarBackward.GetNodesExpanded())/2, nbs.GetNodesExpanded());
 					submitTextToBuffer(tmp);
 				}
@@ -328,7 +328,7 @@ void BGMap2(Map *theMap)
 			which++;
 		}
 	}
-	mapChanged = true;
+	mapChange = true;
 }
 	
 	
