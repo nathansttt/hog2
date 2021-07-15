@@ -72,20 +72,20 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		ReinitViewports(windowID, {-1, -1, 1, 1}, kScaleToSquare);
 		
-		m = new Map(11, 11);
+		m = new Map(11, 11); // makes a map with the dimensions in the parentheses
 		
 		for (int x = 0; x <10; x++)
 		{
-			m->SetTerrainType(x, 0, kStartTerrain);
+			m->SetTerrainType(x, 0, kStartTerrain); // Start terrain placed down
 		}
 		for (int x = 0; x < 5; x++)
 		{
-			m->SetTerrainType(x, 5, kTrees);
+			m->SetTerrainType(x, 5, kTrees); // Tree terrain placed down
 		}
 
 		for (int x = 0; x < 7; x++)
 		{
-			m->SetTerrainType(x, m->GetMapHeight()-1, kEndTerrain);
+			m->SetTerrainType(x, m->GetMapHeight()-1, kEndTerrain); // End terrain
 		}
 		r = new Racetrack(m);
 		r->Reset(s);
@@ -103,11 +103,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	// Draw "racecar"
 	r->Draw(display, s); //Draws the state of the racetrack
 	r->GoalTest(s, s);
-	if (move == true)
+	if (move == true) // if m was pressed, makes the agent move automatically
 	{
 		r->ApplyAction(s, v);
 	}
-	Boundaries();
+	Boundaries(); // doesn't let the agent out of the map
 	return;
 }
 
@@ -133,6 +133,7 @@ void Boundaries()
 	if (s.loc.x > 60000)
 	{
 		std::cout << "Too far left!! D: \n";
+		// makes the agent stop when it hits the wall
 		s.loc.x = 0;
 		s.xVelocity = 0;
 		v.xDelta = 0;
@@ -147,6 +148,7 @@ void Boundaries()
 	if (s.loc.y > 60000)
 	{
 		std::cout << "Too high up!! \n";
+		// makes the agent stop
 		s.loc.y = 0;
 		s.yVelocity = 0;
 		v.yDelta = 0;
@@ -173,8 +175,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			// TODO: Reset to start state
 			r->Reset(s);
 			break;
-			// TODO: Make appropriate movements
-			// TODO: Add support for WASD here
+			// TODO: Make appropriate movements - done
+			// TODO: Add support for WASD here - done
 		
 		
 		case kUpArrow: // y velocity goes up
