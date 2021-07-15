@@ -86,11 +86,15 @@ void Racetrack::GetActions(const RacetrackState &nodeID, std::vector<RacetrackMo
 
 void Racetrack::ApplyAction(RacetrackState &s, RacetrackMove a) const
 { // When x y velocity and action is applied -- location changes when velocity changes
+	RacetrackState temps = s;
 	s.xVelocity += a.xDelta;
 	s.yVelocity += a.yDelta;
 	s.loc.x = s.loc.x + s.xVelocity;
 	s.loc.y = s.loc.y + s.yVelocity;
-
+	
+	
+	std::cout << temps.loc << "\n";
+	std::cout << s.loc << "\n";
 	
 }
 

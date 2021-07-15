@@ -138,7 +138,7 @@ void Boundaries()
 		s.xVelocity = 0;
 		v.xDelta = 0;
 	}
-	else if (s.loc.x >= m->GetMapWidth())
+	else if (s.loc.x >= m->GetMapWidth() - 1)
 	{
 		std::cout << "Too far right! \n";
 		s.loc.x = m->GetMapWidth()-1;
@@ -154,15 +154,15 @@ void Boundaries()
 		v.yDelta = 0;
 	}
 	
-	else if (s.loc.y >= m->GetMapHeight())
+	else if (s.loc.y >= m->GetMapHeight() - 1)
 	{
 		std::cout << "Too far down! \n";
 		s.loc.y = m->GetMapHeight()-1;
 		s.yVelocity = 0;
 		v.yDelta = 0;
 	}
-	std::cout << s.loc.x << ", " << s.loc.y << std::endl;
-	std::cout << m->GetMapWidth() << ", " << m->GetMapHeight() << std::endl;
+	// std::cout << s.loc.x << ", " << s.loc.y << std::endl;
+	// std::cout << m->GetMapWidth() << ", " << m->GetMapHeight() << std::endl;
 	
 }
 
