@@ -177,6 +177,7 @@ void DoOneDimension(int label)
 	{
 		t = astarf.GetOpenItem(0).data;
 		astarf.DoSingleSearchStep(p);
+		//std::cout << t << " ";
 	}
 	astarb.InitializeSearch(ge, t, 0, p);
 	while (astarb.GetNumOpenItems() > 0)

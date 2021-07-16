@@ -23,6 +23,7 @@
 template <int width, int height>
 void BuildSTPPDB();
 void BuildRC();
+void BuildRCO();
 template <int tiles>
 void BuildTS();
 void BuildTOH();
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
 
 enum Domain {
 	kRC,
+	kRCO, // orientation only
 	kSTP44,
 	kSTP55,
 	kTS16,
@@ -56,7 +58,7 @@ int compression = 1;
 void InstallHandlers()
 {
 	InstallWindowHandler(MyWindowHandler);
-	InstallCommandLineHandler(MyCLHandler, "-domain", "-domain", "Select domain to build for. {STP44 STP55 RC, TS16, TOH}");
+	InstallCommandLineHandler(MyCLHandler, "-domain", "-domain", "Select domain to build for. {STP44, STP55, RC, RCO, TS16, TOH}");
 	InstallCommandLineHandler(MyCLHandler, "-pattern", "-pattern", "Choose tiles in PDB");
 	InstallCommandLineHandler(MyCLHandler, "-additive", "-additive", "Build additive PDB");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
@@ -79,6 +81,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		{
 			case kRC:
 				BuildRC();
+				break;
+			case kRCO:
+				BuildRCO();
 				break;
 			case kSTP44:
 				BuildSTPPDB<4, 4>();
@@ -109,6 +114,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		}
 		if (strcmp(argument[1], "RC") == 0)
 			domain = kRC;
+		else if (strcmp(argument[1], "RCO") == 0)
+			domain = kRCO;
 		else if (strcmp(argument[1], "STP44") == 0)
 			domain = kSTP44;
 		else if (strcmp(argument[1], "STP55") == 0)
@@ -269,8 +276,36 @@ void BuildRC()
 		pdb.DivCompress(compression, true);
 	}
 	pdb.Save(path.c_str());
+	pdb.Load(path.c_str());
+	pdb.PrintHistogram();
 }
 
+void BuildRCO()
+{
+	RubikEdge cube;
+	RubikEdgeState goal;
+//	RubiksCube cube;
+//	RubiksState goal;
+	goal.Reset();
+		
+	RubikEdgeOrientationPDB pdb(&cube, goal);
+	if (load)
+	{
+		if (pdb.Load(path.c_str()))
+		{
+			printf("Loaded successfully\n");
+			pdb.PrintHistogram();
+			return;
+		}
+	}
+	
+	pdb.BuildPDB(goal, threads);
+	
+//
+//	pdb.Save(path.c_str());
+//	pdb.Load(path.c_str());
+//	pdb.PrintHistogram();
+}
 
 template <int tiles>
 void BuildTS()

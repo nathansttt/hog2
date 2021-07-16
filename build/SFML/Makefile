@@ -51,9 +51,11 @@ PROJECTS = \
   demos/fastmap \
   demos/pancake \
   demos/racetrack \
+  demos/multiTarget \
   papers/IBEX \
   papers/DWA \
-	tests/mnpuzzle \
+  tests/mnpuzzle \
+  tests/graphics \
 #  generic \
 
 

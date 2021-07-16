@@ -74,7 +74,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
