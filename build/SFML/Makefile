@@ -52,6 +52,7 @@ PROJECTS = \
   demos/pancake \
   demos/racetrack \
   demos/multiTarget \
+  demos/rc \
   papers/IBEX \
   papers/DWA \
   tests/mnpuzzle \
