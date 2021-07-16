@@ -25,6 +25,7 @@ Racetrack *r = 0;
 RacetrackState s;
 RacetrackMove v;
 
+
 // -------------- MAIN FUNCTION ----------- //
 int main(int argc, char* argv[])
 {
@@ -85,7 +86,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		for (int x = 0; x < 7; x++)
 		{
-			m->SetTerrainType(x, m->GetMapHeight()-1, kEndTerrain); // End terrain
+			m->SetTerrainType(x, 8, kEndTerrain); // End terrain
 		}
 		r = new Racetrack(m);
 		r->Reset(s);
@@ -246,6 +247,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			break;
 		
 	}
+	Boundaries();
 	
 }
 

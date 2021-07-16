@@ -5,6 +5,7 @@
 
 #include "Racetrack.h"
 
+
 std::ostream &operator<<(std::ostream &out, const RacetrackState &s)
 {
 	out << "{" << s.loc << "}:(" << s.xVelocity << ", " << s.yVelocity << ")";
@@ -65,10 +66,6 @@ void Racetrack::Reset(RacetrackState &s) const
 	exit(1);
 }
 
-void Racetrack::Moving(RacetrackState &s) const
-{
-	
-}
 
 void Racetrack::GetSuccessors(const RacetrackState &nodeID, std::vector<RacetrackState> &neighbors) const
 {
@@ -92,10 +89,33 @@ void Racetrack::ApplyAction(RacetrackState &s, RacetrackMove a) const
 	s.loc.x = s.loc.x + s.xVelocity;
 	s.loc.y = s.loc.y + s.yVelocity;
 	
-	
-	std::cout << temps.loc << "\n";
-	std::cout << s.loc << "\n";
-	
+	/*  // ------------ Code for detecting whether the agent passes the goal ---------- //
+	for (int x; x < abs(s.loc.x - temps.loc.x); x++)
+	{	
+		if (s.loc.x < temps.loc.x)
+		{
+			temps.loc.x = temps.loc.x - 1;
+		}
+		else
+		{
+			temps.loc.x = temps.loc.x + 1;
+		}
+		this->GoalTest(temps, s);
+	}
+	for (int y; y < abs(s.loc.y - temps.loc.y); y++)
+	{
+		if (s.loc.y < temps.loc.y)
+		{
+			temps.loc.y = temps.loc.y - 1;
+		}
+		else
+		{
+			temps.loc.y = temps.loc.y + 1;
+		}
+		
+		this->GoalTest(temps, s);
+	}
+	*/
 }
 
 bool Racetrack::InvertAction(RacetrackMove &a) const
@@ -113,12 +133,14 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 	// TODO: implement
 	// Use the node to see if the location matches the goal location
 	
+	
+		
+	
+	
 	if (map->GetTerrainType(node.loc.x, node.loc.y) == kEndTerrain)
-	{
-		std::cout << "Touched the goal! \n";
-	}
-	
-	
+		{
+			std::cout << "Touched the goal! \n";
+		}
 	
 
 	return false;
@@ -143,7 +165,6 @@ void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s) const
 {
 	// TODO: draw agent location and movement vector
 // draw a line
-// hog2 graph -- 0,0 in the middle -- upper left -1, -1 bottom left 1, 1 -- window can be scaled -- Coordinates have to be floats
 	
 	xyLoc temp(s.loc.x + s.xVelocity, s.loc.y + s.yVelocity);
 	me->DrawLine(display, s.loc, temp);
