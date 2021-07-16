@@ -1535,7 +1535,7 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 	for (size_t x = 0; x < histogram.size(); x++)
 	{
 		if (histogram[x] > 0)
-			printf("%d: %" PRId64 "\n", x, histogram[x]);
+			printf("%d: %" PRId64 "\n", (int)x, histogram[x]);
 	}
 	printf("Average: %f; count: %" PRId64 "\n", average/PDB.Size(), PDB.Size());
 	return average/PDB.Size();
