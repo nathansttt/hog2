@@ -23,7 +23,6 @@ PROJECTS = \
   utils \
   apps/snakebird \
   demos/fastmap \
-  demos/pancake \
   demos/suboptimal-map \
   demos/STP \
   demos/witness \
@@ -66,7 +65,6 @@ PROJECTS_ALL = \
   simulation \
   utils \
   demos/witness3 \
-  demos/pancake \
   apps/arm \
   apps/airplane \
   apps/localsensingsearch \

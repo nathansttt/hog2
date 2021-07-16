@@ -908,28 +908,22 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				DrawCircle((tmp.right+tmp.left)/2, (tmp.top+tmp.bottom)/2, fabs(tmp.top-tmp.bottom)/2.0, 64);
 				break;
 			}
-		case Graphics::Display::kFrameOval:
-			{
-				//Graphics::rect tmp = ViewportToGlobalHOG(i.shape.r, i.viewport);
-				Graphics::rect tmp = ViewportToScreen(i.shape.r, i.viewport);
-				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
-				FrameCircle((tmp.right+tmp.left)/2, (tmp.top+tmp.bottom)/2, fabs(tmp.top-tmp.bottom)/2.0, ViewportToScreenX(i.shape.width, i.viewport), 64);
-				break;
-			}
 		case Graphics::Display::kFillNGon:
 			{
 				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+				//auto p = ViewportToGlobalHOG(i.polygon.center, i.viewport);
 				Graphics::rect hog(i.polygon.center, i.polygon.radius);
 				auto tmp = ViewportToScreen(hog, i.viewport);
+				//auto p = ViewportToScreen(i.polygon.center, i.viewport);
+				//DrawCircle(p.x, p.y, ViewportToGlobalHOGX(i.polygon.radius, i.viewport), i.polygon.segments, i.polygon.rotate);
+				//DrawCircle(p.x, p.y, ViewportToScreenX(i.polygon.radius, i.viewport), i.polygon.segments, i.polygon.rotate);
 				DrawCircle((tmp.right+tmp.left)/2, (tmp.top+tmp.bottom)/2, fabs(tmp.top-tmp.bottom)/2.0, i.polygon.segments, i.polygon.rotate);
 				break;
 			}
 		case Graphics::Display::kFrameNGon:
 			{
 				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
-				Graphics::rect hog(i.polygon.center, i.polygon.radius);
-				auto tmp = ViewportToScreen(hog, i.viewport);
-				FrameCircle((tmp.right+tmp.left)/2, (tmp.top+tmp.bottom)/2, fabs(tmp.top-tmp.bottom)/2.0, ViewportToScreenX(i.polygon.width, i.viewport), i.polygon.segments, i.polygon.rotate);
+				//FrameCircle(i.polygon.p.x, i.polygon.p.y, i.polygon.radius, i.polygon.segments, , i.polygon.rotate);
 				break;
 			}
 		case Graphics::Display::kFillTriangle:
@@ -944,6 +938,10 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				glVertex3f(tmp2.x, tmp2.y, tmp2.z);
 				glVertex3f(tmp3.x, tmp3.y, tmp3.z);
 				glEnd();
+				break;
+			}
+		case Graphics::Display::kFrameOval:
+			{		
 				break;
 			}
 		case Graphics::Display::kLine:
@@ -962,6 +960,12 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
 				glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
 				glEnd();
+				printf("(%f, %f) to (%f, %f); ",
+					   tmp1.x-ratio*yOff, tmp1.y-ratio*xOff,
+					   tmp1.x+ratio*yOff, tmp1.y+ratio*xOff);
+				printf("(%f, %f) to (%f, %f)\n",
+					   tmp2.x+ratio*yOff, tmp2.y+ratio*xOff,
+					   tmp2.x-ratio*yOff, tmp2.y-ratio*xOff);
 				break;
 			}
 		}

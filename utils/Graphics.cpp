@@ -163,17 +163,16 @@ void Display::FrameTriangle(point p1, point p2, point p3, float lineWidth, rgbCo
 
 void Display::FillNGon(point p, float radius, int sides, float rotation, rgbColor c)
 {
-	shapeInfo i = {p, c, radius, sides, rotation, 0};
+	shapeInfo i = {p, c, radius, sides, rotation};
 	if (drawingBackground)
 		backgroundDrawCommands.push_back({i, kFillNGon, viewport});
 	else
 		drawCommands.push_back({i, kFillNGon, viewport});
 }
 
-void Display::FrameNGon(point p, float radius, float width, int sides, float rotation, rgbColor c)
+void Display::FrameNGon(point p, float radius, int sides, float rotation, rgbColor c)
 {
-	shapeInfo i = {p, c, radius, sides, rotation, width};
-	
+	shapeInfo i = {p, c, radius, sides, rotation};
 	if (drawingBackground)
 		backgroundDrawCommands.push_back({i, kFrameNGon, viewport});
 	else

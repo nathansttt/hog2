@@ -42,28 +42,6 @@ class WitnessState {
 public:
 	WitnessState() { Reset(); }
 	void Reset() { path.resize(0); occupiedCorners.reset(); occupiedEdges.reset(); }
-	bool Occupied(int which)
-	{
-		if (which < width*(height+1))
-		{
-			int x = which%(width);
-			int y = which/(width);
-			return OccupiedEdge(x, y, x+1, y);
-		}
-		which -= width*(height+1);
-		if (which < (width+1)*height)
-		{
-			int x = which%(width+1);
-			int y = which/(width+1);
-			return OccupiedEdge(x, y, x, y+1);
-		}
-		which -= (width+1)*height;
-		// constraint on corner
-		int x = which%(width+1);
-		int y = which/(width+1);
-		return Occupied(x, y);
-		//AddCannotCrossConstraint(x, y);
-	}
 	bool Occupied(int x, int y) const { return occupiedCorners[y*(width+1)+x]; }
 	void Occupy(int x, int y) { occupiedCorners.set(y*(width+1)+x, true); }
 	void Unoccupy(int x, int y) { if (x <= width && y <= height) occupiedCorners.set(y*(width+1)+x, false); }
@@ -110,30 +88,13 @@ class Witness : public SearchEnvironment<WitnessState<width, height>, WitnessAct
 public:
 	enum constraintType {
 		kNone=0,
-		kRegion=1,
+		kSeparation=1,
 		kStar=2,
 		kTetris=3,
 		kNegativeTetris=4,
 		kTriangle=5,
 		kEraser=6,
-		kRegionConstraintCount = 7
-	};
-	
-	enum edgeConstraint {
-		kNoConstraint = 0,
-		kMustCross = 1,
-		kCannotCross = 2,
-		kEdgeConstraintCount = 3
-	};
-	
-	enum legality {
-		kLegal,
-		kNotAtEnd,
-		kNotAtStart,
-		kNotValidAction,
-		kHitCannotCross,
-		kHitStart,
-		kHitLine
+		kConstraintCount = 7
 	};
 	
 	Witness()// :separationConstraints(width*height), separationCount(0), tetrisConstraints(width*height), tetrisCount(0)
@@ -144,12 +105,8 @@ public:
 
 	Witness(const Witness<width, height> &w)
 	{
-		pathConstraints = w.pathConstraints;
-//		mustCrossEdgeConstraints = w.mustCrossEdgeConstraints;
-//		mustCrossConstraints = w.mustCrossConstraints;
-//		cannotCrossEdgeConstraints = w.cannotCrossEdgeConstraints;
-//		cannotCrossConstraints = w.cannotCrossConstraints;
-
+		mustCrossEdgeConstraints = w.mustCrossEdgeConstraints;
+		mustCrossConstraints = w.mustCrossConstraints;
 		constraints = w.constraints;
 		constraintCount = w.constraintCount;
 		start = w.start;
@@ -157,11 +114,8 @@ public:
 
 	Witness<width, height> &operator=(const Witness<width, height> &w)
 	{
-		pathConstraints = w.pathConstraints;
-//		mustCrossEdgeConstraints = w.mustCrossEdgeConstraints;
-//		mustCrossConstraints = w.mustCrossConstraints;
-//		cannotCrossEdgeConstraints = w.cannotCrossEdgeConstraints;
-//		cannotCrossConstraints = w.cannotCrossConstraints;
+		mustCrossEdgeConstraints = w.mustCrossEdgeConstraints;
+		mustCrossConstraints = w.mustCrossConstraints;
 		constraints = w.constraints;
 		constraintCount = w.constraintCount;
 		start = w.start;
@@ -177,16 +131,11 @@ public:
 				constraints[x][y].t = kNone;
 			}
 		}
-		for (int c = 0; c < kRegionConstraintCount; c++)
+		for (int c = 0; c < kConstraintCount; c++)
 			constraintCount[c] = 0;
 		constraintCount[kNone] = width*height;
-		
-		for (int x = 0; x < GetNumPathConstraints(); x++)
-			pathConstraints[x] = kNoConstraint;
-//		mustCrossConstraints.clear();
-//		mustCrossEdgeConstraints.clear();
-//		cannotCrossConstraints.clear();
-//		cannotCrossEdgeConstraints.clear();
+		mustCrossConstraints.clear();
+		mustCrossEdgeConstraints.clear();
 		start.clear();
 		start.push_back({0,0});
 	}
@@ -199,7 +148,6 @@ public:
 	bool InvertAction(WitnessAction &a) const;
 	void UndoAction(WitnessState<width, height> &s, WitnessAction a) const;
 	bool Legal(WitnessState<width, height> &s, WitnessAction a) const;
-	bool Legal(WitnessState<width, height> &s, WitnessAction a, legality &l) const;
 
 	/** Heuristic value between two arbitrary nodes. **/
 	double HCost(const WitnessState<width, height> &node1, const WitnessState<width, height> &node2) const;
@@ -222,7 +170,7 @@ public:
 	void GLLabelState(const WitnessState<width, height>&, const char *) const {} ;// draw label over state
 	void GLDrawLine(const WitnessState<width, height> &x, const WitnessState<width, height> &y) const {};
 	
-	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display);
 	void Draw(Graphics::Display &display, const WitnessState<width, height>&) const;
 	void Draw(Graphics::Display &display, const InteractiveWitnessState<width, height>&) const;
 
@@ -232,33 +180,15 @@ public:
 
 	
 	/* Hexagon constraints - path must cross this point */
-	static constexpr int GetNumPathConstraints();
-	void ClearPathConstraints() { pathConstraints = {kNoConstraint}; }
-	
-	//{ mustCrossConstraints.clear(); mustCrossEdgeConstraints.clear(); }
+	constexpr int GetNumMustCrossConstraints() const;
+	void ClearMustCrossConstraints() { mustCrossConstraints.clear(); mustCrossEdgeConstraints.clear(); }
 	void SetMustCrossConstraint(int);
 	bool GetMustCrossConstraint(int) const;
-	bool GetMustCrossConstraint(int, int) const;
-	bool GetMustCrossConstraint(bool, int, int) const;
 	void ClearMustCrossConstraint(int);
-	void AddMustCrossConstraint(bool horiz, int x, int y);// { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
-	void AddMustCrossConstraint(int x, int y);// { mustCrossConstraints.push_back({x, y});}
-	void AddMustCrossConstraint(int);// { mustCrossConstraints.push_back({x, y});}
-	void RemoveMustCrossConstraint(bool horiz, int x, int y);// { mustCrossEdgeConstraints.pop_back();}
-	void RemoveMustCrossConstraint(int x, int y);// { mustCrossConstraints.pop_back();}
-
-	/* Hexagon constraints - cannot cross this point */
-	constexpr int GetNumCannotCrossConstraints() const;
-	void SetCannotCrossConstraint(int);
-	bool GetCannotCrossConstraint(int) const;
-	bool GetCannotCrossConstraint(int, int) const;
-	bool GetCannotCrossConstraint(bool, int, int) const;
-	void ClearCannotCrossConstraint(int);
-	void AddCannotCrossConstraint(bool horiz, int x, int y);// { cannotCrossEdgeConstraints.push_back({horiz, {x, y}});}
-	void AddCannotCrossConstraint(int x, int y);// { cannotCrossConstraints.push_back({x, y});}
-	void AddCannotCrossConstraint(int);// { cannotCrossConstraints.push_back({x, y});}
-	void RemoveCannotCrossConstraint(bool horiz, int x, int y);// { cannotCrossEdgeConstraints.pop_back();}
-	void RemoveCannotCrossConstraint(int x, int y);// { cannotCrossConstraints.pop_back();}
+	void AddMustCrossConstraint(bool horiz, int x, int y) { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
+	void AddMustCrossConstraint(int x, int y) { mustCrossConstraints.push_back({x, y});}
+	void RemoveMustCrossConstraint(bool horiz, int x, int y) { mustCrossEdgeConstraints.pop_back();}
+	void RemoveMustCrossConstraint(int x, int y) { mustCrossConstraints.pop_back();}
 
 	void ClearInnerConstraints()
 	{
@@ -269,7 +199,7 @@ public:
 				constraints[x][y].t = kNone;
 			}
 		}
-		for (int c = 0; c < kRegionConstraintCount; c++)
+		for (int c = 0; c < kConstraintCount; c++)
 			constraintCount[c] = 0;
 		constraintCount[kNone] = width*height;
 	}
@@ -307,8 +237,6 @@ public:
 	}
 	void AddTriangleConstraint(int x, int y, int count)
 	{
-		if (x >= width || y >= height || y < 0 || x < 0)
-		{ printf("(%d, %d) out of bounds\n", x, y); return; }
 		assert(count >= 1 && count <= 3);
 		constraintCount[constraints[x][y].t]--;
 		constraintCount[kTriangle]++;
@@ -326,15 +254,15 @@ public:
 	/* TODO: Star constraints are a special case */
 	void ClearSeparationConstraints()
 	{
-		ClearConstraint(kRegion);
+		ClearConstraint(kSeparation);
 	}
 	//{ separationConstraints.clear(); separationConstraints.resize(width*height), separationCount = 0; }
 	constexpr int GetNumSeparationConstraints() const { return width*height; }
 	void AddSeparationConstraint(int x, int y, rgbColor c)
 	{
 		constraintCount[constraints[x][y].t]--;
-		constraintCount[kRegion]++;
-		constraints[x][y].t = kRegion;
+		constraintCount[kSeparation]++;
+		constraints[x][y].t = kSeparation;
 		constraints[x][y].c = c;
 	}
 //	{ auto &i = separationConstraints[y*width+x]; i.color = c; i.valid = true; separationCount++;}
@@ -346,28 +274,7 @@ public:
 //	void RemoveSeparationConstraint(int x, int y) { separationConstraints[y*width+x].valid = false; separationCount--;}
 //	void RemoveSeparationConstraint(int which) { separationConstraints[which].valid = false; separationCount--;}
 
-	void ClearEraserConstraints()
-	{
-		ClearConstraint(kEraser);
-	}
-	//{ separationConstraints.clear(); separationConstraints.resize(width*height), separationCount = 0; }
-	constexpr int GetNumEraserConstraints() const { return width*height; }
-	void AddEraserConstraint(int x, int y)
-	{
-		constraintCount[constraints[x][y].t]--;
-		constraintCount[kRegion]++;
-		constraints[x][y].t = kEraser;
-		constraints[x][y].c = Colors::white;
-	}
-	//	{ auto &i = separationConstraints[y*width+x]; i.color = c; i.valid = true; separationCount++;}
-	void AddEraserConstraint(int which)
-	//{ auto &i = separationConstraints[which]; i.color = c; i.valid = true; separationCount++;}
-	{
-		AddEraserConstraint(GetX(which), GetY(which));
-	}
-	
-	
-	// TODO: Not yet complete - don't handle tilted
+	// TODO: Not yet complete
 	/* Tetris constraints - must solve packing problem to validate these */
 	/* We allow most constraints with 1...4 blocks -- 14 total */
 	/*  1  *
@@ -486,8 +393,6 @@ public:
 	constexpr int GetNumStarConstraints() const { return width*height; }
 	void AddStarConstraint(int x, int y, rgbColor c)
 	{
-		if (x >= width || y >= height || y < 0 || x < 0)
-		{ printf("(%d, %d) out of bounds\n", x, y); return; }
 		constraintCount[constraints[x][y].t]--;
 		constraintCount[kStar]++;
 		constraints[x][y].t = kStar;
@@ -540,8 +445,8 @@ public:
 		{
 			hash += quote + "mc" + quote + ":" + quote;
 			// add must-cross constraints
-			for (int x = 0; x < GetNumPathConstraints(); x++)
-				hash += GetMustCrossConstraint(x)?"1":(GetCannotCrossConstraint(x)?"2":"0");
+			for (int x = 0; x < GetNumMustCrossConstraints(); x++)
+				hash += GetMustCrossConstraint(x)?"1":"0";
 			hash += quote;
 		}
 		hash += "}";
@@ -591,12 +496,10 @@ public:
 			while (loc[0] != '"')
 				loc++;
 			loc++;
-			for (int x = 0; x < GetNumPathConstraints(); x++)
+			for (int x = 0; x < GetNumMustCrossConstraints(); x++)
 			{
 				if (loc[0] == '1')
 					SetMustCrossConstraint(x);
-				else if (loc[0] == '2')
-					SetCannotCrossConstraint(x);
 				loc++;
 			}
 		}
@@ -681,13 +584,8 @@ private:
 		bool operator==(const mustCrossEdgeConstraint &a)
 		{ return a.horiz == this->horiz && a.location == this->location; }
 	};
-
-	std::array<edgeConstraint, Witness<width, height>::GetNumPathConstraints()> pathConstraints;
-//	std::vector<mustCrossEdgeConstraint> mustCrossEdgeConstraints;
-//	std::vector<std::pair<int, int>> mustCrossConstraints;
-//
-//	std::vector<mustCrossEdgeConstraint> cannotCrossEdgeConstraints;
-//	std::vector<std::pair<int, int>> cannotCrossConstraints;
+	std::vector<mustCrossEdgeConstraint> mustCrossEdgeConstraints;
+	std::vector<std::pair<int, int>> mustCrossConstraints;
 
 	struct separationObject {
 		separationObject() :valid(false), color(Colors::pink) {}
@@ -696,7 +594,8 @@ private:
 	};
 	std::array<std::array<constraint, height>, width> constraints;
 //	constraint constraints[width][height];
-	std::array<int, (int)kRegionConstraintCount> constraintCount;
+	std::array<int, (int)kConstraintCount> constraintCount;
+//	int constraintCount[kConstraintCount];
 
 	// TODO: merge these
 //	std::vector<separationObject> separationConstraints;
@@ -738,8 +637,7 @@ private:
 	Graphics::point GetScreenCoord(int x, int y) const
 	{
 		if (x > width || y > height)
-			return {(-scale+width*gapOffset+xGap), (scale-height*gapOffset+yGap-2*lineWidth)};
-//			return {(-scale+width*gapOffset+xGap), (scale-(height+4*lineWidth)*gapOffset+yGap)};
+			return {(-scale+width*gapOffset+xGap), (scale-(height+4*lineWidth)*gapOffset+yGap)};
 
 		return {(-scale+x*gapOffset+xGap), (scale-y*gapOffset+yGap)};
 	}
@@ -752,7 +650,7 @@ private:
 				printf(" ");
 			for (int x = 0; x < 8; x++)
 			{
-				printf("%" PRId64 "", (val>>(7-x))>>((7-y)*8)&0x1);
+				printf("%llu", (val>>(7-x))>>((7-y)*8)&0x1);
 			}
 			printf("\n");
 		}
@@ -818,33 +716,13 @@ void Witness<width, height>::GetMouseActions(const WitnessState<width, height> &
 		return;
 	}
 
-//	bool noLeft = false, noRight = false, noUp = false, noDown = false;
-//	for (auto &i : cannotCrossConstraints)
-//	{
-//		if (i.first == currX-1 && i.second == currY)
-//			noLeft = true;
-//		if (i.first == currX+1 && i.second == currY)
-//			noRight = true;
-//		if (i.second == currY-1 && i.first == currX)
-//			noDown = true;
-//		if (i.second == currY+1 && i.first == currX)
-//			noUp = true;
-//	}
-//	if (currX > 0 && !noLeft)
-//		actions.push_back(kLeft);
-//	if (currX < width && !noRight)
-//		actions.push_back(kRight);
-//	if (currY > 0 && !noDown)
-//		actions.push_back(kDown);
-//	if (currY < height && !noUp)
-//		actions.push_back(kUp);
-	if (currX > 0 && !GetCannotCrossConstraint(currX-1, currY))
+	if (currX > 0)
 		actions.push_back(kLeft);
-	if (currX < width && !GetCannotCrossConstraint(currX+1, currY))
+	if (currX < width)
 		actions.push_back(kRight);
-	if (currY > 0 && !GetCannotCrossConstraint(currX, currY-1))
+	if (currY > 0)
 		actions.push_back(kDown);
-	if (currY < height && !GetCannotCrossConstraint(currX, currY+1))
+	if (currY < height)
 		actions.push_back(kUp);
 }
 
@@ -931,110 +809,6 @@ void Witness<width, height>::UndoAction(WitnessState<width, height> &s, WitnessA
 }
 
 template <int width, int height>
-bool Witness<width, height>::Legal(WitnessState<width, height> &s, WitnessAction a, legality &l) const
-{
-	int currX = s.path.back().first;
-	int currY = s.path.back().second;
-	switch (a)
-	{
-		case kEnd:
-			if (currX == width && currY == height)
-			{
-				l = kLegal;
-				return true;
-			}
-			l = kNotAtEnd;
-			return false;
-		case kStart:
-			if (s.path.size() == 0)
-			{
-				l = kLegal;
-				return true;
-			}
-			l = kNotAtStart;
-			return false;
-		case kLeft:
-//			if (currX > 0 && !s.Occupied(currX-1, currY) && !GetCannotCrossConstraint(true, currX-1, currY))
-			if (currX <= 0)
-			{
-				l = kNotValidAction;
-				return false;
-			}
-			else if (GetCannotCrossConstraint(true, currX-1, currY))
-			{
-				l = kHitCannotCross;
- 				return false;
-			}
-			else if (s.Occupied(currX-1, currY))
-			{
-				l = kHitLine;
-				return false;
-			}
-			l = kLegal;
-			return true;
-		case kRight:
-			if (currX >= width)
-			{
-				l = kNotValidAction;
-				return false;
-			}
-			else if (GetCannotCrossConstraint(true, currX, currY))
-			{
-				l = kHitCannotCross;
-				return false;
-			}
-			else if (s.Occupied(currX+1, currY))
-			{
-				l = kHitLine;
-				return false;
-			}
-			l = kLegal;
-			return true;
-//			return (currX < width && !s.Occupied(currX+1, currY) && !GetCannotCrossConstraint(true, currX, currY));
-		case kDown:
-			//return (currY > 0 && !s.Occupied(currX, currY-1) && !GetCannotCrossConstraint(false, currX, currY-1));
-			if (currY <= 0)
-			{
-				l = kNotValidAction;
-				return false;
-			}
-			else if (GetCannotCrossConstraint(false, currX, currY-1))
-			{
-				l = kHitCannotCross;
-				return false;
-			}
-			else if (s.Occupied(currX, currY-1) )
-			{
-				l = kHitLine;
-				return false;
-			}
-			l = kLegal;
-			return true;
-		case kUp:
-//			return (currY < height && !s.Occupied(currX, currY+1) && !GetCannotCrossConstraint(false, currX, currY));
-			if (currY >= height)
-			{
-				l = kNotValidAction;
-				return false;
-			}
-			else if (GetCannotCrossConstraint(false, currX, currY))
-			{
-				l = kHitCannotCross;
-				return false;
-			}
-			else if (s.Occupied(currX, currY+1) )
-			{
-				l = kHitLine;
-				return false;
-			}
-			l = kLegal;
-			return true;
-
-	}
-	return false;
-}
-
-template <int width, int height>
 bool Witness<width, height>::Legal(WitnessState<width, height> &s, WitnessAction a) const
 {
 	int currX = s.path.back().first;
@@ -1046,13 +820,13 @@ bool Witness<width, height>::Legal(WitnessState<width, height> &s, WitnessAction
 		case kStart:
 			return s.path.size() == 0;
 		case kLeft:
-			return (currX > 0 && !s.Occupied(currX-1, currY) && !GetCannotCrossConstraint(true, currX-1, currY));
+			return (currX > 0 && !s.Occupied(currX-1, currY));
 		case kRight:
-			return (currX < width && !s.Occupied(currX+1, currY) && !GetCannotCrossConstraint(true, currX, currY));
+			return (currX < width && !s.Occupied(currX+1, currY));
 		case kDown:
-			return (currY > 0 && !s.Occupied(currX, currY-1) && !GetCannotCrossConstraint(false, currX, currY-1));
+			return (currY > 0 && !s.Occupied(currX, currY-1));
 		case kUp:
-			return (currY < height && !s.Occupied(currX, currY+1) && !GetCannotCrossConstraint(false, currX, currY));
+			return (currY < height && !s.Occupied(currX, currY+1));
 	}
 	return false;
 }
@@ -1098,71 +872,23 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node, c
 template <int width, int height>
 bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) const
 {
-	//TODO: make this more efficient
-	for (int x = 0; x < width+1; x++)
+	for (auto &c : mustCrossConstraints)
 	{
-		for (int y = 0; y < height+1; y++)
-		{
-			if (GetMustCrossConstraint(x, y) && (!node.Occupied(x, y)))
-				return false;
-			if (GetCannotCrossConstraint(x, y) && (node.Occupied(x, y)))
-				return false;
-		}
+		if (!node.Occupied(c.first, c.second))
+			return false;
 	}
-	for (int x = 0; x < width; x++)
+	// First pass - mustCross
+	for (auto &c : mustCrossEdgeConstraints)
 	{
-		for (int y = 0; y <= height; y++)
+//		printf("Checking (%d, %d) to (%d, %d) - ", c.location.first, c.location.second, c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1));
+		if (!node.OccupiedEdge(c.location.first, c.location.second, c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1)))
 		{
-			if (GetMustCrossConstraint(true, x, y) && !node.OccupiedEdge(x, y, x+1, y))
-				return false;
-			if (GetCannotCrossConstraint(true, x, y) && node.OccupiedEdge(x, y, x+1, y))
-				return false;
+//			printf("Failure\n");
+			return false;
 		}
+//		printf("Success\n");
 	}
-	for (int x = 0; x <= width; x++)
-	{
-		for (int y = 0; y < height; y++)
-		{
-			if (GetMustCrossConstraint(false, x, y) && !node.OccupiedEdge(x, y, x, y+1))
-				return false;
-			if (GetCannotCrossConstraint(false, x, y) && node.OccupiedEdge(x, y, x, y+1))
-				return false;
-		}
-	}
-//	for (auto &c : mustCrossConstraints)
-//	{
-//		if (!node.Occupied(c.first, c.second))
-//			return false;
-//	}
-//	// First pass - mustCross
-//	for (auto &c : mustCrossEdgeConstraints)
-//	{
-////		printf("Checking (%d, %d) to (%d, %d) - ", c.location.first, c.location.second, c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1));
-//		if (!node.OccupiedEdge(c.location.first, c.location.second, c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1)))
-//		{
-////			printf("Failure\n");
-//			return false;
-//		}
-////		printf("Success\n");
-//	}
-//
-//	for (auto &c : cannotCrossConstraints)
-//	{
-//		if (node.Occupied(c.first, c.second))
-//			return false;
-//	}
-//	// First pass - mustCross
-//	for (auto &c : cannotCrossEdgeConstraints)
-//	{
-//		//		printf("Checking (%d, %d) to (%d, %d) - ", c.location.first, c.location.second, c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1));
-//		if (node.OccupiedEdge(c.location.first, c.location.second, c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1)))
-//		{
-//			//			printf("Failure\n");
-//			return false;
-//		}
-//		//		printf("Success\n");
-//	}
-	
+
 	// Didn't hit end of puzzle
 	if (node.path.size() == 0 || node.path.back().second <= height)
 		return false;
@@ -1189,17 +915,14 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
 		}
 	}
 	
-	if (constraintCount[kRegion] == 0 && constraintCount[kTetris] == 0 &&
+	if (constraintCount[kSeparation] == 0 && constraintCount[kTetris] == 0 &&
 		constraintCount[kStar] == 0 && constraintCount[kEraser] == 0)
 //	if (separationCount == 0 && tetrisCount == 0)
 		return true;
 
 	LabelRegions(node);
-	
-	// TODO: Verify matched constraints by region.
-	// TODO: Count the total number of unmatched constraints for checking eraser constraints and for displaying failed constraints
-	
-	if (constraintCount[kRegion] > 0)
+
+	if (constraintCount[kSeparation] > 0)
 	{
 		for (auto &v : regionList) // vector of locations
 		{
@@ -1211,7 +934,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
 				int y = GetY(i);//l/width;
 
 				//if (separationConstraints[i].valid)
-				if (constraints[x][y].t == kRegion)
+				if (constraints[x][y].t == kSeparation)
 				{
 					if (!found)
 					{
@@ -1439,7 +1162,7 @@ uint64_t Witness<width, height>::GetActionHash(WitnessAction act) const
 
 
 template <int width, int height>
-constexpr int Witness<width, height>::GetNumPathConstraints()
+constexpr int Witness<width, height>::GetNumMustCrossConstraints() const
 {
 	return width*(height+1)+(width+1)*height+(width+1)*(height+1);
 }
@@ -1447,299 +1170,88 @@ constexpr int Witness<width, height>::GetNumPathConstraints()
 template <int width, int height>
 void Witness<width, height>::SetMustCrossConstraint(int which)
 {
-	pathConstraints[which] = kMustCross;
+	if (which < width*(height+1))
+	{
+		int x = which%(width);
+		int y = which/(width);
+		AddMustCrossConstraint(true, x, y);
+		return;
+	}
+	which -= width*(height+1);
+	if (which < (width+1)*height)
+	{
+		int x = which%(width+1);
+		int y = which/(width+1);
+		AddMustCrossConstraint(false, x, y);
+		return;
+	}
+	which -= (width+1)*height;
+	// constraint on corner
+	int x = which%(width+1);
+	int y = which/(width+1);
+	AddMustCrossConstraint(x, y);
 }
 
 template <int width, int height>
 bool Witness<width, height>::GetMustCrossConstraint(int which) const
 {
-	return (pathConstraints[which] == kMustCross);
-//	if (which < width*(height+1))
-//	{
-//		int x = which%(width);
-//		int y = which/(width);
-//		mustCrossEdgeConstraint e = {true, {x, y}};
-//		for (const auto &c : mustCrossEdgeConstraints)
-//			if (e == c)
-//				return true;
-//		return false;
-//	}
-//	which -= width*(height+1);
-//	if (which < (width+1)*height)
-//	{
-//		int x = which%(width+1);
-//		int y = which/(width+1);
-//		mustCrossEdgeConstraint e = {false, {x, y}};
-//		for (const auto &c : mustCrossEdgeConstraints)
-//			if (e == c)
-//				return true;
-//		return false;
-//	}
-//	which -= (width+1)*height;
-//	// constraint on corner
-//	int x = which%(width+1);
-//	int y = which/(width+1);
-//	std::pair<int, int> e = {x, y};
-//	for (const auto &c : mustCrossConstraints)
-//		if (e == c)
-//			return true;
-//	return false;
+	if (which < width*(height+1))
+	{
+		int x = which%(width);
+		int y = which/(width);
+		mustCrossEdgeConstraint e = {true, {x, y}};
+		for (const auto &c : mustCrossEdgeConstraints)
+			if (e == c)
+				return true;
+		return false;
+	}
+	which -= width*(height+1);
+	if (which < (width+1)*height)
+	{
+		int x = which%(width+1);
+		int y = which/(width+1);
+		mustCrossEdgeConstraint e = {false, {x, y}};
+		for (const auto &c : mustCrossEdgeConstraints)
+			if (e == c)
+				return true;
+		return false;
+	}
+	which -= (width+1)*height;
+	// constraint on corner
+	int x = which%(width+1);
+	int y = which/(width+1);
+	std::pair<int, int> e = {x, y};
+	for (const auto &c : mustCrossConstraints)
+		if (e == c)
+			return true;
+	return false;
 }
 
 template <int width, int height>
 void Witness<width, height>::ClearMustCrossConstraint(int which)
 {
-	pathConstraints[which] = kNoConstraint;
+	if (which < width*(height+1))
+	{
+		int x = which%(width);
+		int y = which/(width);
+		RemoveMustCrossConstraint(true, x, y);
+		return;
+	}
+	which -= width*(height+1);
+	if (which < (width+1)*height)
+	{
+		int x = which%(width+1);
+		int y = which/(width+1);
+		RemoveMustCrossConstraint(false, x, y);
+		return;
+	}
+	which -= (width+1)*height;
+	// constraint on corner
+	int x = which%(width+1);
+	int y = which/(width+1);
+	RemoveMustCrossConstraint(x, y);
 }
 
-template <int width, int height>
-bool Witness<width, height>::GetMustCrossConstraint(bool horiz, int x, int y) const// { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
-{
-	if (horiz == true)
-		return GetMustCrossConstraint(y*width+x);
-	else
-		return GetMustCrossConstraint(width*(height+1)+y*width+x);
-}
-
-template <int width, int height>
-bool Witness<width, height>::GetMustCrossConstraint(int x, int y) const// { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
-{
-	return GetMustCrossConstraint(width*(height+1) + (width+1)*height + (width+1)*y + x);
-}
-
-
-template <int width, int height>
-void Witness<width, height>::AddMustCrossConstraint(bool horiz, int x, int y)// { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
-{
-	if (horiz == true)
-		SetMustCrossConstraint(y*width+x);
-	else
-		SetMustCrossConstraint(width*(height+1)+y*width+x);
-}
-
-template <int width, int height>
-void Witness<width, height>::AddMustCrossConstraint(int x, int y)// { mustCrossConstraints.push_back({x, y});}
-{
-	//	if (which < width*(height+1))
-	//	{
-	//		int x = which%(width);
-	//		int y = which/(width);
-	//		AddMustCrossConstraint(true, x, y);
-	//		return;
-	//	}
-//		which -= width*(height+1);
-	//	if (which < (width+1)*height)
-	//	{
-	//		int x = which%(width+1);
-	//		int y = which/(width+1);
-	//		AddMustCrossConstraint(false, x, y);
-	//		return;
-	//	}
-//		which -= (width+1)*height;
-//		// constraint on corner
-//		int x = which%(width+1);
-//		int y = which/(width+1);
-	SetMustCrossConstraint(width*(height+1) + (width+1)*height + (width+1)*y + x);
-//		AddMustCrossConstraint(x, y);
-
-}
-
-template <int width, int height>
-void Witness<width, height>::AddMustCrossConstraint(int which)// { mustCrossConstraints.push_back({x, y});}
-{
-	pathConstraints[which] = kMustCross;
-}
-
-template <int width, int height>
-void Witness<width, height>::RemoveMustCrossConstraint(bool horiz, int x, int y)// { mustCrossEdgeConstraints.pop_back();}
-{
-	if (horiz == true)
-		RemoveMustCrossConstraint(y*width+x);
-	else
-		RemoveMustCrossConstraint(width*(height+1)+y*width+x);
-
-//	if (which < width*(height+1))
-//	{
-//		int x = which%(width);
-//		int y = which/(width);
-//		RemoveMustCrossConstraint(true, x, y);
-//		return;
-//	}
-//	which -= width*(height+1);
-//	if (which < (width+1)*height)
-//	{
-//		int x = which%(width+1);
-//		int y = which/(width+1);
-//		RemoveMustCrossConstraint(false, x, y);
-//		return;
-//	}
-//	which -= (width+1)*height;
-//	// constraint on corner
-//	int x = which%(width+1);
-//	int y = which/(width+1);
-//	RemoveMustCrossConstraint(x, y);
-
-}
-
-template <int width, int height>
-void Witness<width, height>::RemoveMustCrossConstraint(int x, int y)// { mustCrossConstraints.pop_back();}
-{
-	ClearMustCrossConstraint(width*(height+1) + (width+1)*height + (width+1)*y + x);
-}
-
-
-#pragma mark -
-#pragma mark Path Constraints
-#pragma mark -
-
-template <int width, int height>
-constexpr int Witness<width, height>::GetNumCannotCrossConstraints() const
-{
-	return width*(height+1)+(width+1)*height+(width+1)*(height+1);
-}
-
-template <int width, int height>
-void Witness<width, height>::SetCannotCrossConstraint(int which)
-{
-	pathConstraints[which] = kCannotCross;
-//	if (which < width*(height+1))
-//	{
-//		int x = which%(width);
-//		int y = which/(width);
-//		AddCannotCrossConstraint(true, x, y);
-//		return;
-//	}
-//	which -= width*(height+1);
-//	if (which < (width+1)*height)
-//	{
-//		int x = which%(width+1);
-//		int y = which/(width+1);
-//		AddCannotCrossConstraint(false, x, y);
-//		return;
-//	}
-//	which -= (width+1)*height;
-//	// constraint on corner
-//	int x = which%(width+1);
-//	int y = which/(width+1);
-//	AddCannotCrossConstraint(x, y);
-}
-
-template <int width, int height>
-bool Witness<width, height>::GetCannotCrossConstraint(int which) const
-{
-	return (pathConstraints[which] == kCannotCross);
-//	if (which < width*(height+1))
-//	{
-//		int x = which%(width);
-//		int y = which/(width);
-//		mustCrossEdgeConstraint e = {true, {x, y}};
-//		for (const auto &c : cannotCrossEdgeConstraints)
-//			if (e == c)
-//				return true;
-//		return false;
-//	}
-//	which -= width*(height+1);
-//	if (which < (width+1)*height)
-//	{
-//		int x = which%(width+1);
-//		int y = which/(width+1);
-//		mustCrossEdgeConstraint e = {false, {x, y}};
-//		for (const auto &c : cannotCrossEdgeConstraints)
-//			if (e == c)
-//				return true;
-//		return false;
-//	}
-//	which -= (width+1)*height;
-//	// constraint on corner
-//	int x = which%(width+1);
-//	int y = which/(width+1);
-//	std::pair<int, int> e = {x, y};
-//	for (const auto &c : cannotCrossConstraints)
-//		if (e == c)
-//			return true;
-//	return false;
-}
-
-template <int width, int height>
-void Witness<width, height>::ClearCannotCrossConstraint(int which)
-{
-	pathConstraints[which] = kNoConstraint;
-//	if (which < width*(height+1))
-//	{
-//		int x = which%(width);
-//		int y = which/(width);
-//		RemoveCannotCrossConstraint(true, x, y);
-//		return;
-//	}
-//	which -= width*(height+1);
-//	if (which < (width+1)*height)
-//	{
-//		int x = which%(width+1);
-//		int y = which/(width+1);
-//		RemoveCannotCrossConstraint(false, x, y);
-//		return;
-//	}
-//	which -= (width+1)*height;
-//	// constraint on corner
-//	int x = which%(width+1);
-//	int y = which/(width+1);
-//	RemoveCannotCrossConstraint(x, y);
-}
-
-template <int width, int height>
-bool Witness<width, height>::GetCannotCrossConstraint(int x, int y) const// { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
-{
-	return GetCannotCrossConstraint(width*(height+1) + (width+1)*height + (width+1)*y + x);
-}
-
-template <int width, int height>
-bool Witness<width, height>::GetCannotCrossConstraint(bool horiz, int x, int y) const// { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
-{
-	if (horiz == true)
-		return GetCannotCrossConstraint(y*width+x);
-	else
-		return GetCannotCrossConstraint(width*(height+1)+y*width+x);
-}
-
-template <int width, int height>
-void Witness<width, height>::AddCannotCrossConstraint(bool horiz, int x, int y)// { cannotCrossEdgeConstraints.push_back({horiz, {x, y}});}
-{
-	if (horiz == true)
-		AddCannotCrossConstraint(y*width+x);
-	else
-		AddCannotCrossConstraint(width*(height+1)+y*width+x);
-}
-
-template <int width, int height>
-void Witness<width, height>::AddCannotCrossConstraint(int x, int y)// { cannotCrossConstraints.push_back({x, y});}
-{
-	SetCannotCrossConstraint(width*(height+1) + (width+1)*height + (width+1)*y + x);
-}
-
-template <int width, int height>
-void Witness<width, height>::AddCannotCrossConstraint(int which)// { cannotCrossConstraints.push_back({x, y});}
-{
-	pathConstraints[which] = kCannotCross;
-}
-
-template <int width, int height>
-void Witness<width, height>::RemoveCannotCrossConstraint(bool horiz, int x, int y)// { cannotCrossEdgeConstraints.pop_back();}
-{
-	if (horiz == true)
-		RemoveCannotCrossConstraint(y*width+x);
-	else
-		RemoveCannotCrossConstraint(width*(height+1)+y*width+x);
-}
-
-template <int width, int height>
-void Witness<width, height>::RemoveCannotCrossConstraint(int x, int y)// { cannotCrossConstraints.pop_back();}
-{
-	RemoveCannotCrossConstraint(width*(height+1) + (width+1)*height + (width+1)*y + x);
-}
-
-#pragma mark -
-#pragma mark Solver Helper Functions
-#pragma mark -
 
 
 template <int width, int height>
@@ -1845,9 +1357,6 @@ void Witness<width, height>::LabelRegions(const WitnessState<width, height> &s) 
 }
 
 
-#pragma mark -
-#pragma mark GUI
-#pragma mark -
 
 
 
@@ -1991,29 +1500,19 @@ void Witness<width, height>::Move(Graphics::point mouseLoc, InteractiveWitnessSt
 		// If still tracking, update track distance
 		if (iws.currState == InteractiveWitnessState<width, height>::kBetweenPoints)
 		{
-			double gapSize;
 			if (from.x == to.x) // tracking in y
-			{
 				iws.frac = (mouseLoc.y-from.y)/(to.y-from.y);
-				gapSize = lineWidth/fabs(to.y-from.y);
-			}
-			else {
+			else
 				iws.frac = (mouseLoc.x-from.x)/(to.x-from.x);
-				gapSize = lineWidth/fabs(to.x-from.x);
-			}
 
 			if (iws.frac > 1)
 				iws.frac = 1;
-			legality l;
-			if (!Legal(iws.ws, iws.targetAct, l))
+			if (!Legal(iws.ws, iws.targetAct))
 			{
-				// hitting start circle
 				if ((iws.target == std::pair<int, int>(0,0)) && iws.frac > 0.6f)
 					iws.frac = 0.6f;
-				else if (iws.frac > 0.5-2*gapSize && l == kHitCannotCross) // hitting cannot cross constraint
-					iws.frac = 0.5-2*gapSize;
-				else if (iws.frac > 0.8f && l == kHitLine) // hitting line
-					iws.frac = 1.f-2*gapSize;//0.8f;
+				else if (iws.frac > 0.8f)
+					iws.frac = 0.8f;
 			}
 			//				if (!Legal(iws.ws, iws.targetAct) && iws.frac > 0.8)
 			//					iws.frac = 0.8;
@@ -2023,13 +1522,9 @@ void Witness<width, height>::Move(Graphics::point mouseLoc, InteractiveWitnessSt
 	}
 }
 
-#pragma mark -
-#pragma mark Visualization
-#pragma mark -
-
 
 template <int width, int height>
-void Witness<width, height>::Draw(Graphics::Display &display) const
+void Witness<width, height>::Draw(Graphics::Display &display)
 {
 	// Background drawing
 	{
@@ -2064,169 +1559,22 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
 	DoLine(display, GetScreenCoord(width, height), GetScreenCoord(width+1, height+1), lineColor);
 	display.FillCircle(GetScreenCoord(width+1, height+1), lineWidth, lineColor);
 
-	
-	for (int x = 0; x < width+1; x++)
+	// must-cross constraints (polygons)
+	for (auto &c : mustCrossEdgeConstraints)
 	{
-		for (int y = 0; y < height+1; y++)
-		{
-			if (GetMustCrossConstraint(x, y))
-			{
-				Graphics::point pt = GetScreenCoord(x, y);
-				display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
-			}
-			else if (GetCannotCrossConstraint(x, y))
-			{
-				Graphics::point pt = GetScreenCoord(x, y);
-				Graphics::rect r(pt, lineWidth);
-				display.FillSquare(pt, lineWidth, backColor);
-				if (x > 0)
-				{
-					Graphics::point pt2 = GetScreenCoord(x-1, y);
-					//			pt2 = (pt+pt2)*0.5;
-					pt2.x += lineWidth;
-					Graphics::rect r2(pt2, 0);
-					r2 |= r;
-					display.FillRect(r2, backColor);
-				}
-				if (x+1 <= width)
-				{
-					Graphics::point pt2 = GetScreenCoord(x+1, y);
-					//pt2 = (pt+pt2)*0.5;
-					pt2.x -= lineWidth;
-					Graphics::rect r2(pt2, 0);
-					r2 |= r;
-					display.FillRect(r2, backColor);
-				}
-				if (y > 0)
-				{
-					Graphics::point pt2 = GetScreenCoord(x, y-1);
-					//pt2 = (pt+pt2)*0.5;
-					pt2.y -= lineWidth;
-					Graphics::rect r2(pt2, 0);
-					r2 |= r;
-					display.FillRect(r2, backColor);
-				}
-				if (y+1 <= width)
-				{
-					Graphics::point pt2 = GetScreenCoord(x, y+1);
-					//pt2 = (pt+pt2)*0.5;
-					pt2.y += lineWidth;
-					
-					Graphics::rect r2(pt2, 0);
-					r2 |= r;
-					display.FillRect(r2, backColor);
-				}
-			}
-		}
+		Graphics::point p1 = GetScreenCoord(c.location.first, c.location.second);
+		Graphics::point p2 = GetScreenCoord(c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1));
+		Graphics::point pt = (p1+p2)*0.5;
+		display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
+		//display.FillRect(Graphics::rect(pt, lineWidth*0.5), Colors::black);
 	}
-	for (int x = 0; x < width; x++)
+	for (auto &c : mustCrossConstraints)
 	{
-		for (int y = 0; y <= height; y++)
-		{
-			if (GetMustCrossConstraint(true, x, y))
-			{
-				Graphics::point p1 = GetScreenCoord(x, y);
-				Graphics::point p2 = GetScreenCoord(x+1, y);
-				Graphics::point pt = (p1+p2)*0.5;
-				display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
-			}
-			else if (GetCannotCrossConstraint(true, x, y))
-			{
-				Graphics::point p1 = GetScreenCoord(x, y);
-				Graphics::point p2 = GetScreenCoord(x+1, y);
-				Graphics::point pt = (p1+p2)*0.5;
-				display.FillSquare(pt, lineWidth, backColor);
-			}
-		}
-	}
-	for (int x = 0; x <= width; x++)
-	{
-		for (int y = 0; y < height; y++)
-		{
-			if (GetMustCrossConstraint(false, x, y))
-			{
-				Graphics::point p1 = GetScreenCoord(x, y);
-				Graphics::point p2 = GetScreenCoord(x, y+1);
-				Graphics::point pt = (p1+p2)*0.5;
-				display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
-			}
-			else if (GetCannotCrossConstraint(false, x, y))
-			{
-				Graphics::point p1 = GetScreenCoord(x, y);
-				Graphics::point p2 = GetScreenCoord(x, y+1);
-				Graphics::point pt = (p1+p2)*0.5;
-				display.FillSquare(pt, lineWidth, backColor);
-			}
-		}
+		Graphics::point pt = GetScreenCoord(c.first, c.second);
+		display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
+		//display.FillRect(Graphics::rect(pt, lineWidth*0.5), Colors::black);
 	}
 
-//	// must-cross constraints (polygons)
-//	for (auto &c : mustCrossEdgeConstraints)
-//	{
-//		Graphics::point p1 = GetScreenCoord(c.location.first, c.location.second);
-//		Graphics::point p2 = GetScreenCoord(c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1));
-//		Graphics::point pt = (p1+p2)*0.5;
-//		display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
-//	}
-//	for (auto &c : mustCrossConstraints)
-//	{
-//		Graphics::point pt = GetScreenCoord(c.first, c.second);
-//		display.FillNGon(pt,  lineWidth*0.9f, 6, 30, Colors::black);
-//	}
-//
-//	// must-cross constraints (polygons)
-//	for (auto &c : cannotCrossEdgeConstraints)
-//	{
-//		Graphics::point p1 = GetScreenCoord(c.location.first, c.location.second);
-//		Graphics::point p2 = GetScreenCoord(c.location.first+(c.horiz?1:0), c.location.second+(c.horiz?0:1));
-//		Graphics::point pt = (p1+p2)*0.5;
-//		display.FillSquare(pt, lineWidth, backColor);
-//	}
-//	for (auto &c : cannotCrossConstraints)
-//	{
-//		Graphics::point pt = GetScreenCoord(c.first, c.second);
-//		Graphics::rect r(pt, lineWidth);
-//		display.FillSquare(pt, lineWidth, backColor);
-//		if (c.first > 0)
-//		{
-//			Graphics::point pt2 = GetScreenCoord(c.first-1, c.second);
-////			pt2 = (pt+pt2)*0.5;
-//			pt2.x += lineWidth;
-//			Graphics::rect r2(pt2, 0);
-//			r2 |= r;
-//			display.FillRect(r2, backColor);
-//		}
-//		if (c.first+1 <= width)
-//		{
-//			Graphics::point pt2 = GetScreenCoord(c.first+1, c.second);
-//			//pt2 = (pt+pt2)*0.5;
-//			pt2.x -= lineWidth;
-//			Graphics::rect r2(pt2, 0);
-//			r2 |= r;
-//			display.FillRect(r2, backColor);
-//		}
-//		if (c.second > 0)
-//		{
-//			Graphics::point pt2 = GetScreenCoord(c.first, c.second-1);
-//			//pt2 = (pt+pt2)*0.5;
-//			pt2.y -= lineWidth;
-//			Graphics::rect r2(pt2, 0);
-//			r2 |= r;
-//			display.FillRect(r2, backColor);
-//		}
-//		if (c.second+1 <= width)
-//		{
-//			Graphics::point pt2 = GetScreenCoord(c.first, c.second+1);
-//			//pt2 = (pt+pt2)*0.5;
-//			pt2.y += lineWidth;
-//
-//			Graphics::rect r2(pt2, 0);
-//			r2 |= r;
-//			display.FillRect(r2, backColor);
-//		}
-//	}
-
-	
 	for (int x = 0; x < width; x++)
 	{
 		for (int y = 0; y < height; y++)
@@ -2234,7 +1582,7 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
 			switch(constraints[x][y].t)
 			{
 				case kNone: break;
-				case kRegion:
+				case kSeparation:
 				{
 					Graphics::point p1 = GetScreenCoord(x, y);
 					Graphics::point p2 = GetScreenCoord(x+1, y+1);
@@ -2366,11 +1714,155 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
 				}
 					break;
 				case kEraser: break;
-				case kRegionConstraintCount: break;
+				case kConstraintCount: break;
 
 			}
 		}
 	}
+	
+	
+//	// triangle constraints
+//	for (int y = 0; y < height; y++)
+//	{
+//		for (int x = 0; x < width; x++)
+//		{
+//			if (triangleConstraints[y*width+x] > 0)
+//			{
+//				Graphics::point p1 = GetScreenCoord(x, y);
+//				Graphics::point p2 = GetScreenCoord(x+1, y+1);
+//				Graphics::point p3 = (p1+p2)*0.5;
+//
+//				switch (triangleConstraints[y*width+x])
+//				{
+//					case 1:
+//					{
+//						display.FillNGon(p3,  lineWidth*0.9f, 3, 60, Colors::orange);
+//						break;
+//					}
+//					case 2:
+//					{
+//						p3.x -= lineWidth;
+//						display.FillNGon(p3,  lineWidth*0.9f, 3, 60, Colors::orange);
+//						p3.x += 2*lineWidth;
+//						display.FillNGon(p3,  lineWidth*0.9f, 3, 60, Colors::orange);
+//						break;
+//					}
+//					case 3:
+//					{
+//						display.FillNGon(p3,  lineWidth*0.9f, 3, 60, Colors::orange);
+//						p3.x -= 2*lineWidth;
+//						display.FillNGon(p3,  lineWidth*0.9f, 3, 60, Colors::orange);
+//						p3.x += 4*lineWidth;
+//						display.FillNGon(p3,  lineWidth*0.9f, 3, 60, Colors::orange);
+//
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+	
+//	// separation constraints (rounded squares - maybe stars eventually)
+//	for (int y = 0; y < height; y++)
+//	{
+//		for (int x = 0; x < width; x++)
+//		{
+//			if (separationConstraints[y*width+x].valid)
+//			{
+//				Graphics::point p1 = GetScreenCoord(x, y);
+//				Graphics::point p2 = GetScreenCoord(x+1, y+1);
+//				Graphics::point p3 = (p1+p2)*0.5;
+//				Graphics::point delta = {lineWidth, lineWidth};
+//				display.FillCircle(p3+delta, lineWidth, separationConstraints[y*width+x].color);
+//				display.FillCircle(p3-delta, lineWidth, separationConstraints[y*width+x].color);
+//				delta.x = -delta.x;
+//				display.FillCircle(p3+delta, lineWidth, separationConstraints[y*width+x].color);
+//				display.FillCircle(p3-delta, lineWidth, separationConstraints[y*width+x].color);
+//				display.FillRect({p3.x-1.0f*lineWidth, p3.y-2.0f*lineWidth, p3.x+1.0f*lineWidth, p3.y+2.0f*lineWidth},
+//								 separationConstraints[y*width+x].color);
+//				display.FillRect({p3.x-2.0f*lineWidth, p3.y-1.0f*lineWidth, p3.x+2.0f*lineWidth, p3.y+1.0f*lineWidth},
+//								 separationConstraints[y*width+x].color);
+//			}
+//		}
+//	}
+
+	// tetris constraints
+//	for (int y = 0; y < height; y++)
+//	{
+//		for (int x = 0; x < width; x++)
+//		{
+//			int whichPiece = abs(tetrisConstraints[y*width+x]);
+//			bool negative = tetrisConstraints[y*width+x]<0;
+//			if (whichPiece != 0)
+//			{
+//				float xOff = 0;
+//				float yOff = 0;
+//				switch (whichPiece)
+//				{
+//					case 1: xOff = 1.5; yOff = 1.5; break;
+//					case 2: xOff = 1; yOff = 1.5; break;
+//					case 3: xOff = 1.5; yOff = 1; break;
+//					case 4:
+//					case 5:
+//					case 6:
+//					case 7:
+//					case 8: xOff = 0.5; yOff = 1.5; break;
+//					case 9: xOff = 1.5; yOff = 0.5; break;
+//					case 10:
+//						xOff = 1; yOff = 1; break;
+//					case 11:
+//					case 12:
+//					case 13:
+//					case 14:
+//						xOff = 0.5; yOff = 1; break;
+//					case 15:
+//					case 16:
+//					case 17:
+//					case 18:
+//						xOff = 1; yOff = 0.5; break;
+//					case 19: xOff = 0; yOff = 1.5; break;
+//					case 20: xOff = 1.5; yOff = 0; break;
+//					case 21:
+//					case 22:
+//						xOff = 0.5; yOff = 1; break;
+//					case 23:
+//					case 24:
+//						xOff = 1.0; yOff = 0.5; break;
+//				}
+//				Graphics::point p1 = GetScreenCoord(x, y);
+//				Graphics::point p2 = GetScreenCoord(x+1, y+1);
+//				Graphics::point p3 = (p1+p2)*0.5;
+//				float blockSize = gapOffset/8.0f;
+//				for (int yy = 0; yy < 4; yy++)
+//				{
+//					for (int xx = 0; xx < 4; xx++)
+//					{
+//						if ((tetrisBits[whichPiece]>>(yy*4+xx))&1)
+//						{
+//
+//							Graphics::point p4(-2*blockSize+xx*blockSize+0.5f*blockSize-xOff*blockSize,
+//											   -2*blockSize+yy*blockSize+0.5f*blockSize-yOff*blockSize);
+//							Graphics::rect r((p3-p4), blockSize*0.35f);
+//							if (negative)
+//							{
+//								display.FillRect(r, tetrisBlue);
+//								Graphics::rect inner((p3-p4), blockSize*0.35f*0.55f);
+//								display.FillRect(inner, backColor);
+//							}
+//							else
+//								display.FillRect(r, tetrisYellow);
+//						}
+////						else {
+////							Graphics::point p4(-2*blockSize+xx*blockSize+0.5*blockSize-xOff*blockSize,
+////											   -2*blockSize+yy*blockSize+0.5*blockSize-yOff*blockSize);
+////							Graphics::rect r((p3-p4), blockSize*0.45f);
+////							display.FillRect(r, Colors::blue);
+////						}
+//					}
+//				}
+//			}
+//		}
+//	}
 }
 
 template <int width, int height>

@@ -160,7 +160,7 @@ public:
 
 	
 	void FillNGon(point p, float radius, int sides, float rotation, rgbColor c);
-	void FrameNGon(point p, float radius, float width, int sides, float rotation, rgbColor c);
+	void FrameNGon(point p, float radius, int sides, float rotation, rgbColor c);
 	
 	void DrawLine(point start, point end, float lineWidth, rgbColor c);
 	void DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
@@ -186,7 +186,6 @@ public:
 		float radius;
 		int segments;
 		float rotate;
-		float width;
 	};
 	struct lineInfo {
 		point start, end;

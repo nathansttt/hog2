@@ -443,34 +443,34 @@ void RubiksCube::OpenGLDraw() const
 
 void RubiksCube::OpenGLDraw(const RubiksState&s) const
 {
-	OpenGLDrawCubeBackground();
 	e.OpenGLDraw(s.edge);
 	c.OpenGLDraw(s.corner);
+	OpenGLDrawCubeBackground();
 	OpenGLDrawCenters();
 }
 
 void RubiksCube::OpenGLDrawCorners(const RubiksState&s) const
 {
-	OpenGLDrawCubeBackground();
 	c.OpenGLDraw(s.corner);
 	OpenGLDrawCenters();
+	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
 {
-	OpenGLDrawCubeBackground();
 //	Rubik7EdgeState e7tmp;
 //	s.edge7.GetDual(e7tmp);
 	e.OpenGLDraw(s.edge);
 	OpenGLDrawCenters();
+	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawEdgeDual(const RubiksState&s) const
 {
-	OpenGLDrawCubeBackground();
 	s.edge.GetDual(dual);
 	e.OpenGLDraw(dual);
 	OpenGLDrawCenters();
+	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawCubeBackground() const
