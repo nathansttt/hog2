@@ -96,6 +96,8 @@ public:
 	virtual void OpenGLDraw(const RCState&, const RCState&, float) const;
 	virtual void OpenGLDraw(const RCState&, const RCAction&) const;
 	
+	void Draw(Graphics::Display &display, const RCState&) const;
+	
 	void OpenGLDrawCube(int cube) const;
 	void SetFaceColor(int face) const;
 	mutable std::vector<RCAction> history;
