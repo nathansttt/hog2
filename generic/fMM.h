@@ -107,7 +107,7 @@ public:
 		for (int x = 0; x < d.size(); x++)
 		{
 			if (d[x] != 0)
-				printf("%d\t%llu\n", x, d[x]);
+				printf("%d\t%" PRId64 "\n", x, d[x]);
 		}
 	}
 	void PrintOpenStats(std::unordered_map<std::pair<double, double>, int>  &s)
@@ -259,13 +259,13 @@ bool fMM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vec
 		p2 = DBL_MAX;
 	if (p1 > oldp1)
 	{
-		//		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
+		//		printf("Forward priority to %1.2f [%" PRId64 " expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
 		oldp1 = p1;
 		//PrintOpenStats(f);
 	}
 	if (p2 > oldp2)
 	{
-		//		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
+		//		printf("Backward priority to %1.2f [%" PRId64 " expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
 		oldp2 = p2;
 		//PrintOpenStats(b);
 	}

@@ -123,7 +123,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
 //						   (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded(),
 //						   a1.GetNumOpenItems());
-				printf("%llu unique expansions, %llu total expansions\n", a1.GetUniqueNodesExpanded(), a1.GetNodesExpanded());
+				printf("%" PRId64 " unique expansions, %" PRId64 " total expansions\n", a1.GetUniqueNodesExpanded(), a1.GetNodesExpanded());
 				runningSearch1 = false;
 				break;
 			}

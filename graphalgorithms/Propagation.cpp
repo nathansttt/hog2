@@ -2572,7 +2572,7 @@ void Prop::DrawText(double x, double y, double z, float r, float gg, float b, ch
 	int i=0;
 	while(str[i]) 
 	{
-		glutStrokeCharacter(GLUT_STROKE_ROMAN,str[i]);
+// 		glutStrokeCharacter(GLUT_STROKE_ROMAN,str[i]);
 		i++;
 	}
 	glPopMatrix();

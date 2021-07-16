@@ -30,7 +30,7 @@ int sectorSize = 16;
 bool recording = false;
 void LoadMap(int which);
 void StartSearch();
-bool mapChanged = true;
+bool mapChange = true;
 int whichMap = 0;
 
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
@@ -105,13 +105,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 
-	if (mapChanged == true)
+	if (mapChange == true)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		msa->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 
 	if (mouseTracking)
@@ -385,7 +385,7 @@ void LoadMap(int which)
 		delete me->GetMap();
 	delete me;
 	delete msa;
-	mapChanged = true;
+	mapChange = true;
 	runningSearch1 = false;
 	mouseTracking = false;
 	abstractPath.clear();

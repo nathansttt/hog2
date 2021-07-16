@@ -347,7 +347,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				{
 					std::cout << start << " " << goal << "\n";
 //					astar.GetPath(me, start, goal, path);
-//					printf("Path has %d moves; %llu nodes\n", path.size(), astar.GetNodesExpanded());
+//					printf("Path has %d moves; %" PRId64 " nodes\n", path.size(), astar.GetNodesExpanded());
 					if (useBB)
 						astar.SetConstraint(bb);
 					else
@@ -436,7 +436,7 @@ void DrawRegularGoalArea(Graphics::Display &display, tDirection dir, bool drawBo
 		display.FrameRect({static_cast<float>(l-rad),
 			static_cast<float>(t-rad),
 			static_cast<float>(r+rad),
-			static_cast<float>(b+rad)}, Colors::white, 4.0);
+			static_cast<float>(b+rad)}, Colors::white, rad);
 	}
 }
 
@@ -510,7 +510,7 @@ void DrawJPSGoalArea(Graphics::Display &display, CanonicalGrid::tDirection dir, 
 		display.FrameRect({static_cast<float>(l-rad),
 			static_cast<float>(t-rad),
 			static_cast<float>(r+rad),
-			static_cast<float>(b+rad)}, Colors::white, 4.0);
+			static_cast<float>(b+rad)}, Colors::white, rad);
 	}
 }
 

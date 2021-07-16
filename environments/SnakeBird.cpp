@@ -1850,7 +1850,7 @@ void SnakeBird::Draw(Graphics::Display &display) const
 	for (int x = 0; x < width*height; x++)
 	{
 		Graphics::point p = GetCenter(GetX(x), GetY(x));
-		double radius = GetRadius()*0.95;
+		float radius = GetRadius()*0.95;
 		switch (world[x])
 		{
 			case kEmpty:
@@ -1869,8 +1869,18 @@ void SnakeBird::Draw(Graphics::Display &display) const
 			case kSpikes:
 				if (GetY(x) != height-1)
 				{
-					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
-					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+//					radius = GetRadius();
+//					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+//					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+					display.FillSquare({p.x, p.y+radius/2.0f}, radius/2.0f, Colors::darkgray);
+					display.FillTriangle({p.x-radius/2.0f, p.y}, {p.x-radius/4.0f, p.y-radius/2}, {p.x, p.y}, Colors::darkred);
+					display.FillTriangle({p.x+radius/2.0f, p.y}, {p.x+radius/4.0f, p.y-radius/2}, {p.x, p.y}, Colors::darkred);
+
+					display.FillTriangle({p.x-radius/2.0f, p.y}, {p.x-radius, p.y+radius/4}, {p.x-radius/2.0f, p.y+radius/2}, Colors::darkred);
+					display.FillTriangle({p.x-radius/2.0f, p.y+radius/2}, {p.x-radius, p.y+3*radius/4}, {p.x-radius/2.0f, p.y+radius}, Colors::darkred);
+
+					display.FillTriangle({p.x+radius/2.0f, p.y}, {p.x+radius, p.y+radius/4}, {p.x+radius/2.0f, p.y+radius/2}, Colors::darkred);
+					display.FillTriangle({p.x+radius/2.0f, p.y+radius/2}, {p.x+radius, p.y+3*radius/4}, {p.x+radius/2.0f, p.y+radius}, Colors::darkred);
 				}
 				break;
 			default: break;
@@ -1957,7 +1967,7 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 {
 	rgbColor objColors[4] = {Colors::red*0.75, Colors::blue*0.75, Colors::green*0.75, Colors::yellow*0.75};
 	Graphics::point p = GetCenter(x, y);
-	double radius = GetRadius()*0.95;
+	float radius = GetRadius()*0.95;
 	switch (o)
 	{
 		case kBlock1:
@@ -1997,8 +2007,17 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 		case kSpikes:
 			if (y != height-1)
 			{
-				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
-				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+//				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+//				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				display.FillSquare({p.x, p.y+radius/2.0f}, radius/2.0f, Colors::darkgray);
+				display.FillTriangle({p.x-radius/2.0f, p.y}, {p.x-radius/4.0f, p.y-radius/2}, {p.x, p.y}, Colors::darkred);
+				display.FillTriangle({p.x+radius/2.0f, p.y}, {p.x+radius/4.0f, p.y-radius/2}, {p.x, p.y}, Colors::darkred);
+
+				display.FillTriangle({p.x-radius/2.0f, p.y}, {p.x-radius, p.y+radius/4}, {p.x-radius/2.0f, p.y+radius/2}, Colors::darkred);
+				display.FillTriangle({p.x-radius/2.0f, p.y+radius/2}, {p.x-radius, p.y+3*radius/4}, {p.x-radius/2.0f, p.y+radius}, Colors::darkred);
+
+				display.FillTriangle({p.x+radius/2.0f, p.y}, {p.x+radius, p.y+radius/4}, {p.x+radius/2.0f, p.y+radius/2}, Colors::darkred);
+				display.FillTriangle({p.x+radius/2.0f, p.y+radius/2}, {p.x+radius, p.y+3*radius/4}, {p.x+radius/2.0f, p.y+radius}, Colors::darkred);
 			}
 			break;
 		case kPortal1:

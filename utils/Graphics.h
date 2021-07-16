@@ -155,6 +155,10 @@ public:
 	void FrameCircle(point r, float radius, rgbColor c, float lineWidth); // FIXME: Should be a point and a radius!
 	void FillCircle(rect r, rgbColor c);
 	void FillCircle(point p, float radius, rgbColor c);
+	void FillTriangle(point p1, point p2, point p3, rgbColor c);
+	void FrameTriangle(point p1, point p2, point p3, float lineWidth, rgbColor c);
+
+	
 	void FillNGon(point p, float radius, int sides, float rotation, rgbColor c);
 	void FrameNGon(point p, float radius, int sides, float rotation, rgbColor c);
 	
@@ -168,6 +172,11 @@ public:
 
 	struct drawInfo {
 		rect r;
+		rgbColor c;
+		float width;
+	};
+	struct triangleInfo {
+		point p1, p2, p3;
 		rgbColor c;
 		float width;
 	};
@@ -198,6 +207,8 @@ public:
 	{
 		kFillRectangle,
 		kFrameRectangle,
+		kFillTriangle,
+		kFrameTriangle,
 		kFillOval,
 		kFrameOval,
 		kFillNGon,
@@ -223,11 +234,18 @@ public:
 			line = l;
 			viewport = view;
 		}
+		data(triangleInfo t, tDrawClass d, uint8_t view)
+		{
+			what = d;
+			triangle = t;
+			viewport = view;
+		}
 		tDrawClass what;
 		union {
 			drawInfo shape;
 			shapeInfo polygon;
 			lineInfo line;
+			triangleInfo triangle;
 		};
 		uint8_t viewport;
 	};

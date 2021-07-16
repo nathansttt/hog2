@@ -14,7 +14,7 @@
 #include "BitVector.h"
 #include "MMapUtil.h"
 #include <sys/mman.h>
-
+#include <cinttypes>
 
 BitVector::BitVector(uint64_t _size)
 {
@@ -83,7 +83,7 @@ void BitVector::Load(const char *file)
 	}
 	//fread(&size, sizeof(size), 1, f);
 	fread(&true_size, sizeof(true_size), 1, f);
-	printf("Loading %llu entries\n", true_size);
+	printf("Loading %" PRId64 " entries\n", true_size);
 	// allocate storage
 	size = (true_size>>storageBitsPower)+1;
 	
@@ -112,7 +112,7 @@ void BitVector::clear()
 void BitVector::Set(uint64_t index, bool value)
 {
 	if ((index>>storageBitsPower) > size) {
-		printf("SET %llu OUT OF RANGE\n", index);
+		printf("SET %" PRId64 " OUT OF RANGE\n", index);
 		exit(0);
 	}
 	if (value)

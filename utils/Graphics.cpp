@@ -143,6 +143,24 @@ void Display::FillCircle(point p, float radius, rgbColor c)
 		drawCommands.push_back({i, kFillOval, viewport});
 }
 
+void Display::FillTriangle(point p1, point p2, point p3, rgbColor c)
+{
+	triangleInfo i = {p1, p2, p3, c, 0};
+	if (drawingBackground)
+		backgroundDrawCommands.push_back({i, kFillTriangle, viewport});
+	else
+		drawCommands.push_back({i, kFillTriangle, viewport});
+}
+
+void Display::FrameTriangle(point p1, point p2, point p3, float lineWidth, rgbColor c)
+{
+	triangleInfo i = {p1, p2, p3, c, lineWidth};
+	if (drawingBackground)
+		backgroundDrawCommands.push_back({i, kFrameTriangle, viewport});
+	else
+		drawCommands.push_back({i, kFrameTriangle, viewport});
+}
+
 void Display::FillNGon(point p, float radius, int sides, float rotation, rgbColor c)
 {
 	shapeInfo i = {p, c, radius, sides, rotation};

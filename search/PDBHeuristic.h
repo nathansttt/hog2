@@ -12,6 +12,8 @@
 #include <cassert>
 #include <thread>
 #include <string>
+#include <cinttypes>
+
 #include "Heuristic.h"
 #include "SharedQueue.h"
 #include "NBitArray.h"
@@ -239,7 +241,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		
 		entries += total;//newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 			   depth, timer.EndTimer(), total, entries, COUNT);
 		depth++;
 	} while (entries != COUNT);
@@ -247,7 +249,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -355,7 +357,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		
 		entries += total;//newEntries;
 		if (verbose)
-			printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+			printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 				   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 		coarseOpenCurr.swap(coarseOpenNext);
@@ -366,7 +368,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	if (entries != COUNT)
 	{
 		if (verbose)
-			printf("Entries: %llu; count: %llu\n", entries, COUNT);
+			printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	if (verbose)
@@ -446,7 +448,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		
 		entries += total;//newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 	} while (entries != COUNT);
@@ -454,7 +456,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -556,7 +558,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		entries += total;//newEntries;
 		distribution.push_back(total);
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total [%s]\n",
+		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total [%s]\n",
 			   depth, s.EndTimer(), total, entries, COUNT, searchForward?"forward":"backward");
 		if (double(total)*double(total)*0.4 > double(COUNT-entries)*double(distribution[distribution.size()-2]))// || depth == 8)
 			searchForward = false;
@@ -569,7 +571,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -940,7 +942,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		
 		entries += total;//newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 		coarseOpenCurr.swap(coarseOpenNext);
@@ -963,7 +965,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		printf("Entries: %" PRId64 "; count: %" PRId64 "\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -1533,9 +1535,9 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 	for (size_t x = 0; x < histogram.size(); x++)
 	{
 		if (histogram[x] > 0)
-			printf("%d: %llu\n", x, histogram[x]);
+			printf("%d: %" PRId64 "\n", x, histogram[x]);
 	}
-	printf("Average: %f; count: %llu\n", average/PDB.Size(), PDB.Size());
+	printf("Average: %f; count: %" PRId64 "\n", average/PDB.Size(), PDB.Size());
 	return average/PDB.Size();
 }
 

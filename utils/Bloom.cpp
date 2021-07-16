@@ -11,6 +11,7 @@
 #include "Bloom.h"
 #include <cstring>
 #include <stdio.h>
+#include <cinttypes>
 
 //int numHash;
 //uint64_t filterSize;
@@ -154,7 +155,7 @@ BloomFilter::BloomFilter(uint64_t filterSize, int numHash, const char *loadPrefi
 	saveAtExit = false;
 
 	char name[127];
-	sprintf(name, "%sbloom-%llu-%d.dat", loadPrefix, filterSize, numHash);
+	sprintf(name, "%sbloom-%" PRId64 "-%d.dat", loadPrefix, filterSize, numHash);
 	printf("Loading '%s'\n", name);
 	bits->Load(name);
 }
@@ -184,7 +185,7 @@ BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, b
 	if (0)
 	{
 //		char name[127];
-//		sprintf(name, "/tmp/bloom-%llu-%d.dat", filterSize, numHash);
+//		sprintf(name, "/tmp/bloom-%" PRId64 "-%d.dat", filterSize, numHash);
 //		bits = new BitVector(filterSize, name, zero);
 	}
 	else {
@@ -197,7 +198,7 @@ BloomFilter::~BloomFilter()
 	if (saveAtExit)
 	{
 		char name[127];
-		sprintf(name, "bloom-%llu-%d.dat", filterSize, numHash);
+		sprintf(name, "bloom-%" PRId64 "-%d.dat", filterSize, numHash);
 		printf("Writing to '%s'\n", name);
 		bits->Save(name);
 	}
@@ -209,14 +210,14 @@ void BloomFilter::Analyze()
 {
 	uint64_t entries = bits->GetSize();
 	uint64_t setEntries = bits->GetNumSetBits();
-	printf("%llu of %llu entries set. (%4.2f%%)\n", setEntries, entries, 100*double(setEntries)/double(entries));
+	printf("%" PRId64 " of %" PRId64 " entries set. (%4.2f%%)\n", setEntries, entries, 100*double(setEntries)/double(entries));
 }
 
 void BloomFilter::Load()
 {
 	saveAtExit = false;
 	char name[127];
-	sprintf(name, "bloom-%llu-%d.dat", filterSize, numHash);
+	sprintf(name, "bloom-%" PRId64 "-%d.dat", filterSize, numHash);
 	bits->Load(name);
 }
 

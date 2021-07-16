@@ -54,7 +54,7 @@ std::vector<xyLoc> path;
 std::vector<xyLoc> hd;
 std::vector<xyLoc> farStates;
 bool failedBidirectional = false;
-bool mapChanged = true;
+bool mapChange = true;
 
 xyLoc start, goal, mark, mark2;
 
@@ -155,12 +155,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 
-	if (mapChanged)
+	if (mapChange)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 		
 	if (!(start.x == 0xFFFF || running))
@@ -523,7 +523,7 @@ void DrawHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 	}
 	if (me->GetMap()->GetTerrainType(x, y) == kOutOfBounds)
 		return;
-	mapChanged = true;
+	mapChange = true;
 	if (mType == kMouseDown)
 	{
 		currentlyDrawing = true;
