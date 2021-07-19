@@ -18,6 +18,7 @@
 #include "MapOverlay.h"
 #include "Transit.h"
 #include <string>
+#include "MapGenerators.h"
 
 enum mode {
 	kAddDH = 0,
@@ -46,7 +47,7 @@ mode m = kAddDH;
 
 bool recording = false;
 bool running = false;
-bool mapChanged = true;
+bool mapChange = true;
 bool startTransit = false;
 
 int radius = 5;
@@ -105,7 +106,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak303d.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/den201d.map");
-		Map *map = new Map(1, 1);//("/Users/nathanst/hog2/maps/dao/hrt201d.map");
+		Map *map = new Map(100, 100);//("/Users/nathanst/hog2/maps/dao/hrt201d.map");
+//		MakeRandomMap(map, 15);
+//		MakePseudoMaze(map, 1);
+//		MakeMaze(map);
 		LoadMap(map);
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
@@ -152,12 +156,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 	}
 	
-	if (mapChanged == true)
+	if (mapChange == true)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 
 	if (startTransit)
@@ -200,6 +204,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			start = goal = xyLoc();
 			hd.clear();
 			farStates.clear();
+			running = true;
 			break;
 		}
 		case ']':
@@ -275,12 +280,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			hdSearchType = (hdSearchType+1)%3;
 			RedoHDDisplay();
 			
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
+//			if (mod != kShiftDown)
+//				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+//			else
+//			{
+//				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+//			}
 			break;
 		case 'p':
 			running = !running;
@@ -395,7 +400,7 @@ void DoHighwayDimension(xyLoc s)
 	ZeroHeuristic<xyLoc> z;
 	search.SetHeuristic(&z);
 	search.InitializeSearch(me, s, s, v);
-	while (true)
+	while (search.GetNumOpenItems() > 0)
 	{
 		double cost;
 		bool success = search.GetOpenListGCost(search.CheckNextNode(), cost);
@@ -466,7 +471,7 @@ void DoHighwayDimension1(xyLoc s)
 	ZeroHeuristic<xyLoc> z;
 	search.SetHeuristic(&z);
 	search.InitializeSearch(me, s, s, v);
-	while (true)
+	while (search.GetNumOpenItems() > 0)
 	{
 		double cost;
 		bool success = search.GetOpenListGCost(search.CheckNextNode(), cost);

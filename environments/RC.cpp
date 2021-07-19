@@ -530,3 +530,7 @@ void RC::OpenGLDraw(const RCState&, const RCAction&) const
 	
 }
 
+// Draw a RCState. Internally do the 3d transform for the drawing.
+void RC::Draw(Graphics::Display &display, const RCState&) const
+{
+}
