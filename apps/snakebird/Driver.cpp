@@ -127,7 +127,7 @@ void SetupMapChanges();
 void ProcessSingleMapChange();
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
 void AnalyzeObject(SnakeBird::SnakeBirdWorldObject oldobj, SnakeBird::SnakeBirdWorldObject newobj, int nodeLimit=1000000);
-void ChangeMap(int x, int y);
+void ChangeMap(int x, int y, int o);
 EditorColor CanChangeMap(int x, int y);
 void GetLevelSolution(int nodeLimit = 250000000);
 void StepForwardStoredSolution();
@@ -181,6 +181,11 @@ void InstallHandlers()
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle Ground", "Toggle Ground Mode", kAnyModifier, 'h');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Portal", "Edit Portals", kAnyModifier, 'p');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Blocks", "Edit Blocks", kAnyModifier, 'b');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "SnakeBirds", "Edit SnakeBirds", kAnyModifier, 'i');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Height", "Increase Height", kAnyModifier, 'u');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Width", "Increase Width", kAnyModifier, 'y');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Height", "Decrease Height", kAnyModifier, 'z');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Width", "Decrease Width", kAnyModifier, 'm');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle", "Toggle Modes", kAnyModifier, 'd');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Increase", "Increase Solution", kAnyModifier, 'c');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Decrease", "Decrease Solution", kAnyModifier, 'v');
@@ -1398,6 +1403,33 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kBlock1;
 				editorOverlay.resize(0);
+			case 'i':
+				message = "Editing Mode: Changing SnakeBirds";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				gEditorMode = SnakeBird::kSnake1;
+				editorOverlay.resize(0);
+				break;
+			case 'u':
+				message = "Editing Mode: Increase Height";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				sb.BiggerMapHeight();
+			case 'y':
+				message = "Editing Mode: Increase Width";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				sb.BiggerMapWidth();
+			case 'z':
+				message = "Editing Mode: Decrease Height";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				sb.SmallerMapHeight();
+			case 'm':
+				message = "Editing Mode: Decrease Width";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				sb.SmallerMapWidth();
 				break;
 			case 'c':
 				AnalyzeMapChanges(true, gNodeLimit);
@@ -1526,13 +1558,17 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		{
 			gMouseX = x;
 			gMouseY = y;
+			std::cout << "bakeuyn?"  << std::endl;
+			std::cout << "x5 = " << x <<std::endl;
+			std::cout << "y5 = " << y <<std::endl;
+			ChangeMap(x, y, 0);
 		}
 		else
 		{
 			gMouseX = -1;
 			gMouseY = -1;
 		}
-		return true;
+		//return true;
 	}
 	
 	if ((e == kMouseDown) && (gEditMap == true))
@@ -1541,10 +1577,11 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
 			//printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
-			ChangeMap(x, y);
+			std::cout << "nikiii manaji" << x << std::endl;
+			ChangeMap(x, y, 1);
 //			CanChangeMap(gMouseX, gMouseY);
 			ShowSolutionLength();
-			SetupMapChanges();
+//			SetupMapChanges();
 		}
 	}
 	
@@ -1835,7 +1872,7 @@ void AnalyzeObject(SnakeBird::SnakeBirdWorldObject oldobj, SnakeBird::SnakeBirdW
 	UpdateLevelLink();
 }
 
-void ChangeMap(int x, int y)
+void ChangeMap(int x, int y, int o)
 {
 	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
 	switch (gEditorMode)
@@ -1856,6 +1893,9 @@ void ChangeMap(int x, int y)
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
 				case SnakeBird::kFruit:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
 				{
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
@@ -1900,6 +1940,9 @@ void ChangeMap(int x, int y)
 				case SnakeBird::kGround:
 				case SnakeBird::kEmpty:
 				case SnakeBird::kFruit:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
 				{
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
@@ -1977,12 +2020,30 @@ void ChangeMap(int x, int y)
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
 				case SnakeBird::kSpikes:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
 				{
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.SetGroundType(x, y, SnakeBird::kFruit);
 					sb.EndEditing();
 					UpdateLevelLink();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				{
+					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kFruit);
+					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
 					gRefreshBackground = true;
 					break;
 				}
@@ -2005,11 +2066,30 @@ void ChangeMap(int x, int y)
 					break;
 				}
 				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kFruit:
 				{
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kExit);
 					sb.EndEditing();
 					UpdateLevelLink();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				{
+					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
 					gRefreshBackground = true;
 					break;
 				}
@@ -2028,6 +2108,21 @@ void ChangeMap(int x, int y)
 					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 					sb.EndEditing();
 					UpdateLevelLink();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				{
+					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kPortal);
+					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
 					gRefreshBackground = true;
 					break;
 				}
@@ -2056,13 +2151,100 @@ void ChangeMap(int x, int y)
 					gRefreshBackground = true;
 					break;
 				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
+				case SnakeBird::kFruit:
 					sb.BeginEditing();
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kBlock1);
 					sb.EndEditing();
 					UpdateLevelLink();
 					lastFrameSnake = snake = sb.GetStart();
 					history[0] = snake;
 					gRefreshBackground = true;
+				default:
+					break;
+			}
+		}
+		case SnakeBird::kSnake1:
+		{
+			switch (renderedType)
+			{
+				case SnakeBird::kSnake1:
+				case SnakeBird::kSnake2:
+				case SnakeBird::kSnake3:
+				case SnakeBird::kSnake4:
+					sb.BeginEditing();
+					sb.RemoveSnake(x, y, o);
+					lastFrameSnake = snake = sb.GetStart();
+					history.clear();
+					future.clear();
+					history.push_back(snake);
+					actionInProgressStep.Reset();
+					UpdateActiveSnake();
+					sb.EndEditing();
+					UpdateLevelLink();
+					gRefreshBackground = true;
+					break;
+				case SnakeBird::kEmpty:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kGround:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
+				case SnakeBird::kFruit:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					if (o == 1)
+					{
+						sb.AddSnakeHead(x, y);
+					}
+					else if (o == 0)
+					{
+						sb.AddSnakeBody(x, y);
+					}
+					lastFrameSnake = snake = sb.GetStart();
+					history.clear();
+					future.clear();
+					history.push_back(snake);
+					actionInProgressStep.Reset();
+					UpdateActiveSnake();
+					sb.EndEditing();
+					UpdateLevelLink();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				{
+					sb.BeginEditing();
+					sb.RemoveBlock(x, y);
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					if (o == 1)
+					{
+						sb.AddSnakeHead(x, y);
+					}
+					else if (o == 0)
+					{
+						sb.AddSnakeBody(x, y);
+					}
+					lastFrameSnake = snake = sb.GetStart();
+					history.clear();
+					future.clear();
+					history.push_back(snake);
+					actionInProgressStep.Reset();
+					UpdateActiveSnake();
+					sb.EndEditing();
+					UpdateLevelLink();
+					gRefreshBackground = true;
+					break;
+				}
 				default:
 					break;
 			}
@@ -2125,6 +2307,14 @@ EditorColor CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
+				case SnakeBird::kFruit:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
 					return kCanAdd;
 					break;
 				case SnakeBird::kGround:
@@ -2146,6 +2336,11 @@ EditorColor CanChangeMap(int x, int y)
 				case SnakeBird::kFruit:
 				case SnakeBird::kSpikes:
 				case SnakeBird::kGround:
+				case SnakeBird::kExit:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
 					return kCanAdd;
 					break;
 				case SnakeBird::kEmpty:
@@ -2160,7 +2355,15 @@ EditorColor CanChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kEmpty:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
 				case SnakeBird::kGround:
+				case SnakeBird::kFruit:
+				case SnakeBird::kExit:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
 					return kCanAdd;
 					break;
 				case SnakeBird::kSpikes:
@@ -2180,7 +2383,14 @@ EditorColor CanChangeMap(int x, int y)
 					return kCanRemove;
 					break;
 				case SnakeBird::kEmpty:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
 				case SnakeBird::kGround:
+				case SnakeBird::kExit:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
 				case SnakeBird::kSpikes:
 					return kCanAdd;
 					break;
@@ -2198,6 +2408,15 @@ EditorColor CanChangeMap(int x, int y)
 					return kCanRemove;
 					break;
 				case SnakeBird::kEmpty:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kGround:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kFruit:
 					return kCanAdd;
 					break;
 				default:
@@ -2215,12 +2434,20 @@ EditorColor CanChangeMap(int x, int y)
 					return kCanRemove;
 					break;
 				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
+				case SnakeBird::kExit:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kFruit:
 					if (sb.GetNumPortals() < 2)
 					{
 						return kCanAdd;
 					}
 					else
-					return kCannotAddRemove;
+						return kCannotAddRemove;
 					break;
 				default:
 					return kCannotAddRemove;
@@ -2231,11 +2458,46 @@ EditorColor CanChangeMap(int x, int y)
 		case SnakeBird:: kBlock1:
 		{
 			switch (renderedType) {
-				case SnakeBird:: kBlock1:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
 					return kCanRemove;
 					break;
-				case SnakeBird:: kEmpty:
+				case SnakeBird::kEmpty:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kGround:
+				case SnakeBird::kExit:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kFruit:
 					return kCanAdd;
+					break;
+				default:
+					break;
+			}
+		}
+		case SnakeBird:: kSnake1:
+		{
+			switch (renderedType) {
+				case SnakeBird::kEmpty:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kGround:
+				case SnakeBird::kExit:
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+				case SnakeBird::kSpikes:
+				case SnakeBird::kFruit:
+					return kCanAdd;
+					break;
+				case SnakeBird:: kSnake1:
+				case SnakeBird:: kSnake2:
+				case SnakeBird:: kSnake3:
+				case SnakeBird:: kSnake4:
+					return kCanRemove;
 					break;
 				default:
 					break;

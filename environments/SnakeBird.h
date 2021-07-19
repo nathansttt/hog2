@@ -235,6 +235,10 @@ class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
 	SnakeBird(int width = 20, int height = 16);
 	void Reset();
+	void BiggerMapHeight();
+	void BiggerMapWidth();
+	void SmallerMapHeight();
+	void SmallerMapWidth();
 	bool Load(const char *filename);
 	bool Save(const char *filename);
 	std::string EncodeLevel() const;
@@ -245,6 +249,9 @@ public:
 	SnakeBirdState GetStart() const;
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
+	void AddSnakeHead(int x, int y);
+	void AddSnakeBody(int x, int y);
+	void RemoveSnake(int x, int y, int o);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
 	void RemoveBlock(int x, int y);
 	int GetNumPortals();

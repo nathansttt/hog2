@@ -46,6 +46,38 @@ void SnakeBird::Reset()
 		objects[x].clear();
 }
 
+void SnakeBird::BiggerMapHeight()
+{
+	for (int y = 0; y < 512; y++) //wait is it 512 ?
+		if (GetY(y) >= height)
+		{
+			world[y] = kEmpty;
+		}
+	
+	for (int x = 0; x < width; x++)
+		world[GetIndex(x, height-1)] = kEmpty;
+	height++;
+	
+	for (int x = 0; x < width; x++)
+		world[GetIndex(x, height-1)] = kSpikes;
+}
+
+void SnakeBird::BiggerMapWidth()
+{
+	width++;
+}
+
+
+void SnakeBird::SmallerMapHeight()
+{
+	height--;
+}
+
+void SnakeBird::SmallerMapWidth()
+{
+	width--;
+}
+
 /**
  * Before the map is changed, this should be called. It allows for internal optimizations after
  * editing ends.
@@ -109,6 +141,163 @@ void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 	startState.SetSnakeLength(count, body.size()+1);
 	for (int x = 0; x < body.size(); x++)
 		startState.SetSnakeDir(count, x, body[x]);
+}
+
+void SnakeBird::AddSnakeHead(int x, int y)
+{
+	std::vector<snakeDir> body;
+	int count = startState.GetNumSnakes();
+	if (count == 4)
+	{
+		for (int h = 0; h <= startState.GetNumSnakes()-1; h++)  // Go through each existing snake
+		{
+			if (GetY(startState.GetSnakeHeadLoc(h)) > height || GetX(startState.GetSnakeHeadLoc(h)) > width) // because setting the head at (-1,-1) puts it out of the map
+			{
+				startState.SetSnakeHeadLoc(h, GetIndex(x, y));
+				startState.SetSnakeLength(count, 1);
+				for (int x = 0; x < body.size(); x++)
+					startState.SetSnakeDir(count, x, body[x]);
+			}
+		}
+	}
+	if (count <= 3)
+	{
+		startState.SetNumSnakes(count+1); // check if adding snake, add snake
+		startState.SetSnakeHeadLoc(count, GetIndex(x, y));
+		startState.SetSnakeLength(count, 1);
+		for (int x = 0; x < body.size(); x++)
+			startState.SetSnakeDir(count, x, body[x]);
+	}
+}
+
+void SnakeBird::AddSnakeBody(int x, int y)
+{
+	if (x >= 0 && y >= 0 && x <= width && y <= height)
+	{
+		for (int h = 0; h <= startState.GetNumSnakes()-1; h++)  // Go through each existing snake
+		{
+			if (startState.GetSnakeLength(h) == 1)
+			{
+				if (x-1 == GetX(startState.GetSnakeHeadLoc(h))) // add segments to the head
+				{
+					startState.SetSnakeLength(h, 2);
+					startState.SetSnakeDir(h, 0, kRight);
+				}
+				else if	(x+1 == GetX(startState.GetSnakeHeadLoc(h)))
+				{
+					startState.SetSnakeLength(h, 2);
+					startState.SetSnakeDir(h, 0, kLeft);
+				}
+
+				if (y-1 == GetY(startState.GetSnakeHeadLoc(h)))
+				{
+					startState.SetSnakeLength(h, 2);
+					startState.SetSnakeDir(h, 0, kDown);
+				}
+				else if	(y+1 == GetY(startState.GetSnakeHeadLoc(h)))
+				{
+					startState.SetSnakeLength(h, 2);
+					startState.SetSnakeDir(h, 0, kUp);
+				}
+			}
+			else if (startState.GetSnakeLength(h) >= 2 && startState.GetSnakeLength(h) <= 30)
+			{
+				int segmentX = GetX(startState.GetSnakeHeadLoc(h)); // these track where the coordinates of the snake 'butt'(end) are
+				int segmentY = GetY(startState.GetSnakeHeadLoc(h));
+				for (int t = 0; t <= startState.GetSnakeLength(h)-2; t++) //Go through the snake segments and find where the 'butt'(end) of the snake is
+				{
+					if (startState.GetSnakeDir(h, t) == kRight)
+					{
+						segmentX++;
+					}
+					else if (startState.GetSnakeDir(h, t) == kLeft)
+					{
+						segmentX--;
+					}
+					else if (startState.GetSnakeDir(h, t) == kDown)
+					{
+						segmentY++;
+					}
+					else if (startState.GetSnakeDir(h, t) == kUp)
+					{
+						segmentY--;
+					}
+				}
+				if ((x-1 == segmentX) && (y == segmentY)) // increase the length of the snake and put the desired segment appropriately
+				{
+					startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
+					startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, kRight);
+				}
+				else if ((x+1 == segmentX) && (y == segmentY))
+				{
+					startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
+					startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, kLeft);
+				}
+				else if ((y-1 == segmentY) && (x == segmentX))
+				{
+					startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
+					startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, kDown);
+				}
+				else if ((y+1 == segmentY) && (x == segmentX))
+				{
+					startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
+					startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, kUp);
+				}
+			}
+		}
+	}
+}
+
+void SnakeBird::RemoveSnake(int x, int y, int o)
+{
+	for (int h = 0; h <= startState.GetNumSnakes()-1; h++)  // Go through each existing snake
+	{
+			if (startState.GetSnakeLength(h) >= 3)
+			{
+				int segmentX = GetX(startState.GetSnakeHeadLoc(h)); // these track where the coordinates of the second to last snake segment
+				int segmentY = GetY(startState.GetSnakeHeadLoc(h));
+				for (int t = 0; t <= startState.GetSnakeLength(h)-3; t++) //Go through the snake segments and find where the second to last snake segment is
+				{
+					if (startState.GetSnakeDir(h, t) == kRight)
+					{
+						segmentX++;
+					}
+					else if (startState.GetSnakeDir(h, t) == kLeft)
+					{
+						segmentX--;
+					}
+					else if (startState.GetSnakeDir(h, t) == kDown)
+					{
+						segmentY++;
+					}
+					else if (startState.GetSnakeDir(h, t) == kUp)
+					{
+						segmentY--;
+					}
+				}
+				if (x == segmentX && y == segmentY) // get rid of the snake
+				{
+					startState.SetSnakeLength(h, startState.GetSnakeLength(h)-1);
+				}
+				else if (x == GetX(startState.GetSnakeHeadLoc(h)) && y == GetY(startState.GetSnakeHeadLoc(h)))
+				{
+					startState.SetSnakeLength(h, 0);
+					startState.SetSnakeHeadLoc(h, GetIndex(-1, (h*-1)-1));
+					// TODO: ask the prof about the assert function - it isn't called with the other snakes but it is called with the first snake... like how does he want to get rid of the head?
+				}
+			}
+		if (o == 1) // get rid of the snake but this is for if the snake is short
+		{
+			if (startState.GetSnakeLength(h) <= 2 && startState.GetSnakeLength(h) > 0)
+			{
+				if (x == GetX(startState.GetSnakeHeadLoc(h)) && y == GetY(startState.GetSnakeHeadLoc(h)))
+				{
+					startState.SetSnakeLength(h, 0);
+					startState.SetSnakeHeadLoc(h, GetIndex(-1, (h*-1)-1));
+				}
+			}
+		}
+	}
 }
 
 std::vector<snakeDir> LoadSnake(std:: vector<snakeDir> snakeBod, int width, int pos,std::vector<char> lvl)
