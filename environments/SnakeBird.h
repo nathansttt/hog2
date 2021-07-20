@@ -250,6 +250,7 @@ public:
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void AddSnakeHead(int x, int y);
+	snakeDir SnakeDirection(int x, int y, int which);
 	void AddSnakeBody(int x, int y);
 	void RemoveSnake(int x, int y, int o);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);

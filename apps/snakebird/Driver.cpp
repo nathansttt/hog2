@@ -93,6 +93,7 @@ std::vector<EditorItem> editorItems =
 	{kColumn1, 11, SnakeBird::kPortal1, "Portal", kColumn2, 'p', true, true},
 	{kColumn1, 13, SnakeBird::kBlock1, "Block", kColumn2, 'b', true, true},
 	{kColumn1, 15, SnakeBird::kExit, "Exit", kColumn2, 'x', true, true},
+	{kColumn1, 17, SnakeBird::kSnake1, "Snake", kColumn2, 'i', true, true},
 
 	{kColumn2, 1, SnakeBird::kNothing, "EPCG AI Analysis", kRightMargin, '\0', false, false},
 	{kColumn2, 3, SnakeBird::kSpikes, "Increase Sol. Length", kRightMargin, 'c', false, true},
@@ -2225,13 +2226,14 @@ void ChangeMap(int x, int y, int o)
 				{
 					sb.BeginEditing();
 					sb.RemoveBlock(x, y);
-					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					if (o == 1)
 					{
+						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeHead(x, y);
 					}
 					else if (o == 0)
 					{
+						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeBody(x, y);
 					}
 					lastFrameSnake = snake = sb.GetStart();
