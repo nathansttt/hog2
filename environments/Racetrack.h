@@ -34,7 +34,7 @@ std::ostream &operator<<(std::ostream &out, const RacetrackMove &m);
 bool operator==(const RacetrackMove &m1, const RacetrackMove &m2); // comparing 
 
 //Different types of domain
-const tTerrain kStartTerrain = kSwamp; // start loc
+const tTerrain kStartTerrain = kSwamp; 
 const tTerrain kEndTerrain = kGrass;
 
 class Racetrack : public SearchEnvironment<RacetrackState, RacetrackMove> {
@@ -47,10 +47,12 @@ public:
 	{ std::vector<RacetrackState> neighbors; GetSuccessors(stateID, neighbors); return (int)neighbors.size(); }
 	
 	void Reset(RacetrackState &s) const;
-	void Moving(RacetrackState &s) const;
+	
 	
 	void ApplyAction(RacetrackState &s, RacetrackMove a) const;// a = action s(state) gets changed
 	bool InvertAction(RacetrackMove &a) const;
+
+	void Boundaries(RacetrackState &s, RacetrackMove &v) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
 	double HCost(const RacetrackState &node1, const RacetrackState &node2) const { return 0; } //Later
@@ -73,6 +75,10 @@ public:
 	void Draw(Graphics::Display &display) const;
 	void Draw(Graphics::Display &display, const RacetrackState&) const;
 	void DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const;
+
+	
+	// bool Legal(const state &node1, const action &act) const;
+
 protected: // take two states and draw a line
 private:
 	MapEnvironment *me;

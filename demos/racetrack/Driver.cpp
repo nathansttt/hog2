@@ -83,11 +83,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		{
 			m->SetTerrainType(x, 5, kTrees); // Tree terrain placed down
 		}
-
+		
 		for (int x = 0; x < 7; x++)
 		{
 			m->SetTerrainType(x, 8, kEndTerrain); // End terrain
 		}
+		
 		r = new Racetrack(m);
 		r->Reset(s);
 	}
@@ -103,12 +104,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	r->Draw(display);
 	// Draw "racecar"
 	r->Draw(display, s); //Draws the state of the racetrack
-	r->GoalTest(s, s);
 	if (move == true) // if m was pressed, makes the agent move automatically
 	{
 		r->ApplyAction(s, v);
 	}
-	Boundaries(); // doesn't let the agent out of the map
 	return;
 }
 
@@ -128,44 +127,7 @@ uint64_t random64()
 	uint64_t r2 = random();
 	return (r1<<32)|r2;
 }
-// ------------ Boundaries ----------- //
-void Boundaries()
-{
-	if (s.loc.x > 60000)
-	{
-		std::cout << "Too far left!! D: \n";
-		// makes the agent stop when it hits the wall
-		s.loc.x = 0;
-		s.xVelocity = 0;
-		v.xDelta = 0;
-	}
-	else if (s.loc.x >= m->GetMapWidth() - 1)
-	{
-		std::cout << "Too far right! \n";
-		s.loc.x = m->GetMapWidth()-1;
-		s.xVelocity = 0;
-		v.xDelta = 0;
-	}
-	if (s.loc.y > 60000)
-	{
-		std::cout << "Too high up!! \n";
-		// makes the agent stop
-		s.loc.y = 0;
-		s.yVelocity = 0;
-		v.yDelta = 0;
-	}
-	
-	else if (s.loc.y >= m->GetMapHeight() - 1)
-	{
-		std::cout << "Too far down! \n";
-		s.loc.y = m->GetMapHeight()-1;
-		s.yVelocity = 0;
-		v.yDelta = 0;
-	}
-	// std::cout << s.loc.x << ", " << s.loc.y << std::endl;
-	// std::cout << m->GetMapWidth() << ", " << m->GetMapHeight() << std::endl;
-	
-}
+
 
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) // handles keypresses that change display
@@ -180,50 +142,24 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			// TODO: Add support for WASD here - done
 		
 		
-		case kUpArrow: // y velocity goes up
+		case kUpArrow: case 'w': // y velocity goes up
 			std::cout << "Up arrow!" << std::endl;
 			v.xDelta = 0;
 			v.yDelta = -1;
 			r->ApplyAction(s, v);
 			break;
-		case kDownArrow:
+		case kDownArrow: case 's':
 			std::cout << "Down arrow!" << std::endl;
 			v.xDelta = 0;
 			v.yDelta = 1;
 			r->ApplyAction(s, v);
 			break;
-		case kLeftArrow:
+		case kLeftArrow: case 'a':
 			v.xDelta = -1;
 			v.yDelta = 0;
 			r->ApplyAction(s, v);
 			break;
-		case kRightArrow:
-			v.xDelta = 1;
-			v.yDelta = 0;
-			r->ApplyAction(s, v);
-			break;
-		
-		// --- Support for WASD --- //
-		case 'w':
-			std::cout << "The W key!" << std::endl;
-			v.xDelta = 0;
-			v.yDelta = -1;
-			r->ApplyAction(s, v);
-			break;
-		case 'a':
-			std::cout << "The A key!" << std::endl;
-			v.xDelta = -1;
-			v.yDelta = 0;
-			r->ApplyAction(s, v);
-			break;
-		case 's':
-			std::cout << "The S key!" << std::endl;
-			v.xDelta = 0;
-			v.yDelta = 1;
-			r->ApplyAction(s, v);
-			break;
-		case 'd':
-			std::cout << "The D key!" << std::endl;
+		case kRightArrow: case 'd':
 			v.xDelta = 1;
 			v.yDelta = 0;
 			r->ApplyAction(s, v);
@@ -247,7 +183,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			break;
 		
 	}
-	Boundaries();
+	
 	
 }
 

@@ -358,12 +358,12 @@ void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actio
 	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
 	{
 		down = true;
-		actions.push_back(kS); // South
+		actions.push_back(kS);
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y-1)))
 	{
 		up = true;
-		actions.push_back(kN); // North added to actions
+		actions.push_back(kN); 
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y))) // left
 	{
@@ -374,7 +374,7 @@ void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actio
 			if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1)))) // can go down?
 				actions.push_back(kSW);
 		}
-		actions.push_back(kW); // West added to actions
+		actions.push_back(kW); // 
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
