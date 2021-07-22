@@ -39,7 +39,7 @@ const uint8_t kNothingPushed = 0xFF;
 const int codeSize = 2;
 
 enum snakeDir : uint8_t {
-	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3
+	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3, kElse=0x4
 };
 struct SnakeBirdState {
 	uint64_t snakeBodies; // up to 32 in length
@@ -250,7 +250,7 @@ public:
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void AddSnakeHead(int x, int y);
-	snakeDir SnakeDirection(int x, int y, int which);
+	snakeDir GetAddingDirection(int x, int y, int endX, int endY);
 	void AddSnakeBody(int x, int y);
 	void RemoveSnake(int x, int y, int o);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
@@ -388,6 +388,7 @@ private:
 	int exitLoc;
 	SnakeBirdState startState;
 	bool editing;
+	int lastSnake;
 	//	std::array<
 };
 
