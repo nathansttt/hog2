@@ -77,12 +77,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-domain RC -pattern 0 1 2 3 4 5 6 -delta"
-            isEnabled = "NO">
+            argument = "-domain RC -pattern 0 1 2 3 4 5 6"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-domain RCO"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-domain STP44 -pattern 2 1 0 -additive"
