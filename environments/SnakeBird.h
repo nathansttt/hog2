@@ -252,6 +252,7 @@ public:
 	void AddSnakeHead(int x, int y);
 	snakeDir GetAddingDirection(int x, int y, int endX, int endY);
 	void AddSnakeBody(int x, int y);
+	int GetEndofSnake(int x, int y, int whichSnake);
 	void RemoveSnake(int x, int y, int o);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
 	void RemoveBlock(int x, int y);

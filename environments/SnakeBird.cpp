@@ -204,6 +204,7 @@ void SnakeBird::AddSnakeHead(int x, int y)
 
 snakeDir SnakeBird::GetAddingDirection(int x, int y, int endX, int endY)
 {
+	std::cout << "snake dir called" << std::endl;
 		if ((x-1 == endX) && (y == endY))
 		{
 			return kRight;
@@ -223,44 +224,24 @@ snakeDir SnakeBird::GetAddingDirection(int x, int y, int endX, int endY)
 	return kElse;
 }
 
+int SnakeBird::GetEndofSnake(int x, int y, int whichSnake)
+{
+	
+}
+
 void SnakeBird::AddSnakeBody(int x, int y)
 {
-	if (x >= 0 && y >= 0 && x <= width && y <= height)
+	if (GetIndex(x, y) >= 0 && GetIndex(x, y) < width*height && y <= height-2 && x <= width-1)
 	{
 		std::vector<int> whichSnake;
+		std::cout << "x =" << x << std::endl;
+		std::cout << "y =" << y << std::endl;
 		for (int h = 0; h <= startState.GetNumSnakes()-1; h++)  // Go through each existing snake
 		{
-			if (startState.GetSnakeLength(h) == 1)
+			int segmentX = GetX(startState.GetSnakeHeadLoc(h)); // these track where the coordinates of the snake 'butt'(end) are
+			int segmentY = GetY(startState.GetSnakeHeadLoc(h));
+			if (startState.GetSnakeLength(h) >= 2 && startState.GetSnakeLength(h) <= 30)
 			{
-				if (GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(h)), GetY(startState.GetSnakeHeadLoc(h))) != kElse)
-				{
-					whichSnake.push_back(h);
-				}
-					if (startState.GetNumSnakes() >= 2 && h == startState.GetNumSnakes()-1)
-					{
-						if (whichSnake.size() == 2)
-						{
-							startState.SetSnakeLength(lastSnake, startState.GetSnakeLength(lastSnake)+1);
-							startState.SetSnakeDir(lastSnake, startState.GetSnakeLength(lastSnake)-2, GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(lastSnake)), GetY(startState.GetSnakeHeadLoc(lastSnake))));
-						}
-						else if (whichSnake.size() == 1)
-						{
-							startState.SetSnakeLength(whichSnake[0], startState.GetSnakeLength(whichSnake[0])+1);
-							startState.SetSnakeDir(whichSnake[0], startState.GetSnakeLength(whichSnake[0])-2, GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(whichSnake[0])), GetY(startState.GetSnakeHeadLoc(whichSnake[0]))));
-							lastSnake = whichSnake[0];
-						}
-					}
-					if (startState.GetNumSnakes() == 1)
-					{
-						startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
-						startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(h)), GetY(startState.GetSnakeHeadLoc(h))));
-						lastSnake = h;
-					}
-			}
-			else if (startState.GetSnakeLength(h) >= 2 && startState.GetSnakeLength(h) <= 30)
-			{
-				int segmentX = GetX(startState.GetSnakeHeadLoc(h)); // these track where the coordinates of the snake 'butt'(end) are
-				int segmentY = GetY(startState.GetSnakeHeadLoc(h));
 				for (int t = 0; t <= startState.GetSnakeLength(h)-2; t++) //Go through the snake segments and find where the 'butt'(end) of the snake is
 				{
 					if (startState.GetSnakeDir(h, t) == kRight)
@@ -280,30 +261,79 @@ void SnakeBird::AddSnakeBody(int x, int y)
 						segmentY--;
 					}
 				}
-				if (GetAddingDirection(x, y, segmentX, segmentY) != kElse)
+			}
+			// issue 1: if there are 2 snakes and first snake length = 2, it wont get bigger
+			// issue 2: the second snake is affected(gets smaller and sometimes changes direction) when enlarging the first snake
+			// issue 3: I can't find the way to increase the size of the editor viewport
+			// issue 4: haven't found a way to display the first snake in the editor viewport
+			
+			if (segmentX >= width || segmentY >= height-2 || segmentX < 0 || segmentY < 0)
+			{
+				break;
+			}
+				if (GetAddingDirection(x, y, segmentX, segmentY) != kElse || GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(h)), GetY(startState.GetSnakeHeadLoc(h))) != kElse)
 				{
+					std::cout << "push snake count" << std::endl;
 					whichSnake.push_back(h);
 				}
-					if (startState.GetNumSnakes() >= 2 && h == startState.GetNumSnakes()-1)
+				else if (GetAddingDirection(x, y, segmentX, segmentY) == kElse || GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(h)), GetY(startState.GetSnakeHeadLoc(h))) == kElse)
+				{
+					std::cout << "dont push snake count" << std::endl;
+					whichSnake.push_back(-1);
+				}
+			if (startState.GetNumSnakes() >= 2 && whichSnake.size() == 2)
+			{
+				if (whichSnake[0] != -1 && whichSnake[1] != -1)
+				{
+					if (startState.GetSnakeLength(lastSnake) == 1)
 					{
-						if (whichSnake.size() == 2)
-						{
-							startState.SetSnakeLength(lastSnake, startState.GetSnakeLength(lastSnake)+1);
-							startState.SetSnakeDir(lastSnake, startState.GetSnakeLength(lastSnake)-2, GetAddingDirection(x, y, segmentX, segmentY));
-						}
-						else if (whichSnake.size() == 1)
-						{
-							startState.SetSnakeLength(whichSnake[0], startState.GetSnakeLength(whichSnake[0])+1);
-							startState.SetSnakeDir(whichSnake[0], startState.GetSnakeLength(whichSnake[0])-2, GetAddingDirection(x, y, segmentX, segmentY));
-							lastSnake = whichSnake[0];
-						}
+						std::cout << "both snakes eligable and one is just a head" << std::endl;
+						startState.SetSnakeLength(lastSnake, startState.GetSnakeLength(lastSnake)+1);
+						startState.SetSnakeDir(lastSnake, startState.GetSnakeLength(lastSnake)-2, GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(lastSnake)), GetY(startState.GetSnakeHeadLoc(lastSnake))));
 					}
-					if (startState.GetNumSnakes() == 1)
+					else
 					{
+						std::cout << "both snakes eligable and both are junveniles" << std::endl;
+						std::cout << "segmentX = " << segmentX << std::endl;
+						std::cout << "segmentY = " << segmentY << std::endl;
+						startState.SetSnakeLength(lastSnake, startState.GetSnakeLength(lastSnake)+1);
+						startState.SetSnakeDir(lastSnake, startState.GetSnakeLength(lastSnake)-2, GetAddingDirection(x, y, segmentX, segmentY));
+					}
+				}
+				else if (whichSnake[0] == -1 || whichSnake[1] == -1)
+				{
+					if (whichSnake[0] == -1)
+					{
+						std::cout << "erase the blemish" << std::endl;
+						whichSnake.erase(whichSnake.begin());
+					}
+					std::cout << "printttt grrrr" << std::endl;
+					startState.SetSnakeLength(whichSnake[0], startState.GetSnakeLength(whichSnake[0])+1);
+					startState.SetSnakeDir(whichSnake[0], startState.GetSnakeLength(whichSnake[0])-2, GetAddingDirection(x, y, segmentX, segmentY));
+					lastSnake = whichSnake[0];
+					std::cout << "snake dir1 = " << int(GetAddingDirection(x, y, segmentX, segmentY)) << std::endl;
+				}
+			}
+			else if (startState.GetNumSnakes() == 1)
+			{
+				if (GetAddingDirection(x, y, segmentX, segmentY) != kElse ||  GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(h)), GetY(startState.GetSnakeHeadLoc(h))) != kElse)
+				{
+					if (startState.GetSnakeLength(h) == 1)
+					{
+						std::cout << "there's only one snake1" << std::endl;
 						startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
-						startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, GetAddingDirection(x, y, segmentX, segmentY));
+						startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, GetAddingDirection(x, y, GetX(startState.GetSnakeHeadLoc(h)), GetY(startState.GetSnakeHeadLoc(h))));
 						lastSnake = h;
 					}
+					else
+					{
+						std::cout << "there's only one snake2" << std::endl;
+						startState.SetSnakeLength(h, startState.GetSnakeLength(h)+1);
+						startState.SetSnakeDir(h, startState.GetSnakeLength(h)-2, GetAddingDirection(x, y, segmentX, segmentY));
+						std::cout << "snake dir2 = " << int(GetAddingDirection(x, y, segmentX, segmentY)) << std::endl;
+						lastSnake = h;
+					}
+				}
 			}
 		}
 	}
@@ -311,6 +341,8 @@ void SnakeBird::AddSnakeBody(int x, int y)
 
 void SnakeBird::RemoveSnake(int x, int y, int o)
 {
+	std::cout << "x3 =" << x << std::endl;
+	std::cout << "y3 =" << y << std::endl;
 	for (int h = 0; h <= startState.GetNumSnakes()-1; h++)  // Go through each existing snake
 	{
 		if (startState.GetSnakeLength(h) >= 3)
@@ -342,6 +374,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o)
 					if (x == segmentX && y == segmentY) // get rid of the snake
 					{
 						startState.SetSnakeLength(h, startState.GetSnakeLength(h)-1);
+						std::cout << "monstaxx" << std::endl;
 					}
 					else if (x == GetX(startState.GetSnakeHeadLoc(h)) && y == GetY(startState.GetSnakeHeadLoc(h)) && startState.GetNumSnakes() >= 2)
 					{
@@ -351,26 +384,35 @@ void SnakeBird::RemoveSnake(int x, int y, int o)
 							{
 								if (startState.GetSnakeDir(1, t) == kRight)
 								{
+									std::cout << "push right" << std::endl;
 									snakeBody.push_back(kRight);
 								}
 								else if (startState.GetSnakeDir(1, t) == kLeft)
 								{
 									snakeBody.push_back(kLeft);
+									std::cout << "push left" << std::endl;
 								}
 								else if (startState.GetSnakeDir(1, t) == kDown)
 								{
 									snakeBody.push_back(kDown);
+									std::cout << "push down" << std::endl;
 								}
 								else if (startState.GetSnakeDir(1, t) == kUp)
 								{
 									snakeBody.push_back(kUp);
+									std::cout << "push up" << std::endl;
 								}
 							}
+						std::cout << "erase the snake" << std::endl;
 							startState.SetSnakeLength(h, 0);
 							startState.SetSnakeLength(h, snakeBody.size()+1);
 							startState.SetSnakeHeadLoc(h, snakeHead);
+						if (startState.GetSnakeLength(h) > 1)
+						{
 							for (int b = 0; b <= snakeBody.size(); b++)
 								startState.SetSnakeDir(h, b, snakeBody[b]);
+							std::cout << "reprint the snake" << std::endl;
+						}
 							startState.SetNumSnakes(startState.GetNumSnakes()-1);
 					}
 				}
@@ -378,10 +420,12 @@ void SnakeBird::RemoveSnake(int x, int y, int o)
 				{
 					if (x == segmentX && y == segmentY) // get rid of the snake
 					{
+						std::cout << "add snek but only one" << std::endl;
 						startState.SetSnakeLength(h, startState.GetSnakeLength(h)-1);
 					}
 					else if (x == GetX(startState.GetSnakeHeadLoc(h)) && y == GetY(startState.GetSnakeHeadLoc(h)))
 					{
+						std::cout << "get rid of snek but only one" << std::endl;
 						startState.SetSnakeLength(h, 0);
 						startState.SetNumSnakes(startState.GetNumSnakes()-1);
 					}
@@ -391,6 +435,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o)
 		{
 			if (startState.GetNumSnakes() >= 2 && startState.GetSnakeLength(h) <= 2 && startState.GetSnakeLength(h) > 0)
 			{
+				std::cout << "snek entered" << std::endl;
 				if (h == 0)
 				{
 					if (x == GetX(startState.GetSnakeHeadLoc(h)) && y == GetY(startState.GetSnakeHeadLoc(h)))
@@ -416,12 +461,15 @@ void SnakeBird::RemoveSnake(int x, int y, int o)
 								snakeBody.push_back(kUp);
 							}
 						}
+						std::cout << "redot it" << std::endl;
 						startState.SetSnakeLength(h, 0);
 						startState.SetSnakeLength(h, snakeBody.size()+1);
 						startState.SetSnakeHeadLoc(h, snakeHead);
-						for (int b = 0; b <= snakeBody.size(); b++)
+						if (startState.GetSnakeLength(h) >= 2)
 						{
-							startState.SetSnakeDir(h, b, snakeBody[b]);
+							std::cout << "pring snekt" << std::endl;
+							for (int b = 0; b <= snakeBody.size(); b++)
+								startState.SetSnakeDir(h, b, snakeBody[b]);
 						}
 						startState.SetNumSnakes(startState.GetNumSnakes()-1);
 					}
@@ -430,6 +478,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o)
 				{
 					if (x == GetX(startState.GetSnakeHeadLoc(h)) && y == GetY(startState.GetSnakeHeadLoc(h)))
 					{
+						std::cout << "just add it bro" << std::endl;
 						startState.SetSnakeLength(h, 0);
 						startState.SetNumSnakes(startState.GetNumSnakes()-1);
 					}
