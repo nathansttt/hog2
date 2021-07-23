@@ -158,6 +158,8 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 	
 	int temp_x = node.loc.x + node.xVelocity;
 	int temp_y = node.loc.y + node.yVelocity;
+	int initialx = temp_x;
+	int initialy = temp_y;
 
 	std::cout << "Tempx is " << temp_x << " \n";
 	std::cout << "Tempy is " << temp_y << " \n";
@@ -167,21 +169,14 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 		std::cout << "Touched the goal! \n";
 		return true;
 	}
-	
-	
-
 	else
 	{
-		
-		if (abs(node.loc.x-temp_x) != 0)
+		if (abs(node.loc.x - initialx) != 0)
 		{	
-			std::cout << "IT IS EQUAL TO ZERO \n";
-			
-			for (int x; 0 <= x < abs(node.loc.x - temp_x); x++)
+			for (int x=0;x <= abs(node.loc.x - initialx); x++)
 			{	
 				
-				
-				if (node.loc.x < temp_x)
+				if (node.loc.x < initialx)
 				{
 					temp_x = temp_x - 1;
 				}
@@ -189,32 +184,29 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 				{
 					temp_x = temp_x + 1;
 				}
-				std::cout << "TEMPX IS " <<  temp_x << " \n";
-				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain);
+				
+				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain)
 				{
 					std::cout << "X TOUCHED GOAL \n";
 					return true;
 				}
-				
-			
 			}
-			
 		}
-		if (abs(node.loc.y-temp_y) != 0)
+		if (abs(node.loc.y - temp_y) != 0)
 		{
-			std::cout << "tempy is 0 \n";
+
 			
-			for (int y; 0 <= y < abs(node.loc.y - temp_y); y++)
+			for (int y = 0; y <= abs(node.loc.y - temp_y); y++)
 			{
 				
-				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain);
+				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain)
 				{
 					std::cout << "Y TOUCHED THE GOAL \n";
 					
 					return true;
 				}
-
-				if (node.loc.y < temp_y)
+				
+				if (node.loc.y < initialy)
 				{
 					temp_y = temp_y - 1;
 				}
@@ -222,33 +214,20 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 				{
 					temp_y = temp_y + 1;
 				}
-				
+			
 			}
 			
-			
 		}
-		
-		
 		return false;
 	}
 	
-	
-	
-	
-	
-	
-	
-
-	// ------------ Code for detecting whether the agent passes the goal ---------- //
-	
-	
-
-	
-	
-	
 }
 
+// --- The legal function, which checks whether an action is legal --- //
+bool Legal(const RacetrackState &node1, const action &act)
+{
 
+}
 
 
 

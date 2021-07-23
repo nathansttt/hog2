@@ -17,7 +17,7 @@
 
 // TODO: Need to move code into its own namespace
 
-struct RacetrackMove { // -1, 1
+struct RacetrackMove {
 	int xDelta, yDelta;
 };
 
@@ -77,7 +77,7 @@ public:
 	void DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const;
 
 	
-	// bool Legal(const state &node1, const action &act) const;
+	bool Legal(const state &node1, const action &act) const;
 
 protected: // take two states and draw a line
 private:
