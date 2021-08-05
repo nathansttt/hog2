@@ -85,16 +85,20 @@ void Racetrack::GetActions(const RacetrackState &nodeID, std::vector<RacetrackMo
 
 void Racetrack::ApplyAction(RacetrackState &s, RacetrackMove a) const
 { // When x y velocity and action is applied -- location changes when velocity changes
-	RacetrackState temps = s;
 	s.xVelocity += a.xDelta;
 	s.yVelocity += a.yDelta;
 	s.loc.x = s.loc.x + s.xVelocity;
 	s.loc.y = s.loc.y + s.yVelocity;
+	xyLoc temp(s.loc.x-s.xVelocity, s.loc.y-s.yVelocity);
 
 	this->Boundaries(s, a);
 	
-	this->GoalTest(s, s);
+	if (this->GoalTest(s, s) == true && map->GetTerrainType(s.loc.x, s.loc.y) != kEndTerrain)
+	{
+		std::cout << "Went too far past the goal! \n";
+	}
 	
+	this->GoalTest(s, s);
 }
 
 // ------------ Boundaries ----------- //
@@ -104,33 +108,32 @@ void Racetrack::Boundaries(RacetrackState &s, RacetrackMove &v) const
 	if (s.loc.x > 60000)
 	{
 		std::cout << "Too far left!! D: \n";
-		// makes the agent stop when it hits the wall
 		s.loc.x = 0;
-		s.xVelocity = 0;
-		v.xDelta = 0;
+		//s.xVelocity = 0;
+		//v.xDelta = 0;
 	}
 	else if (s.loc.x >= map->GetMapWidth() - 1)
 	{
 		std::cout << "Too far right! \n";
 		s.loc.x = map->GetMapWidth()-1;
-		s.xVelocity = 0;
-		v.xDelta = 0;
+		//s.xVelocity = 0;
+		//v.xDelta = 0;
 	}
 	if (s.loc.y > 60000)
 	{
 		std::cout << "Too high up!! \n";
 		// makes the agent stop
 		s.loc.y = 0;
-		s.yVelocity = 0;
-		v.yDelta = 0;
+		//s.yVelocity = 0;
+		//v.yDelta = 0;
 	}
 	
 	else if (s.loc.y >= map->GetMapHeight() - 1)
 	{
 		std::cout << "Too far down! \n";
 		s.loc.y = map->GetMapHeight()-1;
-		s.yVelocity = 0;
-		v.yDelta = 0;
+		//s.yVelocity = 0;
+		//v.yDelta = 0;
 	}
 	// std::cout << s.loc.x << ", " << s.loc.y << std::endl;
 	// std::cout << m->GetMapWidth() << ", " << m->GetMapHeight() << std::endl;
@@ -156,26 +159,30 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 	// Use the node to see if the location matches the goal location
 
 	
-	int temp_x = node.loc.x + node.xVelocity;
-	int temp_y = node.loc.y + node.yVelocity;
+	int temp_x = node.loc.x - node.xVelocity;
+	int temp_y = node.loc.y - node.yVelocity;
 	int initialx = temp_x;
 	int initialy = temp_y;
-
-	std::cout << "Tempx is " << temp_x << " \n";
-	std::cout << "Tempy is " << temp_y << " \n";
+	std::cout << temp_x << "\n";
+	std::cout << temp_y << "\n";
 
 	if (map->GetTerrainType(node.loc.x, node.loc.y) == kEndTerrain)
 	{
 		std::cout << "Touched the goal! \n";
 		return true;
 	}
+	
 	else
 	{
 		if (abs(node.loc.x - initialx) != 0)
 		{	
 			for (int x=0;x <= abs(node.loc.x - initialx); x++)
 			{	
-				
+				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain)
+				{
+					std::cout << "X PASSED GOAL \n";
+					return true;
+				}
 				if (node.loc.x < initialx)
 				{
 					temp_x = temp_x - 1;
@@ -185,11 +192,7 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 					temp_x = temp_x + 1;
 				}
 				
-				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain)
-				{
-					std::cout << "X TOUCHED GOAL \n";
-					return true;
-				}
+				
 			}
 		}
 		if (abs(node.loc.y - temp_y) != 0)
@@ -201,7 +204,7 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 				
 				if (map->GetTerrainType(temp_x, temp_y) == kEndTerrain)
 				{
-					std::cout << "Y TOUCHED THE GOAL \n";
+					std::cout << "Y PASSED THE GOAL \n";
 					
 					return true;
 				}
@@ -221,13 +224,85 @@ bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal)
 		return false;
 	}
 	
+	
 }
 
 // --- The legal function, which checks whether an action is legal --- //
-bool Legal(const RacetrackState &node1, const action &act)
+bool Racetrack::Legal(RacetrackState &node1, RacetrackMove &act) const
 {
+	
 
-}
+	
+
+	RacetrackState temp = node1;
+	temp.xVelocity += act.xDelta;
+	temp.yVelocity += act.yDelta;
+	temp.loc.x = temp.loc.x + temp.xVelocity;
+	temp.loc.y = temp.loc.y + temp.yVelocity;
+	int initialx = temp.loc.x;
+	int initialy = temp.loc.y;
+
+	
+	
+
+
+	if (abs(initialx -node1.loc.x) != 0)
+	{
+		for (int x=0; x < abs(temp.loc.x-node1.loc.x); x++)
+		{
+			if (this->GoalTest(temp, node1) == true)
+			{	
+				
+				return true;
+			}
+			if (map->GetTerrainType(temp.loc.x, temp.loc.y) == kObstacle)
+			{	
+				std::cout << "Agent will hit obstacle! \n";
+				return false;
+			}
+			if (initialx > node1.loc.x)
+			{
+				temp.loc.x = temp.loc.x - 1;
+				//std::cout << "TEMPX WAS ADDED \n";
+			}
+			if (initialx < node1.loc.x)
+			{
+				temp.loc.x = temp.loc.x + 1;
+				//std::cout << "TEMPX WAS SUBTRACTED \n";
+			}
+		}
+	}
+	if (abs(initialy-node1.loc.y)!=0)
+	{
+		for (int y=0; y <= abs(initialy-node1.loc.y); y++)
+		{
+			if (this->GoalTest(temp, node1) == true)
+			{
+				return true;
+			}
+			if (map->GetTerrainType(temp.loc.x, temp.loc.y) == kObstacle)
+			{	
+				std::cout << "Agent will hit obstacle! \n";
+				return false;
+			}
+			if (initialy > node1.loc.y)
+			{
+				temp.loc.y = temp.loc.y - 1;
+				//std::cout << "TEMPY WAS SUBTRACTED \n";
+			}
+			if (initialy < node1.loc.y)
+			{
+				temp.loc.y = temp.loc.y + 1;
+				//std::cout << "TEMPX WAS ADDED \n";
+			}
+		}
+	}
+	
+	
+	return false;
+	
+	
+} 
 
 
 
@@ -253,12 +328,15 @@ void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s) const
 // draw a line
 	
 	xyLoc temp(s.loc.x + s.xVelocity, s.loc.y + s.yVelocity);
+	//xyLoc temp2(s.loc.x-s.xVelocity, s.loc.y-s.yVelocity);
 	me->DrawLine(display, s.loc, temp);
 	me->Draw(display, s.loc);
+	//me->DrawLine(display, s.loc, temp2);
 }
 
 void Racetrack::DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const
 {
-	// TODO: draw line between to locations
+	// TODO: draw line between two locations
+	
 
 }

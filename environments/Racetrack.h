@@ -36,6 +36,7 @@ bool operator==(const RacetrackMove &m1, const RacetrackMove &m2); // comparing
 //Different types of domain
 const tTerrain kStartTerrain = kSwamp; 
 const tTerrain kEndTerrain = kGrass;
+const tTerrain kObstacle = kTrees;
 
 class Racetrack : public SearchEnvironment<RacetrackState, RacetrackMove> {
 public:
@@ -53,6 +54,7 @@ public:
 	bool InvertAction(RacetrackMove &a) const;
 
 	void Boundaries(RacetrackState &s, RacetrackMove &v) const;
+	bool Legal(RacetrackState &node1, RacetrackMove &act) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
 	double HCost(const RacetrackState &node1, const RacetrackState &node2) const { return 0; } //Later
@@ -77,7 +79,7 @@ public:
 	void DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const;
 
 	
-	bool Legal(const state &node1, const action &act) const;
+	
 
 protected: // take two states and draw a line
 private:
