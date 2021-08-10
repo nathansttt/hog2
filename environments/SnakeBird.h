@@ -113,6 +113,38 @@ struct SnakeBirdState {
 		uint64_t result = snakeBodies>>(GetSnakeBodyEnd(whichSnake-1)*2);
 		return result&mask;
 	}
+	void SetBodyBits(int whichSnake, uint64_t bodyBits)
+	{
+		uint64_t mask = 1;
+		mask <<= (GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1))*2; // length in bits
+		mask -= 1;
+		mask <<= GetSnakeBodyEnd(whichSnake-1)*2;
+		bodyBits <<= GetSnakeBodyEnd(whichSnake-1)*2;
+		snakeBodies &= (~mask);
+		snakeBodies |= bodyBits;
+	}
+	void MakeSnakeLonger(int whichSnake)
+	{
+		uint64_t old[4]; // max 4 snakes
+		for (int x = 0; x < GetNumSnakes(); x++)
+			old[x] = GetBodyBits(x);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x)+1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetBodyBits(x, old[x]);
+	}
+	void MakeSnakeLonger(int whichSnake, snakeDir addDir)
+	{
+		uint64_t old[4]; // max 4 snakes
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			old[x] = GetBodyBits(x);
+		old[whichSnake] |= ((2*(GetSnakeLength(whichSnake)+1))<<addDir);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x)+1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetBodyBits(x, old[x]);
+		
+	}
 	int GetObjectLocation(int whichObstacle) const { return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	void SetObjectLocation(int whichObstacle, int loc) //{ return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	{ locBlockFruit &= ~(locationMask<<(whichObstacle*9)); locBlockFruit |= ((loc&locationMask)<<(whichObstacle*9)); }
