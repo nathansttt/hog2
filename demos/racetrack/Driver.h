@@ -17,3 +17,5 @@ bool MyClickHandler(unsigned long windowID, int x, int y, point3d loc, tButtonTy
 void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char key);
 
 void InstallHandlers();
+
+

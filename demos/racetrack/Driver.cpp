@@ -14,14 +14,24 @@
 #include "GraphEnvironment.h"
 #include <string>
 #include "Racetrack.h"
+#include "TemplateAStar.h"
 
 bool recording = false;
 bool running = false;
+bool move = false;
 
 Map *m = 0;
 Racetrack *r = 0;
 RacetrackState s;
+RacetrackMove v;
+RacetrackState start;
+RacetrackState end;
+std::vector<RacetrackMove> actions;
+std::vector<RacetrackState> path;
+TemplateAStar<RacetrackState, RacetrackMove, Racetrack> astar;
 
+
+// -------------- MAIN FUNCTION ----------- //
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
@@ -29,17 +39,27 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
  */
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset to start state", kAnyModifier, 'r');
-	// TODO: Add new handlers to enable use of WASD
+	// TODO: Add new handlers to enable use of WASD -- done
 	InstallKeyboardHandler(MyDisplayHandler, "Up", "Accelerate upwards", kAnyModifier, kUpArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Down", "Accelerate upwards", kAnyModifier, kDownArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Left", "Accelerate upwards", kAnyModifier, kLeftArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Right", "Accelerate upwards", kAnyModifier, kRightArrow);
+	InstallKeyboardHandler(MyDisplayHandler, "Down", "Accelerate downwards", kAnyModifier, kDownArrow);
+	InstallKeyboardHandler(MyDisplayHandler, "Left", "Accelerate left", kAnyModifier, kLeftArrow);
+	InstallKeyboardHandler(MyDisplayHandler, "Right", "Accelerate right", kAnyModifier, kRightArrow);
+	// --- WASD handlers --- //
+	InstallKeyboardHandler(MyDisplayHandler, "W", "Accelerate upwards", kAnyModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "A", "Accelerate Left", kAnyModifier, 'a');
+	InstallKeyboardHandler(MyDisplayHandler, "S", "Accelerate downwards", kAnyModifier, 's');
+	InstallKeyboardHandler(MyDisplayHandler, "D", "Accelerate Right", kAnyModifier, 'd');
+
+	InstallKeyboardHandler(MyDisplayHandler, "M", "Move automatically", kAnyModifier, 'm');
+	InstallKeyboardHandler(MyDisplayHandler, "O", "Solve optimally", kAnyModifier, 'o');
+
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseDown));
@@ -59,18 +79,30 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		ReinitViewports(windowID, {-1, -1, 1, 1}, kScaleToSquare);
 		
-		m = new Map(11, 11);
-		m->SetTerrainType(0, 0, kStartTerrain);
+		m = new Map(11, 11); // makes a map with the dimensions in the parentheses
+		
+		for (int x = 0; x <2; x++)
+		{
+			m->SetTerrainType(x, 0, kStartTerrain); // Start terrain placed down
+		}
 		for (int x = 0; x < 5; x++)
 		{
-			m->SetTerrainType(x, 5, kTrees);
+			m->SetTerrainType(x, 5, kTrees); // Tree terrain placed down
 		}
-
-		for (int x = 0; x < 5; x++)
+		
+		
+		for (int x = 0; x < 7; x++)
 		{
-			m->SetTerrainType(x, 10, kEndTerrain);
+			m->SetTerrainType(x, 9, kEndTerrain); // End terrain
 		}
+		
+		
 		r = new Racetrack(m);
+		r->Reset(s);
+		start.loc.x = 1;
+		start.loc.y = 1;
+		end.loc.x = 5;
+		end.loc.y = 9;
 	}
 }
 
@@ -83,8 +115,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	// Draw map
 	r->Draw(display);
 	// Draw "racecar"
-	r->Draw(display, s);
-	return;
+	r->Draw(display, s); //Draws the state of the racetrack
+	r->DrawLine(display, start, end, 0.5);
+	if (move == true) // if m was pressed, makes the agent move automatically
+	{
+		r->ApplyAction(s, v);
+	}
+	r->SetColor(Colors::blue);
+	for (int x=1; x < path.size(); x++)
+	{
+		r->DrawLine(display, path[x-1], path[x], 1);
+	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -95,6 +136,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	return 2;
 }
 
+
+
 uint64_t random64()
 {
 	uint64_t r1 = random();
@@ -102,28 +145,70 @@ uint64_t random64()
 	return (r1<<32)|r2;
 }
 
-void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
+
+
+void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) // handles keypresses that change display
 {
 	switch (key)
 	{
 		case 'r':
 			// TODO: Reset to start state
+			r->Reset(s);
 			break;
-			// TODO: Make appropriate movements
-			// TODO: Add support for WASD here
-		case kUpArrow:
+			// TODO: Make appropriate movements - done
+			// TODO: Add support for WASD here - done
+		
+		
+		case kUpArrow: case 'w': // y velocity goes up
+			std::cout << "Up arrow!" << std::endl;
+			v.xDelta = 0;
+			v.yDelta = -1;
+			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
-		case kDownArrow:
+		case kDownArrow: case 's':
+			std::cout << "Down arrow!" << std::endl;
+			v.xDelta = 0;
+			v.yDelta = 1;
+			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
-		case kLeftArrow:
+		case kLeftArrow: case 'a':
+			v.xDelta = -1;
+			v.yDelta = 0;
+			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
-		case kRightArrow:
+		case kRightArrow: case 'd':
+			v.xDelta = 1;
+			v.yDelta = 0;
+			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
+
+		case 'm':
+			std::cout << "The M Key! \n";
+			std::cout << move << " \n";
+			if (move == true)
+			{
+				move = false;
+			}
+			else
+			{
+				move = true;
+			}
+			
+			break;
+		case 'o':
+			astar.GetPath(r, s, s, path);
 		default:
 			break;
+		
 	}
 	
+	
 }
+
 
 /*
  * Code runs when user clicks or moves mouse in window
@@ -139,7 +224,12 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		}
 			break;
 		case kMouseDown:
-		{
+		{	
+			
+			//std::cout << "Mouse is being held down! \n";
+
+			
+
 		}
 			break;
 		default:

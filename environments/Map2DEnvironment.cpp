@@ -352,7 +352,7 @@ bool MapEnvironment::GetNext8Successor(const xyLoc &currOpenNode, const xyLoc &g
 //	return false;
 }
 
-void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actions) const
+void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actions) const // can agent go to diff loc?
 {
 	bool up=false, down=false;
 	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
@@ -363,18 +363,18 @@ void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actio
 	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y-1)))
 	{
 		up = true;
-		actions.push_back(kN);
+		actions.push_back(kN); 
 	}
-	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y)))
+	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y))) // left
 	{
 		if (!fourConnected)
 		{
-			if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
+			if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1)))) // Can go up?
 				actions.push_back(kNW);
-			if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
+			if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1)))) // can go down?
 				actions.push_back(kSW);
 		}
-		actions.push_back(kW);
+		actions.push_back(kW); // 
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
