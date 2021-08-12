@@ -18,8 +18,9 @@
 // TODO: Need to move code into its own namespace
 
 struct RacetrackMove {
-	int xDelta = 0;
-	int yDelta = 0;
+	RacetrackMove(int x=0, int y=0):xDelta(x), yDelta(y){};
+	int xDelta;
+	int yDelta;
 };
 
 

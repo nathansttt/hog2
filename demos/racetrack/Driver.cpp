@@ -14,7 +14,7 @@
 #include "GraphEnvironment.h"
 #include <string>
 #include "Racetrack.h"
-
+#include "TemplateAStar.h"
 
 bool recording = false;
 bool running = false;
@@ -27,6 +27,8 @@ RacetrackMove v;
 RacetrackState start;
 RacetrackState end;
 std::vector<RacetrackMove> actions;
+std::vector<RacetrackState> path;
+TemplateAStar<RacetrackState, RacetrackMove, Racetrack> astar;
 
 
 // -------------- MAIN FUNCTION ----------- //
@@ -56,6 +58,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "D", "Accelerate Right", kAnyModifier, 'd');
 
 	InstallKeyboardHandler(MyDisplayHandler, "M", "Move automatically", kAnyModifier, 'm');
+	InstallKeyboardHandler(MyDisplayHandler, "O", "Solve optimally", kAnyModifier, 'o');
 
 	InstallWindowHandler(MyWindowHandler);
 
@@ -118,7 +121,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		r->ApplyAction(s, v);
 	}
-	return;
+	r->SetColor(Colors::blue);
+	for (int x=1; x < path.size(); x++)
+	{
+		r->DrawLine(display, path[x-1], path[x], 1);
+	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -192,7 +199,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			}
 			
 			break;
-
+		case 'o':
+			astar.GetPath(r, s, s, path);
 		default:
 			break;
 		
