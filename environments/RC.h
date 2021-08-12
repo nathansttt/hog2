@@ -51,8 +51,6 @@ static bool operator==(const RCState &l1, const RCState &l2)
 class RC : public SearchEnvironment<RCState, RCAction>
 {
 public:
-	RC();
-	~RC();
 	std::string GetName() { return "RC"; }
 //	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
 	virtual void GetSuccessors(const RCState &nodeID, std::vector<RCState> &neighbors) const;
@@ -83,12 +81,9 @@ public:
 	virtual bool GoalTest(const RCState &node) const;
 	
 	virtual uint64_t GetStateHash(const RCState &node) const;
-	virtual uint64_t GetCornerHash(const RCState &node) const;
-	virtual uint64_t GetEdgeHash(const RCState &node) const;
 
 	virtual uint64_t GetActionHash(RCAction act) const { return act; }
 	virtual void GetStateFromHash(uint64_t hash, RCState &node) const;
-	virtual void GetStateFromHash(uint64_t cornerHash, uint64_t edgeHash, RCState &node) const;
 	
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const RCState&) const;
@@ -100,6 +95,8 @@ public:
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const RCState&, const RCState&, float) const;
 	virtual void OpenGLDraw(const RCState&, const RCAction&) const;
+	
+	void Draw(Graphics::Display &display, const RCState&) const;
 	
 	void OpenGLDrawCube(int cube) const;
 	void SetFaceColor(int face) const;

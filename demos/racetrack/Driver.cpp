@@ -24,6 +24,9 @@ Map *m = 0;
 Racetrack *r = 0;
 RacetrackState s;
 RacetrackMove v;
+RacetrackState start;
+RacetrackState end;
+std::vector<RacetrackMove> actions;
 
 
 // -------------- MAIN FUNCTION ----------- //
@@ -75,7 +78,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		
 		m = new Map(11, 11); // makes a map with the dimensions in the parentheses
 		
-		for (int x = 0; x <10; x++)
+		for (int x = 0; x <2; x++)
 		{
 			m->SetTerrainType(x, 0, kStartTerrain); // Start terrain placed down
 		}
@@ -84,13 +87,19 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			m->SetTerrainType(x, 5, kTrees); // Tree terrain placed down
 		}
 		
+		
 		for (int x = 0; x < 7; x++)
 		{
-			m->SetTerrainType(x, 8, kEndTerrain); // End terrain
+			m->SetTerrainType(x, 9, kEndTerrain); // End terrain
 		}
+		
 		
 		r = new Racetrack(m);
 		r->Reset(s);
+		start.loc.x = 1;
+		start.loc.y = 1;
+		end.loc.x = 5;
+		end.loc.y = 9;
 	}
 }
 
@@ -104,6 +113,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	r->Draw(display);
 	// Draw "racecar"
 	r->Draw(display, s); //Draws the state of the racetrack
+	r->DrawLine(display, start, end, 0.5);
 	if (move == true) // if m was pressed, makes the agent move automatically
 	{
 		r->ApplyAction(s, v);
@@ -147,22 +157,26 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			v.xDelta = 0;
 			v.yDelta = -1;
 			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
 		case kDownArrow: case 's':
 			std::cout << "Down arrow!" << std::endl;
 			v.xDelta = 0;
 			v.yDelta = 1;
 			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
 		case kLeftArrow: case 'a':
 			v.xDelta = -1;
 			v.yDelta = 0;
 			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
 		case kRightArrow: case 'd':
 			v.xDelta = 1;
 			v.yDelta = 0;
 			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 			break;
 
 		case 'm':
@@ -202,7 +216,12 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		}
 			break;
 		case kMouseDown:
-		{
+		{	
+			
+			//std::cout << "Mouse is being held down! \n";
+
+			
+
 		}
 			break;
 		default:

@@ -84,6 +84,16 @@
 			<key>orderHint</key>
 			<integer>7</integer>
 		</dict>
+		<key>Pancake.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>23</integer>
+		</dict>
+		<key>Racetrack.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>24</integer>
+		</dict>
 		<key>Reach.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -122,6 +132,11 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>C4017AB426479AED00DE3C91</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C40D4AB621B1BE3800362048</key>
 		<dict>
 			<key>primary</key>
