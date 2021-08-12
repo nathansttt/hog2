@@ -68,7 +68,22 @@ struct SnakeBirdState {
 	{ snakeHeads &= ~(snakeLenMask<<(3+9*(whichSnake+1)+5*whichSnake)); snakeHeads |= ((endOffset&snakeLenMask)<<(3+9*(whichSnake+1)+5*whichSnake)); }
 	
 	void SetSnakeLength(int whichSnake, int len)
-	{ SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1); }
+	{ //SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1);
+		uint64_t oldBody[4]; // max 4 snakes
+		int oldLen[4];
+		for (int x = 0; x < GetNumSnakes(); x++)
+		{
+			oldBody[x] = GetBodyBits(x);
+			oldLen[x] = GetSnakeLength(x);
+		}
+		oldLen[whichSnake] = len;
+		oldBody[whichSnake] &= ((1<<len)-1);
+		//SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x-1)+oldLen[x]-1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetBodyBits(x, oldBody[x]);
+	}
 	int GetSnakeLength(int whichSnake) const
 	{ return GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1)+1; }
 
@@ -143,7 +158,6 @@ struct SnakeBirdState {
 			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x)+1);
 		for (int x = whichSnake; x < GetNumSnakes(); x++)
 			SetBodyBits(x, old[x]);
-		
 	}
 	int GetObjectLocation(int whichObstacle) const { return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	void SetObjectLocation(int whichObstacle, int loc) //{ return (locBlockFruit>>(9*whichObstacle))&locationMask; }
