@@ -130,7 +130,7 @@ void SetupMapChanges();
 void ProcessSingleMapChange();
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
 void AnalyzeObject(SnakeBird::SnakeBirdWorldObject oldobj, SnakeBird::SnakeBirdWorldObject newobj, int nodeLimit=1000000);
-void ChangeMap(int x, int y, int o);
+void ChangeMap(int x, int y, tMouseEventType o);
 EditorColor CanChangeMap(int x, int y);
 void GetLevelSolution(int nodeLimit = 250000000);
 void StepForwardStoredSolution();
@@ -524,41 +524,6 @@ void LoadLevel63()
 	gRefreshBackground = true;
 }
 
-void LoadLevelTrial()
-{
-	sb.BeginEditing();
-	sb.Reset();
-	for (int x = 0; x <= 5; x++)
-		for (int y = 0; y <= 4; y++)
-		{
-//			if (x == 3)
-//			{
-//				sb.SetGroundType(x, y, SnakeBird::kSpikes);
-//			}
-			if (x == 1 && y == 1)
-			{
-				sb.SetGroundType(x, y, SnakeBird::kSpikes);
-			}
-			if (x == 1 && y == 2)
-			{
-				sb.SetGroundType(x, y, SnakeBird::kEmpty);
-			}
-			else
-			sb.SetGroundType(x, y, SnakeBird::kGround);
-		}
-	sb.AddSnake(1, 2, {SnakeBird::kRight});
-	lastFrameSnake = snake = sb.GetStart();
-	history.clear();
-	history.push_back(snake);
-	future.clear();
-	actionInProgressStep.Reset();
-	timePerFrame = 0.01;
-	UpdateActiveSnake();
-	sb.EndEditing();
-	UpdateLevelLink();
-	gRefreshBackground = true;
-}
-
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
 	if (eType == kWindowDestroyed)
@@ -579,7 +544,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			LoadLevel63();
 			//LoadLevel32();
 			//LoadLevel44();
-//			LoadLevelTrial();
 		}
 		if (sb.GetNumFruit() == 0)
 			message = "Welcome to Anhinga! Leave via the yellow exit to pass the level.";
@@ -1354,6 +1318,7 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 		case 'r':
 			message = "";
 			snake = history[0];
+//			snake.MakeSnakeLonger(0, SnakeBird::kUp);
 			timePerFrame = 0.01;
 			history.resize(1);
 			future.clear();
@@ -1469,6 +1434,15 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				messageExpireTime = globalTime+5;
 				sb.BiggerMapHeight();
 				editorOverlay.resize(0);
+				lastFrameSnake = snake = sb.GetStart();
+				history.clear();
+				future.clear();
+				history.push_back(snake);
+				actionInProgressStep.Reset();
+				UpdateActiveSnake();
+				sb.EndEditing();
+				UpdateLevelLink();
+				gRefreshBackground = true;
 				break;
 			case 'y':
 				message = "Editing Mode: Increase Width";
@@ -1483,6 +1457,15 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				messageExpireTime = globalTime+5;
 				sb.SmallerMapHeight();
 				editorOverlay.resize(0);
+				lastFrameSnake = snake = sb.GetStart();
+				history.clear();
+				future.clear();
+				history.push_back(snake);
+				actionInProgressStep.Reset();
+				UpdateActiveSnake();
+				sb.EndEditing();
+				UpdateLevelLink();
+				gRefreshBackground = true;
 				break;
 			case 'm':
 				message = "Editing Mode: Decrease Width";
@@ -1618,9 +1601,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		{
 			gMouseX = x;
 			gMouseY = y;
-			std::cout << "x1 =" << x << std::endl;
-			std::cout << "y1 =" << y << std::endl;
-			ChangeMap(x, y, 0);
+			ChangeMap(x, y, e);
 		}
 		else
 		{
@@ -1636,9 +1617,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
 			//printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
-			std::cout << "x2 =" << x << std::endl;
-			std::cout << "y2 =" << y << std::endl;
-			ChangeMap(x, y, 1);
+			ChangeMap(x, y, e);
 //			CanChangeMap(gMouseX, gMouseY);
 			ShowSolutionLength();
 			SetupMapChanges();
@@ -1934,7 +1913,7 @@ void AnalyzeObject(SnakeBird::SnakeBirdWorldObject oldobj, SnakeBird::SnakeBirdW
 	UpdateLevelLink();
 }
 
-void ChangeMap(int x, int y, int o)
+void ChangeMap(int x, int y, tMouseEventType o)
 {
 	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
 	switch (gEditorMode)
@@ -2238,7 +2217,6 @@ void ChangeMap(int x, int y, int o)
 			{
 				case SnakeBird::kSnake1:
 					sb.BeginEditing();
-					std::cout << "sragnaeh02" << std::endl;
 					sb.RemoveSnake(x, y, o, 0);
 					lastFrameSnake = snake = sb.GetStart();
 					history.clear();
@@ -2257,12 +2235,12 @@ void ChangeMap(int x, int y, int o)
 				{
 					sb.BeginEditing();
 					sb.RemoveBlock(x, y);
-					if (o == 1)
+					if (o == kMouseDown)
 					{
 						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeHead(x, y, 0);
 					}
-					else if (o == 0)
+					else if (o == kMouseDrag)
 					{
 						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeBody(x, y, 0);
@@ -2286,18 +2264,18 @@ void ChangeMap(int x, int y, int o)
 				{
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
-					if (o == 1)
+					if (o == kMouseDown)
 					{
-						std::cout << "sragnaeh1" << std::endl;
+						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeHead(x, y, 0);
-					}
-					else if (o == 0)
-					{
-						std::cout << "sragnaeh2" << std::endl;
-						sb.AddSnakeBody(x, y, 0);
 					}
 					lastFrameSnake = snake = sb.GetStart();
 					history.clear();
+					if (o == kMouseDrag)
+					{
+						sb.SetGroundType(x, y, SnakeBird::kEmpty);
+						sb.AddSnakeBody(x, y, 0);
+					}
 					future.clear();
 					history.push_back(snake);
 					actionInProgressStep.Reset();
@@ -2316,7 +2294,6 @@ void ChangeMap(int x, int y, int o)
 			{
 				case SnakeBird::kSnake2:
 					sb.BeginEditing();
-					std::cout << "sragnaeh0" << std::endl;
 					sb.RemoveSnake(x, y, o, 1);
 					lastFrameSnake = snake = sb.GetStart();
 					history.clear();
@@ -2335,12 +2312,12 @@ void ChangeMap(int x, int y, int o)
 				{
 					sb.BeginEditing();
 					sb.RemoveBlock(x, y);
-					if (o == 1)
+					if (o == kMouseDown)
 					{
 						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeHead(x, y, 0);
 					}
-					else if (o == 0)
+					else if (o == kMouseDrag)
 					{
 						sb.SetGroundType(x, y, SnakeBird::kEmpty);
 						sb.AddSnakeBody(x, y, 1);
@@ -2363,16 +2340,14 @@ void ChangeMap(int x, int y, int o)
 				default:
 				{
 					sb.BeginEditing();
-					if (o == 1)
+					if (o == kMouseDown)
 					{
 						sb.SetGroundType(x, y, SnakeBird::kEmpty);
-						std::cout << "rooftop1" << std::endl;
 						sb.AddSnakeHead(x, y, 1);
 					}
-					else if (o == 0)
+					else if (o == kMouseDrag)
 					{
 						sb.SetGroundType(x, y, SnakeBird::kEmpty);
-						std::cout << "rooftop2" << std::endl;
 						sb.AddSnakeBody(x, y, 1);
 					}
 					lastFrameSnake = snake = sb.GetStart();

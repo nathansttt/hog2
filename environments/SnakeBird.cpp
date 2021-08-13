@@ -48,31 +48,45 @@ void SnakeBird::Reset()
 
 void SnakeBird::BiggerMapHeight()
 {
-	std::cout << "bigger height" <<std::endl; //world stores teh stuff like ground but not portal?
 	if (width*(height+1) <= 512) // map cannot have more than 512 things in it
 	{
 		std::array<SnakeBirdWorldObject, 512> worldCopy;
 		worldCopy = world;
-		int portal1Copy = portal1Loc;
-		int portal2Copy = portal2Loc;
-		portal1Loc = -1;
-		portal2Loc = -1;
-		int exitLocCopy = exitLoc;
-		exitLoc = -1;
-		std::vector<int> fruitCopy;
-		fruitCopy = fruit;
-		fruit.clear();
-		std::array<std::vector<int>, 4> objectsCopy;
-		objectsCopy = objects;
-		for (int which = 0; which <= 3; which++)
-			objects[which].clear();
-
 		for (int x = 0; x < (width*height); x++)
 			world[x] = kEmpty;
+		
+		for (int snake = 0; startState.GetNumSnakes()-1 >= snake; snake++) // for snake
+		{
+			int snakeHead = startState.GetSnakeHeadLoc(snake);
+			std::vector<snakeDir> snakeBody;
+			for (int t = 0; t <= startState.GetSnakeLength(snake)-2; t++)
+			{
+				snakeBody.push_back(startState.GetSnakeDir(snake, t));
+			}
+
+			for (int i = 0; i <= height+1; i++)
+			{
+				if (snakeHead/(height) >= i && snakeHead/(height) < i+1)
+				{
+					startState.SetSnakeHeadLoc(snake, snakeHead+i+1);
+					startState.SetSnakeLength(snake, 1);
+					break;
+				}
+			}
+			if (snakeBody.size() >= 1)
+			{
+			startState.SetSnakeLength(snake, snakeBody.size()+1);
+			for (int x = 0; x < snakeBody.size(); x++)
+				startState.SetSnakeDir(snake, x, snakeBody[x]);
+			}
+		}
 
 		height++;
 
-		for (int x = 0; x <= worldCopy.size()-1; x++) //put grounds back in
+		//TODO:: 1. make the blocks(ground) print accurately after y = 15 or 18
+		//TODO:: 2. figure out the offset for blocks/make them reprint accruetly
+		
+		for (int x = 0; x <= worldCopy.size()-1; x++) //put ground back in
 		{
 			if (worldCopy[x] != kEmpty)
 			{
@@ -80,112 +94,120 @@ void SnakeBird::BiggerMapHeight()
 				{
 					if (x/(height-1) >= i && x/(height-1) < i+1)
 					{
-						world[x+i+1] = worldCopy[x];
-						break;
+						if (i >= 18)
+						{
+							world[x+i+1] = worldCopy[x];
+							break;
+						}
+						else if (i <= 17)
+						{
+							world[x+i+1] = worldCopy[x];
+							break;
+						}
 					}
 				}
 			}
 		}
 
-		if (portal1Copy != -1) //put portals back in
+		if (portal1Loc != -1) //put portals back in
 		{
 			for (int i = 0; i <= height; i++)
 			{
-				if (portal1Copy/(height-1) >= i && portal1Copy/(height-1) < i+1)
+				if (portal1Loc/(height-1) >= i && portal1Loc/(height-1) < i+1)
 				{
-					portal1Loc = portal1Copy+i+1;
+					portal1Loc = portal1Loc+i+1;
 					break;
 				}
 			}
 		}
 
-		if (portal2Copy != -1) //put portals back in
+		if (portal2Loc != -1) //put portals back in
 		{
 			for (int i = 0; i <= height; i++)
 			{
-				if (portal2Copy/(height-1) >= i && portal2Copy/(height-1) < i+1)
+				if (portal2Loc/(height-1) >= i && portal2Loc/(height-1) < i+1)
 				{
-					portal2Loc = portal2Copy+i+1;
+					portal2Loc = portal2Loc+i+1;
 					break;
 				}
 			}
 		}
 		
-		if (exitLocCopy != -1) //put exit back in
+		if (exitLoc != -1) //put exit back in
 		{
 			for (int i = 1; i <= width; i++)
 			{
-				if (exitLocCopy/(height-1) >= i && exitLocCopy/(height-1) < i+1)
+				if (exitLoc/(height-1) >= i && exitLoc/(height-1) < i+1)
 				{
-					exitLoc = exitLocCopy+i+1;
+					exitLoc = exitLoc+i+1;
 					break;
 				}
 			}
 		}
-//		for (int x = 0; x <= fruitCopy.size()-1; x++) //put grounds back in
-//		{
-//			int fruitLoc = fruitCopy[x] + 0;
-//			for (int i = 1; i <= height; i++)
-//			{
-//				if (fruitLoc/(height-1) >= i && fruitLoc/(height-1) < i+1)
-//				{
-//					fruit[x] = fruitLoc+i+1;
-//					break;
-//				}
-//			}
-//		}
-		
-		for (int snake = 0; startState.GetNumSnakes()-1 >= snake; snake++) // for snake
+		if (fruit.size() >= 1)
 		{
-			std::vector<snakeDir> snakeBody;
-			int snakeHead = startState.GetSnakeHeadLoc(snake);
-			for (int t = 0; t <= startState.GetSnakeLength(snake)-2; t++)
+			for (int x = 0; x <= fruit.size()-1; x++) //put grounds back in
 			{
-				if (startState.GetSnakeDir(snake, t) != kNoDirection)
+				for (int i = 1; i <= height; i++)
 				{
-					snakeBody.push_back(startState.GetSnakeDir(snake, t));
+					if (fruit[x]/(height-1) >= i && fruit[x]/(height-1) < i+1)
+					{
+						fruit[x] = fruit[x]+i+1;
+						break;
+					}
+				}
+			}
+		}
+		
+		for (int which = 0; which <= 3; which++)
+		{
+			if (objects[which].size() >= 1)
+			{
+				for (int vector = 0; vector <= objects[which].size()-1; vector++)
+				{
+					for (int i = 1; i <= height; i++)
+					{
+						if (objects[which][vector]/(height-1) >= i && objects[which][vector]/(height-1) < i+1) //(portal1Loc/(height-1) >= i && portal1Loc/(height-1) < i+1)
+						{
+							objects[which][vector] = objects[which][vector]+i+1; //fruit[x] = fruit[x]+i+1;
+							break;
+						}
+					}
 				}
 			}
 			
-			for (int i = 0; i <= height; i++)
-			{
-				if (snakeHead/(height-1) >= i && snakeHead/(height-1) < i+1)
-				{
-					snakeHead = startState.GetSnakeHeadLoc(snake)+i+1;
-					break;
-				}
-			}
-			startState.SetSnakeLength(snake, 0);
-			startState.SetSnakeHeadLoc(snake, snakeHead);
-			startState.SetSnakeLength(snake, snakeBody.size()+1);
-			for (int x = 0; x < snakeBody.size(); x++)
-				startState.SetSnakeDir(snake, x, snakeBody[x]);
-			std::cout << "snake lenght" << startState.GetSnakeLength(snake) << std::endl;
-			std::cout << "snake head" << startState.GetSnakeHeadLoc(snake) << std::endl;
+//			int newX = 0, newY=0;
+//			int xOffset = 0, yOffset = 0;
+//			if (objects[which].size() > 0) // other objects - get their offset base
+//			{
+//				xOffset = GetX(startState.GetObjectLocation(which));
+//				yOffset = GetY(startState.GetObjectLocation(which));
+//			}
+//
+//			// Get new base location (minx/y)
+//			for (int i = 0; i < objects[which].size(); i++)
+//			{
+//				newX = std::min(newX, GetX(objects[which][i])+xOffset);
+//				newY = std::min(newY, GetY(objects[which][i])+yOffset);
+//			}
+//			startState.SetObjectLocation(which, GetIndex(newX, newY));
+//			for (int i = 0; i < objects[which].size(); i++)
+//			{
+//				// reset locations based on new base location
+//				objects[which][i] = GetIndex(GetX(objects[which][i])+xOffset - newX,
+//											 GetY(objects[which][i])+yOffset - newY);
+//			}
+//			// add new piece of new object
+//			objects[which].push_back(GetIndex(x-newX, y-newY));
 		}
 		
-//		objectsCopy = objects;
-//		for (int which = 0; which <= 3; which++)
-//			for (int vector = 0; vector <= objectsCopy[which].size()-1; vector++)
-//				if (exitLocCopy/(height-1) >= vector && exitLocCopy/(height-1) < vector+1)
-//				{
-//					objects[which][vector] = objectsCopy[which][vector];
-//					exitLoc = exitLocCopy+vector+1;
-//					break;
-//				}
-		
-		//SetGroundType(int x, int y, SnakeBirdWorldObject o)
-
-}
+	}
 }
 
 void SnakeBird::BiggerMapWidth()
 {
 	if ((width+1)*height <= 512)
-	{
-		std::cout << "bigger width" <<std::endl;
 		width++;
-	}
 }
 
 
@@ -193,8 +215,196 @@ void SnakeBird::SmallerMapHeight()
 {
 	if ((height-1) >= 5)
 	{
-		std::cout << "smaller height" <<std::endl;
+		std::array<SnakeBirdWorldObject, 512> worldCopy;
+		worldCopy = world;
+		for (int x = 0; x < (width*height); x++)
+			world[x] = kEmpty;
+
+		//TODO:: 1. make the snakes work (reprinting them when they go off the screen)
+		//TODO:: 2. figure out the offset for blocks after y = 16 or around there
+		//TODO:: 2. make the blocks(ground) reprint accurately
+		
+		for (int snake = 0; startState.GetNumSnakes()-1 >= snake; snake++) // for snake
+		{
+			int snakeHead = startState.GetSnakeHeadLoc(snake);
+			int endofSnakeX = GetX(snakeHead);
+			int endofSnakeY = GetY(snakeHead);
+			std::vector<snakeDir> snakeBody;
+			std::vector<int> snakeBodyCoordinates;
+			for (int t = 0; t <= startState.GetSnakeLength(snake)-2; t++)
+			{
+				if (startState.GetSnakeDir(snake, t) == kRight)
+				{
+					endofSnakeX++;
+				}
+				else if (startState.GetSnakeDir(snake, t) == kLeft)
+				{
+					endofSnakeX--;
+				}
+				else if (startState.GetSnakeDir(snake, t) == kDown)
+				{
+					endofSnakeY++;
+				}
+				else if (startState.GetSnakeDir(snake, t) == kUp)
+				{
+					endofSnakeY--;
+				}
+				snakeBody.push_back(startState.GetSnakeDir(snake, t));
+			}
+			if (startState.GetSnakeHeadLoc(snake)%height == 0)
+			{
+				for (int i = 0; i <= height-1; i++)
+				{
+					if ((snakeHead-1)/(height) >= i && (snakeHead-1)/(height) < i+1)
+					{
+						startState.SetSnakeHeadLoc(snake, snakeHead-i-2); //GetIndex(GetX(snakeHead), GetY(snakeHead)-1)-i-1
+						startState.SetSnakeLength(snake, snakeBody.size()+1);
+						if (snakeBody.size() >= 1)
+						{
+							for (int x = 0; x < snakeBody.size(); x++)
+								startState.SetSnakeDir(snake, x, snakeBody[x]);
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i <= height-1; i++)
+				{
+					if ((snakeHead-1)/(height) >= i && (snakeHead-1)/(height) < i+1)
+					{
+						startState.SetSnakeHeadLoc(snake, snakeHead-i-1);
+						startState.SetSnakeLength(snake, 1);
+						break;
+					}
+				}
+				if (snakeBody.size() >= 1)
+				{
+					startState.SetSnakeLength(snake, snakeBody.size()+1);
+					for (int x = 0; x < snakeBody.size(); x++)
+						startState.SetSnakeDir(snake, x, snakeBody[x]);
+				}
+			}
+		}
+		
 		height--;
+		
+		for (int x = 0; x <= worldCopy.size()-1; x++) //put ground back in
+		{
+			if (worldCopy[x] != kEmpty)
+			{
+				for (int i = 0; i <= width; i++)
+				{
+					if ((x-1)/(height+1) >= i && (x-1)/(height+1) < i+1 && x%(height+1) != 0)
+					{
+						if (i >= 15)
+						{
+							world[x-i-1-15] = worldCopy[x];
+							break;
+						}
+						else if (i <= 14)
+						{
+							world[x-i-1] = worldCopy[x];
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		if (portal1Loc != -1) //put portals back in
+		{
+			for (int i = 0; i <= height; i++)
+			{
+				if (portal1Loc%(height+1) == 0)
+				{
+					portal1Loc = -1;
+					break;
+				}
+				if ((portal1Loc-1)/(height+1) >= i && (portal1Loc-1)/(height+1) < i+1)
+				{
+					portal1Loc = portal1Loc-i-1;
+					break;
+				}
+			}
+		}
+		
+		if (portal2Loc != -1) //put portals back in
+		{
+			for (int i = 0; i <= height; i++)
+			{
+				if (portal2Loc%(height+1) == 0)
+				{
+					portal2Loc = -1;
+					break;
+				}
+				if ((portal2Loc-1)/(height+1) >= i && (portal2Loc-1)/(height+1) < i+1)
+				{
+					portal2Loc = portal2Loc-i-1;
+					break;
+				}
+			}
+		}
+		
+		if (exitLoc != -1) //put exit back in
+		{
+			for (int i = 1; i <= width; i++)
+			{
+				if (exitLoc%(height+1) == 0)
+				{
+					exitLoc = -1;
+					break;
+				}
+				if ((exitLoc-1)/(height+1) >= i && (exitLoc-1)/(height+1) < i+1)
+				{
+					exitLoc = exitLoc-i-1;
+					break;
+				}
+			}
+		}
+		
+		if (fruit.size() >= 1)
+		{
+			for (int x = 0; x <= fruit.size()-1; x++) //put grounds back in
+			{
+				for (int i = 1; i <= height; i++)
+				{
+					if (fruit[x]%(height+1) == 0)
+					{
+						std::vector<int>::iterator tor = std::find(fruit.begin(), fruit.end(), GetIndex(x, 0)); //comeback for the y value
+						if (tor != fruit.end())
+						{
+							fruit.erase(tor);
+						}
+						break;
+					}
+					if ((fruit[x]-1)/(height+1) >= i && (fruit[x]-1)/(height+1) < i+1)
+					{
+						fruit[x] = fruit[x]-i-1;
+						break;
+					}
+				}
+			}
+		}
+
+		for (int which = 0; which <= 3; which++)
+		{
+			if (objects[which].size() >= 1)
+			{
+				for (int vector = 0; vector <= objects[which].size()-1; vector++)
+				{
+					for (int i = 1; i <= height; i++)
+					{
+						if ((objects[which][vector]+1)/(height+1) >= i && (objects[which][vector]-1)/(height+1) < i+1 && objects[which][vector]%(height+1) != 0)
+						{
+							objects[which][vector] = objects[which][vector]-i-1;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 	}
 }
 
@@ -202,7 +412,51 @@ void SnakeBird::SmallerMapWidth()
 {
 	if ((width-1) >= 5)
 	{
-		std::cout << "smaller width" << std::endl;
+		//TODO:: 1. make the snakes work (reprinting them when they go off the screen)
+		
+		for (int snake = 0; startState.GetNumSnakes()-1 >= snake; snake++) // for snake
+		{
+			int snakeHead = startState.GetSnakeHeadLoc(snake);
+			int endofSnakeX = GetX(snakeHead);
+			int endofSnakeY = GetY(snakeHead);
+			std::vector<snakeDir> snakeBody;
+			for (int t = 0; t <= startState.GetSnakeLength(snake)-2; t++)
+			{
+				if (startState.GetSnakeDir(snake, t) == kRight)
+				{
+					endofSnakeX++;
+				}
+				else if (startState.GetSnakeDir(snake, t) == kLeft)
+				{
+					endofSnakeX--;
+				}
+				else if (startState.GetSnakeDir(snake, t) == kDown)
+				{
+					endofSnakeY++;
+				}
+				else if (startState.GetSnakeDir(snake, t) == kUp)
+				{
+					endofSnakeY--;
+				}
+				
+				if (endofSnakeX == width-1)
+				{
+					startState.SetSnakeLength(snake, t);
+					break;
+				}
+				snakeBody.push_back(startState.GetSnakeDir(snake, t));
+			}
+			if (GetX(startState.GetSnakeHeadLoc(snake)) == width-1)
+			{
+				startState.SetSnakeHeadLoc(snake, GetIndex(GetX(snakeHead)-1, GetY(snakeHead)));
+				startState.SetSnakeLength(snake, snakeBody.size()+1);
+				if (snakeBody.size() >= 1)
+				{
+					for (int x = 0; x < snakeBody.size(); x++)
+						startState.SetSnakeDir(snake, x, snakeBody[x]);
+				}
+			}
+		}
 		width--;
 	}
 }
@@ -274,66 +528,17 @@ void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 
 void SnakeBird::AddSnakeHead(int x, int y, int whichSnake)
 {
-	if (GetIndex(x, y) >= 0 && GetIndex(x, y) < width*height && y <= height-2 && x <= width-1)
+	if (GetIndex(x, y) >= 0 && GetIndex(x, y) < width*height && y <= height-2 && x <= width-1 && GetIndex(x, y) != startState.GetSnakeHeadLoc(whichSnake))
 	{
-//		if (whichSnake == 0 && startState.GetNumSnakes() == 2 && GetAddingDirection(x, y, GetX(GetEndofSnake(whichSnake, 0)), GetY(GetEndofSnake(whichSnake, 0))) == kNoDirection) //
-//		{
-//			std::vector<snakeDir> snakeBodySnake1;
-//			int snakeHeadSnake1 = startState.GetSnakeHeadLoc(1);
-//			if (startState.GetSnakeLength(1) >= 2)
-//			{
-//				for (int t = 0; t <= startState.GetSnakeLength(1)-2; t++)
-//				{
-//					if (startState.GetSnakeDir(1, t) == kRight)
-//					{
-//						snakeBodySnake1.push_back(kRight);
-//					}
-//					else if (startState.GetSnakeDir(1, t) == kLeft)
-//					{
-//						snakeBodySnake1.push_back(kLeft);
-//					}
-//					else if (startState.GetSnakeDir(1, t) == kDown)
-//					{
-//						snakeBodySnake1.push_back(kDown);
-//					}
-//					else if (startState.GetSnakeDir(1, t) == kUp)
-//					{
-//						snakeBodySnake1.push_back(kUp);
-//					}
-//				}
-//			}
-//			startState.SetSnakeLength(1, 0);
-//			startState.SetNumSnakes(startState.GetNumSnakes()-1); //
-//			std::vector<snakeDir> body;
-//			startState.SetSnakeHeadLoc(whichSnake, GetIndex(x, y));
-//			startState.SetSnakeLength(whichSnake, 1);
-//			for (int x = 0; x < body.size(); x++)
-//				startState.SetSnakeDir(whichSnake, x, body[x]);
-//
-//			startState.SetNumSnakes(startState.GetNumSnakes()+1);
-//			startState.SetSnakeHeadLoc(1, snakeHeadSnake1);
-//			startState.SetSnakeLength(1, snakeBodySnake1.size()+1);
-//			if (startState.GetSnakeLength(1) > 1)
-//			{
-//				for (int b = 0; b <= snakeBodySnake1.size(); b++)
-//					startState.SetSnakeDir(whichSnake, b, snakeBodySnake1[b]);
-//			}
-//		}
-//		else
-//		{
-		std::vector<snakeDir> body;
-		startState.SetNumSnakes(whichSnake+1);
+		if (startState.GetNumSnakes() == whichSnake)
+			startState.SetNumSnakes(whichSnake+1);
 		startState.SetSnakeHeadLoc(whichSnake, GetIndex(x, y));
 		startState.SetSnakeLength(whichSnake, 1);
-		for (int x = 0; x < body.size(); x++)
-			startState.SetSnakeDir(whichSnake, x, body[x]);
-//		}
 	}
 }
 
 snakeDir SnakeBird::GetAddingDirection(int x, int y, int endX, int endY)
 {
-	//std::cout << "snake dir called" << std::endl;
 	if ((x-1 == endX) && (y == endY))
 	{
 		return kRight;
@@ -351,63 +556,6 @@ snakeDir SnakeBird::GetAddingDirection(int x, int y, int endX, int endY)
 		return kUp;
 	}
 	return kNoDirection;
-}
-
-int SnakeBird::GetEndofSnake(int whichSnake, int isItRemoval)
-{
-	int segmentX = GetX(startState.GetSnakeHeadLoc(whichSnake)); // these track where the coordinates of the snake 'butt'(end) are
-	int segmentY = GetY(startState.GetSnakeHeadLoc(whichSnake));
-	if (isItRemoval == 0)
-	{
-		if (startState.GetSnakeLength(whichSnake) >= 2 && startState.GetSnakeLength(whichSnake) <= 30)
-		{
-			for (int t = 0; t <= startState.GetSnakeLength(whichSnake)-2; t++) //Go through the snake segments and find where the end of the snake is
-			{
-				if (startState.GetSnakeDir(whichSnake, t) == kRight)
-				{
-					segmentX++;
-				}
-				else if (startState.GetSnakeDir(whichSnake, t) == kLeft)
-				{
-					segmentX--;
-				}
-				else if (startState.GetSnakeDir(whichSnake, t) == kDown)
-				{
-					segmentY++;
-				}
-				else if (startState.GetSnakeDir(whichSnake, t) == kUp)
-				{
-					segmentY--;
-				}
-			}
-		}
-	}
-	else if (isItRemoval == 1)
-	{
-		if (startState.GetSnakeLength(whichSnake) >= 3)
-		{
-			for (int t = 0; t <= startState.GetSnakeLength(whichSnake)-3; t++) //Go through the snake segments and find where the second to last segment is
-			{
-				if (startState.GetSnakeDir(whichSnake, t) == kRight)
-				{
-					segmentX++;
-				}
-				else if (startState.GetSnakeDir(whichSnake, t) == kLeft)
-				{
-					segmentX--;
-				}
-				else if (startState.GetSnakeDir(whichSnake, t) == kDown)
-				{
-					segmentY++;
-				}
-				else if (startState.GetSnakeDir(whichSnake, t) == kUp)
-				{
-					segmentY--;
-				}
-			}
-		}
-	}
-	return GetIndex(segmentX, segmentY);
 }
 
 void SnakeBird::AddSnakeBody(int x, int y, int whichSnake)
@@ -442,58 +590,15 @@ void SnakeBird::AddSnakeBody(int x, int y, int whichSnake)
 		{
 			if (whichSnake == 0 && startState.GetNumSnakes() == 2)
 			{
-				std::vector<snakeDir> snakeBodySnake1;
-				int snakeHeadSnake1 = startState.GetSnakeHeadLoc(1);
-				if (startState.GetSnakeLength(1) >= 2)
-				{
-					for (int t = 0; t <= startState.GetSnakeLength(1)-2; t++)
-					{
-						if (startState.GetSnakeDir(1, t) == kRight)
-						{
-							snakeBodySnake1.push_back(kRight);
-						}
-						else if (startState.GetSnakeDir(1, t) == kLeft)
-						{
-							snakeBodySnake1.push_back(kLeft);
-						}
-						else if (startState.GetSnakeDir(1, t) == kDown)
-						{
-							snakeBodySnake1.push_back(kDown);
-						}
-						else if (startState.GetSnakeDir(1, t) == kUp)
-						{
-							snakeBodySnake1.push_back(kUp);
-						}
-					}
-				}
-				std::cout << "snake2 length1 =" << startState.GetSnakeLength(1) << std::endl;
-				startState.SetSnakeLength(1, 0);
-				std::cout << "snake2 length2 =" << startState.GetSnakeLength(1) << std::endl;
-				startState.SetNumSnakes(startState.GetNumSnakes()-1);
-				std::cout << "num snakes =" << startState.GetNumSnakes() << std::endl;
+				startState.MakeSnakeLonger(whichSnake, GetAddingDirection(x, y, endofSnakeX, endofSnakeY));
+			}
+			else
+			{
 				startState.SetSnakeLength(whichSnake, startState.GetSnakeLength(whichSnake)+1);
 				startState.SetSnakeDir(whichSnake, startState.GetSnakeLength(whichSnake)-2, GetAddingDirection(x, y, endofSnakeX, endofSnakeY));
-
-				startState.SetNumSnakes(startState.GetNumSnakes()+1);
-				startState.SetSnakeLength(1, snakeBodySnake1.size()+1);
-				std::cout << "snake2 length3 =" << startState.GetSnakeLength(1) << std::endl;
-				startState.SetSnakeHeadLoc(1, snakeHeadSnake1);
-				if (startState.GetSnakeLength(1) > 1)
-				{
-					for (int b = 0; b <= snakeBodySnake1.size(); b++)
-					{
-						startState.SetSnakeDir(whichSnake, b, snakeBodySnake1[b]);
-					std::cout << "snake body dir =" << int(snakeBodySnake1[b]) << std::endl;
-					}
-				}
+				//TODO:: There's an issue here with the program in the adding direction after 4 segments
 			}
-//			else
-//			{
-			startState.SetSnakeLength(whichSnake, startState.GetSnakeLength(whichSnake)+1);
-			startState.SetSnakeDir(whichSnake, startState.GetSnakeLength(whichSnake)-2, GetAddingDirection(x, y, endofSnakeX, endofSnakeY));
-//			}
 		}
-		return;
 	}
 }
 
@@ -532,7 +637,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o, int whichSnake)
 			{
 				startState.SetSnakeLength(whichSnake, startState.GetSnakeLength(whichSnake)-1);
 			}
-			else if (x == GetX(startState.GetSnakeHeadLoc(whichSnake)) && y == GetY(startState.GetSnakeHeadLoc(whichSnake)) && startState.GetNumSnakes() >= 2)
+			else if (GetIndex(x, y) == startState.GetSnakeHeadLoc(whichSnake) && startState.GetNumSnakes() >= 2 && startState.GetNumSnakes() == 2)
 			{
 				std::vector<snakeDir> snakeBody;
 				int snakeHead = startState.GetSnakeHeadLoc(1);
@@ -590,7 +695,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o, int whichSnake)
 						snakeBody.push_back(GetIndex(snakeBodyCounterX, snakeBodyCounterY-1));
 					}
 				}
-				
+
 				for (int i = 0; i <= snakeBody.size()-1; i++)
 				{
 					if (GetIndex(x, y) == snakeBody[i])
@@ -606,7 +711,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o, int whichSnake)
 			{
 				startState.SetSnakeLength(whichSnake, startState.GetSnakeLength(whichSnake)-1);
 			}
-			else if (x == GetX(startState.GetSnakeHeadLoc(whichSnake)) && y == GetY(startState.GetSnakeHeadLoc(whichSnake)) && startState.GetNumSnakes() >= 2)
+			else if (GetIndex(x, y) == startState.GetSnakeHeadLoc(whichSnake) && startState.GetSnakeLength(whichSnake) >= 2 && startState.GetNumSnakes() >= 2)
 			{
 				std::vector<snakeDir> snakeBody;
 				int snakeHead = startState.GetSnakeHeadLoc(whichSnake);
@@ -649,7 +754,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o, int whichSnake)
 			{
 				startState.SetSnakeLength(whichSnake, startState.GetSnakeLength(whichSnake)-1);
 			}
-			else if (x == GetX(startState.GetSnakeHeadLoc(whichSnake)) && y == GetY(startState.GetSnakeHeadLoc(whichSnake)) && startState.GetNumSnakes() >= 2)
+			else if (GetIndex(x, y) == startState.GetSnakeHeadLoc(whichSnake) && startState.GetSnakeLength(whichSnake) >= 2)
 			{
 				startState.SetNumSnakes(startState.GetNumSnakes()-1);
 			}
@@ -691,7 +796,7 @@ void SnakeBird::RemoveSnake(int x, int y, int o, int whichSnake)
 				}
 			}
 		}
-		else if (o == 0)
+		else if (o == 0) // if drag
 		{
 			if (x == endofSnakeX && y == endofSnakeY && startState.GetSnakeLength(whichSnake) >= 3)
 			{
