@@ -59,6 +59,7 @@ void InstallHandlers()
 
 	InstallKeyboardHandler(MyDisplayHandler, "M", "Move automatically", kAnyModifier, 'm');
 	InstallKeyboardHandler(MyDisplayHandler, "O", "Solve optimally", kAnyModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "F", "Freeze", kAnyModifier, 'f');
 
 	InstallWindowHandler(MyWindowHandler);
 
@@ -115,8 +116,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	// Draw map
 	r->Draw(display);
 	// Draw "racecar"
-	r->Draw(display, s); //Draws the state of the racetrack
-	r->DrawLine(display, start, end, 0.5);
+	r->Draw(display, s, v); //Draws the state of the racetrack
 	if (move == true) // if m was pressed, makes the agent move automatically
 	{
 		r->ApplyAction(s, v);
@@ -201,6 +201,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			break;
 		case 'o':
 			astar.GetPath(r, s, s, path);
+		case 'f':
+			v.xDelta = 0;
+			v.yDelta = 0;
+			s.xVelocity = 0;
+			s.yVelocity = 0;
+			r->ApplyAction(s, v);
+			r->GetActions(s, actions);
 		default:
 			break;
 		
