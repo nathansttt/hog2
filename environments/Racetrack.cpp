@@ -309,16 +309,19 @@ void Racetrack::Draw(Graphics::Display &display) const
 	me->Draw(display);
 }
 
-void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s) const
+void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s, RacetrackMove &a) const
 {
-	// TODO: draw agent location and movement vector
-// draw a line
+	// draws agent location and movement vector
 	
-	//xyLoc temp(s.loc.x + s.xVelocity, s.loc.y + s.yVelocity);
-	xyLoc temp2(s.loc.x-s.xVelocity, s.loc.y-s.yVelocity);
-	//me->DrawLine(display, s.loc, temp);
-	me->Draw(display, s.loc);
+	xyLoc temp(s.loc.x + (s.xVelocity + a.xDelta), s.loc.y + (s.yVelocity + a.yDelta)); // predicted next location
+	xyLoc temp2(s.loc.x-s.xVelocity, s.loc.y-s.yVelocity); // location from where agent was before to where it is now
+	
+	me->SetColor(Colors::blue); 
+	me->DrawLine(display, s.loc, temp); 
+	me->SetColor(Colors::red);
 	me->DrawLine(display, s.loc, temp2);
+	me->SetColor(Colors::black); // sets agent color to black
+	me->Draw(display, s.loc); // draws agent location
 }
 
 void Racetrack::DrawLine(Graphics::Display &display, const RacetrackState &c, const RacetrackState &d, float width) const

@@ -77,7 +77,7 @@ public:
 	void OpenGLDraw(const RacetrackState&, const RacetrackMove&) const {};
 
 	void Draw(Graphics::Display &display) const;
-	void Draw(Graphics::Display &display, const RacetrackState&) const;
+	void Draw(Graphics::Display &display, const RacetrackState&, RacetrackMove&) const;
 	void DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const;
 
 	
