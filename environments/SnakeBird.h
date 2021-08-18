@@ -39,7 +39,7 @@ const uint8_t kNothingPushed = 0xFF;
 const int codeSize = 2;
 
 enum snakeDir : uint8_t {
-	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3
+	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3, kNoDirection=0x4
 };
 struct SnakeBirdState {
 	uint64_t snakeBodies; // up to 32 in length
@@ -244,7 +244,7 @@ const uint8_t kBlockMask = 0x20;
 
 enum SnakeBirdWorldObject : uint8_t {
 	// can always enter, but may have secondary effects
-	kEmpty  = 0x80,
+	kEmpty  = 0x80, // = 128
 	kFruit  = 0x81,
 	kExit   = 0x82,
 	kPortal1= 0x83,
@@ -252,8 +252,8 @@ enum SnakeBirdWorldObject : uint8_t {
 	kPortal, //figure out where the portals go
 
 	// cannot ever enter
-	kGround = 0x40,
-	kSpikes = 0x41,
+	kGround = 0x40, // = 64
+	kSpikes = 0x41, // = 65
 
 	// for pushing
 	kBlock1 = 0x20,
@@ -295,10 +295,11 @@ public:
 	SnakeBirdState GetStart() const;
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
-	void AddSnakeHead(int x, int y);
-	snakeDir SnakeDirection(int x, int y, int which);
-	void AddSnakeBody(int x, int y);
-	void RemoveSnake(int x, int y, int o);
+	void AddSnakeHead(int x, int y, int whichSnake);
+	snakeDir GetAddingDirection(int x, int y, int endX, int endY);
+	void AddSnakeBody(int x, int y, int whichSnake);
+	
+	void RemoveSnake(int x, int y, int o, int whichSnake);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
 	void RemoveBlock(int x, int y);
 	int GetNumPortals();
@@ -434,6 +435,7 @@ private:
 	int exitLoc;
 	SnakeBirdState startState;
 	bool editing;
+//	int lastSnake;
 	//	std::array<
 };
 
