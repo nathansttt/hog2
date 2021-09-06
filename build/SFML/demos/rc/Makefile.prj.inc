@@ -58,3 +58,5 @@ default : all
 
 SRC_CPP = \
 	demos/rc/Driver.cpp \
+	environments/RC.cpp \
+	
