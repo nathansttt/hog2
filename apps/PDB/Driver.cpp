@@ -59,7 +59,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-domain", "-domain", "Select domain to build for. {STP44 STP55 RC, TS16, TOH}");
 	InstallCommandLineHandler(MyCLHandler, "-pattern", "-pattern", "Choose tiles in PDB");
 	InstallCommandLineHandler(MyCLHandler, "-additive", "-additive", "Build additive PDB");
-	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
+	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats; optionally compress");
 	InstallCommandLineHandler(MyCLHandler, "-threads", "-threads <N>", "Use <N> threads");
 	InstallCommandLineHandler(MyCLHandler, "-path", "-path <path>", "Set path for output PDB");
 	InstallCommandLineHandler(MyCLHandler, "-delta", "-delta", "Use delta PDB");
@@ -188,6 +188,11 @@ void BuildSTPPDB()
 		{
 			printf("Loaded successfully\n");
 			pdb.PrintHistogram();
+
+			if (compression != 1)
+			{
+				pdb.DivCompress(compression, true);
+			}
 			return;
 		}
 	}
