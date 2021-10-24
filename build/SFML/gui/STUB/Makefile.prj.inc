@@ -30,8 +30,9 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  gui/GL/gl.cpp \
-  gui/GL/glut.cpp
-
+  gui/STUB/GL/gl.cpp \
+  gui/STUB/GL/glut.cpp \
+  gui/STUB/SFML/Window.cpp \
+  gui/STUB/SFML/OpenGL.cpp
 
 

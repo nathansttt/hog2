@@ -14,7 +14,7 @@ prefix = /usr/local/bin
 
 # All projects to build in this order.
 PROJECTS = \
-  gui/GL \
+  gui/STUB \
   algorithms \
   environments \
   envutil \

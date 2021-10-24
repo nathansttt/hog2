@@ -7,7 +7,6 @@
 
 CXX = g++ # clang++
 COMMON_CXXFLAGS += -Wall -std=c++11 -Wno-deprecated
-COMMON_CXXFLAGS += -I/usr/local/include/SFML/
 
 #COMMON_CXXFLAGS += -ansi -pedantic
 
@@ -30,12 +29,14 @@ COMMON_LNFLAGS += -framework OpenGL
 COMMON_CXXFLAGS += -DOS_MAC
 endif
 
-#ifeq ("$(OPENGL)", "STUB")
-#COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
-#else
+ifeq ("$(OPENGL)", "STUB")
+COMMON_CXXFLAGS += -I$(ROOT)/gui/STUB/GL/ -DNO_OPENGL
+COMMON_CXXFLAGS += -I$(ROOT)/gui/STUB/SFML/
+else
+COMMON_LNFLAGS += -lsfml-graphics -lsfml-window -lsfml-system
+COMMON_CXXFLAGS += -I/usr/local/include/SFML/
+endif
 
-
-#else # not darwin
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
@@ -55,7 +56,6 @@ endif
 #endif
 #endif
 
-COMMON_LNFLAGS += -lsfml-graphics -lsfml-window -lsfml-system
 
 #ifeq ("$(CPU)", "G5")
 #COMMON_CXXFLAGS += -mcpu=970 -mpowerpc64 -mtune=970
