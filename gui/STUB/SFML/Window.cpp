@@ -14,8 +14,8 @@ namespace sf
 	Window::Window(VideoMode mode, const String& title, Uint32 style, const ContextSettings& settings) {}
 	Window::~Window() {}
     void Window::close() {}
-	bool Window::isOpen() const {}
-    bool Window::pollEvent(Event& event) {}
+	bool Window::isOpen() const {return true;}
+    bool Window::pollEvent(Event& event) { return false; }
 	void Window::setFramerateLimit(unsigned int limit) {}
     void Window::display() {}
 
