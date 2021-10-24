@@ -32,16 +32,24 @@ endif
 ifeq ("$(OPENGL)", "STUB")
 COMMON_CXXFLAGS += -I$(ROOT)/gui/STUB/GL/ -DNO_OPENGL
 COMMON_CXXFLAGS += -I$(ROOT)/gui/STUB/SFML/
-else
-COMMON_LNFLAGS += -lsfml-graphics -lsfml-window -lsfml-system
-COMMON_CXXFLAGS += -I/usr/local/include/SFML/
-endif
-
+COMMON_CXXFLAGS += -I$(ROOT)/gui/STUB/
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
-COMMON_LNFLAGS +=  -lGL -pthread #-lGLU -lglut
+COMMON_LNFLAGS += -pthread
 endif
+
+else
+COMMON_LNFLAGS += -lsfml-graphics -lsfml-window -lsfml-system
+COMMON_CXXFLAGS += -I/usr/local/include/SFML/
+# if Linux need some other pthread call 
+ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
+COMMON_LNFLAGS += -pthread -lGL #-lGLU -lglut
+endif
+
+endif
+
+
 
 #COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -Lpapers/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
 #else
@@ -54,12 +62,6 @@ endif
 #COMMON_CXXFLAGS += -I/usr/include/GL
 #COMMON_LNFLAGS +=  -lGL -lGLU -lglut
 #endif
-#endif
-
-
-#ifeq ("$(CPU)", "G5")
-#COMMON_CXXFLAGS += -mcpu=970 -mpowerpc64 -mtune=970
-#COMMON_CXXFLAGS += -mpowerpc-gpopt -force_cpusubtype_ALL
 #endif
 
 DBG_CXXFLAGS = $(PROJ_DBG_CXXFLAGS) $(COMMON_CXXFLAGS) -g
