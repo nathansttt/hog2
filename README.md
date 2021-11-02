@@ -50,7 +50,7 @@ To build the project on the command-line, you must first download the source cod
 
 Then traverse to the build directory with:
 ```sh
-cd hog2/build/gmake
+cd hog2/build/SFML
 ```
 
 Finally build the project with make:
