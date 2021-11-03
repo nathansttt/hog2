@@ -58,6 +58,14 @@ Finally build the project with make:
 make
 ```
 
+Alternately, you can build a headless version of HOG2 (which does not require SFML or OpenGL) using:
+
+```sh
+make OPENGL=STUB
+```
+
+Note that when switching between the headless and GUI versions of HOG2 you must do a clean rebuild.
+
 After this completes the binaries can be found under `../../bin/release/`.
 
 To build using XCode you can open one of the projects in `build/XCode`. `HOG2 ObjC` contains a full sample application; many demos are available inside the `hog2 mac native demos` project.
