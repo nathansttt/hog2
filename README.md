@@ -11,7 +11,7 @@ Documentation (much of it older, but starting to be updated) [is available here]
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get started with the HOG2 applications run the following commands
+To get started with the HOG2 applications run the following commands. Note that SFML and OpenGL are not required for the headless version of HOG2 (see build instructions below.)
 
 ### Prerequisites
 
