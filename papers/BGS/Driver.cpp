@@ -13,6 +13,8 @@
 #include "IncrementalBGS.h"
 #include "Map2DEnvironment.h"
 #include "ScenarioLoader.h"
+#include <map>
+#include "IBEX.h"
 
 const int kHeuristic = GraphSearchConstants::kTemporaryLabel;
 
@@ -91,12 +93,14 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
 	ImprovedBGS<xyLoc, tDirection>  bgs;
 	IncrementalBGS<xyLoc, tDirection>  ibex;
-
+	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 5, 2, false);
+	
 	ScenarioLoader s(scenario);
 	Map *map = new Map(theMap);
 	MapEnvironment e(map);
 	Timer t;
 	std::vector<xyLoc> path;
+	std::vector<tDirection> path2;
 	
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
@@ -108,6 +112,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 			t.StartTimer();
 			searcher.GetPath(&e, from, to, path);
 			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
 		if (strcmp(algorithm, "bgs") == 0)
@@ -115,6 +120,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 			t.StartTimer();
 			bgs.GetPath(&e, from, to, &e, path);
 			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
 		if (strcmp(algorithm, "ibex") == 0)
@@ -122,8 +128,17 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 			t.StartTimer();
 			ibex.GetPath(&e, from, to, &e, path);
 			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), ibex.GetNodesExpanded(), t.GetElapsedTime());
 		}
-		/*
+
+		if (strcmp(algorithm, "IBEX") == 0)
+		{
+			t.StartTimer();
+			i.GetPath(&e, from, to, path2);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), i.GetNodesExpanded(), t.GetElapsedTime());
+		}
+/*
 		if (fgreater(fabs(e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance()), 0.01))
 		{
 			std::cout << "From: " << from << " to " << to << "\n";
@@ -132,7 +147,6 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 			exit(1);
 		}
 		*/
-		printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 	}
 	
 	exit(0);
