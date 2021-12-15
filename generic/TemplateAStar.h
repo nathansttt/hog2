@@ -108,6 +108,7 @@ public:
 	
 	bool GetClosedListGCost(const state &val, double &gCost) const;
 	bool GetOpenListGCost(const state &val, double &gCost) const;
+	bool GetHCost(const state &val, double &hCost) const;
 	bool GetClosedItem(const state &s, AStarOpenClosedDataWithF<state> &);
 	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
 	inline const AStarOpenClosedDataWithF<state> &GetOpenItem(unsigned int which) { return openClosedList.Lookat(openClosedList.GetOpenItem(which)); }
@@ -376,6 +377,7 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 		if (!directed)
 			openClosedList.Lookup(nodeid).h = std::max(openClosedList.Lookup(nodeid).h, bestH);
 		openClosedList.Lookup(nodeid).h = std::max(openClosedList.Lookup(nodeid).h, lowHC);
+		openClosedList.Lookup(nodeid).f = phi(openClosedList.Lookup(nodeid).h, openClosedList.Lookup(nodeid).g);
 	}
 	
 	// iterate again updating costs and writing out to memory
@@ -648,6 +650,19 @@ bool TemplateAStar<state, action,environment,openList>::GetOpenListGCost(const s
 	if (loc == kOpenList)
 	{
 		gCost = openClosedList.Lookat(theID).g;
+		return true;
+	}
+	return false;
+}
+
+template <class state, class action, class environment, class openList>
+bool TemplateAStar<state, action,environment,openList>::GetHCost(const state &val, double &hCost) const
+{
+	uint64_t theID;
+	dataLocation loc = openClosedList.Lookup(env->GetStateHash(val), theID);
+	if (loc != kNotFound)
+	{
+		hCost = openClosedList.Lookat(theID).h;
 		return true;
 	}
 	return false;
