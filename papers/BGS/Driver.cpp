@@ -19,6 +19,9 @@
 const int kHeuristic = GraphSearchConstants::kTemporaryLabel;
 
 bool recording = false;
+
+/***** Graph Tests ******/
+
 Graph *g;
 GraphEnvironment *ge;
 
@@ -31,6 +34,106 @@ public:
 };
 
 GraphDistHeuristic h;
+
+/******* DH Tests ********/
+
+
+struct dh {
+	std::vector<double> depths;
+	xyLoc startLoc;
+};
+
+class DifferentialHeuristic : public Heuristic<xyLoc> {
+public:
+	double HCost(const xyLoc &a, const xyLoc &b) const
+	{
+		//return distance(a, b);
+		double v = e->HCost(a, b);
+		int a_hash = e->GetStateHash(a);
+		int b_hash = e->GetStateHash(b);
+		int x  = (a.x+a.y)%(values.size());
+		v = std::max(v, fabs(values[x].depths[a_hash]-values[x].depths[b_hash]));
+		return v;
+	/*	for (int x = 0; x < values.size(); x++)
+			v = std::max(v, fabs(values[x].depths[a_hash]-values[x].depths[b_hash]));
+		return v;
+	*/
+	}
+	// Doesn't include the baseline heuristic
+	double DHCost(const xyLoc &a, const xyLoc &b) const
+	{
+		//return distance(a, b);
+		double v = 0;
+		for (int x = 0; x < values.size(); x++)
+			v = std::max(v, fabs(values[x].depths[e->GetStateHash(a)]-values[x].depths[e->GetStateHash(b)]));
+		return v;
+	}
+	void Clear()
+	{ values.resize(0); }
+	void Add()
+	{
+		std::vector<xyLoc> path;
+		TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+		astar.SetStopAfterGoal(false);
+		xyLoc where;
+		if (values.size() == 0)
+		{ // find first open location
+		    Map *m = e->GetMap();
+			for (int y = 0; y < m->GetMapHeight(); y++)
+			{
+				for (int x = 0; x < m->GetMapWidth(); x++)
+				{
+					if (m->GetTerrainType(x, y) == kGround)
+					{
+						where.x = x;
+						where.y = y;
+						y = m->GetMapHeight();
+						x = m->GetMapWidth();
+						astar.InitializeSearch(e, where, where, path);
+					}
+				}
+			}
+		}
+		else { // get furthest point
+			astar.InitializeSearch(e, values[0].startLoc, values[0].startLoc, path);
+			for (int x = 1; x < values.size(); x++)
+				astar.AddAdditionalStartState(values[x].startLoc);
+		}
+
+		while (astar.GetNumOpenItems() > 0)
+		{
+			where = astar.CheckNextNode();
+			astar.DoSingleSearchStep(path);
+		}
+		
+		std::cout << "Adding DH at " << where << "\n";
+		dh newDH;
+		newDH.startLoc = where;
+		newDH.depths.resize(e->GetMaxHash());
+		astar.SetStopAfterGoal(false);
+		astar.GetPath(e, where, where, path);
+		
+		for (int x = 0; x < astar.GetNumItems(); x++)
+		{
+			double cost;
+			xyLoc v = astar.GetItem(x).data;
+			if (!astar.GetClosedListGCost(v, cost)) {
+				//printf("Error reading depth from closed list!\n");
+			}
+			else {
+				int hash = e->GetStateHash(v);
+				newDH.depths[hash] = cost;
+			}
+		}
+		values.push_back(newDH);
+	}
+	MapEnvironment *e;
+	std::vector<dh> values;
+};
+
+DifferentialHeuristic DH;
+
+
 
 int main(int argc, char* argv[])
 {
@@ -58,10 +161,10 @@ void InstallHandlers()
 //	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
 	InstallCommandLineHandler(MyCLHandler, "-polygraph", "-polygraph <size> <algorithm>", "Runs worst-case inconsistency graph");
-	InstallCommandLineHandler(MyCLHandler, "-grid", "-polygraph <map> <scenario> <algorithm>", "Runs the algorithm on the scenario file with Octile heuristic");
+	InstallCommandLineHandler(MyCLHandler, "-grid", "-grid <map> <scenario> <algorithm>", "Runs the algorithm on the scenario file with Octile heuristic");
+	InstallCommandLineHandler(MyCLHandler, "-inconsistent", "-inconsistent <map> <scenario> <algorithm>", "Runs the algorithm on the scenario file with a compressed DH heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
-
 	InstallMouseClickHandler(MyClickHandler);
 }
 
@@ -104,6 +207,9 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 	
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
+		if (s.GetNthExperiment(x).GetDistance() == 0)
+			continue;
+		
 		xyLoc from = xyLoc(s.GetNthExperiment(x).GetStartX(), s.GetNthExperiment(x).GetStartY());
 		xyLoc to = xyLoc(s.GetNthExperiment(x).GetGoalX(), s.GetNthExperiment(x).GetGoalY());
 
@@ -154,6 +260,90 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 
 
 
+void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
+{
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
+	ImprovedBGS<xyLoc, tDirection>  bgs;
+	IncrementalBGS<xyLoc, tDirection>  ibex;
+	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 5, 2, false);
+	searcher.SetReopenNodes(true);
+	
+	ScenarioLoader s(scenario);
+	Map *map = new Map(theMap);
+	MapEnvironment e(map);
+	DH.e = &e;
+	for (int x = 0; x < 10; x++)
+		DH.Add();
+	Timer t;
+	std::vector<xyLoc> path;
+	std::vector<tDirection> path2;
+	
+	for (int x = 0; x < s.GetNumExperiments(); x++)
+	{
+		if (s.GetNthExperiment(x).GetDistance() == 0)
+			continue;
+
+		xyLoc from = xyLoc(s.GetNthExperiment(x).GetStartX(), s.GetNthExperiment(x).GetStartY());
+		xyLoc to = xyLoc(s.GetNthExperiment(x).GetGoalX(), s.GetNthExperiment(x).GetGoalY());
+
+		if (strcmp(algorithm, "astar") == 0)
+		{
+			searcher.SetHeuristic(&DH);
+			t.StartTimer();
+			searcher.GetPath(&e, from, to, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bpmx") == 0)
+		{
+			searcher.SetHeuristic(&DH);
+			searcher.SetUseBPMX(1);
+			t.StartTimer();
+			searcher.GetPath(&e, from, to, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs") == 0)
+		{
+			t.StartTimer();
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "ibex") == 0)
+		{
+			t.StartTimer();
+			ibex.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), ibex.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "IBEX") == 0)
+		{
+			t.StartTimer();
+			i.GetPath(&e, &DH, from, to, path2);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(from, path2), i.GetNodesExpanded(), t.GetElapsedTime());
+		}
+/*
+		if (fgreater(fabs(e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance()), 0.01))
+		{
+			std::cout << "From: " << from << " to " << to << "\n";
+			printf("Found solution %d length %f; expected %f difference %f\n", map->GetTerrainType(from.x, from.y), e.GetPathLength(path), s.GetNthExperiment(x).GetDistance(),
+				  e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance());
+			exit(1);
+		}
+		*/
+	}
+	
+	exit(0);
+}
+
+
+
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (strcmp(argument[0], "-grid") == 0)
@@ -161,6 +351,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs > 3)
 		{
 			runProblemSet(argument[1], argument[2], argument[3]);
+			exit(0);
+		}
+	}
+	if (strcmp(argument[0], "-inconsistent") == 0)
+	{
+		if (maxNumArgs > 3)
+		{
+			runProblemSetInconsistent(argument[1], argument[2], argument[3]);
 			exit(0);
 		}
 	}
