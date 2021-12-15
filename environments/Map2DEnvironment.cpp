@@ -1319,9 +1319,9 @@ void MapEnvironment::Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc 
 	rgbColor c;// = {0.5, 0.5, 0};
 	GLfloat t;
 	GetColor(c.r, c.g, c.b, t);
-
+	GLdouble rad;
 	{
-		GLdouble px, py, t, rad;
+		GLdouble px, py, t;
 		map->GetOpenGLCoord(l1.x, l1.y, px, py, t, rad);
 
 		rect r;
@@ -1332,7 +1332,7 @@ void MapEnvironment::Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc 
 		r1 = r;
 	}
 	{
-		GLdouble px, py, t, rad;
+		GLdouble px, py, t;
 		map->GetOpenGLCoord(l2.x, l2.y, px, py, t, rad);
 
 		rect r;
@@ -1348,7 +1348,7 @@ void MapEnvironment::Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc 
 	r.right = v*r1.right+r2.right*(1-v);
 	r.top = v*r1.top+r2.top*(1-v);
 	r.bottom = v*r1.bottom+r2.bottom*(1-v);
-	disp.FrameCircle(r, c, 2);
+	disp.FillCircle(r, c);
 }
 
 
@@ -1492,15 +1492,15 @@ void MapEnvironment::GetNextState(const xyLoc &currents, tDirection dir, xyLoc &
 	}	
 }
 
-double MapEnvironment::GetPathLength(std::vector<xyLoc> &neighbors)
-{
-	double length = 0;
-	for (unsigned int x = 1; x < neighbors.size(); x++)
-	{
-		length += GCost(neighbors[x-1], neighbors[x]);
-	}
-	return length;
-}
+//double MapEnvironment::GetPathLength(std::vector<xyLoc> &neighbors)
+//{
+//	double length = 0;
+//	for (unsigned int x = 1; x < neighbors.size(); x++)
+//	{
+//		length += GCost(neighbors[x-1], neighbors[x]);
+//	}
+//	return length;
+//}
 
 
 /***********************************************************/
