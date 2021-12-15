@@ -10,6 +10,7 @@
 #include "GraphEnvironment.h"
 #include "GraphInconsistencyInstances.h"
 #include "ImprovedBGS.h"
+#include "IncrementalBGS.h"
 #include "Map2DEnvironment.h"
 #include "ScenarioLoader.h"
 
@@ -88,6 +89,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 void runProblemSet(char *theMap, char *scenario, char *algorithm)
 {
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
+	ImprovedBGS<xyLoc, tDirection>  bgs;
 	IncrementalBGS<xyLoc, tDirection>  ibex;
 
 	ScenarioLoader s(scenario);
@@ -111,6 +113,13 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 		if (strcmp(algorithm, "bgs") == 0)
 		{
 			t.StartTimer();
+			bgs.GetPath(&e, from, to, &e, path);
+			t.EndTimer();
+		}
+
+		if (strcmp(algorithm, "ibex") == 0)
+		{
+			t.StartTimer();
 			ibex.GetPath(&e, from, to, &e, path);
 			t.EndTimer();
 		}
@@ -123,7 +132,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 			exit(1);
 		}
 		*/
-		printf("%f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
+		printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 	}
 	
 	exit(0);
@@ -144,7 +153,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	if (strcmp(argument[0], "-polygraph") == 0)
 	{
 		std::vector<graphState> path;
-		IncrementalBGS<graphState, graphMove>  ibex;
+		ImprovedBGS<graphState, graphMove>  ibex;
 
 		int instanceSize = 10;
 		if (maxNumArgs >= 3)

@@ -1,5 +1,5 @@
 //
-//  IncrementalBGS.h
+//  ImprovedBGS.h
 //  hog2
 //
 //  This is an incremental version of Budgeted Graph Search - IBEX on trees with Bounded Dijkstra at the low level.
@@ -9,17 +9,17 @@
 // This implementation contains working of Algo2 for the efficient BGS. 
 // The search can start from the current f-cost without discarding any nodes in the queue.
 // There is only need to update the budget values correctly.
-#ifndef IncrementalBGS_h
-#define IncrementalBGS_h
+#ifndef ImprovedBGS_h
+#define ImprovedBGS_h
 
 #include "Heuristic.h"
 #include "AStarOpenClosed.h"
 bool mode = 0;
 int flag = 0;
 template <class state, class action>
-class IncrementalBGS {
+class ImprovedBGS {
 public:
-	IncrementalBGS(double initialBound = 0) :bound(initialBound), initialBound(initialBound), nextBound(initialBound)
+	ImprovedBGS(double initialBound = 0) :bound(initialBound), initialBound(initialBound), nextBound(initialBound)
 	{ ResetNodeCount(); previousBound = 0; }
 	bool InitializeSearch(SearchEnvironment<state, action> *env, state from, state to, Heuristic<state> *h,
 						  std::vector<state> &thePath);
@@ -163,7 +163,7 @@ private:
 };
 
 template <class state, class action>
-void IncrementalBGS<state, action>::GetPath(SearchEnvironment<state, action> *e, state from, state to,
+void ImprovedBGS<state, action>::GetPath(SearchEnvironment<state, action> *e, state from, state to,
 											Heuristic<state> *h, std::vector<state> &thePath)
 {
 	if (InitializeSearch(e, from, to, h, thePath))
@@ -173,14 +173,14 @@ void IncrementalBGS<state, action>::GetPath(SearchEnvironment<state, action> *e,
 }
 
 template <class state, class action>
-void IncrementalBGS<state, action>::GetPath(SearchEnvironment<state, action> *e, state from, state to,
+void ImprovedBGS<state, action>::GetPath(SearchEnvironment<state, action> *e, state from, state to,
 											std::vector<action> &thePath)
 {
 	
 }
 
 template <class state, class action>
-bool IncrementalBGS<state, action>::InitializeSearch(SearchEnvironment<state, action> *e, state from, state to, Heuristic<state> *h,
+bool ImprovedBGS<state, action>::InitializeSearch(SearchEnvironment<state, action> *e, state from, state to, Heuristic<state> *h,
 													 std::vector<state> &thePath)
 {
 	printf("Search Initialization\n");
@@ -227,7 +227,7 @@ bool IncrementalBGS<state, action>::InitializeSearch(SearchEnvironment<state, ac
 }
 
 template <class state, class action>
-void IncrementalBGS<state, action>::SetupIteration(double cost)	
+void ImprovedBGS<state, action>::SetupIteration(double cost)	
 {
 
 
@@ -243,7 +243,7 @@ void IncrementalBGS<state, action>::SetupIteration(double cost)
 
 
 template <class state, class action>
-void IncrementalBGS<state, action>::SetupExponentialBinaryIteration(double cost)
+void ImprovedBGS<state, action>::SetupExponentialBinaryIteration(double cost)
 {
 	assert(MODE==1);
 	data.nodesExpanded = nodeLB;
@@ -257,7 +257,7 @@ void IncrementalBGS<state, action>::SetupExponentialBinaryIteration(double cost)
 
 
 template <class state, class action>
-void IncrementalBGS<state, action>::ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
+void ImprovedBGS<state, action>::ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
 {
 	thePath.clear();
 	thePath.push_back(q_f.Lookup(node).data);
@@ -270,7 +270,7 @@ void IncrementalBGS<state, action>::ExtractPathToStartFromID(uint64_t node, std:
 }
 
 template <class state, class action>
-bool IncrementalBGS<state, action>::StepIteration()
+bool ImprovedBGS<state, action>::StepIteration()
 {
 	uint64_t nodeid = q_f.Close();
 	if(q_f.Lookup(nodeid).reopened == true){
@@ -365,7 +365,7 @@ bool IncrementalBGS<state, action>::StepIteration()
 }
 
 template <class state, class action>
-bool IncrementalBGS<state, action>::StepIterationUsingG(double cost)
+bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 {
     uint64_t nodeid = q_g.Peek();
 	double nodeGCost = q_g.Lookup(nodeid).g;
@@ -468,7 +468,7 @@ bool IncrementalBGS<state, action>::StepIterationUsingG(double cost)
 	return false;
 }
 template <class state, class action>
-bool IncrementalBGS<state, action>::DoSingleSearchStep()
+bool ImprovedBGS<state, action>::DoSingleSearchStep()
 {
 	printf("Single Search Step\n");
 	bool s;
@@ -578,7 +578,7 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep()
 
 
 template <class state, class action>
-bool IncrementalBGS<state, action>::DoExponentialSingleSearchStep(double cost)
+bool ImprovedBGS<state, action>::DoExponentialSingleSearchStep(double cost)
 {
 	printf("Exponential Binary Single Search Step\n");
 	bool s;
@@ -674,7 +674,7 @@ bool IncrementalBGS<state, action>::DoExponentialSingleSearchStep(double cost)
 }
 
 template <class state, class action>
-void IncrementalBGS<state, action>::Draw(Graphics::Display &disp) const
+void ImprovedBGS<state, action>::Draw(Graphics::Display &disp) const
 {
 	double transparency = 1.0;
 	if (q_f.size() == 0)
@@ -727,12 +727,12 @@ void IncrementalBGS<state, action>::Draw(Graphics::Display &disp) const
 	env->Draw(disp, goal);}
 
 template <class state, class action>
-void IncrementalBGS<state, action>::OpenGLDraw()
+void ImprovedBGS<state, action>::OpenGLDraw()
 {
 }
 
 template <class state, class action>
-void IncrementalBGS<state, action>::GetAllNodesfromQwithReopening(){
+void ImprovedBGS<state, action>::GetAllNodesfromQwithReopening(){
 	int n_size = q_f.size();
 	//there are nodes in g-queue that are closed
 	//put them into f-queue as closed
@@ -782,7 +782,7 @@ void IncrementalBGS<state, action>::GetAllNodesfromQwithReopening(){
 
 
 template <class state, class action>
-void IncrementalBGS<state, action>::GetClosedNodesfromQ(){
+void ImprovedBGS<state, action>::GetClosedNodesfromQ(){
 	int n_size = q_g.size();
 	printf("size of g-queue is %d and closedsize is %d\n",n_size,q_g.ClosedSize());
 	for (uint64_t i = 0 ; i < q_g.size();i++){
@@ -805,7 +805,7 @@ void IncrementalBGS<state, action>::GetClosedNodesfromQ(){
 //	assert(n_size == q_f.size());
 }
 template <class state, class action>
-void IncrementalBGS<state, action>::GetOpenNodesfromQ(){
+void ImprovedBGS<state, action>::GetOpenNodesfromQ(){
 	for (uint64_t i = 0 ; i < q_g.size();i++){
 		state s = q_g.Lookup(i).data;
 		double g_value = q_g.Lookup(i).g;
@@ -851,7 +851,7 @@ void IncrementalBGS<state, action>::GetOpenNodesfromQ(){
 }
 
 template <class state, class action>
-void IncrementalBGS<state, action>::GetAllNodesfromQ(){
+void ImprovedBGS<state, action>::GetAllNodesfromQ(){
 	int n_size = q_f.size();
 	//all nodes in f-queue(open+closed)
 	q_g.Reset(env->GetMaxHash());
@@ -887,4 +887,4 @@ void IncrementalBGS<state, action>::GetAllNodesfromQ(){
 
 
 
-#endif /* IncrementalBGS_h */
+#endif /* ImprovedBGS_h */
