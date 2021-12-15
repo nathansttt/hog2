@@ -10,8 +10,9 @@
 #include "GraphEnvironment.h"
 #include "GraphInconsistencyInstances.h"
 #include "ImprovedBGS.h"
+#include "Map2DEnvironment.h"
+#include "ScenarioLoader.h"
 
-IncrementalBGS<graphState, graphMove>  ibex;
 const int kHeuristic = GraphSearchConstants::kTemporaryLabel;
 
 bool recording = false;
@@ -54,6 +55,7 @@ void InstallHandlers()
 //	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
 	InstallCommandLineHandler(MyCLHandler, "-polygraph", "-polygraph <size> <algorithm>", "Runs worst-case inconsistency graph");
+	InstallCommandLineHandler(MyCLHandler, "-grid", "-polygraph <map> <scenario> <algorithm>", "Runs the algorithm on the scenario file with Octile heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -83,11 +85,66 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	display.DrawText("No visual display", {0, 0}, Colors::black, 0.1, Graphics::textAlignLeft, Graphics::textBaselineMiddle);
 }
 
+void runProblemSet(char *theMap, char *scenario, char *algorithm)
+{
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
+	IncrementalBGS<xyLoc, tDirection>  ibex;
+
+	ScenarioLoader s(scenario);
+	Map *map = new Map(theMap);
+	MapEnvironment e(map);
+	Timer t;
+	std::vector<xyLoc> path;
+	
+	for (int x = 0; x < s.GetNumExperiments(); x++)
+	{
+		xyLoc from = xyLoc(s.GetNthExperiment(x).GetStartX(), s.GetNthExperiment(x).GetStartY());
+		xyLoc to = xyLoc(s.GetNthExperiment(x).GetGoalX(), s.GetNthExperiment(x).GetGoalY());
+
+		if (strcmp(algorithm, "astar") == 0)
+		{
+			t.StartTimer();
+			searcher.GetPath(&e, from, to, path);
+			t.EndTimer();
+		}
+
+		if (strcmp(algorithm, "bgs") == 0)
+		{
+			t.StartTimer();
+			ibex.GetPath(&e, from, to, &e, path);
+			t.EndTimer();
+		}
+		/*
+		if (fgreater(fabs(e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance()), 0.01))
+		{
+			std::cout << "From: " << from << " to " << to << "\n";
+			printf("Found solution %d length %f; expected %f difference %f\n", map->GetTerrainType(from.x, from.y), e.GetPathLength(path), s.GetNthExperiment(x).GetDistance(),
+				  e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance());
+			exit(1);
+		}
+		*/
+		printf("%f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
+	}
+	
+	exit(0);
+}
+
+
+
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	if (strcmp(argument[0], "-grid") == 0)
+	{
+		if (maxNumArgs > 3)
+		{
+			runProblemSet(argument[1], argument[2], argument[3]);
+			exit(0);
+		}
+	}
 	if (strcmp(argument[0], "-polygraph") == 0)
 	{
 		std::vector<graphState> path;
+		IncrementalBGS<graphState, graphMove>  ibex;
 
 		int instanceSize = 10;
 		if (maxNumArgs >= 3)
