@@ -618,7 +618,16 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 		auto i = g->GetNumNodes();
 		auto rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
 //		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 1.0, mainColor);
-		DrawLine(disp, x1, y1, x2, y2, 1);
+//		DrawLine(disp, x1, y1, x2, y2, 1);
+		if (directed) // arrow goes to node
+		{
+			GLdouble len = sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+			GLdouble ratio = (rad+0.1*rad)/len;
+			DrawLine(disp, x1, y1, (x2*(1-ratio)+ratio*x1), (y2*(1-ratio)+ratio*y1), 1);
+		}
+		else {
+			DrawLine(disp, x1, y1, x2, y2, 1);
+		}
 //		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.2*rad, mainColor);
 //		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.1*rad*width, SearchEnvironment::color);
 	}
@@ -732,7 +741,9 @@ void GraphEnvironment::DrawStateLabel(Graphics::Display &disp, const graphState 
 	rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
 
 //	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), 0.05);
-	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), rad);
+//	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), rad);
+	disp.DrawText(txt, Graphics::point(x+rad*ONE_OVER_ROOT_TWO+0.15*rad, y-rad*ONE_OVER_ROOT_TWO-0.15*rad), GetColor(), rad,
+				  Graphics::textAlignLeft, Graphics::textBaselineBottom);
 }
 
 void GraphEnvironment::DrawLine(Graphics::Display &disp, const graphState &from, const graphState &to, double width) const
@@ -758,7 +769,10 @@ void GraphEnvironment::DrawLine(Graphics::Display &disp, float x1, float y1, flo
 {
 	auto i = g->GetNumNodes();
 	auto rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
-	disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.1f*rad*width, SearchEnvironment::color);
+	if (directed)
+		disp.DrawArrow(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.1f*rad*width, SearchEnvironment::color);
+	else
+		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.1f*rad*width, SearchEnvironment::color);
 }
 
 Graphics::point GraphEnvironment::GetLocation(const graphState &s) const
