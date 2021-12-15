@@ -18,16 +18,20 @@
 // TODO: Need to move code into its own namespace
 
 struct RacetrackMove {
-	RacetrackMove(int x=0, int y=0):xDelta(x), yDelta(y){};
+	RacetrackMove(int x=0, int y=0):xDelta(x), yDelta(y), hitGoal(false) {};
 	int xDelta;
 	int yDelta;
+	bool hitGoal;
+	int xGoal, yGoal;
 };
 
 
 struct RacetrackState {
-	xyLoc loc;
+	int xLoc, yLoc; // was using xyLoc from Map2DEnvironment, but can't use unsigned for racetracks
 	int xVelocity, yVelocity;
 };
+
+const int maxVelocity = 4;
 
 std::ostream &operator<<(std::ostream &out, const RacetrackState &s);
 bool operator==(const RacetrackState &l1, const RacetrackState &l2);
@@ -44,6 +48,7 @@ class Racetrack : public SearchEnvironment<RacetrackState, RacetrackMove> {
 public:
 	Racetrack(Map *map); 
 	~Racetrack();
+	void UpdateMap(Map *map);
 	void GetSuccessors(const RacetrackState &nodeID, std::vector<RacetrackState> &neighbors) const; //current state --> pass in a vector (array lists) __> fill in -- no modification
 	void GetActions(const RacetrackState &nodeID, std::vector<RacetrackMove> &actions) const; // no modification
 	int GetNumSuccessors(const RacetrackState &stateID) const
@@ -54,15 +59,16 @@ public:
 	
 	void ApplyAction(RacetrackState &s, RacetrackMove a) const;// a = action s(state) gets changed
 	bool InvertAction(RacetrackMove &a) const;
+	RacetrackMove GetAction(const RacetrackState &s1, RacetrackState &s2) const;
 
 	void Boundaries(RacetrackState &s, RacetrackMove &v) const;
 	bool Legal(const RacetrackState &node1, RacetrackMove &act) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	double HCost(const RacetrackState &node1, const RacetrackState &node2) const { return 0; } //Later
+	double HCost(const RacetrackState &node1, const RacetrackState &node2) const;
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	double HCost(const RacetrackState &node) const { return 0; }
+	double HCost(const RacetrackState &node) const;
 	
 	double GCost(const RacetrackState &node1, const RacetrackState &node2) const { return 1; };
 	double GCost(const RacetrackState &node, const RacetrackMove &act) const { return 1; };
@@ -77,16 +83,18 @@ public:
 	void OpenGLDraw(const RacetrackState&, const RacetrackMove&) const {};
 
 	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display, const RacetrackState &s) const;
 	void Draw(Graphics::Display &display, const RacetrackState&, RacetrackMove&) const;
+	void Draw(Graphics::Display &display, const RacetrackState &l1, const RacetrackState &l2, float v) const;
+
 	void DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const;
-
-	
-	
-
 protected: // take two states and draw a line
 private:
 	MapEnvironment *me;
 	Map *map;
+	std::vector<int> heuristic;
+	int GetIndex(int x, int y) const {return static_cast<int>(map->GetMapWidth()*y+x);}
+	void GetCarCoordinates(const RacetrackState &s, Graphics::point &center, Graphics::point &p1, Graphics::point &p2, Graphics::point &p3) const;
 };
 
 
