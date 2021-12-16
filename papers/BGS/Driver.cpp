@@ -342,7 +342,58 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 	exit(0);
 }
 
+void RunPolygraph(int instanceSize, char *algorithm)
+{
+	std::vector<graphState> path;
+	ImprovedBGS<graphState, graphMove>  ibex;
+	std::vector<graphMove> path2;
+	
+	g = GraphInconsistencyExamples::GetPolyGraph(instanceSize);
+	ge = new GraphEnvironment(g);
+	ge->SetDirected(true);
+	
+	graphState from, to;
+	from = 0;
+	to = g->GetNumNodes()-1;
+	//astar.SetUseBPMX(BPMX?1:0);
+	//astar.InitializeSearch(ge, from, to, path);
+	Timer t;
 
+	if (strcmp(algorithm, "IBEX") == 0)
+	{
+		IBEX::IBEX<graphState, graphMove, GraphEnvironment, false> i(2, 5, 2, false);
+		t.StartTimer();
+		i.GetPath(ge, from, to, path2);
+		t.EndTimer();
+		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, i.GetNodesExpanded(), t.GetElapsedTime());
+	}
+	if (strcmp(algorithm, "astar") == 0)
+	{
+		TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
+		astar.SetReopenNodes(true);
+		astar.SetHeuristic(&h);
+		t.StartTimer();
+		astar.GetPath(ge, from, to, path);
+		t.EndTimer();
+		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, astar.GetNodesExpanded(), t.GetElapsedTime());
+	}
+	if (strcmp(algorithm, "bgs") == 0)
+	{
+		ImprovedBGS<graphState, graphMove>  bgs;
+		t.StartTimer();
+		bgs.GetPath(ge, from, to, &h, path);
+		t.EndTimer();
+		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, bgs.GetNodesExpanded(), t.GetElapsedTime());
+	}
+	if (strcmp(algorithm, "ibex") == 0)
+	{
+		t.StartTimer();
+		ibex.GetPath(ge, from, to, &h, path);
+		t.EndTimer();
+		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, ibex.GetNodesExpanded(), t.GetElapsedTime());
+	}
+	
+}
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -364,23 +415,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	if (strcmp(argument[0], "-polygraph") == 0)
 	{
-		std::vector<graphState> path;
-		ImprovedBGS<graphState, graphMove>  ibex;
-
-		int instanceSize = 10;
 		if (maxNumArgs >= 3)
-			instanceSize = atoi(argument[1]);
-		g = GraphInconsistencyExamples::GetPolyGraph(instanceSize);
-		ge = new GraphEnvironment(g);
-		ge->SetDirected(true);
-	
-		graphState from, to;
-		from = 0;
-		to = g->GetNumNodes()-1;
-		//astar.SetUseBPMX(BPMX?1:0);
-		//astar.InitializeSearch(ge, from, to, path);
-		ibex.GetPath(ge, from, to, &h, path);
-		printf("%d\t%llu\n", instanceSize, ibex.GetNodesExpanded());
+		{
+			RunPolygraph(atoi(argument[1]), argument[2]);
+		}
 	}
 	
 	exit(0);
