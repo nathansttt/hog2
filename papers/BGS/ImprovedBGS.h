@@ -112,6 +112,7 @@ private:
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
     void GetNodesFromGq();
 	void GetNodesFromFq(double costLimit);
+	bool MainIterationComplete();
 	std::vector<std::pair<state, double>> history;
 	std::vector<state> solutionPath;
 	state start, goal;
@@ -212,7 +213,16 @@ bool IncrementalBGS<state, action>::InitializeSearch(SearchEnvironment<state, ac
 	stage = "INITIALIZE SEARCH";
 	return false;
 }
-
+template <class state, class action>
+bool IncrementalBGS<state, action>::MainIterationComplete()
+{
+	if(fc_next != DBL_MAX){
+		return false;
+	}
+	else{
+		return true;
+	}
+}
 template <class state, class action>
 void IncrementalBGS<state, action>::SetupIteration(double cost)
 {
@@ -228,6 +238,22 @@ void IncrementalBGS<state, action>::SetupIteration(double cost)
 	data.nodesExpanded = 0;
 	sd.f_below = 0;
 	sd.f_above = DBL_MAX;
+}
+
+template <class state, class action>
+void IncrementalBGS<state, action>::SetupIterationF(double cost)
+{
+	q.Reset(env->GetMaxHash());
+	// put start in open
+	q.AddOpenNode(start, env->GetStateHash(start), 0.0, 0.0);
+
+	assert(q_f.empty());
+	assert(!q_g.empty());
+	//get all the no
+	previousBound = bound;
+	bound = cost;//nextBound;
+	nextBound = -1;
+	printf("Starting iteration bound %1.1f\n", bound);
 }
 
 template <class state, class action>
@@ -393,17 +419,25 @@ template <class state, class action>
 bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 
-
+  
 	int b = 10000;
 	b = k * nodeLB;
+	if(!MainIterationComplete()){
 	if(MInodesreexpanded <= b && (MInodesexpanded) <= c1*nodeLB){
 		int temp1 = nodesExpanded;
 		int temp2 = nodesReexpanded;
-		s = StepIteration();
+		if(!IterationComplete()){
+			s = StepIteration();
+			MInodesexpanded += (nodesExpanded - temp1);
+		    MInodesreexpanded += (nodesReexpanded -temp2);
+		    return s;
+		}
+		else{
+			SetupIterationF(nextCost);
+
+		}
+		
 		printf("bound is %1.5f\n",bound);
-		MInodesexpanded += (nodesExpanded - temp1);
-		MInodesreexpanded += (nodesReexpanded -temp2);
-		return s;
 	}
 	else if(MInodesreexpanded <= b && (MInodesexpanded) > c1*nodeLB){
 		GetNodesFromFq(bound);
@@ -437,8 +471,6 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 	else{
 			if(!SetupExponentialBinaryIteration){
 				GetNodesFromFq(bound);
-				MInodesexpanded = 0;
-				MInodesreexpanded = 0;
 				nodeLB = nodesExpanded ; //redundant
 				nodesReexpanded = 0;
 				nodesExpanded = nodeLB;
@@ -551,6 +583,15 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 					
 
 			}
+	}
+	else{
+		fc = fc_next;
+		fc_next = DBL_MAX;
+		SetupExponentialBinaryIteration = false;
+	    MInodesexpanded = 0;
+	    MInodesreexpanded = 0;
+		return false;
+	}
 	
 }
 
