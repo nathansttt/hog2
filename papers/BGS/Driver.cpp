@@ -345,7 +345,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 void RunPolygraph(int instanceSize, char *algorithm)
 {
 	std::vector<graphState> path;
-	ImprovedBGS<graphState, graphMove>  ibex;
+	IncrementalBGS<graphState, graphMove>  ibex;
 	std::vector<graphMove> path2;
 	
 	g = GraphInconsistencyExamples::GetPolyGraph(instanceSize);
