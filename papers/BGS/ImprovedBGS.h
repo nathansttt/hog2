@@ -137,6 +137,7 @@ private:
 	unsigned long nodesReexpanded;
 	bool MODE = 0;
 	bool SetupExponentialBinaryIteration = false;
+	int cnt = 0;
 	
 	struct BFHSCompare {
 		bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
@@ -303,13 +304,14 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinFAboveBoundinG(double costLi
 						0,
 						parentId);
 	}
-	printf("size of q-open is %d\n",q_g.OpenSize());
-	printf("size of q-open is %d\n",q_g.OpenSize());
+	PrintQueueStatus();
 	while(!q_g.empty()){
 		uint64_t nodeid = q_g.Peek();
 		double nodeGCost = q_g.Lookup(nodeid).g;
 		double nodeFCost = nodeGCost + h->HCost(q_g.Lookup(nodeid).data,goal);
+		printf("-nodeFcost is %1.5f and costlimit is %1.5f hash %lld\n",nodeFCost,costLimit,env->GetStateHash(q_g.Lookup(nodeid).data));
 		if(flesseq(nodeFCost,costLimit)){
+			printf("nodeFcost is %1.5f and costlimit is %1.5f hash %lld\n",nodeFCost,costLimit,env->GetStateHash(q_g.Lookup(nodeid).data));
 			state s = q_g.Lookup(nodeid).data;
 			uint64_t parentId = q_g.Lookup(nodeid).parentID;
 			q_g.Remove(env->GetStateHash(s));
@@ -324,6 +326,7 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinFAboveBoundinG(double costLi
 			break;
 		}
 	}
+	PrintQueueStatus();
 
 }
 
@@ -331,7 +334,6 @@ template <class state, class action>
 void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLimit)
 {
 	while(!q_g.empty()){
-		PrintQueueStatus();
 		uint64_t nodeid = q_g.Peek();
 		double nodeGCost = q_g.Lookup(nodeid).g;
 		double nodeFCost = nodeGCost + h->HCost(q_g.Lookup(nodeid).data,goal);
@@ -344,9 +346,8 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLi
 						h->HCost(s,goal),
 						parentId);
 	}
-	
+	PrintQueueStatus();
 	while(!q_f.empty()){
-		PrintQueueStatus();
 		uint64_t nodeid = q_f.Peek();
 		double nodeGCost = q_f.Lookup(nodeid).g;
 		double nodeFCost = nodeGCost + h->HCost(q_f.Lookup(nodeid).data,goal);
@@ -364,6 +365,7 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLi
 			break;
 		}
 	}
+	PrintQueueStatus();
 }
 
 
@@ -377,7 +379,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingF(double cost)
 
 	//PrintQueueStatus();
 	uint64_t nodeid = q_f.Close();
-	printf("StepIteration\n");
+	printf("StepIteration - f\n");
 	// Check if we are done
 	if (env->GoalTest(q_f.Lookup(nodeid).data, goal))
 	{
@@ -398,8 +400,8 @@ bool ImprovedBGS<state, action>::StepIterationUsingF(double cost)
 	neighborID.resize(0);
 	neighborLoc.resize(0);
 	
-				//	std::cout << "Expanding: " << q_f.Lookup(nodeid).data << " with hash:";
-				//	std::cout << env->GetStateHash(q_f.Lookup(nodeid).data) << std::endl;
+					std::cout << "Expanding: " << q_f.Lookup(nodeid).data << " with hash:";
+					std::cout << env->GetStateHash(q_f.Lookup(nodeid).data) << std::endl;
 	
 	env->GetSuccessors(q_f.Lookup(nodeid).data, neighbors);
 	
@@ -419,7 +421,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingF(double cost)
 		double childFCost = childGCost+h->HCost(neighbors[x], goal);
 		uint64_t hk = env->GetStateHash(neighbors[x]);
 		uint64_t ok;
-		//std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << std::endl;
+		std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCost<<std::endl;
 		if (fgreater(childFCost, cost))
 		{
 			if (nextBound == -1)
@@ -429,12 +431,25 @@ bool ImprovedBGS<state, action>::StepIterationUsingF(double cost)
 
 			sd.f_above = std::min(sd.f_above, childFCost); //TODO
 			if(q_g.Lookup(hk,ok) == kNotFound){
-				//printf("discarded to g\n");
-			q_g.AddOpenNode(neighbors[x],
+				printf("discarded to g\n");
+				q_g.AddOpenNode(neighbors[x],
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
 							  0,
 							  nodeid);
+			}
+			else if(q_g.Lookup(hk,ok) == kOpenList){
+				double childFCostg = q_g.Lookup(ok).g + h->HCost(q_g.Lookup(ok).data, goal);
+				std::cout << "already in open g list : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCostg<<std::endl;
+				if (fless(childGCost, q_g.Lookup(ok).g))
+				{
+					q_g.Lookup(ok).parentID = nodeid;
+					q_g.Lookup(ok).g = childGCost;
+					q_g.KeyChanged(ok);
+				}
+				childFCostg = q_g.Lookup(ok).g + h->HCost(q_g.Lookup(ok).data, goal);
+				std::cout << "changed the f value : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCostg<<std::endl;
+
 			}
 			continue;
 		}
@@ -461,15 +476,22 @@ bool ImprovedBGS<state, action>::StepIterationUsingF(double cost)
 			case kNotFound:
 			{
 				printf("not found ---\n");
-				if(q_g.Lookup(hk,ok) != kNotFound){
+				if(q_g.Lookup(hk,ok) == kClosedList){
+					printf("this needs to be removed %lld objkey\n",ok);
+					q_g.Reopen(ok);
+					printf("this needs to be reopened\n");
 					q_g.Remove(hk);
-					PrintQueueStatus();
 				}
+				else if(q_g.Lookup(hk,ok) == kOpenList){
+					q_g.Remove(hk);
+				}
+				
 				q_f.AddOpenNode(neighbors[x],
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
 							  h->HCost(neighbors[x], goal),
 							  nodeid);
+				
 			}
 		}
 	}
@@ -483,7 +505,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 {
 	//PrintQueueStatus();
 	uint64_t nodeid = q_g.Close();
-	
+	printf("StepIteration - g\n");
 	
 	// Check if we are done
 	if (env->GoalTest(q_g.Lookup(nodeid).data, goal))
@@ -500,8 +522,8 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 	neighborID.resize(0);
 	neighborLoc.resize(0);
 	
-				//	std::cout << "Expanding: " << q_g.Lookup(nodeid).data << " with hash:";
-				//	std::cout << env->GetStateHash(q_g.Lookup(nodeid).data) << std::endl;
+					std::cout << "Expanding: " << q_g.Lookup(nodeid).data << " with hash:";
+					std::cout << env->GetStateHash(q_g.Lookup(nodeid).data) << std::endl;
 	
 	env->GetSuccessors(q_g.Lookup(nodeid).data, neighbors);
 	nodesExpanded++;
@@ -522,7 +544,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 		double childFCost = childGCost+h->HCost(neighbors[x], goal);
 		uint64_t hk = env->GetStateHash(neighbors[x]);
 		uint64_t ok;
-	//	std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << std::endl;
+		std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCost<<std::endl;
 		if (fgreater(childFCost, cost))
 		{
 			if (nextBound == -1)
@@ -531,13 +553,26 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 				nextBound = childFCost;
 
 			sd.f_above = std::min(sd.f_above, childFCost); //TODO
-	//		printf("discarded to f\n");
+			printf("discarded to f\n");
 			if(q_f.Lookup(hk,ok) == kNotFound){
 			q_f.AddOpenNode(neighbors[x],
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
 							  h->HCost(neighbors[x], goal),
 							  nodeid);
+			}
+			else if(q_f.Lookup(hk,ok) == kOpenList){
+				double childFCostf = q_f.Lookup(ok).g + h->HCost(q_f.Lookup(ok).data, goal);
+				std::cout << "already in open f list : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCostf<<std::endl;
+				if (fless(childGCost, q_f.Lookup(ok).g))
+				{
+					q_f.Lookup(ok).parentID = nodeid;
+					q_f.Lookup(ok).g = childGCost;
+					q_f.KeyChanged(ok);
+				}
+				childFCostf = q_f.Lookup(ok).g + h->HCost(q_f.Lookup(ok).data, goal);
+				std::cout << "changed the f value : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCostf<<std::endl;
+
 			}
 			continue;
 		}
@@ -561,14 +596,19 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 				}
 				break;
 			case kNotFound:
-				{	printf("not found\n");
-					if(q_f.Lookup(hk,ok) != kNotFound){
-					q_f.Remove(hk);
+				{	if(q_f.Lookup(hk,ok) == kClosedList){
+						printf("this needs to be removed %lld objkey\n",ok);
+						q_f.Reopen(ok);
+						printf("this needs to be reopened\n");
+						q_f.Remove(hk);
+					}
+					else if(q_f.Lookup(hk,ok) == kOpenList){
+						q_f.Remove(hk);
 					}
 					q_g.AddOpenNode(neighbors[x],
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
-							  0,
+							  h->HCost(neighbors[x], goal),
 							  nodeid);
 				}
 		}
@@ -587,6 +627,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 	int b = 10000;
 	b = k * data.nodeLB;
 	bool s;
+	cnt+=1;
 	if(!MainIterationComplete()){
 		if (flesseq(solutionCost, data.solutionInterval.lowerBound))
 				{
@@ -609,7 +650,10 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					v.lowerBound = sd.f_above;
 					v.upperBound = DBL_MAX;
 					data.solutionInterval &= v;
-					SetupIterationF(nextBound); //is only called once when the f is empty
+					SetupIterationF(nextBound);
+					if(flesseq(bound,-1.00)){
+						return true;
+					} //is only called once when the f is empty
 
 				}
 				return false;
@@ -765,10 +809,8 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 		bound = nextBound;
 		nextBound = -1;
 		MODE = 0;
-		PrintQueueStatus();
 		return false;
 	}
-	
 }
 
 template <class state, class action>
