@@ -144,11 +144,22 @@ template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
 {
 	//size_t hash = hashFcn(val);
-	// should do lookup here...
-	if (table.find(hash) != table.end())
+	// Change to behavior: if we have a duplicate state instead throwing and error,
+	// we update if the path is shorter, otherwise return the old state
+	auto i = table.find(hash);
+	if (i != table.end())
 	{
 		//return -1; // TODO: find correct id and return
-		assert(false);
+		//assert(false);
+		uint64_t index = i->second;
+		if (fless(g, elements[index].g))
+		{
+			elements[index].parentID = parent;
+			elements[index].g = g;
+			elements[index].f = f;
+			KeyChanged(index);
+		}
+		return index;
 	}
 	elements.push_back(dataStructure(val, f, g, h, parent, theHeap.size(), kOpenList));
 	if (parent == kTAStarNoNode)
@@ -165,12 +176,21 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state 
 template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent)
 {
-	//size_t hash = hashFcn(val);
-	// should do lookup here...
-	if (table.find(hash) != table.end())
+	// Change to behavior: if we have a duplicate state instead throwing and error,
+	// we update if the path is shorter, otherwise return the old state
+	auto i = table.find(hash);
+	if (i != table.end())
 	{
 		//return -1; // TODO: find correct id and return
-		assert(false);
+		//assert(false);
+		uint64_t index = i->second;
+		if (fless(g, elements[index].g))
+		{
+			elements[index].parentID = parent;
+			elements[index].g = g;
+			KeyChanged(index);
+		}
+		return index;
 	}
 	elements.push_back(dataStructure(val, g, h, parent, theHeap.size(), kOpenList));
 	if (parent == kTAStarNoNode)
