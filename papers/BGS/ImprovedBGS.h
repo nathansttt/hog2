@@ -697,17 +697,18 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB){
 				//printf("case 2 ");
 				FindtheCurrentBoundF();
-				GetNodeswithBoundinGAboveBoundinF(previousBound);
-				while (!IterationCompleteG()){
+				uint64_t node = q_f.Peek();
+				state s = q_f.Lookup(node).data;
+				double g_value = q_f.Lookup(node).g;
+				double h_value = h->HCost(s,goal);
+				double f_value = g_value+f_value;
+				if(flesseq(f_value,previousBound)){
 					int temp1 = nodesExpanded;
-					StepIterationUsingG(previousBound);
+					int temp2 = nodesReexpanded;
+					StepIterationUsingF();
 					data.nodesExpanded += nodesExpanded-temp1;
-					if (flesseq(solutionCost, data.solutionInterval.lowerBound))
-					{
-						thePath = solutionPath;
-						//printf("Found solution cost %1.5f\n", solutionCost);
-						return true;
-					}
+				    data.nodesReexpanded += nodesReexpanded -temp2;
+					return false;
 				}
 				costInterval v;
 				v.lowerBound = sd.f_above;
