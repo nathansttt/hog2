@@ -110,12 +110,12 @@ private:
 	
 	void SetupIterationF(double cost);
 	bool StepIterationUsingF();
-	bool StepIterationUsingG(double cost);
+	bool StepIterationUsingG();
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
 	void ExtractPathToStartFromIDF(uint64_t node, std::vector<state> &thePath);
 	void ExtractPathToStartFromIDG(uint64_t node, std::vector<state> &thePath);
     void GetNodesFromGq();
-	void GetNodesFromFq(double costLimit);
+	void GetNodesFromFq();
 	void GetNodeswithBoundinFAboveBoundinG();
     void GetNodeswithBoundinGAboveBoundinF(double costLimit);
 	void FindtheBoundAndNextBoundF();
@@ -131,6 +131,7 @@ private:
 	double initialBound;
 	double nextBound;
 	double bound_g;
+	bool case3 = 0;
 	SearchEnvironment<state, action> *env;
 	Heuristic<state> *h;
 	std::vector<state> succ;
@@ -144,7 +145,7 @@ private:
 	bool MODE = 0;
 	bool SetupExponentialBinaryIteration = false;
 	int cnt = 0;
-	
+	bool iterationComplete = false;
 	struct BFHSCompare {
 		bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
 		{
@@ -293,6 +294,57 @@ void ImprovedBGS<state, action>::ExtractPathToStartFromIDG(uint64_t node, std::v
 }
 
 template <class state, class action>
+void ImprovedBGS<state, action>::GetNodesFromFq()
+{
+	for(uint64_t i = 0; i < q_f.size();i++){
+		state s = q_f.Lookup(i).data;
+		double g_value = q_f.Lookup(i).g;
+		double h_value = h->HCost(s,goal);
+		double f_value = g_value+h_value;
+		uint64_t hk = env->GetStateHash(s);
+		uint64_t ok;
+		uint64_t parentId = q_f.Lookup(i).parentID;
+		if(q_f.Lookup(hk,ok) == kOpenList){
+			if(q_g.Lookup(hk,ok) == kNotFound){
+				q_g.AddOpenNode(s,
+						env->GetStateHash(s),
+						g_value,
+						h_value,
+						parentId);
+				q_f.Remove(env->GetStateHash(s));
+			}
+			
+		}
+	}
+
+}
+template <class state, class action>
+void ImprovedBGS<state, action>::GetNodesFromGq()
+{
+	for(uint64_t i = 0; i < q_g.size();i++){
+		state s = q_g.Lookup(i).data;
+		double g_value = q_g.Lookup(i).g;
+		double h_value = h->HCost(s,goal);
+		double f_value = g_value+h_value;
+		uint64_t hk = env->GetStateHash(s);
+		uint64_t ok;
+		uint64_t parentId = q_g.Lookup(i).parentID;
+		if(q_g.Lookup(hk,ok) == kOpenList){
+			if(q_f.Lookup(hk,ok) == kNotFound){
+				q_f.AddOpenNode(s,
+						env->GetStateHash(s),
+						g_value,
+						h_value,
+						parentId);
+				q_g.Remove(env->GetStateHash(s));
+			}
+			
+		}
+	}
+
+}
+
+template <class state, class action>
 void ImprovedBGS<state, action>::GetNodeswithBoundinFAboveBoundinG()
 {
 	assert(q_f.empty() == true);
@@ -321,8 +373,6 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinFAboveBoundinG()
 template <class state, class action>
 void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLimit)
 {
-	printf("queeuee beforeee-------------------\n");
-	PrintQueueStatus();
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
@@ -333,7 +383,6 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLi
 		uint64_t parentId = q_f.Lookup(i).parentID;
 		if(q_f.Lookup(hk,ok) == kOpenList  && flesseq(f_value,costLimit)){
 			if(q_g.Lookup(hk,ok) == kNotFound){
-				printf("addding node to g with g-value %1.5f and h-value %1.5f and f-value %1.5f\n",g_value,h_value,f_value);
 				q_g.AddOpenNode(s,
 						env->GetStateHash(s),
 						g_value,
@@ -344,8 +393,6 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLi
 			
 		}
 	}
-	printf("queeuee after-------------------\n");
-	PrintQueueStatus();
 }
 
 
@@ -536,7 +583,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 
 
 template <class state, class action>
-bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
+bool ImprovedBGS<state, action>::StepIterationUsingG()
 {
 	//PrintQueueStatus();
 	uint64_t nodeid = q_g.Close();
@@ -555,9 +602,6 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 	edgeCosts.resize(0);
 	neighborID.resize(0);
 	neighborLoc.resize(0);
-	std::cout << "Expanding with cost limit: " << cost << std::endl;
-	std::cout << "Expanding with cost: " << q_g.Lookup(nodeid).g +h->HCost(q_g.Lookup(nodeid).data, goal)<< std::endl;
-	std::cout << "Expanding: " << q_g.Lookup(nodeid).data << " with hash: " << env->GetStateHash(q_g.Lookup(nodeid).data) << "with g-value " << q_g.Lookup(nodeid).g<<std::endl;
 	
 	env->GetSuccessors(q_g.Lookup(nodeid).data, neighbors);
 	nodesExpanded++;
@@ -579,22 +623,6 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 		double childFCost = childGCost+h->HCost(neighbors[x], goal);
 		uint64_t hk = env->GetStateHash(neighbors[x]);
 		uint64_t ok;
-		std::cout << "looking at child "<< hk <<" f-cost "<<childFCost<<"and g-cost"<<childGCost<<std::endl;
-		if (fgreater(childFCost, cost))
-		{
-
-			sd.f_above = std::min(sd.f_above, childFCost);
-			std::cout << "looking at child hash" <<hk<<" with and f-cost discarded"<<childFCost<<"and g-cost"<<childGCost<<std::endl;
-			if(q_f.Lookup(hk,ok) == kNotFound){
-				q_f.AddOpenNode(neighbors[x],
-							  env->GetStateHash(neighbors[x]),
-							  childGCost,
-							  h->HCost(neighbors[x], goal),
-							  nodeid);
-			}
-			continue;
-		}
-
 		switch (neighborLoc[x])
 		{
 			case kClosedList:
@@ -605,7 +633,6 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 				}
 				break;
 			case kOpenList:
-				printf("open lis\n");
 				if (fless(childGCost, q_g.Lookup(neighborID[x]).g))
 				{
 					q_g.Lookup(neighborID[x]).parentID = nodeid;
@@ -615,11 +642,10 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 				break;
 			case kNotFound:
 				{
-					printf("not found lis\n");
+					
 					if(q_f.Lookup(hk,ok) == kOpenList){
 					q_f.Remove(hk);
 					}
-					printf("addding node to g with hash %lld\n",env->GetStateHash(neighbors[x]));
 					q_g.AddOpenNode(neighbors[x],
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
@@ -640,8 +666,8 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 
   
 	int b = 10000;
-	b = k * data.nodeLB; //1
-//	b = sqrt(b); //2
+//	b = k * data.nodeLB; //1
+	b = sqrt(b); //2
 //	b = cbrt(b); //3
 //	b = 0; //4
 //	b = 10000; //5not found lis
@@ -676,6 +702,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB){
 				//printf("case 2 ");
 				FindtheCurrentBoundF();
+				if(!q_f.empty()){
 				uint64_t node = q_f.Peek();
 				state s = q_f.Lookup(node).data;
 				double g_value = q_f.Lookup(node).g;
@@ -689,6 +716,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				    data.nodesReexpanded += nodesReexpanded -temp2;
 					return false;
 				}
+				}
 				data.solutionInterval.lowerBound = previousBound;
 				data.solutionInterval.upperBound = previousBound;
 				FindtheBoundAndNextBoundF();
@@ -696,36 +724,47 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 
 			}
 			else if(data.nodesReexpanded > b && data.nodesExpanded > c1*data.nodeLB) {
-				//printf("case 3 ");
-				FindtheCurrentBoundF();
-				GetNodeswithBoundinGAboveBoundinF(previousBound);
-				while (!IterationCompleteG()){
-					int temp1 = nodesExpanded;
-					StepIterationUsingG(previousBound);
-					data.nodesExpanded += nodesExpanded-temp1;
-					if (flesseq(solutionCost, data.solutionInterval.lowerBound))
-					{
-						thePath = solutionPath;
-						//printf("Found solution cost %1.5f\n", solutionCost);
-						return true;
-					}
+				if(!case3){
+					FindtheCurrentBoundF();
+				    GetNodesFromFq();
+				    printf("the cost limit is %1.5f\n",previousBound);
+					case3 = 1;
+					return false;
 				}
-				data.solutionInterval.lowerBound = previousBound;
-				data.solutionInterval.upperBound = previousBound;
-				FindtheBoundAndNextBoundF();
-				return false;
+				else{
+				
+					if(!q_g.empty()){
+					uint64_t node = q_g.Peek();
+					state s = q_g.Lookup(node).data;
+					double g_value = q_g.Lookup(node).g;
+					double h_value = h->HCost(s,goal);
+					double f_value = g_value+f_value;
+					if(flesseq(f_value,previousBound)){
+						int temp1 = nodesExpanded;
+						StepIterationUsingG();
+						data.nodesExpanded += nodesExpanded-temp1;
+						return false;
+					}
+					
+					}
+					case3 = 0;
+					data.solutionInterval.lowerBound = previousBound;
+					data.solutionInterval.upperBound = previousBound;
+					GetNodesFromGq();
+					FindtheBoundAndNextBoundF();
+					return false;
+				}
 			}
 			else {
 				if(!SetupExponentialBinaryIteration){
 				//printf("case 4 \n");
 				FindtheCurrentBoundF();
 				FindtheBoundAndNextBoundF();
+				GetNodesFromFq();
 				if(fequal(previousBound,bound)){
-					GetNodeswithBoundinGAboveBoundinF(previousBound);
 					bound_g = previousBound;
 				}
 				else{
-					GetNodeswithBoundinGAboveBoundinF(bound);
 					bound_g = bound;
 				}
 				SetupExponentialBinaryIteration = true;
@@ -741,13 +780,22 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					//printf("Found solution cost %1.5f\n", solutionCost);
 					return true;
 				}
-				
-				if (!IterationCompleteG() && data.nodesExpanded < data.workBound)
-				{
-					uint64_t tmp = nodesExpanded;
-					StepIterationUsingG(bound_g);
-					data.nodesExpanded += nodesExpanded-tmp;
-					return false;
+				if(!q_g.empty()  && data.nodesExpanded < data.workBound && !iterationComplete){
+					uint64_t node = q_g.Peek();
+					state s = q_g.Lookup(node).data;
+					double g_value = q_g.Lookup(node).g;
+					double h_value = h->HCost(s,goal);
+					double f_value = g_value+f_value;
+					if(flesseq(f_value,bound_g)){
+						int temp1 = nodesExpanded;
+						StepIterationUsingG();
+						data.nodesExpanded += nodesExpanded-temp1;
+						return false;
+					}
+					else{
+						iterationComplete = true;
+					}
+
 				}
 				
 				// Invariant - iteration complete *or* exceeded work limit
@@ -756,15 +804,16 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				if (data.nodesExpanded >= data.workBound)
 				{
 					v.lowerBound = 0;
-					v.upperBound = sd.f_below;
+					v.upperBound = bound_g;
 				}
-				else if (solutionCost != DBL_MAX && fgreatereq(sd.f_below, solutionCost))
+				else if (solutionCost != DBL_MAX && fgreatereq(bound_g, solutionCost))
 				{
 					v.lowerBound = solutionCost;
 					v.upperBound = solutionCost;
 				}
 				else {
-					v.lowerBound = sd.f_above;
+					FindtheBoundAndNextBoundG();
+					v.lowerBound = bound;
 					v.upperBound = DBL_MAX;
 				}
 				data.solutionInterval &= v;
@@ -778,9 +827,10 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 						printf("[HIT]--Critical f in [%1.5f, %1.5f]\n", solutionCost, solutionCost);
 					else
 						printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
-					data.solutionInterval.upperBound = bound;
+					data.solutionInterval.upperBound = bound_g;
 					fEquation = to_string_with_precision(nextBound, 0);
-					previousBound = bound;
+					previousBound = bound_g;
+					GetNodesFromGq();
 					FindtheBoundAndNextBoundF();
 					bound_g = bound;
 					return false;
@@ -815,7 +865,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					bound = nextCost; 
 					bound_g = bound;
 					nextBound = -1;
-					GetNodeswithBoundinGAboveBoundinF(bound);
+					iterationComplete = false;
 					printf("-> Starting new iteration with f: %f; node limit: %" PRId64 "\n", nextCost, data.workBound);
 
 					return false;
@@ -826,8 +876,9 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				else
 					printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
 				
-				data.solutionInterval.upperBound = bound;
-				previousBound = bound;
+				data.solutionInterval.upperBound = bound_g;
+				previousBound = bound_g;
+				GetNodesFromGq();
 				FindtheBoundAndNextBoundF();
 				bound_g = bound;
 				fEquation = to_string_with_precision(nextBound, 0);
@@ -845,6 +896,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 		data.workBound = infiniteWorkBound;
 		SetupExponentialBinaryIteration = false;
 		MODE = 0;
+		iterationComplete = false;
 		return false;
 	}
 }
