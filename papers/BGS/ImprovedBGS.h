@@ -247,23 +247,6 @@ bool ImprovedBGS<state, action>::MainIterationComplete()
 		return false;
 	}
 }
-// template <class state, class action>
-// void ImprovedBGS<state, action>::SetupIteration(double cost)
-// {
-// 	q.Reset(env->GetMaxHash());
-// 	// put start in open
-// 	q.AddOpenNode(start, env->GetStateHash(start), 0.0, 0.0);
-// 	previousBound = bound;
-// 	bound = cost;//nextBound;
-// 	nextBound = -1;
-// 	printf("Starting iteration bound %1.1f\n", bound);
-// 	newNodesLastIteration = newNodeCount;
-// 	newNodeCount = 0;
-// 	data.nodesExpanded = 0;
-// 	sd.f_below = 0;  //??
-// 	sd.f_above = DBL_MAX;
-// }
-
 template <class state, class action>
 void ImprovedBGS<state, action>::SetupIterationF(double cost)
 {
@@ -328,8 +311,8 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinFAboveBoundinG()
 						g_value,
 						h_value,
 						parentId);
-			}
 			q_g.Remove(env->GetStateHash(s));
+			}
 		}
 	}
 
@@ -338,8 +321,7 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinFAboveBoundinG()
 template <class state, class action>
 void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLimit)
 {
-	//assert(q_g.empty() == true);
-	PrintQueueStatus();
+	//PrintQueueStatus();
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
@@ -355,8 +337,9 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveBoundinF(double costLi
 						g_value,
 						h_value,
 						parentId);
-			}
 			q_f.Remove(env->GetStateHash(s));
+			}
+			
 		}
 	}
 	//PrintQueueStatus();
@@ -512,7 +495,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 		uint64_t hk = env->GetStateHash(neighbors[x]);
 		uint64_t ok;
 //		std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCost<<std::endl;
-		sd.f_above = std::min(sd.f_above, childFCost);
+	//	sd.f_above = std::min(sd.f_above, childFCost); //this is not used in bgs
 		
 		switch (neighborLoc[x])
 		{
@@ -633,11 +616,9 @@ bool ImprovedBGS<state, action>::StepIterationUsingG(double cost)
 
 					if(q_f.Lookup(hk,ok) == kClosedList){
 					q_f.Reopen(ok);
-					printf("remove node --%lld\n",hk);
 					q_f.Remove(hk);
 					}
 					else if(q_f.Lookup(hk,ok) == kOpenList){
-					printf("remove node ---%lld\n",hk);
 					q_f.Remove(hk);
 					}
 					q_g.AddOpenNode(neighbors[x],
@@ -710,10 +691,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				    data.nodesReexpanded += nodesReexpanded -temp2;
 					return false;
 				}
-				costInterval v;
-				v.lowerBound = sd.f_above;
-				v.upperBound = DBL_MAX;
-				data.solutionInterval &= v;
+				data.solutionInterval.lowerBound = previousBound;
 				data.solutionInterval.upperBound = previousBound;
 				FindtheBoundAndNextBoundF();
 				return false;
@@ -730,14 +708,11 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					if (flesseq(solutionCost, data.solutionInterval.lowerBound))
 					{
 						thePath = solutionPath;
-						printf("Found solution cost %1.5f\n", solutionCost);
+						//printf("Found solution cost %1.5f\n", solutionCost);
 						return true;
 					}
 				}
-				costInterval v;
-				v.lowerBound = sd.f_above;
-				v.upperBound = DBL_MAX;
-				data.solutionInterval &= v;
+				data.solutionInterval.lowerBound = previousBound;
 				data.solutionInterval.upperBound = previousBound;
 				FindtheBoundAndNextBoundF();
 				return false;
@@ -765,7 +740,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				if (flesseq(solutionCost, data.solutionInterval.lowerBound))
 				{
 					thePath = solutionPath;
-					printf("Found solution cost %1.5f\n", solutionCost);
+					//printf("Found solution cost %1.5f\n", solutionCost);
 					return true;
 				}
 				
@@ -864,6 +839,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 	}
 	else{
 		//printf("main iteration complete\n");
+		data.solutionInterval.lowerBound = bound;
 		data.solutionInterval.upperBound = DBL_MAX;
 		data.nodeLB = nodesExpanded;
 		data.nodesExpanded = 0;
