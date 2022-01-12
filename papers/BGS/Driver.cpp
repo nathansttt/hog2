@@ -305,10 +305,18 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
-		if (strcmp(algorithm, "bgs") == 0)
+		if (strcmp(algorithm, "bgs-bpmx") == 0)
 		{
 			t.StartTimer();
 			bgs.SetUseBPMX();
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs") == 0)
+		{
+			t.StartTimer();
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
