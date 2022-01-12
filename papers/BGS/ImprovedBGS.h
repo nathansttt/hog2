@@ -67,6 +67,7 @@ public:
 	{ lower = data.nodeLB*c1; upper = data.workBound; }
 	std::string stage;
 	std::string fEquation;
+	void SetUseBPMX();
 private:
 	struct costInterval {
 		double lowerBound;
@@ -133,6 +134,7 @@ private:
 	double bound_g;
 	bool case3 = 0;
 	bool case2 = 0;
+	bool useBPMX = false;
 	SearchEnvironment<state, action> *env;
 	Heuristic<state> *h;
 	std::vector<state> succ;
@@ -252,6 +254,12 @@ bool ImprovedBGS<state, action>::MainIterationComplete()
 	else{
 		return false;
 	}
+}
+
+template <class state, class action>
+void ImprovedBGS<state, action>::SetUseBPMX()
+{
+	useBPMX = true;
 }
 template <class state, class action>
 void ImprovedBGS<state, action>::SetupIterationF(double cost)
@@ -535,7 +543,8 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 	//std::cout << "Expanding: " << q_f.Lookup(nodeid).data << " with hash: " << env->GetStateHash(q_f.Lookup(nodeid).data) << "with f-value " << q_f.Lookup(nodeid).g + h->HCost(q_f.Lookup(nodeid).data, goal)<<std::endl;
 	
 	env->GetSuccessors(q_f.Lookup(nodeid).data, neighbors);
-	
+	double bestH = h->HCost(q_f.Lookup(nodeid).data, goal);
+	double lowHC = DBL_MAX;
 	// 1. load all the children
 	for (unsigned int x = 0; x < neighbors.size(); x++)
 	{
@@ -543,6 +552,27 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 		neighborLoc.push_back(q_f.Lookup(env->GetStateHash(neighbors[x]), theID));
 		neighborID.push_back(theID);
 		edgeCosts.push_back(env->GCost(q_f.Lookup(nodeid).data, neighbors[x]));
+		if (useBPMX)
+		{
+			if (neighborLoc.back() != kNotFound)
+			{
+				
+				bestH = std::max(bestH, q_f.Lookup(theID).h-edgeCosts.back());
+				lowHC = std::min(lowHC, q_f.Lookup(theID).h+edgeCosts.back());
+			}
+			else {
+				double tmpH = h->HCost(neighbors[x], goal);
+				bestH = std::max(bestH, tmpH-edgeCosts.back());
+				lowHC = std::min(lowHC, tmpH+edgeCosts.back());
+			}
+		}
+	}
+
+	if (useBPMX) // propagate best child to parent
+	{
+	
+		q_f.Lookup(nodeid).h = std::max(q_f.Lookup(nodeid).h, bestH);
+		q_f.Lookup(nodeid).h = std::max(q_f.Lookup(nodeid).h, lowHC);
 	}
 	
 	// iterate again updating costs and writing out to memory
@@ -558,6 +588,14 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 		switch (neighborLoc[x])
 		{
 			case kClosedList:
+				if (useBPMX) // propagate parent to child - do this before potentially re-opening
+				{
+					if (fless(q_f.Lookup(neighborID[x]).h, bestH-edgeCosts[x]))
+					{
+						auto &i = q_f.Lookup(neighborID[x]);
+						i.h = bestH-edgeCosts[x];
+					}
+				}
 				if(fless(childGCost,q_f.Lookup(neighborID[x]).g)){
 					q_f.Lookup(neighborID[x]).parentID = nodeid;
 					q_f.Lookup(neighborID[x]).g = childGCost;
@@ -571,17 +609,36 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 					q_f.Lookup(neighborID[x]).g = childGCost;
 					q_f.KeyChanged(neighborID[x]);
 				}
+				if (useBPMX) // propagate best child to parent
+				{
+					if (fgreater(bestH-edgeCosts[x], q_f.Lookup(neighborID[x]).h))
+					{
+						auto &i = q_f.Lookup(neighborID[x]);
+						i.h = std::max(i.h, bestH-edgeCosts[x]);
+						q_f.KeyChanged(neighborID[x]);
+					}
+				}
 				break;
 			case kNotFound:
-			{	if(q_g.Lookup(hk,ok) == kClosedList){
+				{	if(q_g.Lookup(hk,ok) == kClosedList){
 					q_g.Reopen(ok);
 					q_g.Remove(hk);
 				}
-				q_f.AddOpenNode(neighbors[x],
+				if(useBPMX){
+					q_f.AddOpenNode(neighbors[x],
+							  env->GetStateHash(neighbors[x]),
+							  childGCost,
+							  std::max(h->HCost(neighbors[x], goal), q_f.Lookup(nodeid).h-edgeCosts[x]),
+							  nodeid);
+				}
+				else{
+					q_f.AddOpenNode(neighbors[x],
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
 							  h->HCost(neighbors[x], goal),
 							  nodeid);
+				}
+				
 			}
 		}
 	}
