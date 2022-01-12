@@ -196,7 +196,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
 	ImprovedBGS<xyLoc, tDirection>  bgs;
 	IncrementalBGS<xyLoc, tDirection>  ibex;
-	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 5, 2, false);
+	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 8, 2, false);
 	
 	ScenarioLoader s(scenario);
 	Map *map = new Map(theMap);
@@ -265,7 +265,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
 	ImprovedBGS<xyLoc, tDirection>  bgs;
 	IncrementalBGS<xyLoc, tDirection>  ibex;
-	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 5, 2, false);
+	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 8, 2, false);
 	searcher.SetReopenNodes(true);
 	
 	ScenarioLoader s(scenario);
@@ -308,6 +308,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 		if (strcmp(algorithm, "bgs") == 0)
 		{
 			t.StartTimer();
+			bgs.SetUseBPMX();
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
