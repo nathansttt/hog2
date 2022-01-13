@@ -235,7 +235,7 @@ bool ImprovedBGS<state, action>::InitializeSearch(SearchEnvironment<state, actio
 	data.nodeLB = 0;
 	data.solutionInterval.lowerBound = h->HCost(start, goal);  //this is the f-cost for the next iteration
 	data.solutionInterval.upperBound = DBL_MAX;
-	data.delta = 0;
+	data.delta = 1;
 	fEquation = to_string_with_precision(h->HCost(start, goal), 0);
     q_g.Reset(env->GetMaxHash());
 	q_f.Reset(env->GetMaxHash());
@@ -594,7 +594,6 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 	{
 		ExtractPathToStartFromID(nodeid, solutionPath);
 		std::reverse(solutionPath.begin(), solutionPath.end());
-		solutionCost = env->GetPathLength(solutionPath);
 		solutionCost = q_f.Lookup(nodeid).g;
 		data.solutionInterval.lowerBound = solutionCost;
 		printf("the solution cost is %1.5f\n",solutionCost);
@@ -984,7 +983,9 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					double nextCost;
 					if (data.solutionInterval.upperBound == DBL_MAX)
 					{
-						nextCost = data.solutionInterval.lowerBound+pow(gamma, data.delta);
+
+						//nextCost = data.solutionInterval.lowerBound+pow(gamma, data.delta);
+						nextCost = data.solutionInterval.lowerBound * data.delta;
 						fEquation = to_string_with_precision(data.solutionInterval.lowerBound, 0)+"+"+to_string_with_precision(gamma, 0)+"^"+to_string_with_precision(data.delta, 0)+"="+to_string_with_precision(nextCost, 0);
 						stage = "EXP";
 					}
@@ -993,7 +994,8 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 						fEquation = "("+to_string_with_precision(data.solutionInterval.lowerBound, 0)+"+"+ to_string_with_precision(data.solutionInterval.upperBound, 0)+")/2"+"="+to_string_with_precision(nextCost, 0);
 						stage = "BIN";
 					}
-					data.delta += 1;
+					//data.delta += 1;
+					data.delta *= gamma;
 					data.workBound = c2*data.nodeLB;
 					previousBound = bound;
 					bound = nextCost; 
@@ -1029,6 +1031,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 		data.nodesExpanded = 0;
 		data.nodesReexpanded = 0;
 		data.workBound = infiniteWorkBound;
+		data.delta = 1;
 		SetupExponentialBinaryIteration = false;
 		MODE = 0;
 		iterationComplete = false;
