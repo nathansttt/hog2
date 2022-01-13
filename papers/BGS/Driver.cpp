@@ -311,7 +311,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			bgs.SetUseBPMX();
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
 		if (strcmp(algorithm, "bgs") == 0)
@@ -319,7 +319,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			t.StartTimer();
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
 		if (strcmp(algorithm, "ibex") == 0)
