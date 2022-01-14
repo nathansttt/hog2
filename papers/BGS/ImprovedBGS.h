@@ -59,7 +59,7 @@ public:
 	const uint64_t c1 = 2;
 	const uint64_t c2 = 8;
 	const uint64_t gamma = 2;
-	const double k = 1;
+	const double k =1;
 	const int infiniteWorkBound = -1;
 	void GetGlobalCostInterval(double &lower, double &upper)
 	{ lower = data.solutionInterval.lowerBound; upper = data.solutionInterval.upperBound; }
@@ -318,7 +318,7 @@ void ImprovedBGS<state, action>::GetNodesFromFq()
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_f.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -350,7 +350,7 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveinF(){
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_f.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t node1;
@@ -405,7 +405,7 @@ void ImprovedBGS<state, action>::GetNodesFromGq()
 	for(uint64_t i = 0; i < q_g.size();i++){
 		state s = q_g.Lookup(i).data;
 		double g_value = q_g.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_g.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t nodeid_g;
@@ -469,7 +469,7 @@ void ImprovedBGS<state, action>::GetAllNodesinG()
 	for(uint64_t i = 0; i < q.size();i++){
 		state s = q.Lookup(i).data;
 		double g_value = q.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -508,7 +508,7 @@ void ImprovedBGS<state, action>::GetNodeswithBoundinG()
 	for(uint64_t i = 0; i < q.size();i++){
 		state s = q.Lookup(i).data;
 		double g_value = q.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -549,7 +549,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundF(){
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_f.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -561,7 +561,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundF(){
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_f.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -578,7 +578,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundF(){
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_f.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -601,7 +601,7 @@ void ImprovedBGS<state, action>::FindtheCurrentBoundF(){
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q_f.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -627,7 +627,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundG(){
 	for(uint64_t i = 0; i < q.size();i++){
 		state s = q.Lookup(i).data;
 		double g_value = q.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -644,7 +644,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundG(){
 	for(uint64_t i = 0; i < q.size();i++){
 		state s = q.Lookup(i).data;
 		double g_value = q.Lookup(i).g;
-		double h_value = h->HCost(s,goal);
+		double h_value = q.Lookup(i).h;
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
@@ -697,7 +697,7 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 	//std::cout << "Expanding: " << q_f.Lookup(nodeid).data << " with hash: " << env->GetStateHash(q_f.Lookup(nodeid).data) << "with f-value " << q_f.Lookup(nodeid).g + h->HCost(q_f.Lookup(nodeid).data, goal)<<std::endl;
 	
 	env->GetSuccessors(q_f.Lookup(nodeid).data, neighbors);
-	double bestH = h->HCost(q_f.Lookup(nodeid).data, goal);
+	double bestH = q_f.Lookup(nodeid).h;
 	double lowHC = DBL_MAX;
 	// 1. load all the children
 	for (unsigned int x = 0; x < neighbors.size(); x++)
@@ -895,12 +895,12 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 
   
-	int b = 100;
-	b = k * data.nodeLB; //1
+	int b = k * data.nodeLB;
+	 //1
 //	printf("%lld--",data.nodeLB);
 //	b = sqrt(b); //2
 //	b = cbrt(b); //3
-//	b = 0; //4
+	b = 0; //4
 //	b = 10000; //5not found lis
 	cnt+=1;
 	if(!MainIterationComplete()){
@@ -912,7 +912,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				}
 		if(!MODE){
 			if(data.nodesReexpanded <= b && data.nodesExpanded <= c1*data.nodeLB){
-				//printf("case 1");
+				printf("case 1");
 				int temp1 = nodesExpanded;
 				int temp2 = nodesReexpanded;
 				if(!IterationCompleteF()){
@@ -921,7 +921,6 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				else {
 					GetAllNodesinG();
 					GetNodesFromGq();
-					printf("hey");
 					StepIterationUsingF();
 				}
 		
@@ -931,7 +930,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				}
 			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB){
 				if(!case2){
-					//printf("case 2 ");
+					printf("case 2 ");
 				    FindtheCurrentBoundF();
 					case2 = 1;
 					return false;
@@ -941,7 +940,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 						uint64_t node = q_f.Peek();
 						state s = q_f.Lookup(node).data;
 						double g_value = q_f.Lookup(node).g;
-						double h_value = h->HCost(s,goal);
+						double h_value = q_f.Lookup(node).h;
 						double f_value = g_value+h_value;
 						//printf("f-value is %1.5f anf previous bound is %1.5f\n",f_value,previousBound);
 						if(flesseq(f_value,previousBound)){
@@ -967,7 +966,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 			}
 			else if(data.nodesReexpanded > b && data.nodesExpanded > c1*data.nodeLB) {
 				if(!case3){
-					//printf("case 3");
+					printf("case 3");
 					FindtheBoundAndNextBoundF();
 					bound_g = previousBound;
 				    GetNodeswithBoundinGAboveinF();
@@ -995,7 +994,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 			}
 			else {
 				if(!SetupExponentialBinaryIteration){
-					//printf("case 4 \n");
+					printf("case 4 \n");
 					FindtheCurrentBoundF();
 					FindtheBoundAndNextBoundF();
 					if(fequal(previousBound,bound)){
