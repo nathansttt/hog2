@@ -47,6 +47,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Turn5", "Turn Face 5", kAnyModifier, '5');
 	InstallKeyboardHandler(MyDisplayHandler, "MoveType", "Choose Move Type", kAnyModifier, 'm');
 	InstallKeyboardHandler(MyDisplayHandler, "TurnStop", "Stop Cube Passive Rotation", kAnyModifier, 'n');
+	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test New PDB", kAnyModifier, 't');
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseDown));
@@ -96,6 +97,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case 't':
+		{
+			RCState goal;
+			RC rc;
+			goal.Reset();
+			RCPDB pdb(&rc);
+			for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
+			{
+				pdb.GetStateFromPDBHash(x, goal);
+				assert(x == pdb.GetPDBHash(goal));
+			}
+			printf("Hash verified\n");
+			goal.Reset();
+			std::vector<RCState> succ;
+			rc.GetSuccessors(goal, succ);
+			for (auto i : succ)
+				std::cout << i << "\n";
+
+			pdb.SetGoal(goal);
+			pdb.BuildPDB(goal);
+			exit(0);
+			break;
+		}
 		case 'm':
 			moveType++;
 			if (moveType > 2) moveType = 0;
@@ -130,6 +154,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 			
 		case 'o':
+		{
+			
+		}
 			break;
 		case 's':
 		{

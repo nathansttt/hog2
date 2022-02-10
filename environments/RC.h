@@ -135,6 +135,14 @@ public:
 
 typedef int RCAction;
 
+static std::ostream &operator<<(std::ostream &out, RCState &tmp)
+{
+	for (int x = 0; x < 20; x++)
+		out << tmp.rotation[x] << " : ";
+	return out;
+	
+}
+
 // Can't write these until data structures are defined
 static bool operator==(const RCState &l1, const RCState &l2)
 {
@@ -199,6 +207,7 @@ public:
 
 	RC()
 	{
+		pruneSuccessors = false;
 		for (int i = 0; i < 26; i++)
 		{
 			//std::cout << cubies[i].a << '\n';
@@ -304,6 +313,31 @@ public:
 	
 	
 	bool pruneSuccessors;
+};
+
+class RCPDB : public PDBHeuristic<RCState, RCAction, RC, RCState, 4> {
+public:
+	RCPDB(RC *e):PDBHeuristic(e){}//, const RCState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
+	uint64_t GetStateHash(const RCState &s) const;
+	void GetStateFromHash(RCState &s, uint64_t hash) const;
+	uint64_t GetPDBSize() const;
+	uint64_t GetPDBHash(const RCState &s, int threadID = 0) const;
+	virtual uint64_t GetAbstractHash(const RCState &s, int threadID = 0) const { return GetPDBHash(s); }
+	void GetStateFromPDBHash(uint64_t hash, RCState &s, int threadID = 0) const;
+	RCState GetStateFromAbstractState(RCState &s) const { return s; }
+
+	void OpenGLDraw() const
+	{}
+	
+	//	const char *GetName();
+	bool Load(const char *prefix) { return false; }
+	void Save(const char *prefix) {}
+	bool Load(FILE *f){ return false; }
+	void Save(FILE *f){}
+	std::string GetFileName(const char *prefix) {return "";}
+private:
+//	std::vector<int> edges;
+//	std::vector<int> corners;
 };
 
 #endif /* defined(__hog2_glut__RubiksCube__) */
