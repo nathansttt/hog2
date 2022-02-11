@@ -9,12 +9,14 @@
 #include <cstdio>
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 // Helpers (for calculation)
 void EditPointMult(float (&vec)[3][3], Graphics::point & p);
 void MakeMatrixRotX(float (&a)[3][3], float angle);
 void MakeMatrixRotY(float (&a)[3][3], float angle);
 void MakeMatrixRotZ(float (&a)[3][3], float angle);
+int findInArray(int arr[], int elem, int lower, int upper);
 float array3 [3] = {0,0,0};
 float rotation [3][3] = { {0,0,0}, {0,0,0}, {0,0,0} };
 std::vector<int> furthestZ(0);
@@ -23,6 +25,173 @@ std::vector<int> furthestZ(0);
 /*===============================================================================================================================================================================
  * 			CUBIE CLASS
  ===============================================================================================================================================================================*/
+
+/* Called when cubie is initialized via the RCState
+ * 
+ */
+void Cubie::Initialize(int RCpos, int RCind, int RCrot)
+{
+	RCindex = RCind; // TEMP
+	// Reset previous data
+	basePoints.clear();
+	baseFacePoints.clear();
+	points.clear();
+	facePoints.clear();
+	
+	// Edge or corner
+	bool isCorner = false;
+	if (RCind >= 12) isCorner = true;
+	
+	// Position of the cubie on the cube (x, y, z) -------------------------------------------
+	int xPos = 0, yPos = 0, zPos = 0;
+	int xAdd[8] =  {3, 4, 5, 10, 13, 14, 17, 18};  //Orange
+	int xSubt[8] = {0, 1, 7, 8, 12, 15, 16, 19};   //Red
+	int yAdd[8] =  {8, 9, 10, 11, 16, 17, 18, 19}; //Yellow
+	int ySubt[8] = {0, 2, 4, 6, 12, 13, 14, 15};   //White
+	int zAdd[8] =  {5, 6, 7, 11, 14, 15, 18, 19};  //Green
+	int zSubt[8] = {1, 2, 3, 9, 12, 13, 16, 17};   //Blue
+	
+	// Modify array search range
+	int starti = 0, endi = 4;
+	if (isCorner) 
+	{
+		starti = 4;
+		endi = 8;
+	}
+	
+	// Search within arrays and modify
+	if (findInArray(xAdd, RCpos, starti, endi) != -1)
+	{ 
+		xPos = 1;
+	} else if (findInArray(xSubt, RCpos, starti, endi) != -1)
+	{ 
+		xPos = -1;
+	}
+	if (findInArray(yAdd, RCpos, starti, endi) != -1)
+	{ 
+		yPos = 1;
+	} else if (findInArray(ySubt, RCpos, starti, endi) != -1)
+	{ 
+		yPos = -1;
+	}
+	if (findInArray(zAdd, RCpos, starti, endi) != -1)
+	{ 
+		zPos = 1;
+	} else if (findInArray(zSubt, RCpos, starti, endi) != -1)
+	{ 
+		zPos = -1;
+	}
+	
+	// Visibible Faces -------------------------------------------------------------------------
+	// Init faces
+	for (int i = 0; i < 6; i++)
+	{
+		faceCols[i] = inCol;
+		facesShown[i] = false;
+	}
+	
+	// Do face visibility and colors depending on corner/edge
+	if (isCorner)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			facesShown[facesShowing[RCpos][i]] = true; 
+			// This is a colored face, update the color
+			int indToEdit;
+			if (RCrot == 0)
+			{
+				// "Correct" rotation: White/Yellow faces White/Yellow 
+				indToEdit = i;
+			} else if (RCrot == 1)
+			{
+				// Clockwise rotation from "Correct" rotation, add 1 to i
+				indToEdit = (i + 1) % 3;
+			} else
+			{
+				// Counterclockwise rotation from "Correct" rotation, subtract 1 from i
+				indToEdit = (i + 2) % 3;
+			}
+			// Change the color
+			faceCols[facesShowing[RCpos][indToEdit]] = faceColors[facesShowing[RCind][i]];		
+		}	
+	} else
+	{ // Edge
+		for (int i = 0; i < 2; i++)
+		{
+			facesShown[facesShowing[RCpos][i]] = true; 
+			// This is a colored face, update the color
+			if (RCrot != 2)
+			{
+				// (i + RCrot)%2 : Swap index 0/1 if the incorrect RCrot (RCrot == 1)
+				faceCols[facesShowing[RCpos][i]] = faceColors[facesShowing[RCind][(i + RCrot)%2]];
+				
+			} else
+			{
+				std::cout << "ERROR: 2 OUT OF BOUNDS [Cubie::Initialize(int RCpos, int RCind, int RCrot)]" << '\n';
+			}
+		}
+	}
+	
+	// The following is the same code as with Cubie::Initialize(int ind)
+	//Initialize the 8 points
+	for (int i = 0; i < 8; i++)
+	{
+		points.push_back(Graphics::point(0,0,0));
+		points[i].x = -0.5f * sideLen;// + xPos * sideLen;
+		if ((i%4) == 1 || (i%4) == 2)
+			points[i].x += 1.f * sideLen;
+		points[i].y = (-0.5f + (1.f * ((i/2)%2))) * sideLen;// + yPos * sideLen; //y
+		points[i].z = (-0.5f + (1.f * (i/4))) * sideLen;// + zPos * sideLen; //z
+		
+		basePoints.push_back(Graphics::point(points[i].x,points[i].y,points[i].z));
+	}
+	//Initialize the 4 face points for all 6 faces (24)
+	for (int i = 0; i < 6; i++)
+	{
+		facePoints.push_back(std::vector<Graphics::point>());
+		baseFacePoints.push_back(std::vector<Graphics::point>());
+		for (int j = 0; j < 4; j++)
+		{
+			float x, y, z;
+			if (i == 2 || i == 4) x = 1.0f;
+				else x = faceSize;
+			if (i == 0 || i == 5) y = 1.0f;
+				else y = faceSize;
+			if (i == 1 || i == 3) z = 1.0f;
+				else z = faceSize;
+
+			Graphics::point p = points[pointsOnFace[i][j]];
+			x *= p.x;
+			y *= p.y;
+			z *= p.z;
+			facePoints[i].push_back(Graphics::point(x,y,z));
+			baseFacePoints[i].push_back(Graphics::point(x,y,z));
+		}
+	}
+	//Move all points (faces and cube) by coord
+	for (int i = 0; i < 8; i++)
+	{
+		points[i].x += xPos * sideLen;
+		points[i].y += yPos * sideLen;
+		points[i].z += zPos * sideLen;
+		basePoints[i].x += xPos * sideLen;
+		basePoints[i].y += yPos * sideLen;
+		basePoints[i].z += zPos * sideLen;
+	}
+	for (int i = 0; i < 6; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			facePoints[i][j].x += xPos * sideLen;
+			facePoints[i][j].y += yPos * sideLen;
+			facePoints[i][j].z += zPos * sideLen;
+			baseFacePoints[i][j].x += xPos * sideLen;
+			baseFacePoints[i][j].y += yPos * sideLen;
+			baseFacePoints[i][j].z += zPos * sideLen;
+		}
+	}
+}
+
 
 void Cubie::Initialize(int ind)
 {
@@ -152,6 +321,21 @@ void Cubie::Initialize(int ind)
  */
 void Cubie::Draw(Graphics::Display &display)
 {
+	//Test
+//	if (RCindex == 19 || RCindex == 0)
+//	{
+//		//Test
+//		std::cout << "start " << RCindex << "\n";
+//		for (int i = 0; i < 8; i++)
+//		{
+//			std::cout << "p" << i << RCindex << "\n";
+//			std::cout << "x " << points[i].x << "\n";
+//			std::cout << "y " << points[i].y << "\n";
+//			std::cout << "z " << points[i].z << "\n";
+//		}
+//		std::cout << "\n\n";
+//	}
+
 	//	Identify which faces will be hidden from sight (Find which points are the furthest back)
 	float highest;
 	furthestZ.clear();
@@ -339,6 +523,66 @@ void Cubie::SetFacePositionVisible(bool toggle, int position)
 	blackFaceToReset = position;
 }
 
+/* For testing purposes, prints all of the Cubie's non-constant data
+ * 
+ */
+void Cubie::PrintData()
+{
+	std::cout << "Index: " << index << std::endl;
+	
+	std::cout << "BlackFaceToReset: " << blackFaceToReset << std::endl;
+	
+	std::cout << "faceCols: ";
+	for (int i = 0; i < 6; i ++)
+	{
+		//std::cout << faceCols[i] << ", ";
+	} std::cout << std::endl;
+	
+	std::cout << "facesShown: ";
+	for (int i = 0; i < 6; i ++)
+	{
+		std::cout << facesShown[i] << ", ";
+	} std::cout << std::endl;
+	
+	std::cout << "faceInPos: ";
+	for (int i = 0; i < 6; i ++)
+	{
+		std::cout << faceInPos[i] << ", ";
+	} std::cout << std::endl;
+	
+	std::cout << "points: ";
+	for (int i = 0; i < 8; i ++)
+	{
+		std::cout << points[i] << ", ";
+	} std::cout << std::endl;
+	
+	std::cout << "basePoints: ";
+	for (int i = 0; i < 8; i ++)
+	{
+		std::cout << points[i] << ", ";
+	} std::cout << std::endl;	
+	
+	std::cout << "facePoints: " << std::endl;
+	for (int i = 0; i < 6; i ++)
+	{
+		std::cout << "	Face " << i << ": ";
+		for (int j = 0; j < 8; j++)
+		{
+			std::cout << facePoints[i][j] << ", ";
+		} std::cout << std::endl;	
+	} std::cout << std::endl;
+	
+	std::cout << "baseFacePoints: " << std::endl;
+	for (int i = 0; i < 6; i ++)
+	{
+		std::cout << "	Face " << i << ": ";
+		for (int j = 0; j < 8; j++)
+		{
+			std::cout << baseFacePoints[i][j] << ", ";
+		} std::cout << std::endl;	
+	} std::cout << std::endl;
+}
+
 /*===============================================================================================================================================================================
  * 			RCSTATE CLASS
  ===============================================================================================================================================================================*/
@@ -348,9 +592,15 @@ void Cubie::SetFacePositionVisible(bool toggle, int position)
  */
 void RCState::RotateFace(int face, int move)
 {
+	// TODO: DELETE
+	
 	// Move the cubes
 	if (move != 2)
 	{
+		//Rotate the Cubes
+		RotateEdges(face, move);
+		RotateCorners(face, move);
+
 		bool forward;
 		if (move == 0) forward = true;
 		else forward = false;
@@ -364,10 +614,116 @@ void RCState::RotateFace(int face, int move)
 		SwapPositions(cornersOnFace[face][0], cornersOnFace[face][2]);
 		SwapPositions(cornersOnFace[face][1], cornersOnFace[face][3]);
 	}
-	
-	//Rotate the Cubes
-	RotateEdges(face, move);
-	RotateCorners(face, move);
+}
+
+/*
+ * 
+ */
+void RCState::RotateFace(int move)
+{
+	switch(move)
+	{
+		case 0: // Face 0, CW
+			// No change in rotation
+			ShiftPositionsCW(edgesOnFace[0]);
+			ShiftPositionsCW(cornersOnFace[0]);
+			break;
+		case 1: // CCW
+			// No change in rotation
+			ShiftPositionsCCW(edgesOnFace[0]);
+			ShiftPositionsCCW(cornersOnFace[0]);
+			break;
+		case 3: // Face 1, CW
+			RotateEdges(move);
+			RotateCorners(move);
+			
+			ShiftPositionsCW(edgesOnFace[1]);
+			ShiftPositionsCW(cornersOnFace[1]);
+			break;
+		case 4: // CCW
+			RotateEdges(move);
+			RotateCorners(move);
+			
+			ShiftPositionsCCW(edgesOnFace[1]);
+			ShiftPositionsCCW(cornersOnFace[1]);
+			break;
+		case 6: // Face 2, CW
+			RotateCorners(move);
+			
+			ShiftPositionsCW(edgesOnFace[2]);
+			ShiftPositionsCW(cornersOnFace[2]);
+			break;
+		case 7: // CCW
+			RotateCorners(move);
+			
+			ShiftPositionsCCW(edgesOnFace[2]);
+			ShiftPositionsCCW(cornersOnFace[2]);
+			break;
+		case 9: // Face 3, CW
+			RotateEdges(move);
+			RotateCorners(move);
+			
+			ShiftPositionsCW(edgesOnFace[3]);
+			ShiftPositionsCW(cornersOnFace[3]);
+			break;
+		case 10: // CCW
+			RotateEdges(move);
+			RotateCorners(move);
+			
+			ShiftPositionsCCW(edgesOnFace[3]);
+			ShiftPositionsCCW(cornersOnFace[3]);
+			break;
+		case 12: // Face 4, CW
+			RotateCorners(move);
+			
+			ShiftPositionsCW(edgesOnFace[4]);
+			ShiftPositionsCW(cornersOnFace[4]);
+			break;
+		case 13: // CCW
+			RotateCorners(move);
+			
+			ShiftPositionsCCW(edgesOnFace[4]);
+			ShiftPositionsCCW(cornersOnFace[4]);
+			break;
+		case 15: // Face 5, CW
+			// No change in rotation
+			
+			ShiftPositionsCW(edgesOnFace[5]);
+			ShiftPositionsCW(cornersOnFace[5]);
+			break;
+		case 16: // CCW
+			// No change in rotation
+			
+			ShiftPositionsCCW(edgesOnFace[5]);
+			ShiftPositionsCCW(cornersOnFace[5]);
+			break;
+		case 2: // All faces 180
+		case 5:
+		case 8:
+		case 11:
+		case 14:
+		case 17:
+			// No change in rotation
+			
+			int face = move/3;
+			SwapPositions(edgesOnFace[face][0], edgesOnFace[face][2]);
+			SwapPositions(edgesOnFace[face][1], edgesOnFace[face][3]);
+			SwapPositions(cornersOnFace[face][0], cornersOnFace[face][2]);
+			SwapPositions(cornersOnFace[face][1], cornersOnFace[face][3]);
+			break;
+	}
+}
+
+/*
+ * 
+ */
+void RCState::RotateEdges(int move)
+{
+	int face = move/3;
+	rotation[edgesOnFace[face][0]] = 1 - rotation[edgesOnFace[face][0]];
+	rotation[edgesOnFace[face][1]] = 1 - rotation[edgesOnFace[face][1]];
+	rotation[edgesOnFace[face][2]] = 1 - rotation[edgesOnFace[face][2]];
+	rotation[edgesOnFace[face][3]] = 1 - rotation[edgesOnFace[face][3]];
 }
 
 /*
@@ -375,6 +731,7 @@ void RCState::RotateFace(int face, int move)
  */
 void RCState::RotateEdges(int face, int move)
 {
+	// TODO: move is already checked to not be 2
 	if (move != 2 && (face == 1 || face == 3))
 	{
 		for (int i = 0; i < 4; i++)
@@ -387,8 +744,32 @@ void RCState::RotateEdges(int face, int move)
 /*
  * 
  */
+void RCState::RotateCorners(int move)
+{
+	// cornersOnFace[face][0] will ALWAYS be a special corner, 
+	// cannot be an index A face (face =/ 0, 5)
+	int face = move/3;
+	// For standard corners, the amount of rotation is equal to the faceIndex (0-2)
+	int add = 2 - (face % 2); // Standard corners
+	rotation[cornersOnFace[face][1]] += add;
+	rotation[cornersOnFace[face][1]] %= 3;
+	rotation[cornersOnFace[face][3]] += add;
+	rotation[cornersOnFace[face][3]] %= 3;
+	
+	add = 3 - add; // Special corners
+	rotation[cornersOnFace[face][0]] += add;
+	rotation[cornersOnFace[face][0]] %= 3;
+	rotation[cornersOnFace[face][2]] += add;
+	rotation[cornersOnFace[face][2]] %= 3;
+}
+
+/*
+ * 
+ */
 void RCState::RotateCorners(int face, int move)
 {
+	// TODO: move is already checked to not be 2
+	// If 180 turn or index A face, do not change rotation
 	if (move != 2)
 	{
 		int index;
@@ -396,13 +777,34 @@ void RCState::RotateCorners(int face, int move)
 		else if (face % 2 == 1) index = 1;
 		else index = 2;
 		
+		// If index A face, do not change rotation
 		if (index != 0)
 		{
+			int specialCorners[4] = {13, 15, 16, 18};
+
+			// Rotate each corner in the face
 			for (int i = 0; i < 4; i++)
 			{
-				int rot = rotation[cornersOnFace[face][i]] + index;
-				if (rot > 2) rot -= 3;
-				rotation[cornersOnFace[face][i]] = rot;
+				// Determine whether this cubie is a special corner
+				bool special = false;
+				for(int j = 0; j < 4; j++){
+				     if(cornersOnFace[face][i] == specialCorners[j]){
+				    	 special = true;
+				         break;
+				     }
+				}
+				// if Shaded corner cubie:
+					// B Face: rot += 2
+					// C Face: rot += 1
+				// if Unshaded corner cubie:
+					// B Face: rot += 1
+					// C Face: rot += 2
+				int add = index;
+				if (special) add = 3-add;
+
+				rotation[cornersOnFace[face][i]] += add;
+				// Loop to start of rotation if rotation goes over 2
+				rotation[cornersOnFace[face][i]] = rotation[cornersOnFace[face][i]] % 3;
 			}
 		}
 	}
@@ -416,6 +818,60 @@ void RCState::SwapPositions(int p1, int p2)
 	int temp = indices[p1];
 	indices[p1] = indices[p2];
 	indices[p2] = temp;
+	// Also swap rotations
+	temp = rotation[p1];
+	rotation[p1] = rotation[p2];
+	rotation[p2] = temp;
+}
+
+/*
+ * 
+ */
+void RCState::ShiftPositionsCW(int (&arr)[4])
+{
+	// Shift rotations as well
+	int temp;
+	int tempR;
+	temp = indices[arr[3]];
+	tempR = rotation[arr[3]];
+	
+	int i = 3;
+	indices[arr[i]] = indices[arr[i-1]];
+	rotation[arr[i]] = rotation[arr[i-1]];
+	i--;
+	indices[arr[i]] = indices[arr[i-1]];
+	rotation[arr[i]] = rotation[arr[i-1]];
+	i--;
+	indices[arr[i]] = indices[arr[i-1]];
+	rotation[arr[i]] = rotation[arr[i-1]];
+	
+	indices[arr[0]] = temp;
+	rotation[arr[0]] = tempR;
+}
+
+/*
+ * 
+ */
+void RCState::ShiftPositionsCCW(int (&arr)[4])
+{
+	// Shift rotations as well
+	int temp;
+	int tempR;
+	temp = indices[arr[0]];
+	tempR = rotation[arr[0]];
+	
+	int i = 0;
+	indices[arr[i]] = indices[arr[i+1]];
+	rotation[arr[i]] = rotation[arr[i+1]];
+	i++;
+	indices[arr[i]] = indices[arr[i+1]];
+	rotation[arr[i]] = rotation[arr[i+1]];
+	i++;
+	indices[arr[i]] = indices[arr[i+1]];
+	rotation[arr[i]] = rotation[arr[i+1]];
+
+	indices[arr[3]] = temp;
+	rotation[arr[3]] = tempR;
 }
 
 /*
@@ -423,24 +879,51 @@ void RCState::SwapPositions(int p1, int p2)
  */
 void RCState::ShiftPositions(int (&arr)[4], bool forward)
 {
+	//std::cout << "Shifting positions " << arr[0] << ", " << arr[1] << ", " << arr[2] << ", " << arr[3] << std::endl;
+
+	// Shift rotations as well
 	int temp;
+	int tempR;
 	if (forward) // clockwise
 	{
 		temp = indices[arr[3]];
+		tempR = rotation[arr[3]];
 		for (int i = 3; i > 0; i--)
 		{
 			indices[arr[i]] = indices[arr[i-1]];
+			rotation[arr[i]] = rotation[arr[i-1]];
 		}
-		indices[0] = temp;
+		indices[arr[0]] = temp;
+		rotation[arr[0]] = tempR;
 	} else //CCW
 	{
 		temp = indices[arr[0]];
+		tempR = rotation[arr[0]];
 		for (int i = 0; i < 3; i++)
 		{
 			indices[arr[i]] = indices[arr[i+1]];
+			rotation[arr[i]] = rotation[arr[i+1]];
 		}
-		indices[3] = temp;
+		indices[arr[3]] = temp;
+		rotation[arr[3]] = tempR;
 	}
+}
+
+void RCState::PrintState()
+{
+	// Print the two arrays: indices[] and rotation[]
+	std::cout << "Indices: [";
+	for (int i = 0; i < 20; i++)
+	{
+		std::cout << indices[i] << ", ";
+	}
+	std::cout << "]" << std::endl;
+	std::cout << "Rotation: [";
+	for (int i = 0; i < 20; i++)
+	{
+		std::cout << rotation[i] << ", ";
+	}
+	std::cout << "]" << std::endl;
 }
 
 /*===============================================================================================================================================================================
@@ -657,11 +1140,16 @@ void RC::TestUpdate()
 {
 	float testRot [3];
 	if (passiveRot)
-		for (int i = 0; i < 3; i++)
-		{
-			//if (i == 1)
-			testRot[i] = 0.03f;
-		}
+	{
+//		for (int i = 0; i < 3; i++)
+//		{
+//			//if (i == 1)
+//			testRot[i] = 0.03f;
+//		}
+		testRot[0] = 0.01f;
+		testRot[1] = 0.02f;
+		testRot[2] = 0.03f;
+	}
 	
 	if (rotating)
 	{
@@ -1208,10 +1696,34 @@ void RC::OpenGLDraw(const RCState&, const RCAction&) const
 }
 
 // Draw a RCState. Internally do the 3d transform for the drawing.
-void RC::Draw(Graphics::Display &display, const RCState&) const
+void RC::Draw(Graphics::Display &display, const RCState &) const
 {
+	// CANNOT change any variables within RCState, Cubies, or RC
+	
+	// Format of the data needed to draw everything:
+	
 }
 
+// Draw a RCState. Internally do the 3d transform for the drawing.
+void RC::TestDraw(Graphics::Display &display, RCState & state) 
+{
+	// TEMP: Refresh the cube EVERY FRAME (BAD)
+	for (int i = 0; i < 20; i++)
+	{
+		cubies[convertStatePos[i]].Initialize(i, state.indices[i], state.rotation[i]);
+	}
+
+	// For every cubie, return it to its original draw angle, and then apply the needed rotation 
+	// This codeblock is a section from RotateCubies(), consider creating a new function
+	for (int i = 0; i < 26; i++)
+	{
+		cubies[i].ResetToBase();
+		cubies[i].RotateRelative(rotationTotal);
+	}
+	
+	// Draw the newly reset and rotated cubies
+	DrawCubies(display);
+}
 
 
 /*
@@ -1300,3 +1812,248 @@ void MakeMatrixRotZ(float (&a)[3][3], float angle) {
 	a[2][1] = 0;
 	a[2][2] = 1;
 }
+
+/* Returns the index of the integer element within the given bounds of an array
+ * Returns -1 if not found
+ */
+int findInArray(int arr[], int elem, int lower, int upper)
+{
+	for (int i = lower; i < upper; i++)
+	{
+		if (arr[i] == elem) return i;
+	}
+	return -1;
+	// TODO: binary search
+}
+
+/*===============================================================================================================================================================================
+ * 			RANKING (CORNERS)
+ ===============================================================================================================================================================================*/
+
+uint64_t RC::GetPDBSizeCorner() const
+{
+	uint64_t answer[] = {1, 24, 504, 9072, 136080, 1632960, 14696640, 88179840, 88179840};
+	return 2187; //answer[corners.size()];
+}
+
+uint64_t RC::GetPDBHashCorner(const RCState &s, int threadID) const
+{
+	// Initialize variables
+	int puzzle[8];
+	int dual[16]; 
+	int cornerSize = corners.size();
+	int lastPiece = 8-(int)corners.size();
+	for (int x = 0; x < 8; x++)
+		dual[s.indices[x+12]-12] = x;
+	for (int x = 0; x < cornerSize; x++)
+		puzzle[x] = dual[corners[x]];
+	
+	uint64_t hashVal = 0;
+	uint64_t part2 = 0;
+	int numEntriesLeft = 8;
+//	for (unsigned int x = 0; x < cornerSize; x++)
+//	{
+//		hashVal += puzzle[x] * FactorialUpperK(numEntriesLeft-1, lastPiece);
+//		
+//		numEntriesLeft--;
+//		for (unsigned y = x; y < cornerSize; y++)
+//		{
+//			if (puzzle[y] > puzzle[x])
+//				puzzle[y]--;
+//		}
+//	}
+	
+	int limit = std::min((int)cornerSize, 7);
+	for (int x = 0; x < limit; x++)
+	{
+		part2 = part2*3 + s.rotation[corners[x]];
+	}
+	
+	return part2; //* FactorialUpperK(8, lastPiece)+hashVal;
+}
+
+
+void RC::GetStateFromPDBHashCorner(uint64_t hash, RCState &s, int threadID) const
+{
+	int lastPiece = 8-(int)corners.size();
+	int cornerSize = corners.size();
+	int puzzle[12];
+	int dual[16];
+	uint64_t hashVal = hash;
+	
+//	hash /= FactorialUpperK(8, lastPiece); // for rotations
+//	hashVal = hashVal%FactorialUpperK(8, lastPiece); // for pieces
+//	
+//	int numEntriesLeft = lastPiece+1;
+//	for (int x = corners.size()-1; x >= 0; x--)
+//	{
+//		puzzle[x] = hashVal % numEntriesLeft;
+//		hashVal /= numEntriesLeft;
+//		numEntriesLeft++;
+//		for (int y = x+1; y < cornerSize; y++)
+//		{
+//			if (puzzle[y] >= puzzle[x])
+//				puzzle[y]++;
+//		}
+//	}
+	
+	for (int x = 0; x < 8; x++)
+	{
+		s.indices[x+12] = 0xF;
+		s.rotation[x+12] = x;
+	}
+	
+	for (int x = 0; x < cornerSize; x++)
+	{
+		s.indices[puzzle[x]] = corners[x];
+		dual[corners[x]] = puzzle[x];
+	}
+	
+	int cnt = 0; 
+	int limit = std::min((int)corners.size(), 7);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.rotation[corners[x]] = hash%3;
+		cnt += hash%3;
+		hash/=3;
+	}
+	if (corners.size() == 8)
+		s.rotation[corners[7]] = (3-(cnt%3)); // 0->0 2->1 1->2
+}
+
+// KEEP
+uint64_t RC::GetStateHashCorner(const RCState &s)
+{
+	uint64_t hashVal = 0;
+	for (int x = 0; x < 7; x++)
+	{
+		hashVal = (hashVal<<1) + s.rotation[19-x];
+	}
+	return hashVal;
+}
+
+/*===============================================================================================================================================================================
+ * 			RANKING (EDGES)
+ ===============================================================================================================================================================================*/
+//
+//uint64_t RC::GetPDBSizeEdge() const
+//{
+//	// last tile is symmetric
+//	uint64_t power2[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2048};
+//	int elts = (int)edges.size();
+//	return FactorialUpperK(12, 12-elts)*power2[elts];
+////	return mr1.GetMaxRank()*power2[elts];
+//}
+//
+//uint64_t RC::GetPDBHashEdge(const RCState &s, int threadID) const
+//{
+//	int puzzle[12];
+//	int dual[16]; // seamlessly handle 0xF entries (no cube)
+//	int lastPiece = 12-(int)edges.size();
+//	//std::cout << "!" << s << "\n";
+//	for (int x = 0; x < 12; x++)
+//		dual[s.GetCubeInLoc(x)] = x;
+//	for (int x = 0; x < edges.size(); x++)
+//		puzzle[x] = dual[edges[x]];
+//	
+//	uint64_t hashVal = 0;
+//	uint64_t part2 = 0;
+//	int numEntriesLeft = 12;
+//	for (unsigned int x = 0; x < edges.size(); x++)
+//	{
+//		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+//		
+//		numEntriesLeft--;
+//		for (unsigned y = x; y < edges.size(); y++)
+//		{
+//			if (puzzle[y] > puzzle[x])
+//				puzzle[y]--;
+//		}
+//	}
+//	int limit = std::min((int)edges.size(), 11);
+//	for (int x = 0; x < limit; x++)
+//	{
+//		part2 = part2*2+(s.GetCubeOrientation(edges[x])?1:0);
+//		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
+//	}
+//	return part2*FactorialUpperK(12, lastPiece)+hashVal;
+//}
+//
+//void RC::GetStateFromPDBHashEdge(uint64_t hash, RCState &s, int threadID) const
+//{
+//	int lastPiece = 12-(int)edges.size();
+//	int puzzle[12];
+//	int dual[16];
+//	uint64_t hashVal = hash;
+//	hash /= FactorialUpperK(12, lastPiece); // for rotations
+//	hashVal = hashVal%FactorialUpperK(12, lastPiece); // for pieces
+//	
+//	int numEntriesLeft = lastPiece+1;
+//	for (int x = edges.size()-1; x >= 0; x--)
+//	{
+//		puzzle[x] = hashVal%numEntriesLeft;
+//		hashVal /= numEntriesLeft;
+//		numEntriesLeft++;
+//		for (int y = x+1; y < edges.size(); y++)
+//		{
+//			if (puzzle[y] >= puzzle[x])
+//				puzzle[y]++;
+//		}
+//	}
+//	for (int x = 0; x < 12; x++)
+//	{
+//		s.SetCubeInLoc(x, 0xF);
+//		s.SetCubeOrientation(x, 0);
+//	}
+//	
+//	for (int x = 0; x < edges.size(); x++)
+//	{
+//		s.SetCubeInLoc(puzzle[x], edges[x]);
+//		dual[edges[x]] = puzzle[x];
+//	}
+//	
+//	int cnt = 0;
+//	int limit = std::min((int)edges.size(), 11);
+//	for (int x = limit-1; x >= 0; x--)
+//	{
+//		s.SetCubeOrientation(edges[x], hash%2);
+//		//s.SetCubeOrientation(dual[corners[x]], hash%3);
+//		cnt += hash%2;
+//		hash/=2;
+//	}
+//	if (edges.size() == 12)
+//		s.SetCubeOrientation(edges[11], cnt%2);
+//}
+//
+//
+//// KEEP
+//uint64_t RC::GetStateHashEdge(const RCState &s)
+//{
+//	uint64_t hashVal = 0;
+//	for (int x = 0; x < 11; x++)
+//	{
+//		hashVal = (hashVal<<1)+s.GetCubeOrientation(11-x);
+//	}
+//	return hashVal;
+//}
+
+uint64_t RC::FactorialUpperK(int n, int k) const
+{
+	const uint64_t result[9][9] = {
+		{1}, // n = 0
+		{1, 1}, // n = 1
+		{2, 2, 1}, // n = 2
+		{6, 6, 3, 1}, // n = 3
+		{24, 24, 12, 4, 1}, // n = 4
+		{120, 120, 60, 20, 5, 1}, // n = 5
+		{720, 720, 360, 120, 30, 6, 1}, // n = 6
+		{5040, 5040, 2520, 840, 210, 42, 7, 1}, // n = 7
+		{40320, 40320, 20160, 6720, 1680, 336, 56, 8, 1}, // n = 8
+	};
+	return result[n][k];
+}
+
+
+
+// PDB CLass
+

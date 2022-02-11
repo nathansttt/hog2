@@ -15,6 +15,43 @@
 #include "PDBHeuristic.h"
 
 /*===============================================================================================================================================================================
+ * 			RUBIKPDB CLASS
+ ===============================================================================================================================================================================*/
+
+//class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube, RubiksState, 4> {
+//public:
+//	RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
+//	uint64_t GetStateHash(const RubiksState &s) const;
+//	void GetStateFromHash(RubiksState &s, uint64_t hash) const;
+//
+//	uint64_t GetPDBSize() const;
+//	
+//	uint64_t GetPDBHash(const RubiksState &s, int threadID = 0) const;
+//	virtual uint64_t GetAbstractHash(const RubiksState &s, int threadID = 0) const { return GetPDBHash(s); }
+//	void GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID = 0) const;
+//	RubiksState GetStateFromAbstractState(RubiksState &s) const { return s; }
+//
+//	void OpenGLDraw() const
+//	{
+//		RubiksState s;
+//		GetStateFromPDBHash(0, s);
+//		env->OpenGLDraw(s);
+//	}
+//	
+//	//	const char *GetName();
+//	bool Load(const char *prefix);
+//	void Save(const char *prefix);
+//	bool Load(FILE *f);
+//	void Save(FILE *f);
+//	std::string GetFileName(const char *prefix);
+//private:
+//	RubikEdgePDB ePDB;
+//	RubikCornerPDB cPDB;
+//	std::vector<int> edges;
+//	std::vector<int> corners;
+//};
+
+/*===============================================================================================================================================================================
  * 			CUBIE CLASS
  ===============================================================================================================================================================================*/
 
@@ -32,6 +69,7 @@ public:
 	std::vector<std::vector<Graphics::point>> facePoints;
 	rgbColor faceCols [6];
 	int index;
+	int RCindex = -1; //TEMP
 	bool facesShown [6];
 	int blackFaceToReset = -1;
 	int faceInPos [6] = {0,1,2,3,4,5};
@@ -70,8 +108,51 @@ public:
 		{1,2,3,4},
 		{0,4,5,2}
 	};
+	const int facesShowing [20][3] =
+	{
+		// Visible faces for a given cubie position
+		/* (With blue at front and white at top}
+		 * 0 = Top
+		 * 1 = Front
+		 * 2 = Left
+		 * 3 = Right
+		 * 4 = Back
+		 * 5 = Bottom
+		 * -1 = N/A
+		 */
+			
+		// Also represents the colors present on a given cubie index
+		/* 0 = White... 5 = Yellow
+		 * For corners, the colors are listed in a CLOCKWISE order from the face of index 0/5
+		 * The face
+		 */
+			
+		// Edges
+		{0, 2, -1}, //0
+		{1, 2, -1}, //1
+		{0, 1, -1}, //2
+		{1, 4, -1}, //3
+		{0, 4, -1}, //4
+		{3, 4, -1}, //5
+		{0, 3, -1}, //6
+		{3, 2, -1}, //7
+		{5, 2, -1}, //8
+		{5, 1, -1}, //9
+		{5, 4, -1}, //10
+		{5, 3, -1}, //11
+		// Corners
+		{0, 1, 2}, //12
+		{0, 4, 1}, //13
+		{0, 3, 4}, //14
+		{0, 2, 3}, //15
+		{5, 2, 1}, //16
+		{5, 1, 4}, //17
+		{5, 4, 3}, //18
+		{5, 3, 2}  //19
+	};
 	
 	void Initialize(int ind);
+	void Initialize(int RCpos, int RCind, int RCrot);
 	void Draw(Graphics::Display &display);
 	void DrawFace(Graphics::Display &display, int index);
 	void RotateRelative(float angle [3]);
@@ -80,6 +161,7 @@ public:
 	void ResetToBase();
 	void ResetVisibleFace();
 	void SetFacePositionVisible(bool toggle, int position);
+	void PrintData();
 	//Cubie & operator=(const Cubie & rhs);
 };
 
@@ -104,32 +186,52 @@ public:
 		}
 	}
 	// Put data structures here
-	int indices[20]; //Index of cubie in position
+	int indices[20]; //Index of cubie in position //uint8_t
 	int rotation[20]; //Rotation of cubie in position
 	
 	int edgesOnFace[6][4] = 
 	{
 		{0, 6, 4, 2},  //0
-		{0, 1, 8, 7},  //1
-		{2, 3, 9, 1},  //2
-		{4, 5, 10, 3}, //3
-		{6, 7, 11, 5}, //4
+		{2, 3, 9, 1},  //1
+		{0, 1, 8, 7},  //2
+		{6, 7, 11, 5}, //3
+		{4, 5, 10, 3}, //4
 		{9, 10, 11, 8} //5
 	};
+//	int cornersOnFace[6][4] = 
+//	{
+//		{4 +11, 3 +11, 2 +11, 1 +11}, //0
+//		{1 +11, 2 +11, 6 +11, 5 +11}, //1
+//		{4 +11, 1 +11, 5 +11, 8 +11}, //2
+//		{3 +11, 4 +11, 8 +11, 7 +11}, //3
+//		{2 +11, 3 +11, 7 +11, 6 +11}, //4
+//		{5 +11, 6 +11, 7 +11, 8 +11}  //5
+//	};
 	int cornersOnFace[6][4] = 
 	{
-		{4 +11, 3 +11, 2 +11, 1 +11}, //0
-		{4 +11, 1 +11, 5 +11, 8 +11}, //1
-		{1 +11, 2 +11, 6 +11, 5 +11}, //2
-		{2 +11, 3 +11, 7 +11, 6 +11}, //3
-		{3 +11, 4 +11, 8 +11, 7 +11}, //4
-		{5 +11, 6 +11, 7 +11, 8 +11}  //5
+		{15, 14, 13, 12}, //0
+		{16, 12, 13, 17}, //1
+		{15, 12, 16, 19}, //2
+		{15, 19, 18, 14}, //3
+		{13, 14, 18, 17}, //4
+		{16, 17, 18, 19}  //5
 	};
 	
+	// Move to RC Class
+	void RotateFace(int move);
+	void RotateEdges(int move);
+	void RotateCorners(int move);
+	void SwapPositions(int p1, int p2);
+	void ShiftPositionsCW(int (&arr)[4]);
+	void ShiftPositionsCCW(int (&arr)[4]);
+	//
+	
+	void PrintState();
+	
+	// TODO: Remove
 	void RotateFace(int face, int move);
 	void RotateEdges(int face, int move);
 	void RotateCorners(int face, int move);
-	void SwapPositions(int p1, int p2);
 	void ShiftPositions(int (&arr)[4], bool forward);
 };
 
@@ -162,8 +264,15 @@ static bool operator==(const RCState &l1, const RCState &l2)
 class RC : public SearchEnvironment<RCState, RCAction>
 {
 public:
-	//Constants
+	// RELATED TO HASH FUNCTION
+	std::vector<int> corners;
+	std::vector<int> edges;
+	
+	
+	//Constants TODO: MOVE TO BOTTOM
 	const int fromFaceToCenter[6] =
+	// Modifier: e.g. cubies on face 0 simply add 3 to their own position to get the position 
+	// of the layer of cubies to get the position of the cubie 1 towards the center of the cubie
 	{
 		3, 9, 1, -9, -1, -3
 	};
@@ -175,6 +284,29 @@ public:
 	const float turnSpd = 0.04;
 	const int edgeOrder [4] = {1, 5, 7, 3};
 	const int cornerOrder [4] = {0, 2, 8, 6};
+	const int convertStatePos [20] = 
+	{	// Converts from RCState cubie indices to RC indices
+		9, // 0
+		3, // 1
+		1, // 2
+		5, // 3
+		11,// 4
+		22,// 5
+		18,// 6
+		20,// 7
+		14,// 8
+		7, // 9
+		16,// 10
+		24,// 11
+		0, // 12
+		2, // 13
+		19,// 14
+		17,// 15
+		6, // 16
+		8, // 17
+		25,// 18
+		23 // 19
+	};
 	
 	//Cubie Object items
 	Cubie cubies [26];
@@ -199,6 +331,18 @@ public:
 
 	RC()
 	{
+		// HASH FUNCTION RELATED
+		corners.resize(8);
+		for (int i = 0; i < 8; i++)
+		{
+			corners[i] = i;
+		}
+		edges.resize(12);
+		for (int i = 0; i < 12; i++)
+		{
+			edges[i] = i;
+		}
+		
 		for (int i = 0; i < 26; i++)
 		{
 			//std::cout << cubies[i].a << '\n';
@@ -226,6 +370,7 @@ public:
 			in = (i/3)*3 - (i%3) + 20; in -= in/14;
 			cubiesOnFace[3][i] = in;
 		}
+		
 		//Initialize notInFaceTurning
 		for (int i = 0; i < 6; i++)
 		{
@@ -297,13 +442,28 @@ public:
 	virtual void OpenGLDraw(const RCState&, const RCAction&) const;
 	
 	void Draw(Graphics::Display &display, const RCState&) const;
+	void TestDraw(Graphics::Display &display, RCState &state);
 	
 	void OpenGLDrawCube(int cube) const;
 	void SetFaceColor(int face) const;
 	mutable std::vector<RCAction> history;
 	
-	
 	bool pruneSuccessors;
+	
+	// HASH FUNCTION
+	// CORNERS
+	uint64_t GetPDBSizeCorner() const;
+	uint64_t GetPDBHashCorner(const RCState &s, int threadID) const;
+	void GetStateFromPDBHashCorner(uint64_t hash, RCState &s, int threadID) const;
+	uint64_t GetStateHashCorner(const RCState &s);
+
+	// EDGES
+//	uint64_t GetPDBSizeEdge() const;
+//	uint64_t GetPDBHashEdge(const RCState &s, int threadID) const;
+//	void GetStateFromPDBHashEdge(uint64_t hash, RCState &s, int threadID) const;
+//	uint64_t GetStateHashEdge(const RCState &s);
+	
+	uint64_t FactorialUpperK(int n, int k) const;
 };
 
 #endif /* defined(__hog2_glut__RubiksCube__) */
