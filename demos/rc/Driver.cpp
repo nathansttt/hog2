@@ -85,7 +85,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	//Draw here
 	env.TestUpdate();
 	env.Draw(display, cube);
-	env.TestDraw(display, cube);
+	//env.TestDraw(display, cube);
 
 	return;
 }
@@ -151,8 +151,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			int ikey = key - '0';
 			// TEMP: DO NOT ROTATE RC
 			// env.RotateFace(ikey, moveType);
-
-			cube.RotateFace(ikey*3+moveType);
+			env.ApplyAction(cube, ikey*3+moveType);
+			//cube.RotateFace(ikey*3+moveType);
 			
 			// Test
 			std::cout << "State: " << '\n'; cube.PrintState();
