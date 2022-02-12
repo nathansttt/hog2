@@ -153,9 +153,9 @@ public:
 	
 	void Initialize(int ind);
 	void Initialize(int RCpos, int RCind, int RCrot);
-	void Draw(Graphics::Display &display);
-	void DrawFace(Graphics::Display &display, int index);
-	void RotateRelative(float angle [3]);
+	void Draw(Graphics::Display &display) const;
+	void DrawFace(Graphics::Display &display, int index) const;
+	void RotateRelative(const float angle[3]);
 	void RotateBase(float angle [3]);
 	void RotateFacePos(bool clockwise, int axis); 
 	void ResetToBase();
@@ -317,7 +317,7 @@ public:
 	};
 	
 	//Cubie Object items
-	Cubie cubies [26];
+	mutable Cubie cubies [26];
 	float rotationTotal [3];
 	int cubiesOnFace [6][9]; //Face, position
 	int cubieInPos[26];
@@ -330,8 +330,8 @@ public:
 	float interpArr[3];
 	bool passiveRot = true;
 	
-	void DrawCubies(Graphics::Display &display);
-	void DrawCubiesRotating(Graphics::Display &display);
+	void DrawCubies(Graphics::Display &display) const;
+	void DrawCubiesRotating(Graphics::Display &display) const;
 	void RotateCubies(float add[3]);
 	void RotateFace(int face, int move);
 	void InterpFaceRot(float progress);
@@ -451,7 +451,6 @@ public:
 	virtual void OpenGLDraw(const RCState&, const RCAction&) const;
 	
 	void Draw(Graphics::Display &display, const RCState&) const;
-	void TestDraw(Graphics::Display &display, RCState &state);
 	
 	void OpenGLDrawCube(int cube) const;
 	void SetFaceColor(int face) const;

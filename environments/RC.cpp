@@ -319,7 +319,7 @@ void Cubie::Initialize(int ind)
 /*
  * 
  */
-void Cubie::Draw(Graphics::Display &display)
+void Cubie::Draw(Graphics::Display &display) const
 {
 	//Test
 //	if (RCindex == 19 || RCindex == 0)
@@ -386,7 +386,7 @@ void Cubie::Draw(Graphics::Display &display)
 /* Given points (in a correct order)
  * Draw a polygon (face of a cubie)
  */
-void Cubie::DrawFace(Graphics::Display &display, int index) //face Index (0-5)
+void Cubie::DrawFace(Graphics::Display &display, int index) const //face Index (0-5)
 {
 	display.FillTriangle( points[pointsOnFace[index][0]], points[pointsOnFace[index][1]],
 			points[pointsOnFace[index][2]], outCol);
@@ -402,7 +402,7 @@ void Cubie::DrawFace(Graphics::Display &display, int index) //face Index (0-5)
 /*
  * 
  */
-void Cubie::RotateRelative(float angle [3])
+void Cubie::RotateRelative(const float angle[3])
 {
 	for (Graphics::point & point : points) //!!!!
 	{
@@ -933,7 +933,7 @@ void RCState::PrintState()
 /*
  * 
  */
-void RC::DrawCubies(Graphics::Display &display)
+void RC::DrawCubies(Graphics::Display &display) const
 {
 	if (rotating)
 	{
@@ -950,7 +950,7 @@ void RC::DrawCubies(Graphics::Display &display)
 /*
  * 
  */
-void RC::DrawCubiesRotating(Graphics::Display &display)
+void RC::DrawCubiesRotating(Graphics::Display &display) const
 {
 	bool jumped = false;
 	if (rotatingFaceBehind)
@@ -1267,7 +1267,7 @@ void RC::GetNextState(const RCState &s1, RCAction a, RCState &s2) const
 
 bool RC::InvertAction(RCAction &a) const
 {
-	assert(false);
+//	assert(false);
 	// TODO: Test
 	if (2 == a%3)
 		return true;
@@ -1360,16 +1360,7 @@ void RC::OpenGLDraw(const RCState&, const RCAction&) const
 }
 
 // Draw a RCState. Internally do the 3d transform for the drawing.
-void RC::Draw(Graphics::Display &display, const RCState &) const
-{
-	// CANNOT change any variables within RCState, Cubies, or RC
-	
-	// Format of the data needed to draw everything:
-	
-}
-
-// Draw a RCState. Internally do the 3d transform for the drawing.
-void RC::TestDraw(Graphics::Display &display, RCState & state) 
+void RC::Draw(Graphics::Display &display, const RCState &state) const
 {
 	// TEMP: Refresh the cube EVERY FRAME (BAD)
 	for (int i = 0; i < 20; i++)
@@ -1377,7 +1368,7 @@ void RC::TestDraw(Graphics::Display &display, RCState & state)
 		cubies[convertStatePos[i]].Initialize(i, state.indices[i], state.rotation[i]);
 	}
 
-	// For every cubie, return it to its original draw angle, and then apply the needed rotation 
+	// For every cubie, return it to its original draw angle, and then apply the needed rotation
 	// This codeblock is a section from RotateCubies(), consider creating a new function
 	for (int i = 0; i < 26; i++)
 	{
