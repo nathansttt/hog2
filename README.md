@@ -11,7 +11,7 @@ Documentation (much of it older, but starting to be updated) [is available here]
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get started with the HOG2 applications run the following commands
+To get started with the HOG2 applications run the following commands. Note that SFML and OpenGL are not required for the headless version of HOG2 (see build instructions below.)
 
 ### Prerequisites
 
@@ -50,13 +50,21 @@ To build the project on the command-line, you must first download the source cod
 
 Then traverse to the build directory with:
 ```sh
-cd hog2/build/gmake
+cd hog2/build/SFML
 ```
 
 Finally build the project with make:
 ```sh
 make
 ```
+
+Alternately, you can build a headless version of HOG2 (which does not require SFML or OpenGL) using:
+
+```sh
+make OPENGL=STUB
+```
+
+Note that when switching between the headless and GUI versions of HOG2 you must do a clean rebuild.
 
 After this completes the binaries can be found under `../../bin/release/`.
 

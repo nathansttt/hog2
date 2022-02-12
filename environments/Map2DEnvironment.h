@@ -211,7 +211,7 @@ public:
 	void SetEightConnected() { fourConnected = false; }
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
-	double GetPathLength(std::vector<xyLoc> &neighbors);
+//	double GetPathLength(std::vector<xyLoc> &neighbors);
 private:
 	void GetMaxRect(long terrain, int x, int y, int endx, int endy, std::vector<bool> &drawn, Graphics::rect &r) const;
 	void DrawSingleTerrain(long terrain, Graphics::Display &disp, std::vector<bool> &drawn) const;

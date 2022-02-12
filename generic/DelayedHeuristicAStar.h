@@ -1,83 +1,75 @@
 /**
- * @file TemplateAStar.h
+ * @file DelayedHeuristicAStar.h
  * @package hog2
- * @brief A templated version of the original HOG's genericAstar.h
+ * @brief This is the A* used in Doran Nadav's MSc Thesis (BGU 2020-2021) The original version was in Python
  * @author Nathan Sturtevant
  * SearchEnvironment
- * @date 3/22/06, modified 06/13/2007
+ * @date Jaunary 7, 2022
  *
  */
 
-#ifndef TemplateAStar_H
-#define TemplateAStar_H
+#ifndef DelayedHeuristicAStar_H
+#define DelayedHeuristicAStar_H
 
-#define __STDC_CONSTANT_MACROS
-#include <stdint.h>
-// this is defined in stdint.h, but it doesn't always get defined correctly
-// even when __STDC_CONSTANT_MACROS is defined before including stdint.h
-// because stdint might be included elsewhere first...
-#ifndef UINT32_MAX
-#define UINT32_MAX        4294967295U
-#endif
+// Borrow most data structures from A*
+#include "TemplateAStar.h"
 
 
-#include <iostream>
-#include "Constraint.h"
-#include "FPUtil.h"
-#include <unordered_map>
-#include "Graphics.h"
-#include "AStarOpenClosed.h"
-#include "BucketOpenClosed.h"
-//#include "SearchEnvironment.h" // for the SearchEnvironment class
-#include "float.h"
-
-#include <algorithm> // for vector reverse
-
-#include "GenericSearchAlgorithm.h"
-//static double lastF = 0;
-
-//typedef double (*phi)(double, double);
-// note, this should be consteval when C++20 is widespread
-//constexpr auto phi_astar = [](double h, double g) -> double { return g+h; };
-
-template <class state>
-struct AStarCompareWithF {
-	// returns true if i2 is preferred over i1
-	bool operator()(const AStarOpenClosedDataWithF<state> &i1, const AStarOpenClosedDataWithF<state> &i2) const
-	{
-		if (fequal(i1.f, i2.f))
-		{
-			return (fless(i1.g, i2.g));
-		}
-		return fgreater(i1.f, i2.f);
-	}
-};
-
-template <class state>
-struct AStarCompare {
-	// returns true if i2 is preferred over i1
-	bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
-	{
-		if (fequal(i1.g+i1.h, i2.g+i2.h))
-		{
-			return (fless(i1.g, i2.g));
-		}
-		return fgreater(i1.g+i1.h, i2.g+i2.h);
-	}
-};
-
-/**
- * A templated version of A*, based on HOG genericAStar
- */
-template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompareWithF<state>, AStarOpenClosedDataWithF<state>> >
-class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
+template <class state, class Environment>
+class HeuristicLookupBuffer {
 public:
-	TemplateAStar() {
-		ResetNodeCount(); env = 0; useBPMX = 0; stopAfterGoal = true; weight=1; reopenNodes = false; theHeuristic = 0; directed = false;
+	HeuristicLookupBuffer()
+	{
+		e = 0;
+	}
+	void Reset(Environment *env, const state &goal, unsigned int nodeLimit)
+	{
+		e = env;
+		this->goal = goal;
+		this->nodeLimit = nodeLimit;
+	}
+	
+	bool HitNodeLimit()
+	{
+		return states.size() >= nodeLimit;
+	}
+	
+	void Add(state &s)
+	{
+		states.push_back(s);
+	}
+	
+	const std::vector<int> &Evaluate()
+	{
+		results.resize(states.size());
+		for (int x = 0; x < states.size(); x++)
+			results[x] = e->HCost(states[x], goal);
+		states.resize(0);
+		return results;
+	}
+private:
+	Environment *e;
+	state goal;
+	std::vector<state> states;
+	std::vector<int> results;
+	int nodeLimit;
+};
+
+ 
+/**
+ * A templated version of A*, based on TemplateAStar, which delays heuristic lookups as long as possible and batches them.
+ */
+template <class state, class action, class environment, class batchHeuristic = HeuristicLookupBuffer<state, environment>, class openList = AStarOpenClosed<state, AStarCompareWithF<state>, AStarOpenClosedDataWithF<state>> >
+class DelayedHeuristicAStar : public GenericSearchAlgorithm<state,action,environment> {
+public:
+	DelayedHeuristicAStar(int batchLookupSize)
+	:batch(), batchLookupSize(batchLookupSize)
+	{
+		ResetNodeCount(); env = 0; stopAfterGoal = true; weight=1; reopenNodes = false; theHeuristic = 0; directed = false;
 		theConstraint = 0;
 		phi = [](double h, double g){ return g+h; };
 	}
-	virtual ~TemplateAStar() {}
+	virtual ~DelayedHeuristicAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state&, const state&, std::vector<action> & );
 	
@@ -86,8 +78,6 @@ public:
 	
 	bool InitializeSearch(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
-	void AddAdditionalStartState(state& newState);
-	void AddAdditionalStartState(state& newState, double cost);
 	
 	state CheckNextNode();
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
@@ -119,9 +109,6 @@ public:
 	dataLocation GetStateLocation(const state &val)
 	{ uint64_t key; return openClosedList.Lookup(env->GetStateHash(val), key); }
 	
-	void SetUseBPMX(int depth) { useBPMX = depth; if (depth) reopenNodes = true; }
-	int GetUsingBPMX() { return useBPMX; }
-
 	void SetReopenNodes(bool re) { reopenNodes = re; }
 	bool GetReopenNodes() { return reopenNodes; }
 
@@ -162,6 +149,7 @@ public:
 	}
 	double GetWeight() { return weight; }
 private:
+	void HandleBatchedStates();
 	uint64_t nodesTouched, nodesExpanded;
 	
 	std::vector<state> neighbors;
@@ -175,12 +163,23 @@ private:
 	double weight;
 	std::function<double(double, double)> phi;
 	bool directed;
-	int useBPMX;
 	bool reopenNodes;
 	uint64_t uniqueNodesExpanded;
 	environment *radEnv;
 	Heuristic<state> *theHeuristic;
 	Constraint<state> *theConstraint;
+	struct tempData {
+//		tempData(state s, uint64_t hash, double g, uint64_t parent)
+//		:s(s), hash(hash), g(g), parent(parent) {}
+		state s;
+		uint64_t hash;
+		double g;
+		uint64_t parent;
+	};
+	std::vector<tempData> delayedStates;
+	double currentCostLimit;
+	batchHeuristic batch;
+	int batchLookupSize;
 };
 
 /**
@@ -191,11 +190,11 @@ private:
  * @return The name of the algorithm
  */
 
-template <class state, class action, class environment, class openList>
-const char *TemplateAStar<state,action,environment,openList>::GetName()
+template <class state, class action, class environment, class batchHeuristic, class openList>
+const char *DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetName()
 {
 	static char name[32];
-	sprintf(name, "TemplateAStar[]");
+	sprintf(name, "DelayedHeuristicAStar[]");
 	return name;
 }
 
@@ -210,8 +209,8 @@ const char *TemplateAStar<state,action,environment,openList>::GetName()
  * @param thePath A vector of states which will contain an optimal path 
  * between from and to when the function returns, if one exists. 
  */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetPath(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
 	if (!InitializeSearch(_env, from, to, thePath))
   	{	
@@ -224,8 +223,8 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
 	}
 }
 
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env, const state& from, const state& to, std::vector<action> &path)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetPath(environment *_env, const state& from, const state& to, std::vector<action> &path)
 {
 	std::vector<state> thePath;
 	if (!InitializeSearch(_env, from, to, thePath))
@@ -253,8 +252,8 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
  * @param to The goal state
  * @return TRUE if initialization was successful, FALSE otherwise
  */
-template <class state, class action, class environment, class openList>
-bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+bool DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
 	if (theHeuristic == 0)
 		theHeuristic = _env;
@@ -265,39 +264,21 @@ bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environm
 	start = from;
 	goal = to;
 	
+	currentCostLimit = 0;
+	delayedStates.resize(0);
+	batch.Reset(_env, to, batchLookupSize);
+
 	if (env->GoalTest(from, to) && (stopAfterGoal)) //assumes that from and to are valid states
 	{
 		return false;
 	}
-	
-	double h = theHeuristic->HCost(start, goal);
+
+	// No purpose in looking up the heuristic of the start state.
+	// It is never used.
+	double h = 0;//theHeuristic->HCost(start, goal);
 	openClosedList.AddOpenNode(start, env->GetStateHash(start), phi(h, 0), 0, h);
 	
 	return true;
-}
-
-/**
- * Add additional start state to the search. This should only be called after Initialize Search and before DoSingleSearchStep.
- * @author Nathan Sturtevant
- * @date 01/06/08
- */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(state& newState)
-{
-	double h = theHeuristic->HCost(newState, goal);
-	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), phi(h, 0), 0, h);
-}
-
-/**
- * Add additional start state to the search. This should only be called after Initialize Search
- * @author Nathan Sturtevant
- * @date 09/25/10
- */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(state& newState, double cost)
-{
-	double h = theHeuristic->HCost(newState, goal);
-	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), phi(h, cost), cost, h);
 }
 
 /**
@@ -310,15 +291,22 @@ void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(s
  * @return TRUE if there is no path or if we have found the goal, FALSE
  * otherwise
  */
-template <class state, class action, class environment, class openList>
-bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::vector<state> &thePath)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+bool DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::DoSingleSearchStep(std::vector<state> &thePath)
 {
+	if (openClosedList.OpenSize() == 0)
+	{
+		HandleBatchedStates();
+	}
 	if (openClosedList.OpenSize() == 0)
 	{
 		thePath.resize(0); // no path found!
 		//closedList.clear();
 		return true;
 	}
+	if (fgreater(openClosedList.Lookup(openClosedList.Peek()).f, currentCostLimit))
+		HandleBatchedStates();
+
 	uint64_t nodeid = openClosedList.Close();
 //	if (openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h > lastF)
 //	{ lastF = openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h;
@@ -355,29 +343,6 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 		neighborLoc.push_back(openClosedList.Lookup(env->GetStateHash(neighbors[x]), theID));
 		neighborID.push_back(theID);
 		edgeCosts.push_back(env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]));
-		if (useBPMX)
-		{
-			if (neighborLoc.back() != kNotFound)
-			{
-				if (!directed)
-					bestH = std::max(bestH, openClosedList.Lookup(theID).h-edgeCosts.back());
-				lowHC = std::min(lowHC, openClosedList.Lookup(theID).h+edgeCosts.back());
-			}
-			else {
-				double tmpH = theHeuristic->HCost(neighbors[x], goal);
-				if (!directed)
-					bestH = std::max(bestH, tmpH-edgeCosts.back());
-				lowHC = std::min(lowHC, tmpH+edgeCosts.back());
-			}
-		}
-	}
-	
-	if (useBPMX) // propagate best child to parent
-	{
-		if (!directed)
-			openClosedList.Lookup(nodeid).h = std::max(openClosedList.Lookup(nodeid).h, bestH);
-		openClosedList.Lookup(nodeid).h = std::max(openClosedList.Lookup(nodeid).h, lowHC);
-		openClosedList.Lookup(nodeid).f = phi(openClosedList.Lookup(nodeid).h, openClosedList.Lookup(nodeid).g);
 	}
 	
 	// iterate again updating costs and writing out to memory
@@ -393,16 +358,6 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 		switch (neighborLoc[x])
 		{
 			case kClosedList:
-				if (useBPMX) // propagate parent to child - do this before potentially re-opening
-				{
-					if (fless(openClosedList.Lookup(neighborID[x]).h, bestH-edgeCosts[x]))
-					{
-						auto &i = openClosedList.Lookup(neighborID[x]);
-						i.h = bestH-edgeCosts[x];
-						i.f = phi(i.h, i.g);
-						if (useBPMX > 1) FullBPMX(neighborID[x], useBPMX-1);
-					}
-				}
 				if (reopenNodes)
 				{
 					if (fless(openClosedList.Lookup(nodeid).g+edgeCosts[x], openClosedList.Lookup(neighborID[x]).g))
@@ -435,54 +390,53 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 //					std::cout << " Reducing cost to " << openClosedList.Lookup(nodeid).g+edgeCosts[x] << "\n";
 					// TODO: unify the KeyChanged calls.
 				}
-				else {
-//					std::cout << " no cheaper \n";
-				}
-				if (useBPMX) // propagate best child to parent
-				{
-					if (fgreater(bestH-edgeCosts[x], openClosedList.Lookup(neighborID[x]).h))
-					{
-						auto &i = openClosedList.Lookup(neighborID[x]);
-						i.h = std::max(i.h, bestH-edgeCosts[x]);
-						i.f = phi(i.h, i.g);
-						openClosedList.KeyChanged(neighborID[x]);
-					}
-				}
-				break;
 			case kNotFound:
 				{ // add node to open list
 					//double edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
 //					std::cout << " adding to open ";
 //					std::cout << double(theHeuristic->HCost(neighbors[x], goal)+openClosedList.Lookup(nodeid).g+edgeCosts[x]);
 //					std::cout << " \n";
-					double h = theHeuristic->HCost(neighbors[x], goal);
-					if (useBPMX)
-					{
-						openClosedList.AddOpenNode(neighbors[x],
-												   env->GetStateHash(neighbors[x]),
-												   phi(h, openClosedList.Lookup(nodeid).g+edgeCosts[x]),
-												   openClosedList.Lookup(nodeid).g+edgeCosts[x],
-												   std::max(h, openClosedList.Lookup(nodeid).h-edgeCosts[x]),
-												   nodeid);
-					}
-					else {
-						openClosedList.AddOpenNode(neighbors[x],
-												   env->GetStateHash(neighbors[x]),
-												   phi(h, openClosedList.Lookup(nodeid).g+edgeCosts[x]),
-												   openClosedList.Lookup(nodeid).g+edgeCosts[x],
-												   h,
-												   nodeid);
-					}
-//					if (loc == -1)
-//					{ // duplicate edges
-//						neighborLoc[x] = kOpenList;
-//						x--;
-//					}
+					delayedStates.push_back({neighbors[x],
+						env->GetStateHash(neighbors[x]),
+						openClosedList.Lookup(nodeid).g+edgeCosts[x],
+						nodeid});
+					batch.Add(neighbors[x]);
+					if (batch.HitNodeLimit())
+						HandleBatchedStates();
+//					double h = theHeuristic->HCost(neighbors[x], goal);
+//					openClosedList.AddOpenNode(neighbors[x],
+//											   env->GetStateHash(neighbors[x]),
+//											   phi(h, openClosedList.Lookup(nodeid).g+edgeCosts[x]),
+//											   openClosedList.Lookup(nodeid).g+edgeCosts[x],
+//											   h,
+//											   nodeid);
 				}
 		}
 	}
 		
 	return false;
+}
+
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::HandleBatchedStates()
+{
+	if (delayedStates.size() == 0)
+		return;
+	auto vec = batch.Evaluate();
+	for (int x = 0; x < delayedStates.size(); x++)
+	{
+		double h = vec.at(x);
+		openClosedList.AddOpenNode(delayedStates[x].s,
+								   delayedStates[x].hash,
+								   phi(h, delayedStates[x].g),
+								   delayedStates[x].g,
+								   h,
+								   delayedStates[x].parent);
+	}
+	delayedStates.resize(0);
+	currentCostLimit = openClosedList.Lookup(openClosedList.Peek()).f;
+//	batch.Reset(_env, to, batchLookupSize);
+//	batch.
 }
 
 /**
@@ -492,8 +446,8 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
  * 
  * @return The first state in the open list. 
  */
-template <class state, class action, class environment, class openList>
-state TemplateAStar<state, action,environment,openList>::CheckNextNode()
+template <class state, class action, class environment, class batchHeuristic, class openList>
+state DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::CheckNextNode()
 {
 	uint64_t key = openClosedList.Peek();
 	return openClosedList.Lookup(key).data;
@@ -508,8 +462,8 @@ state TemplateAStar<state, action,environment,openList>::CheckNextNode()
  * 
  * @return The first state in the open list. 
  */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state, action,environment,openList>::FullBPMX(uint64_t nodeID, int distance)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::FullBPMX(uint64_t nodeID, int distance)
 {
 	if (distance <= 0)
 		return;
@@ -559,8 +513,8 @@ void TemplateAStar<state, action,environment,openList>::FullBPMX(uint64_t nodeID
  * @param goalNode the goal state
  * @param thePath will contain the path from goalNode to the start state
  */
-template <class state, class action,class environment,class openList>
-void TemplateAStar<state, action,environment,openList>::ExtractPathToStartFromID(uint64_t node,
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::ExtractPathToStartFromID(uint64_t node,
 																	 std::vector<state> &thePath)
 {
 	do {
@@ -570,8 +524,8 @@ void TemplateAStar<state, action,environment,openList>::ExtractPathToStartFromID
 	thePath.push_back(openClosedList.Lookup(node).data);
 }
 
-template <class state, class action,class environment,class openList>
-const state &TemplateAStar<state, action,environment,openList>::GetParent(const state &s)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+const state &DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetParent(const state &s)
 {
 	uint64_t theID;
 	openClosedList.Lookup(env->GetStateHash(s), theID);
@@ -579,8 +533,8 @@ const state &TemplateAStar<state, action,environment,openList>::GetParent(const 
 	return openClosedList.Lookup(theID).data;
 }
 
-template <class state, class action, class environment, class openList>
-uint64_t TemplateAStar<state, action,environment,openList>::GetNecessaryExpansions() const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+uint64_t DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetNecessaryExpansions() const
 {
 	uint64_t n = 0;
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
@@ -599,22 +553,22 @@ uint64_t TemplateAStar<state, action,environment,openList>::GetNecessaryExpansio
  * @author Nathan Sturtevant
  * @date 03/22/06
  */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state, action,environment,openList>::PrintStats()
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::PrintStats()
 {
 	printf("%u items in closed list\n", (unsigned int)openClosedList.ClosedSize());
 	printf("%u items in open queue\n", (unsigned int)openClosedList.OpenSize());
 }
 
 /**
- * Return the amount of memory used by TemplateAStar
+ * Return the amount of memory used by DelayedHeuristicAStar
  * @author Nathan Sturtevant
  * @date 03/22/06
  * 
  * @return The combined number of elements in the closed list and open queue
  */
-template <class state, class action, class environment, class openList>
-int TemplateAStar<state, action,environment,openList>::GetMemoryUsage()
+template <class state, class action, class environment, class batchHeuristic, class openList>
+int DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetMemoryUsage()
 {
 	return openClosedList.size();
 }
@@ -629,8 +583,8 @@ int TemplateAStar<state, action,environment,openList>::GetMemoryUsage()
  * @return success Whether we found the value or not
  * the states
  */
-template <class state, class action, class environment, class openList>
-bool TemplateAStar<state, action,environment,openList>::GetClosedListGCost(const state &val, double &gCost) const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+bool DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetClosedListGCost(const state &val, double &gCost) const
 {
 	uint64_t theID;
 	dataLocation loc = openClosedList.Lookup(env->GetStateHash(val), theID);
@@ -642,8 +596,8 @@ bool TemplateAStar<state, action,environment,openList>::GetClosedListGCost(const
 	return false;
 }
 
-template <class state, class action, class environment, class openList>
-bool TemplateAStar<state, action,environment,openList>::GetOpenListGCost(const state &val, double &gCost) const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+bool DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetOpenListGCost(const state &val, double &gCost) const
 {
 	uint64_t theID;
 	dataLocation loc = openClosedList.Lookup(env->GetStateHash(val), theID);
@@ -655,8 +609,8 @@ bool TemplateAStar<state, action,environment,openList>::GetOpenListGCost(const s
 	return false;
 }
 
-template <class state, class action, class environment, class openList>
-bool TemplateAStar<state, action,environment,openList>::GetHCost(const state &val, double &hCost) const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+bool DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetHCost(const state &val, double &hCost) const
 {
 	uint64_t theID;
 	dataLocation loc = openClosedList.Lookup(env->GetStateHash(val), theID);
@@ -668,8 +622,8 @@ bool TemplateAStar<state, action,environment,openList>::GetHCost(const state &va
 	return false;
 }
 
-template <class state, class action, class environment, class openList>
-bool TemplateAStar<state, action,environment,openList>::GetClosedItem(const state &s, AStarOpenClosedDataWithF<state> &result)
+template <class state, class action, class environment, class batchHeuristic, class openList>
+bool DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::GetClosedItem(const state &s, AStarOpenClosedDataWithF<state> &result)
 {
 	uint64_t theID;
 	dataLocation loc = openClosedList.Lookup(env->GetStateHash(s), theID);
@@ -689,8 +643,8 @@ bool TemplateAStar<state, action,environment,openList>::GetClosedItem(const stat
  * @date 03/12/09
  * 
  */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state, action,environment,openList>::OpenGLDraw() const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::OpenGLDraw() const
 {
 	double transparency = 1.0;
 	if (openClosedList.size() == 0)
@@ -758,8 +712,8 @@ void TemplateAStar<state, action,environment,openList>::OpenGLDraw() const
  * @date 7/12/16
  *
  */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state, action,environment,openList>::Draw(Graphics::Display &disp) const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+void DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::Draw(Graphics::Display &disp) const
 {
 	double transparency = 1.0;
 	if (openClosedList.size() == 0)
@@ -810,10 +764,15 @@ void TemplateAStar<state, action,environment,openList>::Draw(Graphics::Display &
 	}
 	env->SetColor(1.0, 0.5, 1.0, 0.5);
 	env->Draw(disp, goal);
+	for (unsigned int x = 0; x < delayedStates.size(); x++)
+	{
+		env->SetColor(Colors::blue);
+		env->Draw(disp, delayedStates[x].s);
+	}
 }
 
-template <class state, class action, class environment, class openList>
-std::string TemplateAStar<state, action,environment,openList>::SVGDraw() const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+std::string DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::SVGDraw() const
 {
 	std::string s;
 	double transparency = 1.0;
@@ -858,8 +817,8 @@ std::string TemplateAStar<state, action,environment,openList>::SVGDraw() const
 	return s;
 }
 
-template <class state, class action, class environment, class openList>
-std::string TemplateAStar<state, action,environment,openList>::SVGDrawDetailed() const
+template <class state, class action, class environment, class batchHeuristic, class openList>
+std::string DelayedHeuristicAStar<state,action,environment,batchHeuristic,openList>::SVGDrawDetailed() const
 {
 	std::string s;
 	//double transparency = 1.0;

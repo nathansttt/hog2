@@ -39,7 +39,7 @@ const uint8_t kNothingPushed = 0xFF;
 const int codeSize = 2;
 
 enum snakeDir : uint8_t {
-	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3
+	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3, kNoDirection=0x4
 };
 struct SnakeBirdState {
 	uint64_t snakeBodies; // up to 32 in length
@@ -68,7 +68,22 @@ struct SnakeBirdState {
 	{ snakeHeads &= ~(snakeLenMask<<(3+9*(whichSnake+1)+5*whichSnake)); snakeHeads |= ((endOffset&snakeLenMask)<<(3+9*(whichSnake+1)+5*whichSnake)); }
 	
 	void SetSnakeLength(int whichSnake, int len)
-	{ SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1); }
+	{ //SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1);
+		uint64_t oldBody[4]; // max 4 snakes
+		int oldLen[4];
+		for (int x = 0; x < GetNumSnakes(); x++)
+		{
+			oldBody[x] = GetBodyBits(x);
+			oldLen[x] = GetSnakeLength(x);
+		}
+		oldLen[whichSnake] = len;
+		oldBody[whichSnake] &= ((1<<len)-1);
+		//SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x-1)+oldLen[x]-1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetBodyBits(x, oldBody[x]);
+	}
 	int GetSnakeLength(int whichSnake) const
 	{ return GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1)+1; }
 
@@ -112,6 +127,37 @@ struct SnakeBirdState {
 		mask -= 1;
 		uint64_t result = snakeBodies>>(GetSnakeBodyEnd(whichSnake-1)*2);
 		return result&mask;
+	}
+	void SetBodyBits(int whichSnake, uint64_t bodyBits)
+	{
+		uint64_t mask = 1;
+		mask <<= (GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1))*2; // length in bits
+		mask -= 1;
+		mask <<= GetSnakeBodyEnd(whichSnake-1)*2;
+		bodyBits <<= GetSnakeBodyEnd(whichSnake-1)*2;
+		snakeBodies &= (~mask);
+		snakeBodies |= bodyBits;
+	}
+	void MakeSnakeLonger(int whichSnake)
+	{
+		uint64_t old[4]; // max 4 snakes
+		for (int x = 0; x < GetNumSnakes(); x++)
+			old[x] = GetBodyBits(x);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x)+1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetBodyBits(x, old[x]);
+	}
+	void MakeSnakeLonger(int whichSnake, snakeDir addDir)
+	{
+		uint64_t old[4]; // max 4 snakes
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			old[x] = GetBodyBits(x);
+		old[whichSnake] |= ((2*(GetSnakeLength(whichSnake)+1))<<addDir);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetSnakeBodyEnd(x, GetSnakeBodyEnd(x)+1);
+		for (int x = whichSnake; x < GetNumSnakes(); x++)
+			SetBodyBits(x, old[x]);
 	}
 	int GetObjectLocation(int whichObstacle) const { return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	void SetObjectLocation(int whichObstacle, int loc) //{ return (locBlockFruit>>(9*whichObstacle))&locationMask; }
@@ -198,7 +244,7 @@ const uint8_t kBlockMask = 0x20;
 
 enum SnakeBirdWorldObject : uint8_t {
 	// can always enter, but may have secondary effects
-	kEmpty  = 0x80,
+	kEmpty  = 0x80, // = 128
 	kFruit  = 0x81,
 	kExit   = 0x82,
 	kPortal1= 0x83,
@@ -206,8 +252,8 @@ enum SnakeBirdWorldObject : uint8_t {
 	kPortal, //figure out where the portals go
 
 	// cannot ever enter
-	kGround = 0x40,
-	kSpikes = 0x41,
+	kGround = 0x40, // = 64
+	kSpikes = 0x41, // = 65
 
 	// for pushing
 	kBlock1 = 0x20,
@@ -235,6 +281,10 @@ class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
 	SnakeBird(int width = 20, int height = 16);
 	void Reset();
+	void BiggerMapHeight();
+	void BiggerMapWidth();
+	void SmallerMapHeight();
+	void SmallerMapWidth();
 	bool Load(const char *filename);
 	bool Save(const char *filename);
 	std::string EncodeLevel() const;
@@ -245,6 +295,11 @@ public:
 	SnakeBirdState GetStart() const;
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
+	void AddSnakeHead(int x, int y, int whichSnake);
+	snakeDir GetAddingDirection(int x, int y, int endX, int endY);
+	void AddSnakeBody(int x, int y, int whichSnake);
+	
+	void RemoveSnake(int x, int y, int o, int whichSnake);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
 	void RemoveBlock(int x, int y);
 	int GetNumPortals();
@@ -380,6 +435,7 @@ private:
 	int exitLoc;
 	SnakeBirdState startState;
 	bool editing;
+//	int lastSnake;
 	//	std::array<
 };
 

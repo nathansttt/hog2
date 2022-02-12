@@ -13,8 +13,6 @@
 #include <string>
 #include "RC.h"
 
-// #include "cubeHolder.h"
-
 RCState cube;
 RC env;
 //RC env2;
@@ -53,6 +51,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "MoveType", "Choose Move Type", kAnyModifier, 'm');
 	InstallKeyboardHandler(MyDisplayHandler, "TurnStop", "Stop Cube Passive Rotation", kAnyModifier, 'n');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset cube to solved", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test New PDB", kAnyModifier, 't');
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseDown));
@@ -111,7 +110,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			printf("rank is %llu\n", env.GetPDBHashCorner(cube, 0));
 		}
 			break;
-			
+		case 't':
+		{
+			RCState goal;
+			RC rc;
+			goal.Reset();
+			RCPDB pdb(&rc);
+			for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
+			{
+				pdb.GetStateFromPDBHash(x, goal);
+				assert(x == pdb.GetPDBHash(goal));
+			}
+			printf("Hash verified\n");
+			goal.Reset();
+			std::vector<RCState> succ;
+			rc.GetSuccessors(goal, succ);
+			for (auto i : succ)
+				std::cout << i << "\n";
+
+			pdb.SetGoal(goal);
+			pdb.BuildPDB(goal);
+			exit(0);
+			break;
+		}
 		case 'm':
 			moveType++;
 			if (moveType > 2) moveType = 0;

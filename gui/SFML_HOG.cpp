@@ -56,7 +56,9 @@ Graphics::rect screenRect;
 Graphics::point WindowToHOG(const Graphics::point &p);
 MonoFont font;
 std::vector<Graphics::Display::lineInfo> textLines;
-	
+
+void Line(Graphics::point p1, Graphics::point p2, float width, int viewport);
+
 pRecContext GetContext(unsigned long windowID)
 {
 	return pContextInfo;
@@ -946,22 +948,35 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				glEnd();
 				break;
 			}
+		case Graphics::Display::kFrameTriangle:
+			{
+				glColor3f(i.triangle.c.r, i.triangle.c.g, i.triangle.c.b);
+				
+				glBegin(GL_QUADS);
+				Line(i.triangle.p1, i.triangle.p2, i.triangle.width, i.viewport);
+				Line(i.triangle.p2, i.triangle.p3, i.triangle.width, i.viewport);
+				Line(i.triangle.p3, i.triangle.p1, i.triangle.width, i.viewport);
+				glEnd();
+			}
 		case Graphics::Display::kLine:
 			{
+				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
+
+				Line(i.line.start, i.line.end, i.line.width, i.viewport);
 				//std::cout << i.line.start << " <=> " << i.line.end << " " << i.line.width << "\n";
+				/*
 				Graphics::point tmp1 = ViewportToScreen(i.line.start, i.viewport);
 				Graphics::point tmp2 = ViewportToScreen(i.line.end, i.viewport);
 				GLfloat xOff = tmp1.x-tmp2.x;
 				GLfloat yOff = tmp2.y-tmp1.y;
 				GLfloat ratio = ViewportToScreenX(0.5*i.line.width, i.viewport)/sqrt(xOff*xOff+yOff*yOff);
-
 				glBegin(GL_QUADS);
-				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
 				glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
 				glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
 				glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
 				glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
 				glEnd();
+				*/
 				break;
 			}
 		}
@@ -990,6 +1005,31 @@ void DrawLines(std::vector<Graphics::Display::lineInfo> &textLines, int viewport
 		DrawCircle(tmp1.x, tmp1.y, wide, 16);
 		DrawCircle(tmp2.x, tmp2.y, wide, 16);
 	}
+}
+
+void Line(Graphics::point p1, Graphics::point p2, float width, int viewport)
+{
+	Graphics::point tmp1 = ViewportToScreen(p1, viewport);
+	Graphics::point tmp2 = ViewportToScreen(p2, viewport);
+	GLfloat xOff = tmp1.x-tmp2.x;
+	GLfloat yOff = tmp2.y-tmp1.y;
+	GLfloat ratio = ViewportToScreenX(0.5*width, viewport)/sqrt(xOff*xOff+yOff*yOff);
+	glBegin(GL_QUADS);
+	glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
+	glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
+	glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
+	glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
+	glEnd();
+	
+	// Graphics::point tmp1 = ViewportToScreen(p1, viewport);
+	// Graphics::point tmp2 = ViewportToScreen(p2, viewport);
+	// GLfloat xOff = tmp1.x-tmp2.x;
+	// GLfloat yOff = tmp1.y-tmp2.y;
+	// GLfloat ratio = 0.5f*width/sqrt(xOff*xOff+yOff*yOff);
+	// glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
+	// glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
+	// glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
+	// glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
 }
 
 void DrawGraphics(Graphics::Display &display, int port, sf::Window &window)
@@ -1038,15 +1078,7 @@ void DrawGraphics(Graphics::Display &display, int port, sf::Window &window)
 		glBegin(GL_QUADS);
 		for (int t = 0; t < i.points.size()-1; t++)
 		{
-			Graphics::point tmp1 = ViewportToScreen(i.points[t], i.viewport);
-			Graphics::point tmp2 = ViewportToScreen(i.points[t+1], i.viewport);
-			GLfloat xOff = tmp1.x-tmp2.x;
-			GLfloat yOff = tmp1.y-tmp2.y;
-			GLfloat ratio = 0.5f*i.size/sqrt(xOff*xOff+yOff*yOff);
-			glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
-			glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
-			glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
-			glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
+			Line(i.points[t], i.points[t+1], i.size, i.viewport);
 		}
 		glEnd();
 		

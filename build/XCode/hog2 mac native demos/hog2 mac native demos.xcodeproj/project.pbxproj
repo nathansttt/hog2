@@ -3786,7 +3786,8 @@
 				C4C835F61F2AF6B5004E78C0 /* glut.cpp */,
 				C4C835F71F2AF6B5004E78C0 /* glut.h */,
 			);
-			path = GL;
+			name = GL;
+			path = STUB/GL;
 			sourceTree = "<group>";
 		};
 		C4C836141F2AF6B5004E78C0 /* learning */ = {

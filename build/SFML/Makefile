@@ -14,7 +14,7 @@ prefix = /usr/local/bin
 
 # All projects to build in this order.
 PROJECTS = \
-  gui/GL \
+  gui/STUB \
   algorithms \
   environments \
   envutil \
@@ -33,6 +33,7 @@ PROJECTS = \
   apps/mapUtils \
   apps/prediction \
   apps/emotion \
+  apps/hexagon \
   apps/3dmaps \
   apps/rubik \
   apps/bidirectional \
@@ -55,6 +56,7 @@ PROJECTS = \
   demos/rc \
   papers/IBEX \
   papers/DWA \
+  papers/BGS \
   tests/mnpuzzle \
   tests/graphics \
 #  generic \

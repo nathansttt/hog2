@@ -172,6 +172,52 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 					WidthToCanvas(o.width, d.viewport));
 			break;
 		}
+		case Graphics::Display::kFillTriangle:
+		{
+			const Graphics::Display::triangleInfo &o = d.triangle;
+			int r = o.c.r*255.0;
+			int g = o.c.g*255.0;
+			int b = o.c.b*255.0;
+			
+			EM_ASM_({
+				var c=document.getElementById(UTF8ToString($0));
+				var ctx=c.getContext("2d");
+				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.beginPath();
+				ctx.moveTo($4, $5);
+				ctx.lineTo($6, $7);
+				ctx.lineTo($8, $9);
+				ctx.fill();
+			}, which, r,g,b,
+					PointXToCanvas(o.p1.x, d.viewport), PointYToCanvas(o.p1.y, d.viewport),
+					PointXToCanvas(o.p2.x, d.viewport), PointYToCanvas(o.p2.y, d.viewport),
+					PointXToCanvas(o.p3.x, d.viewport), PointYToCanvas(o.p3.y, d.viewport));
+			break;
+		}
+		case Graphics::Display::kFrameTriangle:
+		{
+			const Graphics::Display::triangleInfo &o = d.triangle;
+			int r = o.c.r*255.0;
+			int g = o.c.g*255.0;
+			int b = o.c.b*255.0;
+			
+			EM_ASM_({
+				var c=document.getElementById(UTF8ToString($0));
+				var ctx=c.getContext("2d");
+				ctx.strokeStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.beginPath();
+				ctx.moveTo($4, $5);
+				ctx.lineTo($6, $7);
+				ctx.lineTo($8, $9);
+				ctx.lineWidth=$10;
+				ctx.stroke();
+			}, which, r,g,b,
+					PointXToCanvas(o.p1.x, d.viewport), PointYToCanvas(o.p1.y, d.viewport),
+					PointXToCanvas(o.p2.x, d.viewport), PointYToCanvas(o.p2.y, d.viewport),
+					PointXToCanvas(o.p3.x, d.viewport), PointYToCanvas(o.p3.y, d.viewport),
+					WidthToCanvas(o.width, d.viewport));
+			break;
+		}
 		case Graphics::Display::kFillRectangle:
 		{
 			const Graphics::Display::drawInfo &o = d.shape;
