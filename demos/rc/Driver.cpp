@@ -13,10 +13,9 @@
 #include <string>
 #include "RC.h"
 
-//#include "cubeHolder.h"
-
 RCState cube;
 RC env;
+//RC env2;
 
 //static CubeHolder *cubeHolder;
 int moveType = 0;
@@ -37,6 +36,10 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
+	// HASH FUNCTION
+	InstallKeyboardHandler(MyDisplayHandler, "Test9", "HASH TEST", kAnyModifier, '9');
+	
+
 	InstallKeyboardHandler(MyDisplayHandler, "Optimal", "Show optimal solution", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Randomize", "Get Random State", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Turn0", "Turn Face 0", kAnyModifier, '0');
@@ -47,6 +50,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Turn5", "Turn Face 5", kAnyModifier, '5');
 	InstallKeyboardHandler(MyDisplayHandler, "MoveType", "Choose Move Type", kAnyModifier, 'm');
 	InstallKeyboardHandler(MyDisplayHandler, "TurnStop", "Stop Cube Passive Rotation", kAnyModifier, 'n');
+	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset cube to solved", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test New PDB", kAnyModifier, 't');
 	InstallWindowHandler(MyWindowHandler);
 
@@ -77,12 +81,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 	display.FillRect({-1, -1, 1, 1}, Colors::white);
-
-	//Draw here!!!
-	env.Draw(display, cube);
-	env.TestUpdate();
-	env.DrawCubies(display);
 	
+	//Draw here
+	env.TestUpdate();
+	env.Draw(display, cube);
+	env.TestDraw(display, cube);
+
 	return;
 }
 
@@ -95,8 +99,17 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
+	// TODO: Check if already rotating before allowing an input from 0-5
 	switch (key)
 	{
+		// HASH FUNCTION
+		case '9':
+		{
+			static int a = 0;
+			env.GetStateFromPDBHashCorner(a++, cube, 0);
+			printf("rank is %llu\n", env.GetPDBHashCorner(cube, 0));
+		}
+			break;
 		case 't':
 		{
 			RCState goal;
@@ -128,45 +141,55 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'n':
 			env.passiveRot = !env.passiveRot;		
 			break;	
-		case '0':
-			env.RotateFace(0,moveType);
-			cube.RotateFace(0,moveType);
-			break;	
-		case '1':
-			env.RotateFace(1,moveType);
-			cube.RotateFace(1,moveType);
-			break;	
+		case '0':	
+		case '1':	
 		case '2':
-			env.RotateFace(2,moveType);
-			cube.RotateFace(2,moveType);
-			break;	
 		case '3':
-			env.RotateFace(3,moveType);
-			cube.RotateFace(3,moveType);
-			break;	
 		case '4':
-			env.RotateFace(4,moveType);
-			cube.RotateFace(4,moveType);
-			break;	
 		case '5':
-			env.RotateFace(5,moveType);
-			cube.RotateFace(5,moveType);
-			break;
+		{
+			int ikey = key - '0';
+			// TEMP: DO NOT ROTATE RC
+			// env.RotateFace(ikey, moveType);
+
+			cube.RotateFace(ikey*3+moveType);
 			
+			// Test
+			std::cout << "State: " << '\n'; cube.PrintState();
+			std::cout << '\n';
+			break;
+		}
 		case 'o':
 		{
-			
-		}
+			// TEMP: Print data from cubies from each RC
+//			std::cout << "Env 1:" << std::endl;
+//			env.cubies[0].PrintData();
+//			std::cout << std::endl;
+//			std::cout << "Env 2:" << std::endl;
+//			env2.cubies[0].PrintData();
+			// TEMP: Rotate on x axis
+			float rot[3] = {0.3f, 0, 0};
+			env.RotateCubies(rot);
 			break;
+		}
 		case 's':
 		{
 			// TODO: When hash function is finished you can use it to get random states 
+			// TEMP: Sets the state to a custom one
+			for (int i = 0; i < 12; i++)
+			{
+				cube.rotation[i] = 1;
+			}
 			break;
 		}
 		case 'r':
 		{
-			// TODO: Reset state
-			//curr = goal;
+			// Reset state
+			for (int i = 0; i < 20; i++)
+			{
+				cube.indices[i] = i;
+				cube.rotation[i] = 0;
+			}
 			break;
 		}
 		case '?':
