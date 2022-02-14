@@ -273,7 +273,7 @@ void ImprovedBGS<state, action>::SetupIterationF(double cost)
 	/* if the g list is empty, get the start node, otherwise use the cost value to put all the nodes from g to f */
     if(q_g.empty()){
 		q_f.Reset(env->GetMaxHash());
-		q_f.AddOpenNode(start, env->GetStateHash(start), 0.0, 0.0);
+		q_f.AddOpenNode(start, env->GetStateHash(start), 0.0, h->HCost(start, goal));
 	}
 	else{
 		GetAllNodesinG();
@@ -900,8 +900,8 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 //	printf("%lld--",data.nodeLB);
 //	b = sqrt(b); //2
 //	b = cbrt(b); //3
-	b = 0; //4
-//	b = 10000; //5not found lis
+//	b = 0; //4
+	b = 10000; //5not found lis
 	cnt+=1;
 	if(!MainIterationComplete()){
 		if (flesseq(solutionCost, data.solutionInterval.lowerBound))
