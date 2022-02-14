@@ -305,18 +305,96 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
-		if (strcmp(algorithm, "bgs-bpmx") == 0)
+		if (strcmp(algorithm, "bgs-bpmx-1") == 0)
 		{
 			t.StartTimer();
 			bgs.SetUseBPMX();
+			bgs.SetB(1);
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
-		if (strcmp(algorithm, "bgs") == 0)
+		if (strcmp(algorithm, "bgs-1") == 0)
 		{
 			t.StartTimer();
+			bgs.SetB(1);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-bpmx-2") == 0)
+		{
+			t.StartTimer();
+			bgs.SetUseBPMX();
+			bgs.SetB(2);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-2") == 0)
+		{
+			t.StartTimer();
+			bgs.SetB(2);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-bpmx-3") == 0)
+		{
+			t.StartTimer();
+			bgs.SetUseBPMX();
+			bgs.SetB(3);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-3") == 0)
+		{
+			t.StartTimer();
+			bgs.SetB(3);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-bpmx-4") == 0)
+		{
+			t.StartTimer();
+			bgs.SetUseBPMX();
+			bgs.SetB(4);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-4") == 0)
+		{
+			t.StartTimer();
+			bgs.SetB(4);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-bpmx-5") == 0)
+		{
+			t.StartTimer();
+			bgs.SetUseBPMX();
+			bgs.SetB(5);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-5") == 0)
+		{
+			t.StartTimer();
+			bgs.SetB(5);
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());

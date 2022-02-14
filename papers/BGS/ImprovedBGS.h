@@ -59,6 +59,7 @@ public:
 	const uint64_t c1 = 2;
 	const uint64_t c2 = 8;
 	const uint64_t gamma = 2;
+	int b_num = 10;
 	const double k =1;
 	const int infiniteWorkBound = -1;
 	void GetGlobalCostInterval(double &lower, double &upper)
@@ -68,6 +69,7 @@ public:
 	std::string stage;
 	std::string fEquation;
 	void SetUseBPMX();
+	void SetB(int a);
 	double GetSolutionCost(){return solutionCost;}
 private:
 	struct costInterval {
@@ -266,6 +268,29 @@ void ImprovedBGS<state, action>::SetUseBPMX()
 {
 	useBPMX = true;
 }
+
+
+template <class state, class action>
+void ImprovedBGS<state, action>::SetB(int a)
+{
+
+    if( a == 1){
+		b_num = 1;
+	}
+	else if(a == 2){
+		b_num = 2;
+	}
+	else if(a == 3){
+		b_num = 3;
+	}
+	else if(a == 4){
+		b_num = 4;
+	}
+	else{
+		b_num = 5;
+	}
+}
+
 template <class state, class action>
 void ImprovedBGS<state, action>::SetupIterationF(double cost)
 {
@@ -894,14 +919,26 @@ template <class state, class action>
 bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 
+    int b = k * data.nodeLB;
+	if( b_num == 1){
+		b = k * data.nodeLB;
+	}
+	else if(b_num == 2){
+		b = k * data.nodeLB;
+		b = sqrt(b);
+	}
+	else if(b_num == 3){
+		b = k * data.nodeLB;
+	    b = cbrt(b);
+	}
+	else if(b_num == 4){
+		b = 0;
+	}
+	else{
+		b = 10000;
+	}
   
-	int b = k * data.nodeLB;
-	 //1
-//	printf("%lld--",data.nodeLB);
-//	b = sqrt(b); //2
-//	b = cbrt(b); //3
-//	b = 0; //4
-	b = 10000; //5not found lis
+
 	cnt+=1;
 	if(!MainIterationComplete()){
 		if (flesseq(solutionCost, data.solutionInterval.lowerBound))
@@ -912,7 +949,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				}
 		if(!MODE){
 			if(data.nodesReexpanded <= b && data.nodesExpanded <= c1*data.nodeLB){
-				printf("case 1");
+				//printf("case 1");
 				int temp1 = nodesExpanded;
 				int temp2 = nodesReexpanded;
 				if(!IterationCompleteF()){
@@ -930,7 +967,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				}
 			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB){
 				if(!case2){
-					printf("case 2 ");
+					//printf("case 2 ");
 				    FindtheCurrentBoundF();
 					case2 = 1;
 					return false;
@@ -966,7 +1003,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 			}
 			else if(data.nodesReexpanded > b && data.nodesExpanded > c1*data.nodeLB) {
 				if(!case3){
-					printf("case 3");
+					//printf("case 3");
 					FindtheBoundAndNextBoundF();
 					bound_g = previousBound;
 				    GetNodeswithBoundinGAboveinF();
@@ -994,7 +1031,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 			}
 			else {
 				if(!SetupExponentialBinaryIteration){
-					printf("case 4 \n");
+					//printf("case 4 \n");
 					FindtheCurrentBoundF();
 					FindtheBoundAndNextBoundF();
 					if(fequal(previousBound,bound)){
@@ -1046,7 +1083,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					data.solutionInterval.lowerBound = bound_g;
 					data.solutionInterval.upperBound = DBL_MAX;
 				}
-			    printf("--> Iteration complete - %" PRId64 " expanded; target [%" PRId64 ", %" PRId64 ")\n", data.nodesExpanded, c1*data.nodeLB, c2*data.nodeLB);
+			    //printf("--> Iteration complete - %" PRId64 " expanded; target [%" PRId64 ", %" PRId64 ")\n", data.nodesExpanded, c1*data.nodeLB, c2*data.nodeLB);
 				
 				// Move to next iteration
 				if (data.nodesExpanded >= c1*data.nodeLB && data.workBound == infiniteWorkBound)
@@ -1100,7 +1137,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					nextBound = -1;
 					iterationComplete = false;
 					GetNodeswithBoundinG(); //move nodes from temp to g
-					printf("-> Starting new iteration with f: %f; node limit: %" PRId64 "\n", nextCost, data.workBound);
+					//printf("-> Starting new iteration with f: %f; node limit: %" PRId64 "\n", nextCost, data.workBound);
 
 					return false;
 				}
