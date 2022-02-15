@@ -458,11 +458,12 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 					double h = theHeuristic->HCost(neighbors[x], goal);
 					if (useBPMX)
 					{
+						h = std::max(h, openClosedList.Lookup(nodeid).h-edgeCosts[x]);
 						openClosedList.AddOpenNode(neighbors[x],
 												   env->GetStateHash(neighbors[x]),
 												   phi(h, openClosedList.Lookup(nodeid).g+edgeCosts[x]),
 												   openClosedList.Lookup(nodeid).g+edgeCosts[x],
-												   std::max(h, openClosedList.Lookup(nodeid).h-edgeCosts[x]),
+												   h,
 												   nodeid);
 					}
 					else {
