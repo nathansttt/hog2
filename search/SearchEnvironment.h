@@ -91,11 +91,11 @@ public:
 	virtual void SetOccupancyInfo(OccupancyInterface<state,action> *)
 	{ }
 
-	virtual void OpenGLDraw() const = 0;
-	virtual void OpenGLDraw(const state&) const = 0;
+	virtual void OpenGLDraw() const {};
+	virtual void OpenGLDraw(const state&) const {};
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const state&, const state&, float) const {}
-	virtual void OpenGLDraw(const state&, const action&) const = 0;
+	virtual void OpenGLDraw(const state&, const action&) const {};
 	virtual void GLLabelState(const state&, const char *) const {} // draw label over state
 	virtual void GLDrawLine(const state &x, const state &y) const {}
 	virtual void GLDrawPath(const std::vector<state> &x) const;
