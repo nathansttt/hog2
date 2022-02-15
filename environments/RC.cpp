@@ -20,6 +20,34 @@ int findInArray(int arr[], int elem, int lower, int upper);
 float array3 [3] = {0,0,0};
 float rotation [3][3] = { {0,0,0}, {0,0,0}, {0,0,0} };
 std::vector<int> furthestZ(0);
+
+const int edgesOnFace[6][4] =
+{
+	{0, 6, 4, 2},  //0
+	{2, 3, 9, 1},  //1
+	{0, 1, 8, 7},  //2
+	{6, 7, 11, 5}, //3
+	{4, 5, 10, 3}, //4
+	{9, 10, 11, 8} //5
+};
+//	int cornersOnFace[6][4] =
+//	{
+//		{4 +11, 3 +11, 2 +11, 1 +11}, //0
+//		{1 +11, 2 +11, 6 +11, 5 +11}, //1
+//		{4 +11, 1 +11, 5 +11, 8 +11}, //2
+//		{3 +11, 4 +11, 8 +11, 7 +11}, //3
+//		{2 +11, 3 +11, 7 +11, 6 +11}, //4
+//		{5 +11, 6 +11, 7 +11, 8 +11}  //5
+//	};
+const int cornersOnFace[6][4] =
+{
+	{15, 14, 13, 12}, //0
+	{16, 12, 13, 17}, //1
+	{15, 12, 16, 19}, //2
+	{15, 19, 18, 14}, //3
+	{13, 14, 18, 17}, //4
+	{16, 17, 18, 19}  //5
+};
 //std::vector<std::vector<float>> rotation(3,std::vector<float>(3));
 
 /*===============================================================================================================================================================================
@@ -827,7 +855,7 @@ void RCState::SwapPositions(int p1, int p2)
 /*
  * 
  */
-void RCState::ShiftPositionsCW(int (&arr)[4])
+void RCState::ShiftPositionsCW(const int (&arr)[4])
 {
 	// Shift rotations as well
 	int temp;
@@ -852,7 +880,7 @@ void RCState::ShiftPositionsCW(int (&arr)[4])
 /*
  * 
  */
-void RCState::ShiftPositionsCCW(int (&arr)[4])
+void RCState::ShiftPositionsCCW(const int (&arr)[4])
 {
 	// Shift rotations as well
 	int temp;
@@ -877,7 +905,7 @@ void RCState::ShiftPositionsCCW(int (&arr)[4])
 /*
  * 
  */
-void RCState::ShiftPositions(int (&arr)[4], bool forward)
+void RCState::ShiftPositions(const int (&arr)[4], bool forward)
 {
 	//std::cout << "Shifting positions " << arr[0] << ", " << arr[1] << ", " << arr[2] << ", " << arr[3] << std::endl;
 
@@ -1186,48 +1214,53 @@ void RC::GetSuccessors(const RCState &nodeID, std::vector<RCState> &neighbors) c
 
 void RC::GetPrunedActions(const RCState &nodeID, RCAction lastAction, std::vector<RCAction> &actions) const
 {
-	actions.resize(0);
-	for (int x = 0; x < 18; x++)
-	{
-		// 1. after any face you can't turn the same face again
-		if (x/3 == lastAction/3)
-			continue;
-		
-		// 2. after faces 5, 4, 3 you can't turn 0, 2, 1 respectively
-		if ((1 == (lastAction/3)%2) &&
-			(x/3+1 == lastAction/3))
-			continue;
-		
-		actions.push_back(x);
-	}
+	assert(false);
+//	actions.resize(0);
+//	for (int x = 0; x < 18; x++)
+//	{
+//		// 1. after any face you can't turn the same face again
+//		if (x/3 == lastAction/3)
+//			continue;
+//
+//		// 2. after faces 5, 4, 3 you can't turn 0, 2, 1 respectively
+//		if ((1 == (lastAction/3)%2) &&
+//			(x/3+1 == lastAction/3))
+//			continue;
+//
+//		actions.push_back(x);
+//	}
 }
 
 
 void RC::GetActions(const RCState &nodeID, std::vector<RCAction> &actions) const
 {
 	actions.resize(0);
-//	if (!pruneSuccessors || history.size() == 0)
-//	{
-	for (int x = 0; x < 18; x++)
-		actions.push_back(x);
-//	}
-//	else {
-//		// 0, 5, 2, 4, 1, 3
-//
-//		for (int x = 0; x < 18; x++)
-//		{
-//			// 1. after any face you can't turn the same face again
-//			if (x/3 == history.back()/3)
-//				continue;
-//
-//			// 2. after faces 5, 4, 3 you can't turn 0, 2, 1 respectively
+	if (!pruneSuccessors || history.size() == 0)
+	{
+		for (int x = 0; x < 18; x++)
+			actions.push_back(x);
+	}
+	else {
+		// 1-3, 2-4, 0-5
+		// 0, 5, 2, 4, 1, 3
+		//int firstFace[6] = {true, true, false, false, true, false};
+		int firstFace[6] = {-1, -1, -1, 1, 2, 0};
+		for (int x = 0; x < 18; x++)
+		{
+			// 1. after any face you can't turn the same face again
+			if (x/3 == history.back()/3)
+				continue;
+
+			// 2. after faces 0, 1, 2 you can't turn 4, 3, 5 respectively
+			if (firstFace[x/3] == history.back()/3)
+				continue;
 //			if ((1 == (history.back()/3)%2) &&
 //				(x/3+1 == history.back()/3))
 //				continue;
-//
-//			actions.push_back(x);
-//		}
-//	}
+
+			actions.push_back(x);
+		}
+	}
 //	std::random_shuffle(actions.begin(), actions.end());
 }
 
@@ -1248,15 +1281,23 @@ RCAction RC::GetAction(const RCState &s1, const RCState &s2) const
 
 void RC::ApplyAction(RCState &s, RCAction a) const
 {
-	// TODO: Write
 	s.RotateFace(a/3, a%3);
+	if (pruneSuccessors)
+		history.push_back(a);
 }
 
 void RC::UndoAction(RCState &s, RCAction a) const
 {
-	assert(false);
-	// TODO: Write
-	s.RotateFace(a/3, 2-(a%3));
+	if (pruneSuccessors)
+	{
+		assert(history.back() == a);
+		history.pop_back();
+	}
+	InvertAction(a);
+	s.RotateFace(a/3, a%3);
+//	assert(false);
+//	// TODO: verify
+//	s.RotateFace(a/3, 2-(a%3));
 }
 
 void RC::GetNextState(const RCState &s1, RCAction a, RCState &s2) const
@@ -1267,8 +1308,6 @@ void RC::GetNextState(const RCState &s1, RCAction a, RCState &s2) const
 
 bool RC::InvertAction(RCAction &a) const
 {
-//	assert(false);
-	// TODO: Test
 	if (2 == a%3)
 		return true;
 	if (1 == a%3)
@@ -1307,7 +1346,13 @@ bool RC::GoalTest(const RCState &node, const RCState &goal) const
 /** Goal Test if the goal is stored **/
 bool RC::GoalTest(const RCState &node) const
 {
-	assert(false);
+	for (int x = 0; x < 20; x++)
+	{
+		if (node.indices[x] != x)
+			return false;
+		if (node.rotation[x] != 0)
+			return false;
+	}
 	return false;
 }
 
@@ -1710,7 +1755,29 @@ uint64_t RC::FactorialUpperK(int n, int k) const
 
 
 
-// PDB CLass
+// PDB Class
+
+RCPDB::RCPDB(RC *e,
+			 const std::array<bool, 12> &edgeRotations, const std::array<bool, 12> &edgeLocations,
+			 const std::array<bool, 8> &cornerRotations, const std::array<bool, 8> &cornerLocations)
+:PDBHeuristic(e)
+{
+	for (int x = 0; x < 12; x++)
+	{
+		if (edgeRotations.at(x))
+			this->edgeRotations.push_back(x);
+		if (edgeLocations.at(x))
+			this->edgeLocations.push_back(x);
+	}
+	for (int x = 0; x < 8; x++)
+	{
+		if (cornerRotations.at(x))
+			this->cornerRotations.push_back(x);
+		if (cornerLocations.at(x))
+			this->cornerLocations.push_back(x);
+	}
+}
+
 uint64_t RCPDB::GetStateHash(const RCState &s) const
 {
 	assert(false); // not implemented currently
@@ -1723,41 +1790,325 @@ void RCPDB::GetStateFromHash(RCState &s, uint64_t hash) const
 
 uint64_t RCPDB::GetPDBSize() const
 {
-	return 4478976; // 2^11 * 3^7
+	return 	GetEdgeRotationSize()*GetEdgeLocationSize()*GetCornerRotationSize()*GetCornerLocationSize();
+//	return 4478976; // 2^11 * 3^7
 }
 
 uint64_t RCPDB::GetPDBHash(const RCState &s, int threadID) const
 {
-	// NOTE: Assuming edges + corners for now
-	//	int indices[20]; //Index of cubie in position
-	//	int rotation[20]; //Rotation of cubie in position
 	uint64_t hash = 0;
-	for (int x = 0; x < 11; x++)
-		hash = 2*hash + s.rotation[x];
-	for (int x = 12; x < 19; x++)
-		hash = 3*hash + s.rotation[x];
+	hash = GetEdgeLocationHash(s); // edge loc
+	hash *= GetEdgeRotationSize(); // make space for edge rot
+	hash += GetEdgeRotationHash(s); // edge rot
+	hash *= GetCornerLocationSize(); // make space for corner loc
+	hash += GetCornerLocationHash(s); // corner loc
+	hash *= GetCornerRotationSize(); // make space for corner rot
+	hash += GetCornerRotationHash(s); // corner rot
+//	std::cout << "Hashes: el:" << GetEdgeLocationHash(s) << " er:" << GetEdgeRotationHash(s) <<
+//	" cl:" << GetCornerLocationHash(s) << " cr:" << GetCornerRotationHash(s) << "\n";
 	return hash;
+	
+//	// NOTE: Assuming edges + corners for now
+//	//	int indices[20]; //Index of cubie in position
+//	//	int rotation[20]; //Rotation of cubie in position
+//	uint64_t hash = 0;
+//	for (int x = 0; x < 11; x++)
+//		hash = 2*hash + s.rotation[x];
+//	for (int x = 12; x < 19; x++)
+//		hash = 3*hash + s.rotation[x];
+//	return hash;
 }
 
 void RCPDB::GetStateFromPDBHash(uint64_t hash, RCState &s, int threadID) const
 {
-	int two = 0;
-	int three = 0;
-	for (int x = 18; x >= 12; x--)
+//	hash = GetEdgeLocationHash(s); // edge loc
+//	hash *= GetEdgeRotationSize(); // make space for edge rot
+//	hash += GetEdgeRotationHash(s); // edge rot
+//	hash *= GetCornerLocationSize(); // make space for corner loc
+//	hash += GetCornerLocationHash(s); // corner loc
+//	hash *= GetCornerRotationSize(); // make space for corner rot
+//	hash += GetCornerRotationHash(s); // corner rot
+
+
+	GetStateFromCornerRotationHash(s, hash%GetCornerRotationSize());
+//	std::cout << "unrank cr:" << hash%GetCornerRotationSize();
+	hash /= GetCornerRotationSize();
+	GetStateFromCornerLocationHash(s, hash%GetCornerLocationSize());
+//	std::cout << " cl:" << hash%GetCornerLocationSize();
+	hash /= GetCornerLocationSize();
+	GetStateFromEdgeRotationHash(s, hash%GetEdgeRotationSize());
+//	std::cout << " er:" << hash%GetEdgeRotationSize();
+	hash /= GetEdgeRotationSize();
+	GetStateFromEdgeLocationHash(s, hash);
+//	std::cout << " el:" << hash << "\n";
+
+//	int two = 0;
+//	int three = 0;
+//	for (int x = 18; x >= 12; x--)
+//	{
+//		s.rotation[x] = hash%3;
+//		three += s.rotation[x];
+//		hash /= 3;
+//	}
+//	// fill in s.rotation[19]
+//	s.rotation[19] = (3-(two%3))%3;
+//	for (int x = 10; x >= 0; x--)
+//	{
+//		s.rotation[x] = hash%2;
+//		two += s.rotation[x];
+//		hash /= 2;
+//	}
+//	// fill in s.rotation[11]
+//	s.rotation[11] = two%2;
+}
+
+uint64_t RCPDB::GetEdgeRotationSize() const
+{
+	int limit = std::min((int)edgeRotations.size(), 11);
+	return 1ull<<limit;
+}
+
+uint64_t RCPDB::GetEdgeLocationSize() const
+{
+	return FactorialUpperK(12, 12-(int)edgeLocations.size());
+}
+
+uint64_t RCPDB::GetCornerRotationSize() const
+{
+	uint64_t answer[] = {1, 3, 9, 27, 81, 243, 729, 2187, 6561, 19683};
+	int limit = std::min((int)cornerRotations.size(), 7);
+	return answer[limit];
+}
+
+uint64_t RCPDB::GetCornerLocationSize() const
+{
+	return FactorialUpperK(8, 8-(int)cornerLocations.size());
+}
+
+uint64_t RCPDB::GetEdgeRotationHash(const RCState &s) const
+{
+	int limit = std::min((int)edgeRotations.size(), 11);
+	uint64_t hash = 0;
+	for (int x = 0; x < limit; x++)
 	{
-		s.rotation[x] = hash%3;
-		three += s.rotation[x];
-		hash /= 3;
+		hash = hash*2+(s.rotation[edgeRotations[x]]?1:0);
+		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
 	}
-	// fill in s.rotation[19]
-	s.rotation[19] = (3-(two%3))%3;
-	for (int x = 10; x >= 0; x--)
+	return hash;
+}
+
+uint64_t RCPDB::GetEdgeLocationHash(const RCState &s) const
+{
+	if (edgeLocations.size() == 0)
+		return 0;
+	int puzzle[12];
+	int dual[16]; // seamlessly handle 0xF entries (no cube)
+	int lastPiece = 12-(int)edgeLocations.size();
+	//std::cout << "!" << s << "\n";
+	for (int x = 0; x < 12; x++)
+		dual[s.indices[x]] = x;
+	for (int x = 0; x < edgeLocations.size(); x++)
+		puzzle[x] = dual[edgeLocations[x]];
+	
+	uint64_t hashVal = 0;
+	int numEntriesLeft = 12;
+	for (unsigned int x = 0; x < edgeLocations.size(); x++)
 	{
-		s.rotation[x] = hash%2;
-		two += s.rotation[x];
-		hash /= 2;
+		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+		
+		numEntriesLeft--;
+		for (unsigned y = x; y < edgeLocations.size(); y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
 	}
-	// fill in s.rotation[11]
-	s.rotation[11] = two%2;
+	return hashVal;
+	
+}
+
+uint64_t RCPDB::GetCornerRotationHash(const RCState &s) const
+{
+	int limit = std::min((int)cornerRotations.size(), 7);
+	uint64_t hash = 0;
+	for (int x = 0; x < limit; x++)
+	{
+		hash = hash*3+s.rotation[12+cornerRotations[x]];
+		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
+	}
+	return hash;
+}
+
+uint64_t RCPDB::GetCornerLocationHash(const RCState &s) const
+{
+	if (cornerLocations.size() == 0)
+		return 0;
+	// TODO: handle fewer according to pattern
+	int puzzle[8];
+	int dual[16]; // seamlessly handle 0xF entries (no cube)
+	int cornerSize = (int)cornerLocations.size();
+	int lastPiece = 8-(int)cornerLocations.size();
+	for (int x = 0; x < 8; x++)
+		dual[s.indices[12+x]-12] = x;
+	for (int x = 0; x < cornerLocations.size(); x++)
+		puzzle[x] = dual[cornerLocations[x]];
+	
+	uint64_t hashVal = 0;
+	int numEntriesLeft = 8;
+	for (unsigned int x = 0; x < cornerSize; x++)
+	{
+		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+		
+		numEntriesLeft--;
+		for (unsigned y = x; y < cornerLocations.size(); y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
+	}
+	return hashVal;
+//	return part2*FactorialUpperK(8, lastPiece)+hashVal;
+}
+
+void RCPDB::GetStateFromEdgeRotationHash(RCState &s, uint64_t hash) const
+{
+	for (int x = 0; x < 12; x++)
+	{
+//		s.SetCubeInLoc(x, 0xF);
+//		s.SetCubeOrientation(x, 0);
+		s.rotation[x] = 0;
+	}
+	
+	int cnt = 0;
+	int limit = std::min((int)edgeRotations.size(), 11);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.rotation[edgeRotations[x]] = hash%2;
+//		s.SetCubeOrientation(edgeRotations[x], hash%2);
+		//s.SetCubeOrientation(dual[corners[x]], hash%3);
+		cnt += hash%2;
+		hash/=2;
+	}
+	if (edgeRotations.size() == 12)
+		s.rotation[edgeRotations[11]] = cnt%2;
+//		s.SetCubeOrientation(edges[11], cnt%2);
+
+}
+
+void RCPDB::GetStateFromEdgeLocationHash(RCState &s, uint64_t hash) const
+{
+	int lastPiece = 12-(int)edgeLocations.size();
+	int puzzle[12];
+	int dual[16];
+	uint64_t hashVal = hash;
+	hash /= FactorialUpperK(12, lastPiece); // for rotations
+	hashVal = hashVal%FactorialUpperK(12, lastPiece); // for pieces
+	
+	int numEntriesLeft = lastPiece+1;
+	for (int x = (int) edgeLocations.size()-1; x >= 0; x--)
+	{
+		puzzle[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < edgeLocations.size(); y++)
+		{
+			if (puzzle[y] >= puzzle[x])
+				puzzle[y]++;
+		}
+	}
+	for (int x = 0; x < 12; x++)
+	{
+		s.indices[x] = 0xF;
+//		s.SetCubeInLoc(x, 0xF);
+//		s.SetCubeOrientation(x, 0);
+	}
+	
+	for (int x = 0; x < edgeLocations.size(); x++)
+	{
+		s.indices[puzzle[x]] = edgeLocations[x];
+		//s.SetCubeInLoc(puzzle[x], edgeLocations[x]);
+		dual[edgeLocations[x]] = puzzle[x];
+	}
+	
+}
+
+void RCPDB::GetStateFromCornerRotationHash(RCState &s, uint64_t hash) const
+{
+	for (int x = 0; x < 8; x++)
+	{
+		s.rotation[12+x] = 0;
+	}
+	int cnt = 0;
+	int limit = std::min((int)cornerRotations.size(), 7);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.rotation[12+cornerRotations[x]] = hash%3;
+//		s.SetCubeOrientation(cornerRotations[x], hash%3);
+		cnt += hash%3;
+		hash/=3;
+	}
+	if (cornerRotations.size() == 8)
+	{
+		s.rotation[12+cornerRotations[7]] = (3-(cnt%3))%3; // 0->0 2->1 1->2
+		cnt += s.rotation[12+cornerRotations[7]];
+	}
+	assert((cnt%3) == 0);
+}
+
+void RCPDB::GetStateFromCornerLocationHash(RCState &s, uint64_t hash) const
+{
+	int lastPiece = 8-(int)cornerLocations.size();
+	int cornerSize = (int)cornerLocations.size();
+	int puzzle[12];
+//	int dual[16];
+	uint64_t hashVal = hash;
+	hash /= FactorialUpperK(8, lastPiece); // for rotations
+	hashVal = hashVal%FactorialUpperK(8, lastPiece); // for pieces
+	
+	int numEntriesLeft = lastPiece+1;
+	for (int x = (int)cornerLocations.size()-1; x >= 0; x--)
+	{
+		puzzle[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < cornerSize; y++)
+		{
+			if (puzzle[y] >= puzzle[x])
+				puzzle[y]++;
+		}
+	}
+	for (int x = 0; x < 8; x++)
+	{
+		s.indices[12+x] = 0xF;
+//		s.SetCubeInLoc(x, 0xF);
+//		s.SetCubeOrientation(x, 0);
+	}
+	
+	for (int x = 0; x < cornerSize; x++)
+	{
+		s.indices[12+puzzle[x]] = 12+cornerLocations[x];
+//		s.SetCubeInLoc(puzzle[x], cornerLocations[x]);
+//		dual[cornerLocations[x]] = puzzle[x];
+	}
+}
+
+uint64_t RCPDB::FactorialUpperK(int n, int k) const
+{
+	const uint64_t result[13][13] = {
+		{1}, // n = 0
+		{1, 1}, // n = 1
+		{2, 2, 1}, // n = 2
+		{6, 6, 3, 1}, // n = 3
+		{24, 24, 12, 4, 1}, // n = 4
+		{120, 120, 60, 20, 5, 1}, // n = 5
+		{720, 720, 360, 120, 30, 6, 1}, // n = 6
+		{5040, 5040, 2520, 840, 210, 42, 7, 1}, // n = 7
+		{40320, 40320, 20160, 6720, 1680, 336, 56, 8, 1}, // n = 8
+		{362880, 362880, 181440, 60480, 15120, 3024, 504, 72, 9, 1}, // n = 9
+		{3628800, 3628800, 1814400, 604800, 151200, 30240, 5040, 720, 90, 10, 1}, // n = 10
+		{39916800, 39916800, 19958400, 6652800, 1663200, 332640, 55440, 7920, 990, 110, 11, 1}, // n = 11
+		{479001600, 479001600, 239500800, 79833600, 19958400, 3991680, 665280, 95040, 11880, 1320, 132, 12, 1} // n = 12
+	};
+	return result[n][k];
 }
 

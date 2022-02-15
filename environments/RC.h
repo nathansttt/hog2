@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <vector>
+#include <array>
 #include "SearchEnvironment.h"
 #include "PDBHeuristic.h"
 
@@ -185,19 +186,19 @@ public:
 			rotation[i] = 0;
 		}
 	}
-	// Put data structures here
+	// 12 edges followed by 8 corners
 	int indices[20]; //Index of cubie in position //uint8_t
 	int rotation[20]; //Rotation of cubie in position
 	
-	int edgesOnFace[6][4] = 
-	{
-		{0, 6, 4, 2},  //0
-		{2, 3, 9, 1},  //1
-		{0, 1, 8, 7},  //2
-		{6, 7, 11, 5}, //3
-		{4, 5, 10, 3}, //4
-		{9, 10, 11, 8} //5
-	};
+//const int edgesOnFace[6][4] =
+//{
+//	{0, 6, 4, 2},  //0
+//	{2, 3, 9, 1},  //1
+//	{0, 1, 8, 7},  //2
+//	{6, 7, 11, 5}, //3
+//	{4, 5, 10, 3}, //4
+//	{9, 10, 11, 8} //5
+//};
 //	int cornersOnFace[6][4] = 
 //	{
 //		{4 +11, 3 +11, 2 +11, 1 +11}, //0
@@ -207,23 +208,23 @@ public:
 //		{2 +11, 3 +11, 7 +11, 6 +11}, //4
 //		{5 +11, 6 +11, 7 +11, 8 +11}  //5
 //	};
-	int cornersOnFace[6][4] = 
-	{
-		{15, 14, 13, 12}, //0
-		{16, 12, 13, 17}, //1
-		{15, 12, 16, 19}, //2
-		{15, 19, 18, 14}, //3
-		{13, 14, 18, 17}, //4
-		{16, 17, 18, 19}  //5
-	};
+//const int cornersOnFace[6][4] =
+//{
+//	{15, 14, 13, 12}, //0
+//	{16, 12, 13, 17}, //1
+//	{15, 12, 16, 19}, //2
+//	{15, 19, 18, 14}, //3
+//	{13, 14, 18, 17}, //4
+//	{16, 17, 18, 19}  //5
+//};
 	
 	// Move to RC Class
 	void RotateFace(int move);
 	void RotateEdges(int move);
 	void RotateCorners(int move);
 	void SwapPositions(int p1, int p2);
-	void ShiftPositionsCW(int (&arr)[4]);
-	void ShiftPositionsCCW(int (&arr)[4]);
+	void ShiftPositionsCW(const int (&arr)[4]);
+	void ShiftPositionsCCW(const int (&arr)[4]);
 	//
 	
 	void PrintState();
@@ -232,7 +233,7 @@ public:
 	void RotateFace(int face, int move);
 	void RotateEdges(int face, int move);
 	void RotateCorners(int face, int move);
-	void ShiftPositions(int (&arr)[4], bool forward);
+	void ShiftPositions(const int (&arr)[4], bool forward);
 };
 
 typedef int RCAction;
@@ -248,7 +249,15 @@ static std::ostream &operator<<(std::ostream &out, RCState &tmp)
 // Can't write these until data structures are defined
 static bool operator==(const RCState &l1, const RCState &l2)
 {
-	return false;
+	for (int x = 0; x < 20; x++)
+	{
+		if (l1.indices[x] != l2.indices[x])
+			return false;
+		if (l1.rotation[x] != l2.rotation[x])
+			return false;
+	}
+	return true;
+	//return false;
 	//return (l1.corner == l2.corner) && (l1.edge == l2.edge);
 }
 //
@@ -406,7 +415,7 @@ public:
 	}
 
 	std::string GetName() { return "RC"; }
-//	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
+	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
 	virtual void GetSuccessors(const RCState &nodeID, std::vector<RCState> &neighbors) const;
 	virtual void GetActions(const RCState &nodeID, std::vector<RCAction> &actions) const;
 	virtual void GetPrunedActions(const RCState &nodeID, RCAction lastAction, std::vector<RCAction> &actions) const;
@@ -476,7 +485,9 @@ public:
 
 class RCPDB : public PDBHeuristic<RCState, RCAction, RC, RCState, 4> {
 public:
-	RCPDB(RC *e):PDBHeuristic(e){}//, const RCState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
+	RCPDB(RC *e,
+		  const std::array<bool, 12> &edgeRotations, const std::array<bool, 12> &edgeLocations,
+		  const std::array<bool, 8> &cornerRotations, const std::array<bool, 8> &cornerLocations);
 	uint64_t GetStateHash(const RCState &s) const;
 	void GetStateFromHash(RCState &s, uint64_t hash) const;
 	uint64_t GetPDBSize() const;
@@ -495,8 +506,25 @@ public:
 	void Save(FILE *f){}
 	std::string GetFileName(const char *prefix) {return "";}
 private:
-//	std::vector<int> edges;
-//	std::vector<int> corners;
+	uint64_t FactorialUpperK(int n, int k) const;
+
+	uint64_t GetEdgeRotationSize() const;
+	uint64_t GetEdgeLocationSize() const;
+	uint64_t GetCornerRotationSize() const;
+	uint64_t GetCornerLocationSize() const;
+	uint64_t GetEdgeRotationHash(const RCState &s) const;
+	uint64_t GetEdgeLocationHash(const RCState &s) const;
+	uint64_t GetCornerRotationHash(const RCState &s) const;
+	uint64_t GetCornerLocationHash(const RCState &s) const;
+	void GetStateFromEdgeRotationHash(RCState &s, uint64_t hash) const;
+	void GetStateFromEdgeLocationHash(RCState &s, uint64_t hash) const;
+	void GetStateFromCornerRotationHash(RCState &s, uint64_t hash) const;
+	void GetStateFromCornerLocationHash(RCState &s, uint64_t hash) const;
+
+	std::vector<int> edgeRotations;
+	std::vector<int> edgeLocations;
+	std::vector<int> cornerRotations;
+	std::vector<int> cornerLocations;
 };
 
 #endif /* defined(__hog2_glut__RubiksCube__) */

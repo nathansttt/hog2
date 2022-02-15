@@ -12,10 +12,16 @@
 #include "Driver.h"
 #include <string>
 #include "RC.h"
+#include "RubiksInstances.h"
+#include "ParallelIDAStar.h"
+#include "IDAStar.h"
+#include "Timer.h"
 
 RCState cube;
 RC env;
-//RC env2;
+
+void RunNewPDBTest();
+void RunOldPDBTest();
 
 //static CubeHolder *cubeHolder;
 int moveType = 0;
@@ -52,6 +58,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "TurnStop", "Stop Cube Passive Rotation", kAnyModifier, 'n');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset cube to solved", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test New PDB", kAnyModifier, 't');
+	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test Old PDB", kAnyModifier, 'u');
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseDown));
@@ -73,6 +80,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 
 		ReinitViewports(windowID, {-1, -1, 1, 1}, kScaleToSquare);
+		env.passiveRot = false;
 	}
 }
 
@@ -111,28 +119,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case 't':
-		{
-			RCState goal;
-			RC rc;
-			goal.Reset();
-			RCPDB pdb(&rc);
-			for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
-			{
-				pdb.GetStateFromPDBHash(x, goal);
-				assert(x == pdb.GetPDBHash(goal));
-			}
-			printf("Hash verified\n");
-			goal.Reset();
-			std::vector<RCState> succ;
-			rc.GetSuccessors(goal, succ);
-			for (auto i : succ)
-				std::cout << i << "\n";
-
-			pdb.SetGoal(goal);
-			pdb.BuildPDB(goal);
-			exit(0);
+			RunNewPDBTest();
 			break;
-		}
+		case 'u':
+			RunOldPDBTest();
+			break;
 		case 'm':
 			moveType++;
 			if (moveType > 2) moveType = 0;
@@ -174,22 +165,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 's':
 		{
+			RubiksCubeInstances::GetSuperFlip(cube);
 			// TODO: When hash function is finished you can use it to get random states 
 			// TEMP: Sets the state to a custom one
-			for (int i = 0; i < 12; i++)
-			{
-				cube.rotation[i] = 1;
-			}
+//			for (int i = 0; i < 12; i++)
+//			{
+//				cube.rotation[i] = 1;
+//			}
 			break;
 		}
 		case 'r':
 		{
-			// Reset state
-			for (int i = 0; i < 20; i++)
-			{
-				cube.indices[i] = i;
-				cube.rotation[i] = 0;
-			}
+			cube.Reset();
 			break;
 		}
 		case '?':
@@ -219,3 +206,169 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 	return true;
 }
 
+void RunNewPDBTest()
+{
+	ParallelIDAStar<RC, RCState, RCAction> ida;
+	IDAStar<RCState, RCAction> i;
+	RCState goal;
+	RC rc;
+	goal.Reset();
+	std::vector<RCAction> path;
+
+//	for (int x = 0; x < 100; x++)
+//	{
+//		RCState start;
+//		RubiksCubeInstances::GetRandomN(start, 6, x*10);
+//		printf("NP: ");
+//		rc.SetPruneSuccessors(false);
+//		ida.GetPath(&rc, start, goal, path);
+//		printf("Path length %lu\n", path.size());
+//
+//		printf(" P: ");
+//		rc.SetPruneSuccessors(true);
+//		ida.GetPath(&rc, start, goal, path);
+//		printf("Path length %lu\n", path.size());
+//	}
+//	exit(0);
+	
+	RCPDB pdb1(&rc,
+			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0}
+			   );
+	RCPDB pdb2(&rc,
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 1, 1},
+			   {1, 1, 1, 1, 1, 1, 1, 1}
+			   );
+	RCPDB pdb3(&rc,
+			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0}
+			   );
+	RCPDB pdb4(&rc,
+			   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 0, 0}
+			   );
+	Heuristic<RCState> h;
+	h.lookups.push_back({kMaxNode, 1, 4});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 2, 2});
+	h.lookups.push_back({kLeafNode, 3, 3});
+
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+	h.heuristics.push_back(&pdb3);
+	h.heuristics.push_back(&pdb4);
+
+//					  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//					  {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+//					  {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+//					  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+//					  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//					  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//					  {1, 1, 1, 1, 1, 1, 1, 1},
+//					  {1, 1, 1, 1, 1, 1, 1, 1}
+//					  {0, 0, 0, 0, 0, 0, 0, 0},
+//					  {0, 0, 0, 0, 0, 0, 0, 0}
+//					  );
+	printf("Verifying hashes:\n");
+	for (auto &j : h.heuristics)
+	{
+		RCPDB *i = (RCPDB*)j;
+		std::cout << "PDB Size " << i->GetPDBSize() << "\n";
+		for (uint64_t x = 0; x < i->GetPDBSize(); x++)
+		{
+			i->GetStateFromPDBHash(x, goal);
+			assert(x == i->GetPDBHash(goal));
+		}
+		printf("Hash verified\n");
+	}
+//			std::vector<RCState> succ;
+//			rc.GetSuccessors(goal, succ);
+//			for (auto i : succ)
+//				std::cout << i << "\n";
+
+	goal.Reset();
+	pdb1.SetGoal(goal);
+	pdb1.BuildPDB(goal, 16);
+	std::cout << pdb1.HCost(goal, goal);
+	
+	goal.Reset();
+	pdb2.SetGoal(goal);
+	pdb2.BuildPDB(goal, 16);
+	std::cout << pdb2.HCost(goal, goal);
+
+	goal.Reset();
+	pdb3.SetGoal(goal);
+	pdb3.BuildPDB(goal, 16);
+	std::cout << pdb3.HCost(goal, goal);
+
+	goal.Reset();
+	pdb4.SetGoal(goal);
+	pdb4.BuildPDB(goal, 16);
+	std::cout << pdb4.HCost(goal, goal);
+
+	ida.SetHeuristic(&h);
+	RCState start;
+	rc.SetPruneSuccessors(true);
+	Timer t;
+	for (int x = 0; x < 10; x++)
+	{
+		RubiksCubeInstances::GetKorfRubikInstance(start, x);
+		t.StartTimer();
+		ida.GetPath(&rc, start, goal, path);
+		t.EndTimer();
+		printf("%1.2fs elapsed. Found path length %lu. %" PRId64 " expanded %" PRId64 " generated\n",
+			   t.GetElapsedTime(), path.size(), ida.GetNodesExpanded(), ida.GetNodesTouched());
+	}
+	exit(0);
+}
+
+void RunOldPDBTest()
+{
+	RubiksCube cube;
+	RubiksState start, goal;
+	goal.Reset();
+	std::vector<RubiksAction> path;
+
+//	std::vector<int> edges;
+//	std::vector<int> corners;
+	RubikPDB pdb1(&cube, goal, {0, 1, 2, 3, 4, 5}, {});
+	RubikPDB pdb2(&cube, goal, {6, 7, 8, 9, 10, 11}, {});
+	RubikPDB pdb3(&cube, goal, {}, {0, 1, 2, 3, 4, 5, 6, 7});
+	pdb1.BuildPDB(goal, 16);
+	pdb2.BuildPDB(goal, 16);
+	pdb3.BuildPDB(goal, 16);
+
+	Heuristic<RubiksState> h;
+	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 2, 2});
+
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+	h.heuristics.push_back(&pdb3);
+
+	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> ida;
+	ida.SetHeuristic(&h);
+	Timer t;
+	cube.SetPruneSuccessors(true);
+	for (int x = 0; x < 10; x++)
+	{
+		RubiksCubeInstances::GetKorfRubikInstance(start, x);
+		t.StartTimer();
+		ida.GetPath(&cube, start, goal, path);
+		t.EndTimer();
+		printf("%1.2fs elapsed. Found path length %lu. %" PRId64 " expanded %" PRId64 " generated\n",
+			   t.GetElapsedTime(), path.size(), ida.GetNodesExpanded(), ida.GetNodesTouched());
+	}
+
+}
