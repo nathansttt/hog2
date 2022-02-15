@@ -26,6 +26,23 @@ public:
 	{
 		return rgbColor((1-perc)*c1.r+c2.r*perc, (1-perc)*c1.g+c2.g*perc, (1-perc)*c1.b+c2.b*perc);
 	}
+	static rgbColor hsl(float h, float s, float l)
+	{
+		float r, g, b;
+		
+		if (s == 0)
+		{
+			r = g = b = l; // achromatic
+		}
+		else {
+			float q = l < 0.5f ? l * (1 + s) : l + s - l * s;
+			float p = 2 * l - q;
+			r = hue2rgb(p, q, h + 1.0f/3.0f);
+			g = hue2rgb(p, q, h);
+			b = hue2rgb(p, q, h - 1.0f/3.0f);
+		}
+		return rgbColor(r, g, b);
+	}
 	void mix(const rgbColor &c, float perc)
 	{
 		r = (1-perc)*r+c.r*perc;
@@ -53,6 +70,16 @@ public:
 	}
 	float r,g,b;
 private:
+	static float hue2rgb(float p, float q, float t)
+	{
+		if (t < 0) t += 1;
+		if (t > 1) t -= 1;
+		if (t < 1.0/6.0) return p + (q - p) * 6 * t;
+		if (t < 1.0/2.0) return q;
+		if (t < 2.0/3.0) return p + (q - p) * (2.0/3.0 - t) * 6;
+		return p;
+	}
+
 	int unhexdigit(char c)
 	{
 		switch (c)
