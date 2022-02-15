@@ -1166,7 +1166,7 @@ void RC::InterpFaceRot(float progress)
  */
 void RC::TestUpdate()
 {
-	float testRot [3];
+	float testRot [3] = {0, 0, 0};
 	if (passiveRot)
 	{
 //		for (int i = 0; i < 3; i++)
