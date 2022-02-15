@@ -51,6 +51,7 @@ SRC_CPP = \
 	environments/RubiksCubeCorners.cpp \
 	environments/RubiksCube.cpp \
 	environments/CanonicalGrid.cpp \
+	environments/Hexagon.cpp \
 	environments/Fling.cpp \
 	environments/Voxels.cpp \
 	environments/VoxelGrid.cpp \
