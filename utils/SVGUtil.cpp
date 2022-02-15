@@ -325,7 +325,22 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
 					}
 //					s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
+					if (o.arrow)
+					{
+						
+						Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
+						Graphics::point p1 = o.end-o.start;
+						Graphics::point p2 = o.start;
+						p2.z = 1;
+						p2 = p1*p2;
+						p2.normalise();
+						p2 *= (o.end-newEnd).length();
 
+						s += SVGAddLinePath(PointToSVG(newEnd.x+p2.x, width), PointToSVG(newEnd.y+p2.y, height),
+											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+						s += SVGAddLinePath(PointToSVG(newEnd.x-p2.x, width), PointToSVG(newEnd.y-p2.y, height),
+											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+					}
 					x++;
 				}
 				x--;
@@ -441,7 +456,7 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 				std::to_string(p1.x)+","+std::to_string(p1.y)+" "+
 				std::to_string(p2.x)+","+std::to_string(p2.y)+" "+
 				std::to_string(p3.x)+","+std::to_string(p3.y)+"\" ";
-				s += "style=\"stroke:"+SVGGetRGB(i.c)+";stroke-width:"+std::to_string(i.width)+"\" />";
+				s += "style=\"fill:none;stroke:"+SVGGetRGB(i.c)+";stroke-width:"+std::to_string(i.width)+"\" />";
 //				s += "style=\"fill:"+SVGGetRGB(i.c);
 				//style="fill:lime;stroke:purple;stroke-width:1" />
 				break;
