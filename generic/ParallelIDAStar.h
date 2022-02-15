@@ -164,7 +164,7 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 			delete threads[x];
 			threads[x] = 0;
 		}
-		double bestBound = nextBound*10; // FIXME: Better ways to do bounds
+		double bestBound = (nextBound+1)*10; // FIXME: Better ways to do bounds
 		for (int x = 0; x < work.size(); x++)
 		{
 			for (int y = 0; y < work[x].gHistogram.size(); y++)
@@ -226,6 +226,8 @@ void ParallelIDAStar<environment, state, action>::GenerateWork(environment *env,
 		thePath.push_back(actions[x]);
 		
 		env->ApplyAction(currState, actions[x]);
+//		assert(!env->GoalTest(currState));
+			
 		action a = actions[x];
 		env->InvertAction(a);
 		GenerateWork(env, a, currState, thePath);
