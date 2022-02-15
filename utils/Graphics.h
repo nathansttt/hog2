@@ -52,11 +52,11 @@ struct point {
 	point &operator-=(const point &i)
 	{ x-=i.x; y-=i.y; z-=i.z; return *this; }
 
-	point operator*(float i)
+	point operator*(float i) const
 	{ point p = *this; p*=i; return p; }
-	point operator+(const point &i)
+	point operator+(const point &i) const
 	{ point p = *this; p+=i; return p; }
-	point operator-(const point &i)
+	point operator-(const point &i) const
 	{ point p = *this; p-=i; return p; }
 
 
