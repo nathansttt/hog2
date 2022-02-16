@@ -114,7 +114,7 @@ void Hexagon::Load(const char *file, HexagonState &s, bool solution)
 				s.state.Set(x, 11);
 			}
 		}
-		else if (isnumber(c))
+		else if (isdigit(c))
 		{
 			this->solution.state.Set(x, tolower(c)-'0');
 			s.state.Set(x, tolower(c)-'0');
