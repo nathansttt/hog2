@@ -1,6 +1,33 @@
 #!bin/bash
 
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen astar | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bpmx | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen IBEX | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-1 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-1 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-2 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-2 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-3 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-3 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-4 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-4 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-5 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-5 | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
 
+
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen astar | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bpmx | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen IBEX | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-1 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-1 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-2 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-2 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-3 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-3 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-4 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-4 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-bpmx-5 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
+~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/den601d.map ~/hog2/scenarios/dao/den601d.map.scen bgs-5 | grep ^result | awk '{ sum += $2; n++ } END {print sum/n}'
 
 ~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/brc000d.map ~/hog2/scenarios/dao/brc000d.map.scen astar | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
 ~/hog2/bin/release/BGS -inconsistent ~/hog2/maps/dao/brc000d.map ~/hog2/scenarios/dao/brc000d.map.scen bpmx | grep ^result | awk '{ sum += $3; n++ } END {print sum/n}'
