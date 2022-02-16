@@ -342,8 +342,8 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 	neighborID.resize(0);
 	neighborLoc.resize(0);
 	
-//	std::cout << "Expanding: " << openClosedList.Lookup(nodeid).data << " with f:";
-//	std::cout << openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h << std::endl;
+	//std::cout << "Expanding: " << env->GetStateHash(openClosedList.Lookup(nodeid).data) << " with f:";
+	//std::cout << openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h << std::endl;
 	
  	env->GetSuccessors(openClosedList.Lookup(nodeid).data, neighbors);
 	double bestH = openClosedList.Lookup(nodeid).h;
@@ -384,7 +384,7 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 	for (size_t x = 0; x < neighbors.size(); x++)
 	{
 		nodesTouched++;
-
+		//std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << "and g-cost"<<openClosedList.Lookup(nodeid).g+edgeCosts[x]<<std::endl;
 		if (theConstraint &&
 			theConstraint->ShouldNotGenerate(start, openClosedList.Lookup(nodeid).data, neighbors[x],
 											 openClosedList.Lookup(nodeid).g+edgeCosts[x], goal))

@@ -60,7 +60,7 @@ public:
 	const uint64_t c2 = 8;
 	const uint64_t gamma = 2;
 	int b_num = 10;
-	const double k =1;
+	const double k = 20;
 	const int infiniteWorkBound = -1;
 	void GetGlobalCostInterval(double &lower, double &upper)
 	{ lower = data.solutionInterval.lowerBound; upper = data.solutionInterval.upperBound; }
@@ -761,8 +761,8 @@ bool ImprovedBGS<state, action>::StepIterationUsingF()
 		double childFCost = childGCost+h->HCost(neighbors[x], goal);
 		uint64_t hk = env->GetStateHash(neighbors[x]);
 		uint64_t ok;
-//		std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << "and f-cost"<<childFCost<<std::endl;
-	//	sd.f_above = std::min(sd.f_above, childFCost); //this is not used in bgs
+	//	std::cout << "looking at child with hash : " << env->GetStateHash(neighbors[x]) << "and g-cost"<<childGCost<<std::endl;
+		sd.f_above = std::min(sd.f_above, childFCost); //this is not used in bgs
 		
 		switch (neighborLoc[x])
 		{

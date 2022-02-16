@@ -263,7 +263,6 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 {
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
-	ImprovedBGS<xyLoc, tDirection>  bgs;
 	IncrementalBGS<xyLoc, tDirection>  ibex;
 	IBEX::IBEX<xyLoc, tDirection, MapEnvironment, false> i(2, 8, 2, false);
 	searcher.SetReopenNodes(true);
@@ -307,6 +306,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-bpmx-1") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetUseBPMX();
 			bgs.SetB(1);
@@ -317,6 +317,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-1") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetB(1);
 			bgs.GetPath(&e, from, to, &DH, path);
@@ -326,6 +327,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-bpmx-2") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetUseBPMX();
 			bgs.SetB(2);
@@ -336,6 +338,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-2") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetB(2);
 			bgs.GetPath(&e, from, to, &DH, path);
@@ -345,6 +348,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-bpmx-3") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetUseBPMX();
 			bgs.SetB(3);
@@ -355,6 +359,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-3") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetB(3);
 			bgs.GetPath(&e, from, to, &DH, path);
@@ -364,6 +369,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-bpmx-4") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetUseBPMX();
 			bgs.SetB(4);
@@ -374,6 +380,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-4") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetB(4);
 			bgs.GetPath(&e, from, to, &DH, path);
@@ -383,6 +390,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-bpmx-5") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetUseBPMX();
 			bgs.SetB(5);
@@ -393,6 +401,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 
 		if (strcmp(algorithm, "bgs-5") == 0)
 		{
+			ImprovedBGS<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetB(5);
 			bgs.GetPath(&e, from, to, &DH, path);
