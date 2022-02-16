@@ -28,6 +28,7 @@ public:
 	NBitArray(const NBitArray &copyMe);
 	~NBitArray();
 	NBitArray &operator=(const NBitArray &copyMe);
+	bool Equal(const NBitArray &compare) const;
 	void FillMax();
 	void Clear();
 	void Resize(uint64_t newMaxEntries);
@@ -45,6 +46,13 @@ private:
 	uint64_t entries;
 	uint64_t memorySize;
 };
+
+
+template <uint64_t numBits>
+bool operator==(const NBitArray<numBits>& l, const NBitArray<numBits>& r)
+{
+	return l.Equal(r);
+}
 
 template <uint64_t numBits>
 NBitArray<numBits>::NBitArray(uint64_t numEntries)
@@ -91,6 +99,25 @@ NBitArray<numBits> &NBitArray<numBits>::operator=(const NBitArray &copyMe)
 	memcpy(mem, copyMe.mem, memorySize*sizeof(mem[0]));
 	return *this;
 }
+
+template <uint64_t numBits>
+bool NBitArray<numBits>::Equal(const NBitArray &compare) const
+{
+	if (this == &compare)
+		return true;
+	if (entries != compare.entries)
+		return false;
+	for (size_t x = 0; x < memorySize; x++)
+	{
+		if (mem[x] != compare.mem[x])
+			return false;
+	}
+#pragma message("Last bits are not being tested properly")
+	// TODO: figure out how many remaining entries are left, and
+	// only compare relevant bits
+	return true;
+}
+
 
 template <uint64_t numBits>
 void NBitArray<numBits>::FillMax()
