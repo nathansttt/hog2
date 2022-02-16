@@ -7,7 +7,7 @@
 //
 
 #include "Hexagon.h"
-
+#include <ctype.h>
 
 Hexagon::Hexagon()
 {
