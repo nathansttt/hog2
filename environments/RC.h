@@ -16,43 +16,6 @@
 #include "PDBHeuristic.h"
 
 /*===============================================================================================================================================================================
- * 			RUBIKPDB CLASS
- ===============================================================================================================================================================================*/
-
-//class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube, RubiksState, 4> {
-//public:
-//	RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
-//	uint64_t GetStateHash(const RubiksState &s) const;
-//	void GetStateFromHash(RubiksState &s, uint64_t hash) const;
-//
-//	uint64_t GetPDBSize() const;
-//	
-//	uint64_t GetPDBHash(const RubiksState &s, int threadID = 0) const;
-//	virtual uint64_t GetAbstractHash(const RubiksState &s, int threadID = 0) const { return GetPDBHash(s); }
-//	void GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID = 0) const;
-//	RubiksState GetStateFromAbstractState(RubiksState &s) const { return s; }
-//
-//	void OpenGLDraw() const
-//	{
-//		RubiksState s;
-//		GetStateFromPDBHash(0, s);
-//		env->OpenGLDraw(s);
-//	}
-//	
-//	//	const char *GetName();
-//	bool Load(const char *prefix);
-//	void Save(const char *prefix);
-//	bool Load(FILE *f);
-//	void Save(FILE *f);
-//	std::string GetFileName(const char *prefix);
-//private:
-//	RubikEdgePDB ePDB;
-//	RubikCornerPDB cPDB;
-//	std::vector<int> edges;
-//	std::vector<int> corners;
-//};
-
-/*===============================================================================================================================================================================
  * 			CUBIE CLASS
  ===============================================================================================================================================================================*/
 
@@ -416,48 +379,48 @@ public:
 
 	std::string GetName() { return "RC"; }
 	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
-	virtual void GetSuccessors(const RCState &nodeID, std::vector<RCState> &neighbors) const;
-	virtual void GetActions(const RCState &nodeID, std::vector<RCAction> &actions) const;
-	virtual void GetPrunedActions(const RCState &nodeID, RCAction lastAction, std::vector<RCAction> &actions) const;
-	virtual RCAction GetAction(const RCState &s1, const RCState &s2) const;
-	virtual void ApplyAction(RCState &s, RCAction a) const;
-	virtual void UndoAction(RCState &s, RCAction a) const;
+	void GetSuccessors(const RCState &nodeID, std::vector<RCState> &neighbors) const;
+	void GetActions(const RCState &nodeID, std::vector<RCAction> &actions) const;
+	void GetPrunedActions(const RCState &nodeID, RCAction lastAction, std::vector<RCAction> &actions) const;
+	RCAction GetAction(const RCState &s1, const RCState &s2) const;
+	void ApplyAction(RCState &s, RCAction a) const;
+	void UndoAction(RCState &s, RCAction a) const;
 
-	virtual void GetNextState(const RCState &, RCAction , RCState &) const;
+	void GetNextState(const RCState &, RCAction , RCState &) const;
 	
-	virtual bool InvertAction(RCAction &a) const;
+	bool InvertAction(RCAction &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const RCState &node1, const RCState &node2) const;
-	virtual double HCost(const RCState &node1, const RCState &node2, double parentHCost) const;
+	double HCost(const RCState &node1, const RCState &node2) const;
+	double HCost(const RCState &node1, const RCState &node2, double parentHCost) const;
 	int Edge12PDBDist(const RCState &s);
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const RCState &node) const;
+	double HCost(const RCState &node) const;
 	
-	virtual double GCost(const RCState &node1, const RCState &node2) const { return 1.0; }
-	virtual double GCost(const RCState &node, const RCAction &act) const { return 1.0; }
-	virtual bool GoalTest(const RCState &node, const RCState &goal) const;
+	double GCost(const RCState &node1, const RCState &node2) const { return 1.0; }
+	double GCost(const RCState &node, const RCAction &act) const { return 1.0; }
+	bool GoalTest(const RCState &node, const RCState &goal) const;
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const RCState &node) const;
+	bool GoalTest(const RCState &node) const;
 	
-	virtual uint64_t GetStateHash(const RCState &node) const;
+	uint64_t GetStateHash(const RCState &node) const;
 
-	virtual uint64_t GetActionHash(RCAction act) const { return act; }
-	virtual void GetStateFromHash(uint64_t hash, RCState &node) const;
+	uint64_t GetActionHash(RCAction act) const { return act; }
+	void GetStateFromHash(uint64_t hash, RCState &node) const;
 	
-	virtual void OpenGLDraw() const;
-	virtual void OpenGLDraw(const RCState&) const;
-	virtual void OpenGLDrawCorners(const RCState&) const;
-	virtual void OpenGLDrawEdges(const RCState&) const;
-	virtual void OpenGLDrawEdgeDual(const RCState&) const;
-	virtual void OpenGLDrawCenters() const;
-	virtual void OpenGLDrawCubeBackground() const;
+	void OpenGLDraw() const;
+	void OpenGLDraw(const RCState&) const;
+	void OpenGLDrawCorners(const RCState&) const;
+	void OpenGLDrawEdges(const RCState&) const;
+	void OpenGLDrawEdgeDual(const RCState&) const;
+	void OpenGLDrawCenters() const;
+	void OpenGLDrawCubeBackground() const;
 	/** Draw the transition at some percentage 0...1 between two states */
-	virtual void OpenGLDraw(const RCState&, const RCState&, float) const;
-	virtual void OpenGLDraw(const RCState&, const RCAction&) const;
+	void OpenGLDraw(const RCState&, const RCState&, float) const;
+	void OpenGLDraw(const RCState&, const RCAction&) const;
 	
 	void Draw(Graphics::Display &display, const RCState&) const;
 	
@@ -492,7 +455,7 @@ public:
 	void GetStateFromHash(RCState &s, uint64_t hash) const;
 	uint64_t GetPDBSize() const;
 	uint64_t GetPDBHash(const RCState &s, int threadID = 0) const;
-	virtual uint64_t GetAbstractHash(const RCState &s, int threadID = 0) const { return GetPDBHash(s); }
+	uint64_t GetAbstractHash(const RCState &s, int threadID = 0) const { return GetPDBHash(s); }
 	void GetStateFromPDBHash(uint64_t hash, RCState &s, int threadID = 0) const;
 	RCState GetStateFromAbstractState(RCState &s) const { return s; }
 
