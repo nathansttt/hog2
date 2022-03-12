@@ -22,6 +22,7 @@ RC env;
 
 void RunNewPDBTest();
 void RunOldPDBTest();
+void ComputeHeuristicStrength(Heuristic<RCState> h);
 
 //static CubeHolder *cubeHolder;
 int moveType = 0;
@@ -60,7 +61,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test New PDB", kAnyModifier, 't');
 	InstallKeyboardHandler(MyDisplayHandler, "TestPDB", "Test Old PDB", kAnyModifier, 'u');
 	InstallWindowHandler(MyWindowHandler);
-
+	InstallCommandLineHandler(MyCLHandler, "-test", "-test <new/old>", "Run standard test");
+	
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseDown));
 	srandom(time(0));
 }
@@ -100,9 +102,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (maxNumArgs <= 1)
-		return 0;
-	return 2;
+	if (maxNumArgs > 1)
+	{
+		if (strcmp(argument[1], "new") == 0)
+			RunNewPDBTest();
+		else
+			RunOldPDBTest();
+	}
+	exit(0);
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
@@ -231,37 +238,57 @@ void RunNewPDBTest()
 //	}
 //	exit(0);
 	
+	RCPDB pdb0(&rc,
+			   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			   {1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+//			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0}
+			   );
 	RCPDB pdb1(&rc,
-			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
-			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+//			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
 			   {0, 0, 0, 0, 0, 0, 0, 0},
 			   {0, 0, 0, 0, 0, 0, 0, 0}
 			   );
 	RCPDB pdb2(&rc,
-			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			   {1, 1, 1, 1, 1, 1, 1, 1},
-			   {1, 1, 1, 1, 1, 1, 1, 1}
-			   );
-	RCPDB pdb3(&rc,
-			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
-			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+//			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+//			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
+//			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+//			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
 			   {0, 0, 0, 0, 0, 0, 0, 0},
 			   {0, 0, 0, 0, 0, 0, 0, 0}
 			   );
-	RCPDB pdb4(&rc,
+	RCPDB pdb3(&rc,
 			   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			   {1, 1, 1, 1, 1, 1, 1, 1},
 			   {0, 0, 0, 0, 0, 0, 0, 0}
 			   );
+	RCPDB pdb4(&rc,
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 1, 1},
+			   {1, 1, 1, 1, 1, 1, 1, 1}
+			   );
 	Heuristic<RCState> h;
-	h.lookups.push_back({kMaxNode, 1, 4});
+	h.lookups.push_back({kMaxNode, 1, 5});
 	h.lookups.push_back({kLeafNode, 0, 0});
 	h.lookups.push_back({kLeafNode, 1, 1});
 	h.lookups.push_back({kLeafNode, 2, 2});
 	h.lookups.push_back({kLeafNode, 3, 3});
+	h.lookups.push_back({kLeafNode, 4, 4});
 
+	h.heuristics.push_back(&pdb0);
 	h.heuristics.push_back(&pdb1);
 	h.heuristics.push_back(&pdb2);
 	h.heuristics.push_back(&pdb3);
@@ -281,39 +308,54 @@ void RunNewPDBTest()
 	printf("Verifying hashes:\n");
 	for (auto &j : h.heuristics)
 	{
+		RCState tmp;
 		RCPDB *i = (RCPDB*)j;
 		std::cout << "PDB Size " << i->GetPDBSize() << "\n";
 		for (uint64_t x = 0; x < i->GetPDBSize(); x++)
 		{
 			i->GetStateFromPDBHash(x, goal);
 			assert(x == i->GetPDBHash(goal));
+//			rc.GetActions(goal, path);
+//			for (auto act : path)
+//			{
+//				rc.ApplyAction(goal, act);
+//				auto rank = i->GetPDBHash(goal);
+//				i->GetStateFromPDBHash(rank, tmp);
+//				assert(i->AbstractEqual(tmp, goal));
+//				rc.UndoAction(goal, act);
+//			}
 		}
 		printf("Hash verified\n");
+
+		goal.Reset();
+		i->SetGoal(goal);
+		i->BuildPDB(goal, 16);
+		std::cout << i->HCost(goal, goal);
 	}
 //			std::vector<RCState> succ;
 //			rc.GetSuccessors(goal, succ);
 //			for (auto i : succ)
 //				std::cout << i << "\n";
 
-	goal.Reset();
-	pdb1.SetGoal(goal);
-	pdb1.BuildPDB(goal, 16);
-	std::cout << pdb1.HCost(goal, goal);
-	
-	goal.Reset();
-	pdb2.SetGoal(goal);
-	pdb2.BuildPDB(goal, 16);
-	std::cout << pdb2.HCost(goal, goal);
-
-	goal.Reset();
-	pdb3.SetGoal(goal);
-	pdb3.BuildPDB(goal, 16);
-	std::cout << pdb3.HCost(goal, goal);
-
-	goal.Reset();
-	pdb4.SetGoal(goal);
-	pdb4.BuildPDB(goal, 16);
-	std::cout << pdb4.HCost(goal, goal);
+//	goal.Reset();
+//	pdb1.SetGoal(goal);
+//	pdb1.BuildPDB(goal, 16);
+//	std::cout << pdb1.HCost(goal, goal);
+//
+//	goal.Reset();
+//	pdb2.SetGoal(goal);
+//	pdb2.BuildPDB(goal, 16);
+//	std::cout << pdb2.HCost(goal, goal);
+//
+//	goal.Reset();
+//	pdb3.SetGoal(goal);
+//	pdb3.BuildPDB(goal, 16);
+//	std::cout << pdb3.HCost(goal, goal);
+//
+//	goal.Reset();
+//	pdb4.SetGoal(goal);
+//	pdb4.BuildPDB(goal, 16);
+//	std::cout << pdb4.HCost(goal, goal);
 
 	ida.SetHeuristic(&h);
 	RCState start;
@@ -371,4 +413,9 @@ void RunOldPDBTest()
 			   t.GetElapsedTime(), path.size(), ida.GetNodesExpanded(), ida.GetNodesTouched());
 	}
 
+}
+
+void ComputeHeuristicStrength(Heuristic<RCState> h)
+{
+	
 }
