@@ -375,6 +375,103 @@ void RunNewPDBTest()
 
 void RunOldPDBTest()
 {
+	ParallelIDAStar<RC, RCState, RCAction> ida;
+	IDAStar<RCState, RCAction> i;
+	RCState goal;
+	RC rc;
+	goal.Reset();
+	std::vector<RCAction> path;
+
+//	for (int x = 0; x < 100; x++)
+//	{
+//		RCState start;
+//		RubiksCubeInstances::GetRandomN(start, 6, x*10);
+//		printf("NP: ");
+//		rc.SetPruneSuccessors(false);
+//		ida.GetPath(&rc, start, goal, path);
+//		printf("Path length %lu\n", path.size());
+//
+//		printf(" P: ");
+//		rc.SetPruneSuccessors(true);
+//		ida.GetPath(&rc, start, goal, path);
+//		printf("Path length %lu\n", path.size());
+//	}
+//	exit(0);
+	
+	RCPDB pdb0(&rc,
+			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0}
+			   );
+	RCPDB pdb1(&rc,
+			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+			   {0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0}
+			   );
+	RCPDB pdb2(&rc,
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {1, 1, 1, 1, 1, 1, 1, 1},
+			   {1, 1, 1, 1, 1, 1, 1, 1}
+			   );
+	Heuristic<RCState> h;
+	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 2, 2});
+	
+	h.heuristics.push_back(&pdb0);
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+
+	printf("Verifying hashes:\n");
+	for (auto &j : h.heuristics)
+	{
+		RCState tmp;
+		RCPDB *i = (RCPDB*)j;
+		std::cout << "PDB Size " << i->GetPDBSize() << "\n";
+		for (uint64_t x = 0; x < i->GetPDBSize(); x++)
+		{
+			i->GetStateFromPDBHash(x, goal);
+			assert(x == i->GetPDBHash(goal));
+//			rc.GetActions(goal, path);
+//			for (auto act : path)
+//			{
+//				rc.ApplyAction(goal, act);
+//				auto rank = i->GetPDBHash(goal);
+//				i->GetStateFromPDBHash(rank, tmp);
+//				assert(i->AbstractEqual(tmp, goal));
+//				rc.UndoAction(goal, act);
+//			}
+		}
+		printf("Hash verified\n");
+
+		goal.Reset();
+		i->SetGoal(goal);
+		i->BuildPDB(goal, 16);
+		std::cout << i->HCost(goal, goal);
+	}
+
+	ida.SetHeuristic(&h);
+	RCState start;
+	rc.SetPruneSuccessors(true);
+	Timer t;
+	for (int x = 0; x < 10; x++)
+	{
+		RubiksCubeInstances::GetKorfRubikInstance(start, x);
+		t.StartTimer();
+		ida.GetPath(&rc, start, goal, path);
+		t.EndTimer();
+		printf("%1.2fs elapsed. Found path length %lu. %" PRId64 " expanded %" PRId64 " generated\n",
+			   t.GetElapsedTime(), path.size(), ida.GetNodesExpanded(), ida.GetNodesTouched());
+	}
+	exit(0);
+}
+
+void RunOlderPDBTest()
+{
 	RubiksCube cube;
 	RubiksState start, goal;
 	goal.Reset();
