@@ -311,6 +311,7 @@ void InstallMouseClickHandler(MouseCallback2 mC, tMouseEventType which = static_
 void RemoveMouseClickHandler(MouseCallback mC);
 void RemoveMouseClickHandler(MouseCallback2 mC);
 bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tMouseEventType mouse);
+bool HandleMouse(pRecContext pContextInfo, int xWindow, int yWindow, point3d where, tButtonType button, tMouseEventType mouse);
 bool HandleMouseClick(pRecContext pContextInfo, int x, int y, point3d where, tButtonType, tMouseEventType);
 bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, point3d where, tButtonType, tMouseEventType);
 

@@ -154,14 +154,14 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 					case sf::Mouse::Right:
 						//HandleMouseClick(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kRightButton, kMouseDown);
 						//printf("Right (%d, %d) - {%f, %f, %f}\n", event.mouseButton.x, event.mouseButton.y, p.x, p.y, p.z);
-						HandleMouse(pContextInfo, p, kRightButton, kMouseDown);
+						HandleMouse(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kRightButton, kMouseDown);
 						break;
 					case sf::Mouse::Left:
 						//printf("Left (%d, %d) - {%f, %f, %f}\n", event.mouseButton.x, event.mouseButton.y, p.x, p.y, p.z);
-						HandleMouse(pContextInfo, p, kLeftButton, kMouseDown);
+						HandleMouse(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kLeftButton, kMouseDown);
 						break;
 					case sf::Mouse::Middle:
-						HandleMouse(pContextInfo, p, kMiddleButton, kMouseDown);
+						HandleMouse(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kMiddleButton, kMouseDown);
 						break;
 					default: break;
 					}
@@ -174,13 +174,13 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 					switch (event.mouseButton.button)
 					{
 					case sf::Mouse::Right:
-						HandleMouse(pContextInfo, p, kRightButton, kMouseUp);
+						HandleMouse(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kRightButton, kMouseUp);
 						break;
 					case sf::Mouse::Left:
-						HandleMouse(pContextInfo, p, kLeftButton, kMouseUp);
+						HandleMouse(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kLeftButton, kMouseUp);
 						break;
 					case sf::Mouse::Middle:
-						HandleMouse(pContextInfo, p, kMiddleButton, kMouseUp);
+						HandleMouse(pContextInfo, event.mouseButton.x, event.mouseButton.y, p, kMiddleButton, kMouseUp);
 						break;
 					}
 				}
@@ -192,11 +192,11 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 					if (mousePressCount == 0)
 					{
 						//printf("Move (%d, %d) - {%f, %f, %f}\n", event.mouseMove.x, event.mouseMove.y, p.x, p.y, p.z);
-						HandleMouse(pContextInfo, p, bType, kMouseMove);
+						HandleMouse(pContextInfo, event.mouseMove.x, event.mouseMove.y, p, bType, kMouseMove);
 					}
 					else {
 						//printf("Drag (%d, %d) - {%f, %f, %f}\n", event.mouseMove.x, event.mouseMove.y, p.x, p.y, p.z);
-						HandleMouse(pContextInfo, p, bType, kMouseDrag);
+						HandleMouse(pContextInfo, event.mouseMove.x, event.mouseMove.y, p, bType, kMouseDrag);
 					}
 				}
 				//std::cout << "new mouse x: " << event.mouseMove.x << std::endl;

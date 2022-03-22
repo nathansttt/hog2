@@ -561,6 +561,24 @@ Graphics::point ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v,
 
 
 /* New low-end mouse handler. Does the viewport computation - just requires incoming global HOG coordinates. */
+bool HandleMouse(pRecContext pContextInfo, int xWindow, int yWindow, point3d where, tButtonType button, tMouseEventType mouse)
+{
+	for (int x = MAXPORTS-1; x >= 0; x--)
+	{
+//		if (!pContextInfo->viewports[x].active)
+//			continue;
+		if (!PointInRect(where, pContextInfo->viewports[x].bounds))
+			continue;
+		// got hit in rect
+		Graphics::point res = GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[x], where);
+		// click handled
+		if (HandleMouseClick(pContextInfo, x, xWindow, yWindow, res, button, mouse))
+			return true;
+	}
+	return false;
+}
+
+/* New low-end mouse handler. Does the viewport computation - just requires incoming global HOG coordinates. */
 bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tMouseEventType mouse)
 {
 	for (int x = MAXPORTS-1; x >= 0; x--)
@@ -586,6 +604,10 @@ bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, poin
 	{
 		if (mouseCallbacks2[j]->which&mouse) // need to ask for event to call handler
 		{
+			if (x == -1 || y == -1)
+				fprintf(stderr, "Warning: window coordinates not being pased into HandleMouseClick (%s line %d)\n",
+						__FILE__, __LINE__);
+
 			if (mouseCallbacks2[j]->mC(pContextInfo->windowID, viewport, x, y, where,
 									   button, mouse))
 				return true;
