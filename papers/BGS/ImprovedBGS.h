@@ -119,7 +119,6 @@ private:
 	void ExtractPathToStartFromIDF(uint64_t node, std::vector<state> &thePath);
 	void ExtractPathToStartFromIDG(uint64_t node, std::vector<state> &thePath);
     void GetNodesFromGq();
-	void GetNodesFromFq();
 	void GetAllNodesinG();
     void GetNodeswithBoundinG();
 	void GetNodeswithBoundinGAboveinF();
@@ -337,37 +336,6 @@ void ImprovedBGS<state, action>::ExtractPathToStartFromIDG(uint64_t node, std::v
 	
 }
 
-template <class state, class action>
-void ImprovedBGS<state, action>::GetNodesFromFq()
-{
-	for(uint64_t i = 0; i < q_f.size();i++){
-		state s = q_f.Lookup(i).data;
-		double g_value = q_f.Lookup(i).g;
-		double h_value = q_f.Lookup(i).h;
-		double f_value = g_value+h_value;
-		uint64_t hk = env->GetStateHash(s);
-		uint64_t ok;
-		uint64_t parentId = q_f.Lookup(i).parentID;
-		if(q_f.Lookup(hk,ok) == kOpenList){
-			if(q_g.Lookup(hk,ok) == kNotFound){
-				q_g.AddOpenNode(s,
-						env->GetStateHash(s),
-						g_value,
-						h_value,
-						parentId);
-				q_f.Remove(env->GetStateHash(s));
-			}
-			else if(q_g.Lookup(hk,ok) == kOpenList && fless(g_value, q_g.Lookup(ok).g)){
-					q_g.Lookup(ok).parentID = parentId;
-					q_g.Lookup(ok).g = g_value;
-					q_g.KeyChanged(ok);
-					q_f.Remove(env->GetStateHash(s));
-				}
-			}
-			
-		}
-
-}
 
 template <class state, class action>
 void ImprovedBGS<state, action>::GetNodeswithBoundinGAboveinF(){
@@ -582,7 +550,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundF(){
 				tmp3 = f_value;
 		}
 	}
-	previousBound = tmp3;
+	previousBound = tmp3;   
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
@@ -599,7 +567,7 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundF(){
 	if(fequal(tmp,DBL_MAX)){
 		tmp = tmp3;
 	}
-	bound = tmp;
+	bound = tmp;    //bound is the next f-cost that is to be expanded or the largest f-value expanded otherwise
 	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
@@ -615,9 +583,11 @@ void ImprovedBGS<state, action>::FindtheBoundAndNextBoundF(){
 			}
 		}
 	}
-	nextBound = tmp2;
+	nextBound = tmp2;    
 	//printf("previous bound %1.5f bound is %1.5f and nextBound is %1.5f\n",tmp3,bound,nextBound);
 }
+
+/* Finds the largest f-cost expanded in the iteration */
 template <class state, class action>
 void ImprovedBGS<state, action>::FindtheCurrentBoundF(){
 
@@ -944,12 +914,11 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 		if (flesseq(solutionCost, data.solutionInterval.lowerBound))
 				{
 					thePath = solutionPath;
-					//printf("Found solution cost %1.5f\n", solutionCost);
+					//printf("Found solution cost %1.5f\n", solutionCost);    //if the solution is found
 					return true;
 				}
 		if(!MODE){
-			if(data.nodesReexpanded <= b && data.nodesExpanded <= c1*data.nodeLB){
-				//printf("case 1");
+			if(data.nodesReexpanded <= b && data.nodesExpanded <= c1*data.nodeLB){    //case 1 : Run A* when within the re-expansion budget
 				int temp1 = nodesExpanded;
 				int temp2 = nodesReexpanded;
 				if(!IterationCompleteF()){
@@ -965,9 +934,8 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 				data.nodesReexpanded += nodesReexpanded -temp2;
 				return false;
 				}
-			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB){
+			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB){  //case 2 : Expanded nodes by a factor, Run A* 
 				if(!case2){
-					//printf("case 2 ");
 				    FindtheCurrentBoundF();
 					case2 = 1;
 					return false;
@@ -980,7 +948,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 						double h_value = q_f.Lookup(node).h;
 						double f_value = g_value+h_value;
 						//printf("f-value is %1.5f anf previous bound is %1.5f\n",f_value,previousBound);
-						if(flesseq(f_value,previousBound)){
+						if(flesseq(f_value,previousBound)){      //expand all the nodes with the previousBound
 							int temp1 = nodesExpanded;
 							int temp2 = nodesReexpanded;
 							StepIterationUsingF();
@@ -988,22 +956,21 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 							data.nodesReexpanded += nodesReexpanded -temp2;
 							return false;
 						}
-						data.solutionInterval.lowerBound = previousBound;
+						data.solutionInterval.lowerBound = previousBound;   
 						data.solutionInterval.upperBound = previousBound;
-						FindtheBoundAndNextBoundF();
+						FindtheBoundAndNextBoundF();   //find the previousBound, bound and nextBound
 						return false;
 				   }
 				data.solutionInterval.lowerBound = previousBound;
 				data.solutionInterval.upperBound = previousBound;
-				FindtheBoundAndNextBoundF();
+				FindtheBoundAndNextBoundF();  //find the previousBound, bound and nextBound
 				return false;
 				}
 				
 
 			}
-			else if(data.nodesReexpanded > b && data.nodesExpanded > c1*data.nodeLB) {
+			else if(data.nodesReexpanded > b && data.nodesExpanded > c1*data.nodeLB) {  //case 3: Grew by a factor but can not afford any more re-expansions
 				if(!case3){
-					//printf("case 3");
 					FindtheBoundAndNextBoundF();
 					bound_g = previousBound;
 				    GetNodeswithBoundinGAboveinF();
@@ -1011,27 +978,22 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					return false;
 				}
 				else{
-				
-
 				    if(!IterationCompleteG()){
-					
 						int temp1 = nodesExpanded;
 						StepIterationUsingG();
 						data.nodesExpanded += nodesExpanded-temp1;
 						return false;
-
 				    }
 					data.solutionInterval.lowerBound = previousBound;
 					data.solutionInterval.upperBound = previousBound;
 					GetAllNodesinG();
 					GetNodesFromGq();
-					FindtheBoundAndNextBoundF();
+					FindtheBoundAndNextBoundF();   // end of main interation
 					return false;
 				}
 			}
 			else {
-				if(!SetupExponentialBinaryIteration){
-					//printf("case 4 \n");
+				if(!SetupExponentialBinaryIteration){    //case 4: Exponential Search
 					FindtheCurrentBoundF();
 					FindtheBoundAndNextBoundF();
 					if(fequal(previousBound,bound)){
@@ -1040,8 +1002,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					else{
 						bound_g = bound;
 					}
-					GetNodeswithBoundinGAboveinF(); //move from q_f to q_g anf q once bound_g is set
-					//GetNodesFromFq();
+					GetNodeswithBoundinGAboveinF(); //move from q_f to q_g and q once bound_g is set
 					SetupExponentialBinaryIteration = true;
 					iterationComplete = false;
 					MODE = 1;
@@ -1097,7 +1058,7 @@ bool ImprovedBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 					fEquation = to_string_with_precision(nextBound, 0);
 					previousBound = bound_g;
 					FindtheBoundAndNextBoundG();
-					GetAllNodesinG();  //move evrerything from temp to g 
+					GetAllNodesinG();  //move everything from temp to g 
 					GetNodesFromGq();  //move everything from g to f
 					bound_g = bound;
 					return false;
