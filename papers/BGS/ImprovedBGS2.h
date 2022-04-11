@@ -60,7 +60,7 @@ public:
 	const uint64_t c2 = 8;
 	const uint64_t gamma = 2;
 	int b_num = 10;
-	const double k = 20;
+	double k = 1;
 	const int infiniteWorkBound = -1;
 	void GetGlobalCostInterval(double &lower, double &upper)
 	{ lower = data.solutionInterval.lowerBound; upper = data.solutionInterval.upperBound; }
@@ -269,21 +269,7 @@ template <class state, class action>
 void ImprovedBGS2<state, action>::SetB(int a)
 {
 
-    if( a == 1){
-		b_num = 1;
-	}
-	else if(a == 2){
-		b_num = 2;
-	}
-	else if(a == 3){
-		b_num = 3;
-	}
-	else if(a == 4){
-		b_num = 4;
-	}
-	else{
-		b_num = 5;
-	}
+    b_num = a;
 }
 
 template <class state, class action>
@@ -719,23 +705,16 @@ template <class state, class action>
 bool ImprovedBGS2<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 
-    int b = k * data.nodeLB;
-	if( b_num == 1){
-		b = k * data.nodeLB;
-	}
-	else if(b_num == 2){
-		b = k * data.nodeLB;
-		b = sqrt(b);
-	}
-	else if(b_num == 3){
-		b = k * data.nodeLB;
-	    b = cbrt(b);
-	}
-	else if(b_num == 4){
+    int b = data.nodeLB;
+	
+	if(b_num == 9){
 		b = 0;
 	}
-	else{
+	else if(b_num == 10){
 		b = 10000;
+	}
+	else{
+		b = b_num * b;
 	}
   
 
