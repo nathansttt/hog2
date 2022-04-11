@@ -212,20 +212,7 @@ bool ImprovedBGS2<state, action>::InitializeSearch(SearchEnvironment<state, acti
 	this->h = h;
 
 	solutionPath.clear();
-
-	/// Setup BTS control data
-/*	data.nodesExpanded = 0;
-	data.workBound = infiniteWorkBound;
-	data.nodeLB = 0;
-	data.solutionInterval.lowerBound = h->HCost(start, goal);
-	data.solutionInterval.upperBound = DBL_MAX;
-	data.delta = 0;
-	fEquation = to_string_with_precision(h->HCost(start, goal), 0);
-	solutionCost = DBL_MAX;
-	SetupIteration(h->HCost(start, goal));
-	stage = "NEW ITERATION";
-*/
-	//nodeLB = nodesExpanded ;
+	
 	data.nodesExpanded = 0;
 	data.nodesReexpanded = 0;
 	data.workBound = infiniteWorkBound;
