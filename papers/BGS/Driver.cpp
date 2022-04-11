@@ -276,7 +276,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 	Timer t;
 	std::vector<xyLoc> path;
 	std::vector<tDirection> path2;
-	
+	printf("doing experiments\n");
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
 		if (s.GetNthExperiment(x).GetDistance() == 0)
@@ -303,7 +303,6 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 		}
-
 		if (strcmp(algorithm, "bgs-bpmx-1") == 0)
 		{
 			ImprovedBGS2<xyLoc, tDirection>  bgs;
@@ -404,6 +403,46 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			ImprovedBGS2<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetB(5);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+		if (strcmp(algorithm, "bgs-bpmx-9") == 0)
+		{
+			ImprovedBGS2<xyLoc, tDirection>  bgs;
+			t.StartTimer();
+			bgs.SetUseBPMX();
+			bgs.SetB(9);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-9") == 0)
+		{
+			ImprovedBGS2<xyLoc, tDirection>  bgs;
+			t.StartTimer();
+			bgs.SetB(9);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+		if (strcmp(algorithm, "bgs-bpmx-10") == 0)
+		{
+			ImprovedBGS2<xyLoc, tDirection>  bgs;
+			t.StartTimer();
+			bgs.SetUseBPMX();
+			bgs.SetB(10);
+			bgs.GetPath(&e, from, to, &DH, path);
+			t.EndTimer();
+			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+		}
+
+		if (strcmp(algorithm, "bgs-10") == 0)
+		{
+			ImprovedBGS2<xyLoc, tDirection>  bgs;
+			t.StartTimer();
+			bgs.SetB(10);
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
