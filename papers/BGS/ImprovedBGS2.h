@@ -529,6 +529,9 @@ bool ImprovedBGS2<state, action>::StepIterationUsingF()
 					{
 						auto &i = q_f.Lookup(neighborID[x]);
 						i.h = bestH-edgeCosts[x];
+						q_g.Lookup(hk,ok_child);
+						auto &j = q_g.Lookup(ok_child);
+						j.h = bestH-edgeCosts[x];
 					}
 				}
 				if(fless(childGCost,q_f.Lookup(neighborID[x]).g)){
@@ -565,6 +568,11 @@ bool ImprovedBGS2<state, action>::StepIterationUsingF()
 						auto &i = q_f.Lookup(neighborID[x]);
 						i.h = std::max(i.h, bestH-edgeCosts[x]);
 						q_f.KeyChanged(neighborID[x]);
+
+						q_g.Lookup(hk,ok_child);
+						auto &j = q_g.Lookup(ok_child);
+						j.h = std::max(j.h, bestH-edgeCosts[x]);
+						q_g.KeyChanged(ok_child);
 					}
 				}
 				break;
@@ -575,6 +583,12 @@ bool ImprovedBGS2<state, action>::StepIterationUsingF()
 							  env->GetStateHash(neighbors[x]),
 							  childGCost,
 							  std::max(h->HCost(neighbors[x], goal), q_f.Lookup(nodeid).h-edgeCosts[x]),
+							  nodeid);
+					
+					q_g.AddOpenNode(neighbors[x],
+							  env->GetStateHash(neighbors[x]),
+							  childGCost,
+							  std::max(h->HCost(neighbors[x], goal), q_f.Lookup(ok_parent).h-edgeCosts[x]),
 							  nodeid);
 				}
 				else{
