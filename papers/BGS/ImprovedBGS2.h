@@ -336,6 +336,11 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundF(){
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
 		if(q_f.Lookup(hk,ok) == kClosedList && fgreater(f_value,tmp3)){
+				tmp3 = f_value;
+		}
+	}
+	previousBound = tmp3;   
+	for(uint64_t i = 0; i < q_f.size();i++){
 		state s = q_f.Lookup(i).data;
 		double g_value = q_f.Lookup(i).g;
 		double h_value = q_f.Lookup(i).h;
@@ -346,7 +351,6 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundF(){
 			if(fgreatereq(f_value,tmp3) && fless(f_value,tmp)){
 				tmp = f_value;
 			}
-		}
 		}
 	}
 	if(fequal(tmp,DBL_MAX)){
@@ -368,7 +372,7 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundF(){
 			}
 		}
 	}
-	nextBound = tmp2;    
+	nextBound = tmp2;      
 	//printf("previous bound %1.5f bound is %1.5f and nextBound is %1.5f\n",tmp3,bound,nextBound);
 }
 
@@ -379,7 +383,7 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundG(){
 
     double tmp = DBL_MAX;
 	double tmp2 = DBL_MAX;
-	
+	double tmp3 = 0;
 	for(uint64_t i = 0; i < q_g.size();i++){
 		state s = q_g.Lookup(i).data;
 		double g_value = q_g.Lookup(i).g;
@@ -387,16 +391,28 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundG(){
 		double f_value = g_value+h_value;
 		uint64_t hk = env->GetStateHash(s);
 		uint64_t ok;
-		if(q_g.Lookup(hk,ok) == kOpenList){
-			if(fless(f_value,tmp)){
+		if(q_g.Lookup(hk,ok) == kClosedList && fgreater(f_value,tmp3)){
+				tmp3 = f_value;
+		}
+	}
+	previousBound = tmp3;   
+	for(uint64_t i = 0; i < q_g.size();i++){
+		state s = q_g.Lookup(i).data;
+		double g_value = q_g.Lookup(i).g;
+		double h_value = q_g.Lookup(i).h;
+		double f_value = g_value+h_value;
+		uint64_t hk = env->GetStateHash(s);
+		uint64_t ok;
+		if(q_f.Lookup(hk,ok) == kOpenList){
+			if(fgreatereq(f_value,tmp3) && fless(f_value,tmp)){
 				tmp = f_value;
 			}
 		}
 	}
 	if(fequal(tmp,DBL_MAX)){
-		tmp = bound_g;  //the bound used to close the last nodes
+		tmp = tmp3;
 	}
-	bound = tmp;
+	bound = tmp;    //bound is the next f-cost that is to be expanded or the largest f-value expanded otherwise
 	for(uint64_t i = 0; i < q_g.size();i++){
 		state s = q_g.Lookup(i).data;
 		double g_value = q_g.Lookup(i).g;
@@ -412,7 +428,7 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundG(){
 			}
 		}
 	}
-	nextBound = tmp2;
+	nextBound = tmp2;    
 }
 
 
