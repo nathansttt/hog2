@@ -996,7 +996,7 @@ bool ImprovedBGS2<state, action>::DoSingleSearchStep(std::vector<state> &thePath
 		data.nodesReexpanded = 0;
 		data.workBound = infiniteWorkBound;
 		data.delta = 1;
-		DO_ASTAR = 0;  //set the flag to Exponential Search
+		DO_ASTAR = 1;  //set the flag to Exponential Search
 		InitializeCase2 = 0;
 		InitializeCase3 = 0;
 		return false;
