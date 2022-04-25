@@ -225,6 +225,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 		{
 			t.StartTimer();
 			bgs.GetPath(&e, from, to, &e, path);
+			bgs.SetK(1);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
@@ -354,7 +355,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm, ch
 	exit(0);
 }
 
-void RunPolygraph(int instanceSize, char *algorithm)
+void RunPolygraph(int instanceSize, char *algorithm, char *K)
 {
 	std::vector<graphState> path;
 	IncrementalBGS<graphState, graphMove>  ibex;
@@ -394,6 +395,7 @@ void RunPolygraph(int instanceSize, char *algorithm)
 		ImprovedBGS2<graphState, graphMove>  bgs;
 		t.StartTimer();
 		bgs.GetPath(ge, from, to, &h, path);
+		bgs.SetK(std::stoi(K));
 		t.EndTimer();
 		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, bgs.GetNodesExpanded(), t.GetElapsedTime());
 	}
@@ -427,9 +429,9 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	if (strcmp(argument[0], "-polygraph") == 0)
 	{
-		if (maxNumArgs >= 3)
+		if (maxNumArgs >= 4)
 		{
-			RunPolygraph(atoi(argument[1]), argument[2]);
+			RunPolygraph(atoi(argument[1]), argument[2], argument[3]);
 		}
 	}
 	
