@@ -225,6 +225,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 		{
 			t.StartTimer();
 			bgs.GetPath(&e, from, to, &e, path);
+			bgs.SetK(1);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
@@ -260,7 +261,7 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 
 
 
-void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
+void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm, char *K)
 {
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
 	IncrementalBGS<xyLoc, tDirection>  ibex;
@@ -276,7 +277,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 	Timer t;
 	std::vector<xyLoc> path;
 	std::vector<tDirection> path2;
-	printf("doing experiments\n");
+	
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
 		if (s.GetNthExperiment(x).GetDistance() == 0)
@@ -303,146 +304,23 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), searcher.GetNodesExpanded(), t.GetElapsedTime());
 		}
-		if (strcmp(algorithm, "bgs-bpmx-1") == 0)
+
+		if (strcmp(algorithm, "bgs-bpmx") == 0)
 		{
 			ImprovedBGS2<xyLoc, tDirection>  bgs;
 			t.StartTimer();
 			bgs.SetUseBPMX();
-			bgs.SetB(1);
+			bgs.SetK(std::stoi(K));
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
 
-		if (strcmp(algorithm, "bgs-1") == 0)
+		if (strcmp(algorithm, "bgs") == 0)
 		{
 			ImprovedBGS2<xyLoc, tDirection>  bgs;
 			t.StartTimer();
-			bgs.SetB(1);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-bpmx-2") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetUseBPMX();
-			bgs.SetB(2);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-2") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetB(2);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-bpmx-3") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetUseBPMX();
-			bgs.SetB(3);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-3") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetB(3);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-bpmx-4") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetUseBPMX();
-			bgs.SetB(4);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-4") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetB(4);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-bpmx-5") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetUseBPMX();
-			bgs.SetB(5);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-5") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetB(5);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-		if (strcmp(algorithm, "bgs-bpmx-9") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetUseBPMX();
-			bgs.SetB(9);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-9") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetB(9);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-		if (strcmp(algorithm, "bgs-bpmx-10") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetUseBPMX();
-			bgs.SetB(10);
-			bgs.GetPath(&e, from, to, &DH, path);
-			t.EndTimer();
-			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
-		}
-
-		if (strcmp(algorithm, "bgs-10") == 0)
-		{
-			ImprovedBGS2<xyLoc, tDirection>  bgs;
-			t.StartTimer();
-			bgs.SetB(10);
+			bgs.SetK(std::stoi(K));
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
@@ -477,7 +355,7 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm)
 	exit(0);
 }
 
-void RunPolygraph(int instanceSize, char *algorithm)
+void RunPolygraph(int instanceSize, char *algorithm, char *K)
 {
 	std::vector<graphState> path;
 	IncrementalBGS<graphState, graphMove>  ibex;
@@ -517,6 +395,7 @@ void RunPolygraph(int instanceSize, char *algorithm)
 		ImprovedBGS2<graphState, graphMove>  bgs;
 		t.StartTimer();
 		bgs.GetPath(ge, from, to, &h, path);
+		bgs.SetK(std::stoi(K));
 		t.EndTimer();
 		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, bgs.GetNodesExpanded(), t.GetElapsedTime());
 	}
@@ -542,17 +421,17 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	if (strcmp(argument[0], "-inconsistent") == 0)
 	{
-		if (maxNumArgs > 3)
+		if (maxNumArgs > 4)
 		{
-			runProblemSetInconsistent(argument[1], argument[2], argument[3]);
+			runProblemSetInconsistent(argument[1], argument[2], argument[3], argument[4]);
 			exit(0);
 		}
 	}
 	if (strcmp(argument[0], "-polygraph") == 0)
 	{
-		if (maxNumArgs >= 3)
+		if (maxNumArgs >= 4)
 		{
-			RunPolygraph(atoi(argument[1]), argument[2]);
+			RunPolygraph(atoi(argument[1]), argument[2], argument[3]);
 		}
 	}
 	
