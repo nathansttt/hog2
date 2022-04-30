@@ -224,8 +224,8 @@ void runProblemSet(char *theMap, char *scenario, char *algorithm)
 		if (strcmp(algorithm, "bgs") == 0)
 		{
 			t.StartTimer();
+			bgs.SetK(9);
 			bgs.GetPath(&e, from, to, &e, path);
-			bgs.SetK(1);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", e.GetPathLength(path), bgs.GetNodesExpanded(), t.GetElapsedTime());
 		}
@@ -394,8 +394,8 @@ void RunPolygraph(int instanceSize, char *algorithm, char *K)
 	{
 		ImprovedBGS2<graphState, graphMove>  bgs;
 		t.StartTimer();
-		bgs.GetPath(ge, from, to, &h, path);
 		bgs.SetK(std::stoi(K));
+		bgs.GetPath(ge, from, to, &h, path);
 		t.EndTimer();
 		printf("%s\t%d\t%llu\t%f\n", algorithm, instanceSize, bgs.GetNodesExpanded(), t.GetElapsedTime());
 	}
