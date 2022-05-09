@@ -93,6 +93,1137 @@ void InstallHandlers()
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseUp|kMouseDrag));
 }
 
+void DrawPaperLevel(int which)
+{
+	std::string fname = "/Users/nathanst/Pictures/SVG/witness/";
+	rgbColor blueColor(0.354, 0.666, 0.824);
+	switch (which)
+	{
+		case 0:
+		{
+			Graphics::Display d;
+			Witness<1, 2> p;
+			InteractiveWitnessState<1, 2> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.SetGoal(1, 1);
+			p.SetStart(0, 1);
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.currState = InteractiveWitnessState<1, 2>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 1:
+		{
+			Graphics::Display d;
+			Witness<1, 2> p;
+			InteractiveWitnessState<1, 2> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.SetGoal(1, 2);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 3});
+			p1.currState = InteractiveWitnessState<1, 2>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 2:
+		{
+			Graphics::Display d;
+			Witness<1, 3> p;
+			InteractiveWitnessState<1, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.SetGoal(1, 3);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({1, 4});
+			p1.currState = InteractiveWitnessState<1, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 3:
+		{
+			Graphics::Display d;
+			Witness<2, 2> p;
+			InteractiveWitnessState<2, 2> p1;
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+			p.SetGoal(2, 2);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 3});
+			p1.currState = InteractiveWitnessState<2, 2>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 4:
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.SetGoal(3, 3);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 4});
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 5:
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.SetGoal(0, 1);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({-1, 1});
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 6:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			p.AddSeparationConstraint(3, 1, blueColor);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.AddSeparationConstraint(3, 2, blueColor);
+			p.AddSeparationConstraint(0, 3, blueColor);
+			p.AddSeparationConstraint(2, 3, Colors::black);
+			p.AddSeparationConstraint(3, 3, blueColor);
+			p.SetGoal(1, 4);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({4, 0});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({1, 5});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 7:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			p.AddSeparationConstraint(3, 1, blueColor);
+			
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.AddSeparationConstraint(3, 2, blueColor);
+			
+			p.AddSeparationConstraint(0, 3, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 3, Colors::black);
+			p.AddSeparationConstraint(3, 3, blueColor);
+			p.SetGoal(4, 2);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({0, 4});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({5, 2});
+
+			
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 8:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(3, 2, blueColor);
+			
+			p.AddSeparationConstraint(1, 3, blueColor);
+			p.AddSeparationConstraint(2, 3, Colors::black);
+			p.AddSeparationConstraint(3, 3, blueColor);
+			p.SetGoal(3, 0);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, -1});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 9:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, blueColor);
+			p.AddSeparationConstraint(3, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			p.AddSeparationConstraint(3, 1, blueColor);
+
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.AddSeparationConstraint(3, 2, blueColor);
+
+			p.AddSeparationConstraint(0, 3, Colors::black);
+			p.AddSeparationConstraint(1, 3, blueColor);
+			p.AddSeparationConstraint(2, 3, blueColor);
+			p.AddSeparationConstraint(3, 3, Colors::black);
+
+			p.SetGoal(4, 4);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({4, 5});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 10:
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, blueColor);
+
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(2, 1, blueColor);
+
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			p.SetGoal(1, 3);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({1, 5});
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 11:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+			p.AddSeparationConstraint(3, 1, blueColor);
+			
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			p.AddSeparationConstraint(3, 2, Colors::black);
+			
+			p.AddSeparationConstraint(0, 3, Colors::black);
+			p.AddSeparationConstraint(1, 3, Colors::black);
+			p.AddSeparationConstraint(2, 3, blueColor);
+			
+			p.SetGoal(4, 0);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({0, 4});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({4, 0});
+			p1.ws.path.push_back({5, 0});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+			
+			
+		// Spread curriculum
+		case 12:
+		{
+			Graphics::Display d;
+			Witness<1, 2> p;
+			InteractiveWitnessState<1, 2> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.SetGoal(1, 1);
+			p.SetStart(0, 1);
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.currState = InteractiveWitnessState<1, 2>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 13:
+		{
+			Graphics::Display d;
+			Witness<1, 3> p;
+			InteractiveWitnessState<1, 3> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.SetGoal(1, 3);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({1, 4});
+			p1.currState = InteractiveWitnessState<1, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 14:
+		{
+			Graphics::Display d;
+			Witness<2, 2> p;
+			InteractiveWitnessState<2, 2> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.SetGoal(0, 2);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.currState = InteractiveWitnessState<2, 2>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 15:
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, blueColor);
+
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			p.SetGoal(1, 0);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({1, -1});
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 16:
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.SetGoal(2, 3);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({2, 4});
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 17:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			
+			p.AddSeparationConstraint(2, 1, Colors::black);
+			p.AddSeparationConstraint(3, 1, blueColor);
+			
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.AddSeparationConstraint(3, 2, blueColor);
+			
+			p.AddSeparationConstraint(2, 3, blueColor);
+			p.AddSeparationConstraint(3, 3, blueColor);
+
+			p.SetGoal(4, 2);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({4, 0});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({5, 2});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 18:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, Colors::black);
+			p.AddSeparationConstraint(3, 1, Colors::black);
+			
+			p.AddSeparationConstraint(3, 2, Colors::black);
+			
+			p.AddSeparationConstraint(0, 3, Colors::black);
+			p.AddSeparationConstraint(1, 3, Colors::black);
+			p.AddSeparationConstraint(3, 3, Colors::black);
+
+			p.SetGoal(0, 4);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({0, 4});
+			p1.ws.path.push_back({0, 5});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 19:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, blueColor);
+			p.AddSeparationConstraint(3, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+			p.AddSeparationConstraint(2, 1, blueColor);
+			
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(3, 2, blueColor);
+			
+			p.AddSeparationConstraint(1, 3, Colors::black);
+			p.AddSeparationConstraint(2, 3, Colors::black);
+			
+			p.SetGoal(0, 4);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({3, 4});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({0, 4});
+			p1.ws.path.push_back({0, 5});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 20:
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, Colors::black);
+			p.AddSeparationConstraint(3, 1, Colors::black);
+
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			p.AddSeparationConstraint(3, 2, Colors::black);
+
+			p.AddSeparationConstraint(0, 3, Colors::black);
+			p.AddSeparationConstraint(2, 3, blueColor);
+			p.AddSeparationConstraint(3, 3, blueColor);
+			
+			p.SetGoal(4, 0);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({0, 4});
+			p1.ws.path.push_back({1, 4});
+			p1.ws.path.push_back({2, 4});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 0});
+			p1.ws.path.push_back({5, 0});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		// TODO: finish these
+		case 21: // 0 of 8
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, blueColor);
+			p.AddSeparationConstraint(2, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, Colors::black);
+			
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+
+			p.SetGoal(3, 2);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({4, 2});
+
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 22: // 1 of 8
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, Colors::black);
+
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			
+			p.SetGoal(2, 0);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({2, -1});
+
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 23: // 2 of 8
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(1, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, Colors::black);
+
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(1, 2, blueColor);
+
+			p.SetGoal(1, 3);
+			p.SetStart(0, 0);
+
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({1, 4});
+
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 24: // 3 of 8
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			p.AddSeparationConstraint(3, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+			p.AddSeparationConstraint(3, 1, blueColor);
+			
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			p.AddSeparationConstraint(3, 2, Colors::black);
+			
+			p.AddSeparationConstraint(0, 3, Colors::black);
+			p.AddSeparationConstraint(1, 3, Colors::black);
+			
+			p.SetGoal(0, 4);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({4, 1});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({0, 4});
+			p1.ws.path.push_back({0, 5});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 25: // 4 of 8
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, blueColor);
+			p.AddSeparationConstraint(2, 2, blueColor);
+			p.SetGoal(3, 3);
+			p.SetStart(0, 0);
+			
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({3, 0});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 4});
+
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 26: // 5 of 8
+		{
+			Graphics::Display d;
+			Witness<1, 3> p;
+			InteractiveWitnessState<1, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(0, 2, blueColor);
+			p.SetGoal(1, 3);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({1, 4});
+			
+			p1.currState = InteractiveWitnessState<1, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 27: // 6 of 8
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, blueColor);
+
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(1, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+			p.SetGoal(3, 1);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({0, 3});
+			p1.ws.path.push_back({1, 3});
+			p1.ws.path.push_back({2, 3});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({4, 1});
+
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 28: // 7 of 8
+		{
+			Graphics::Display d;
+			Witness<3, 3> p;
+			InteractiveWitnessState<3, 3> p1;
+			p.AddSeparationConstraint(0, 0, Colors::black);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, blueColor);
+			p.AddSeparationConstraint(1, 1, blueColor);
+
+			p.AddSeparationConstraint(0, 2, Colors::black);
+			p.AddSeparationConstraint(2, 2, Colors::black);
+
+			p.SetGoal(3, 3);
+			p.SetStart(0, 0);
+
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({0, 2});
+			p1.ws.path.push_back({1, 2});
+			p1.ws.path.push_back({2, 2});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({3, 3});
+			p1.ws.path.push_back({3, 4});
+
+			p1.currState = InteractiveWitnessState<3, 3>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		case 29: // 8 of 8
+		{
+			Graphics::Display d;
+			Witness<4, 4> p;
+			InteractiveWitnessState<4, 4> p1;
+			p.AddSeparationConstraint(0, 0, blueColor);
+			p.AddSeparationConstraint(1, 0, Colors::black);
+			p.AddSeparationConstraint(2, 0, blueColor);
+			
+			p.AddSeparationConstraint(0, 1, Colors::black);
+			p.AddSeparationConstraint(1, 1, Colors::black);
+			p.AddSeparationConstraint(2, 1, Colors::black);
+			p.AddSeparationConstraint(3, 1, blueColor);
+			
+			p.AddSeparationConstraint(3, 2, Colors::black);
+			
+			p.AddSeparationConstraint(0, 3, Colors::black);
+			p.AddSeparationConstraint(1, 3, Colors::black);
+			p.AddSeparationConstraint(2, 3, Colors::black);
+			p.AddSeparationConstraint(3, 3, Colors::black);
+			
+			p.SetGoal(4, 4);
+			p.SetStart(0, 0);
+			p1.ws.path.push_back({0, 0});
+			p1.ws.path.push_back({0, 1});
+			p1.ws.path.push_back({1, 1});
+			p1.ws.path.push_back({1, 0});
+			p1.ws.path.push_back({2, 0});
+			p1.ws.path.push_back({2, 1});
+			p1.ws.path.push_back({3, 1});
+			p1.ws.path.push_back({3, 2});
+			p1.ws.path.push_back({4, 2});
+			p1.ws.path.push_back({4, 3});
+			p1.ws.path.push_back({4, 4});
+			p1.ws.path.push_back({4, 5});
+
+			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
+			p.Draw(d);
+			p.Draw(d, p1);
+			printf("Save to '%s'\n", (fname+std::to_string(which)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
+			break;
+		}
+		default: break;
+	}
+
+}
+
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
 	if (eType == kWindowDestroyed)
@@ -102,42 +1233,50 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 	else if (eType == kWindowCreated)
 	{
+//		for (int x = 0; x < 50; x++)
+//			DrawPaperLevel(x);
+		
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-
 		
 //		w.AddTriangleConstraint(0, 0, 3);
+//		w.AddGoal(1, -1);
+//		w.AddGoal(-1, 1);
+//		w.AddGoal(puzzleWidth, 0);
+//		w.AddGoal(0, puzzleHeight);
+//		w.AddGoal(puzzleWidth, puzzleHeight+1);
 //		w.AddTriangleConstraint(0, 1, 2);
 //		w.AddTriangleConstraint(1, 0, 1);
 //		ExamineMustCross(numRequiredPieces);
-//		w.AddSeparationConstraint(0, 0, Colors::white);
+		w.AddStarConstraint(0, 0, Colors::pink);
+//		w.AddSeparationConstraint(0, 0, Colors::green);
 //		w.AddSeparationConstraint(0, 4, Colors::white);
 //		w.AddSeparationConstraint(4, 0, Colors::white);
-//		w.AddSeparationConstraint(2, 2, Colors::pink);
+		w.AddSeparationConstraint(2, 2, Colors::pink);
 //		w.AddSeparationConstraint(4, 4, Colors::black);
-//		w.AddSeparationConstraint(2, 0, Colors::black);
+		w.AddSeparationConstraint(2, 0, Colors::black);
 //		w.AddSeparationConstraint(2, 4, Colors::black);
-//		w.AddSeparationConstraint(0, 2, Colors::orange);
+		w.AddSeparationConstraint(0, 2, Colors::orange);
 //		w.AddSeparationConstraint(4, 2, Colors::orange);
 
 //		std::string s = "{\"dim\":\"3x3\",\"cc\":{\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"4;3;#385CDE\",\"3;10;#DCA700\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\"},\"mc\":\"0000000000000000000000000000000000000000\"}\"";
 //		w.LoadFromHashString(s);
 
-		std::string s2 = "{\"dim\":\"4x4\",\"cc\":{\"1;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#FFFFFF\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\"},\"mc\":\"10000000000000000000000000001100000000000000000000000000000000000\"}";
-		std::string s = "{\"dim\":\"4x4\",\"cc\":{\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#000000\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"1;1077084160;#FFFFFF\",\"0;0;#000000\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#000000\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"1;0;#FFFFFF\",\"0;0;#000000\"},\"mc\":\"00000000010000010000000000000001000000000000000000000000000000000\"}";
-		s = 	"{\"dim\":\"4x4\",\"cc\":{\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"0;0;#FFFFFF\",\"1;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"0;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"1;0;#FFFFFF\"},\"mc\":\"00000010000000000000000000000000000000000000000000000000000000000\"}";
-		s = "{\"dim\":\"4x4\",\"cc\":{\"1;0;#0000FF\",\"0;0;#000026D\",\"0;0;#0029D00\",\"2;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\",\"2;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\"},\"mc\":\"10000000000010000000000000000000100000000000000000000000000000000\"}";
+//		std::string s2 = "{\"dim\":\"4x4\",\"cc\":{\"1;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#FFFFFF\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\",\"0;0;#000000\"},\"mc\":\"10000000000000000000000000001100000000000000000000000000000000000\"}";
+//		std::string s = "{\"dim\":\"4x4\",\"cc\":{\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#000000\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"1;1077084160;#FFFFFF\",\"0;0;#000000\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#000000\",\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"1;0;#FFFFFF\",\"0;0;#000000\"},\"mc\":\"00000000010000010000000000000001000000000000000000000000000000000\"}";
+//		s = 	"{\"dim\":\"4x4\",\"cc\":{\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"0;0;#FFFFFF\",\"1;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"0;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"1;0;#FFFFFF\"},\"mc\":\"00000010000000000000000000000000000000000000000000000000000000000\"}";
+//		s = "{\"dim\":\"4x4\",\"cc\":{\"1;0;#0000FF\",\"0;0;#000026D\",\"0;0;#0029D00\",\"2;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\",\"2;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\"},\"mc\":\"10000000000010000000000000000000100000000000000000000000000000000\"}";
 
 //		w.LoadFromHashString(s);
-		w.AddTriangleConstraint(0, 0, 1);
-		w.AddTriangleConstraint(1, 1, 2);
-		w.AddTriangleConstraint(2, 2, 3);
-		w.AddStarConstraint(3, 3, Colors::orange);
+//		w.AddTriangleConstraint(0, 0, 1);
+//		w.AddTriangleConstraint(1, 1, 2);
+//		w.AddTriangleConstraint(2, 2, 3);
+//		w.AddStarConstraint(3, 3, Colors::orange);
 //		w.AddCannotCrossConstraint(1, 4);
 //		w.AddCannotCrossConstraint(3, 1);
-		w.AddCannotCrossConstraint(false /*vert*/, 2, 1);
-		w.AddCannotCrossConstraint(true /*horiz*/, 0, 2);
+//		w.AddCannotCrossConstraint(false /*vert*/, 2, 1);
+//		w.AddCannotCrossConstraint(true /*horiz*/, 0, 2);
 		//		w.AddTetrisConstraint(1, 1, 10);
 //		w.AddNegativeTetrisConstraint(1, 0, 3);
 //		w.AddTetrisConstraint(2, 1, 2);
@@ -315,6 +1454,8 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 	if (e == kMouseMove)
 	{
 		w.Move(p, iws);
+//		if (iws.ws.path.size() > 0)
+//			std::cout << iws.ws.path.back().first << ", " << iws.ws.path.back().second << "\n";
 	}
 
 	// Don't need any other mouse support
@@ -725,7 +1866,7 @@ void ExamineRegionsAndStars(int count)
 	int bestPathSize = 0;
 	//	std::vector<uint64_t> best;
 	std::vector<int> items(count);
-	Combinations<w.GetNumStarConstraints()> c;
+//	Combinations<w.GetNumStarConstraints()> c;
 	Combinations<w.GetNumPathConstraints()> mc;
 	std::vector<int> forbidden;
 	std::vector<int> currSolutions;
@@ -854,7 +1995,8 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 	
 	Witness<puzzleWidth, puzzleHeight> wp;
 	WitnessState<puzzleWidth, puzzleHeight> s;
-
+	//wp.SetGoal(5, 4);
+	
 	uint64_t minCount = allSolutions.size();
 	int bestPathSize = 0;
 	std::vector<int> items(count);
@@ -865,7 +2007,7 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 	
 	//int *items = new int[count];
 	
-	const int pieceTypes = 6;//24+2;
+	const int pieceTypes = 3;//24+2;
 	
 	uint64_t pCount = pow(pieceTypes, count);
 	uint64_t maxRank = c.MaxRank(count)*pCount;
@@ -879,56 +2021,58 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 		uint64_t n = rank/pCount; // arrangement on board
 		uint64_t pieces = rank%pCount; // pieces in locations
 		c.Unrank(n, &items[0], count);
-		bool t1 = false, t2 = false, t3 = false, t4 = false, t5 = false, t6 = false;
+//		bool t1 = false, t2 = false, t3 = false, t4 = false, t5 = false, t6 = false;
 		for (int x = 0; x < count; x++)
 		{
 			switch (pieces%pieceTypes)
 			{
 				case 0:
-					wp.AddSeparationConstraint(items[x], Colors::black);
-					t1 = true; break;
+					wp.AddSeparationConstraint(items[x], Colors::orange);
+					break;
 				case 1:
-					wp.AddSeparationConstraint(items[x], Colors::white);
-					t2 = true; break;
+					wp.AddStarConstraint(items[x], Colors::orange);
+					break;
 				case 2:
-					wp.AddSeparationConstraint(items[x], Colors::yellow);
-					t3 = true; break;
+					wp.AddTriangleConstraint(items[x], 2);
+//					wp.AddSeparationConstraint(items[x], Colors::blue);
+					break;
 				case 3:
-					wp.AddStarConstraint(items[x], Colors::black);
-					t4 = true; break;
+					wp.AddStarConstraint(items[x], Colors::blue);
+					break;
 				case 4:
-					wp.AddStarConstraint(items[x], Colors::white);
-					t5 = true; break;
+					wp.AddSeparationConstraint(items[x], Colors::green);//
+					break;
 				case 5:
-					wp.AddStarConstraint(items[x], Colors::yellow);
-					t6 = true; break;
-			}
-		}
-		if (0)
-		{
-			int x=0;
-			if ((pieces%pieceTypes) < 24)
-			{
-				wp.AddTetrisConstraint(items[x], 1+(pieces%pieceTypes));
-				t1 = true;
-			}
-			else {
-//				wp.AddStarConstraint(items[x], wp.tetrisYellow);
-//				wp.AddTriangleConstraint(items[x], (pieces%pieceTypes)-23);
-				if ((pieces%pieceTypes)-24)
-				{
-					wp.AddSeparationConstraint(items[x], Colors::black);
-					t2 = true;
-				}
-				else {
-					wp.AddSeparationConstraint(items[x], Colors::white);
-					t3 = true;
-				}
+					wp.AddStarConstraint(items[x], Colors::green);
+					break;
 			}
 			pieces/=pieceTypes;
 		}
-		if (!(t1 && t2 && t3 && t4 && t5 && t6))
-			continue;
+//		if (0)
+//		{
+//			int x=0;
+//			if ((pieces%pieceTypes) < 24)
+//			{
+//				wp.AddTetrisConstraint(items[x], 1+(pieces%pieceTypes));
+//				t1 = true;
+//			}
+//			else {
+////				wp.AddStarConstraint(items[x], wp.tetrisYellow);
+////				wp.AddTriangleConstraint(items[x], (pieces%pieceTypes)-23);
+//				if ((pieces%pieceTypes)-24)
+//				{
+//					wp.AddSeparationConstraint(items[x], Colors::black);
+//					t2 = true;
+//				}
+//				else {
+//					wp.AddSeparationConstraint(items[x], Colors::white);
+//					t3 = true;
+//				}
+//			}
+//			pieces/=pieceTypes;
+//		}
+//		if (!(t1 && t2 && t3))// && t4 && t5 && t6))
+//			continue;
 		
 
 		int pathSize = 0;
@@ -968,10 +2112,10 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 	parallel = false;
 }
 
-const int numThreads = 1;
+const int numThreads = std::thread::hardware_concurrency();
 void ParallelExamine(int count)
 {
-	std::vector<std::thread *> t(8);
+	std::vector<std::thread *> t(numThreads);
 	if (!parallel)
 	{
 		parallel = true;
