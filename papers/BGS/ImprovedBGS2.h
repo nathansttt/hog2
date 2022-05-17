@@ -2,10 +2,6 @@
 //  ImprovedBGS2.h
 //  hog2
 //
-//  This is an incremental version of Budgeted Graph Search - IBEX on trees with Bounded Dijkstra at the low level.
-//  This code isn't meant for production - just to animate how the algorithm works as a comparison to IDA*.
-//  See (Helmert et al, IJCAI 2019) for details of the algorithm
-//
 // This implementation contains working of Algo2 for the efficient BGS. 
 // The search can start from the current f-cost without discarding any nodes in the queue.
 // There is only need to update the budget values correctly.
@@ -106,11 +102,10 @@ private:
 	void FindtheCurrentBoundF();
 	bool CurrentIterationComplete();
 	bool SetupExponentialBinaryIteration();
+	bool DoAStar();
+	bool DoFLimitedAStar();
+	bool DoBFHS();
 	bool ExponentialBinaryStepIteration();
-	bool Case1();
-	bool Case2();
-	bool Case3();
-	bool Case4();
 	
 	void PrintQueueStatus();
 	std::vector<std::pair<state, double>> history;
@@ -121,8 +116,8 @@ private:
 	double initialBound;
 	double nextBound;
 	double bound_g;
-	bool InitializeCase3 = 0;
-	bool InitializeCase2 = 0;
+	bool InitializeBFHS = 0;
+	bool InitializeFLimitedAStar = 0;
 	bool useBPMX = false;
 	unsigned long nodesTouched;
 	SearchEnvironment<state, action> *env;
@@ -133,6 +128,8 @@ private:
 	double fc_next;
 	unsigned long nodesExpanded;
 	unsigned long nodesReexpanded;
+	enum STAGE { AStar, FLimitedAStar, BFHS, EXPONENTIAL };
+	STAGE s = AStar;
 	bool  DO_ASTAR = 1;  
 	bool InitializeExponentialBinaryIteration = false;
 	int cnt = 0;
@@ -184,11 +181,11 @@ template <class state, class action>
 void ImprovedBGS2<state, action>::SetK(int a)
 {
 
-    if (a <= 9) 
+    if (a <= 8) 
 	{
 		K = a;   //set re-expansion budget
 	}
-	else if (a == 10)
+	else if (a == 9)
 	{
 		K = 10000;   //infinite re-expansion budget
 	}
@@ -299,24 +296,26 @@ bool ImprovedBGS2<state, action>::DoSingleSearchStep(std::vector<state> &thePath
 					//printf("Found solution cost %1.5f\n", solutionCost);   
 					return true;
 				}
-		if (DO_ASTAR)
+		if (s == AStar || s == FLimitedAStar || s == BFHS )
 		{   
 			//case 1 : Run A* when within the re-expansion budget
 			if (data.nodesReexpanded <= b && data.nodesExpanded <= c1*data.nodeLB)
 			{    
-				return Case1();	
+				return DoAStar();	
 			} 
 			 
 			//case 2 : Number of node expansions grew by a factor withine re-expanision budget, Run A* 
 			else if(data.nodesReexpanded <= b && data.nodesExpanded > c1*data.nodeLB)
 			{ 
-				return Case2();
+				s = FLimitedAStar;
+				return DoFLimitedAStar();
 			}
 
 			//case 3: Number of node expansions grew by a factor but can not afford any more re-expansions
 			else if(data.nodesReexpanded > b && data.nodesExpanded > c1*data.nodeLB)
 			{  
-				return Case3();
+				s = BFHS;
+				return DoBFHS();
 			}
 
 			//case 4: Exponential Search
@@ -349,15 +348,15 @@ bool ImprovedBGS2<state, action>::DoSingleSearchStep(std::vector<state> &thePath
 		data.nodesReexpanded = 0;
 		data.workBound = infiniteWorkBound;
 		data.delta = 1;
-		DO_ASTAR = 1;  //set the flag to Exponential Search
-		InitializeCase2 = 0;
-		InitializeCase3 = 0;
+		s == AStar;  //set enum back to stage ASTAR
+		InitializeFLimitedAStar = 0;
+		InitializeBFHS = 0;
 		return false;
 	}
 }
 
 template <class state, class action>
-bool ImprovedBGS2<state, action>::Case1()
+bool ImprovedBGS2<state, action>::DoAStar()
 {
 	int temp1 = nodesExpanded;
 	int temp2 = nodesReexpanded;
@@ -375,14 +374,14 @@ bool ImprovedBGS2<state, action>::Case1()
 
 
 template <class state, class action>
-bool ImprovedBGS2<state, action>::Case2()
+bool ImprovedBGS2<state, action>::DoFLimitedAStar()
 {
 
 	//Initialize the case by finding the f-cost (previousBound) that has been expanded in the iteration
-	if(!InitializeCase2)
+	if(!InitializeFLimitedAStar)
 	{
 		FindtheCurrentBoundF();
-		InitializeCase2 = 1;
+		InitializeFLimitedAStar = 1;
 		return false;
 	}
 	else{
@@ -421,15 +420,15 @@ bool ImprovedBGS2<state, action>::Case2()
 
 
 template <class state, class action>
-bool ImprovedBGS2<state, action>::Case3()
+bool ImprovedBGS2<state, action>::DoBFHS()
 {
 
 	//Initialize the case by finding the f-cost (previousBound) that has been expanded in the iteration 
-	if(!InitializeCase3)
+	if(!InitializeBFHS)
 	{
 		FindtheBoundAndNextBoundF();
 		bound_g = previousBound;
-		InitializeCase3 = 1;
+		InitializeBFHS = 1;
 		return false;
 	}
 	else{
@@ -476,7 +475,6 @@ bool ImprovedBGS2<state, action>::SetupExponentialBinaryIteration()
 			FindtheCurrentBoundF();
 			FindtheBoundAndNextBoundF();
 
-
 			if(fequal(previousBound,bound))
 			{
 				bound_g = previousBound;   //To expand the rest of the nodes that did not get expanded in the last iteration
@@ -484,7 +482,7 @@ bool ImprovedBGS2<state, action>::SetupExponentialBinaryIteration()
 			else{
 				bound_g = bound;    //To expand all the nodes with the next smallest f-cost
 			}
-			DO_ASTAR = 0;  //set the flag to Exponential Search
+			s = EXPONENTIAL;  //set the enum to Exponential Search
 			return false;
 }
 
