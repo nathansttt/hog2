@@ -348,7 +348,7 @@ bool ImprovedBGS2<state, action>::DoSingleSearchStep(std::vector<state> &thePath
 		data.nodesReexpanded = 0;
 		data.workBound = infiniteWorkBound;
 		data.delta = 1;
-		s == AStar;  //set enum back to stage ASTAR
+		s = AStar;  //set enum back to stage ASTAR
 		InitializeFLimitedAStar = 0;
 		InitializeBFHS = 0;
 		return false;
