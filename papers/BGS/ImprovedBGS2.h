@@ -12,6 +12,7 @@
 #include "Heuristic.h"
 #include "AStarOpenClosed.h"
 
+
 template <class state, class action>
 class ImprovedBGS2 {
 public:
@@ -284,7 +285,6 @@ bool ImprovedBGS2<state, action>::DoSingleSearchStep(std::vector<state> &thePath
 
     int b = data.nodeLB;
 	b = b * K;
-	
 	if (!CurrentIterationComplete())
 	{   // Main Iteration is over when the number of expansions grow by a factor.
 	    // check if we are done
@@ -531,9 +531,14 @@ bool ImprovedBGS2<state, action>::ExponentialBinaryStepIteration()
 		{
 			//printf("Expanded %" PRId64 " - needed at least %" PRId64 "\n", data.nodesExpanded, c1*data.nodeLB);
 			if (data.solutionInterval.lowerBound == DBL_MAX) // No new nodes in iteration
-				printf("[HIT]--Critical f in [%1.5f, %1.5f]\n", solutionCost, solutionCost);
+			{
+				// printf("[HIT]--Critical f in [%1.5f, %1.5f]\n", solutionCost, solutionCost);
+			}
 			else
-				printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+			{
+				// printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+			}
+				
 			data.solutionInterval.upperBound = bound_g;
 			fEquation = to_string_with_precision(nextBound, 0);
 			previousBound = bound_g;
@@ -549,9 +554,15 @@ bool ImprovedBGS2<state, action>::ExponentialBinaryStepIteration()
 			))
 		{
 			if (data.solutionInterval.upperBound == DBL_MAX)
-				printf("    ]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+			{
+				// printf("    ]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+			}
+				
 			else
-				printf("    ]--Critical f in [%1.5f, %1.5f]\n", data.solutionInterval.lowerBound, data.solutionInterval.upperBound);
+			{
+				// printf("    ]--Critical f in [%1.5f, %1.5f]\n", data.solutionInterval.lowerBound, data.solutionInterval.upperBound);	
+			}
+				
 				
 			double nextCost;
 			data.delta *= gamma;
@@ -579,9 +590,15 @@ bool ImprovedBGS2<state, action>::ExponentialBinaryStepIteration()
 		}
 		
 		if (data.solutionInterval.lowerBound == DBL_MAX)
-			printf("[HIT]--Critical f in [∞, ∞]\n");
+		{
+			// printf("[HIT]--Critical f in [∞, ∞]\n");
+		}
+			
 		else
-			printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+		{
+			// printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+		}
+			
 		
         
 		data.solutionInterval.upperBound = bound_g;
@@ -710,7 +727,7 @@ void ImprovedBGS2<state, action>::FindtheBoundAndNextBoundF()
 		}
 	}
 	nextBound = tmp2;      // second smallest f-cost to be expanded.
-	//printf("previous bound %1.5f bound is %1.5f and nextBound is %1.5f\n",tmp3,bound,nextBound);
+	// printf("previous bound %1.5f bound is %1.5f and nextBound is %1.5f\n",tmp3,bound,nextBound);
 }
 
 /**
@@ -796,7 +813,7 @@ void ImprovedBGS2<state, action>::SetupIterationF(double cost)
 	previousBound = bound;
 	bound = cost;
 	nextBound = -1;
-	//printf("Starting iteration bound %1.1f\n", bound);
+	// printf("Starting iteration bound %1.1f\n", bound);
 }
 
 
@@ -810,7 +827,7 @@ template <class state, class action>
 bool ImprovedBGS2<state, action>::StepIterationUsingF()
 {
 
-    //printf("StepIteration - f\n");
+    // printf("StepIteration - f\n");
 
     // Close the node
 	uint64_t nodeid = q_f.Close();
@@ -843,7 +860,7 @@ bool ImprovedBGS2<state, action>::StepIterationUsingF()
 		//printf("%1.5f*************\n",env->GetPathLength(solutionPath));
 		solutionCost = q_f.Lookup(nodeid).g;
 		data.solutionInterval.lowerBound = solutionCost;
-		printf("the solution cost is %1.5f has value is %lld\n",solutionCost, env->GetStateHash(q_f.Lookup(nodeid).data));
+		//printf("the solution cost is %1.5f has value is %lld\n",solutionCost, env->GetStateHash(q_f.Lookup(nodeid).data));
 		return false;
 	}
 	
@@ -1021,7 +1038,7 @@ bool ImprovedBGS2<state, action>::StepIterationUsingG()
 		//printf("%1.5f*************\n",env->GetPathLength(solutionPath));
 		solutionCost = q_g.Lookup(nodeid).g;
 		data.solutionInterval.lowerBound = solutionCost;
-		printf("the solution cost is %1.5f has value is %lld\n",solutionCost, env->GetStateHash(q_g.Lookup(nodeid).data));
+		//printf("the solution cost is %1.5f has value is %lld\n",solutionCost, env->GetStateHash(q_g.Lookup(nodeid).data));
 		return false;
 	}
 
