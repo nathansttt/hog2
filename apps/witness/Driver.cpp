@@ -18,6 +18,7 @@
 #include "Combinations.h"
 #include "SVGUtil.h"
 #include <thread>
+#include <mutex>
 std::mutex lock;
 #include <sys/stat.h>
 bool fileExists(const char *name)
@@ -1332,7 +1333,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 		case 't':
-			ParallelExamine(6);
+			ParallelExamine(5);
 //			ExamineMustCross(numRequiredPieces);
 //			w.ClearTetrisConstraints();
 //			ExamineTetris(4);
@@ -1995,7 +1996,7 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 	
 	Witness<puzzleWidth, puzzleHeight> wp;
 	WitnessState<puzzleWidth, puzzleHeight> s;
-	//wp.SetGoal(5, 4);
+	//wp.SetGoal(puzzleWidth+1, puzzleHeight);
 	
 	uint64_t minCount = allSolutions.size();
 	int bestPathSize = 0;

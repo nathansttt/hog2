@@ -148,16 +148,17 @@ public:
 
 	Witness(const Witness<width, height> &w)
 	{
-		pathConstraints = w.pathConstraints;
-//		mustCrossEdgeConstraints = w.mustCrossEdgeConstraints;
-//		mustCrossConstraints = w.mustCrossConstraints;
-//		cannotCrossEdgeConstraints = w.cannotCrossEdgeConstraints;
-//		cannotCrossConstraints = w.cannotCrossConstraints;
-
-		constraints = w.constraints;
-		constraintCount = w.constraintCount;
-		start = w.start;
-		goal = w.goal;
+		*this = w;
+//		pathConstraints = w.pathConstraints;
+////		mustCrossEdgeConstraints = w.mustCrossEdgeConstraints;
+////		mustCrossConstraints = w.mustCrossConstraints;
+////		cannotCrossEdgeConstraints = w.cannotCrossEdgeConstraints;
+////		cannotCrossConstraints = w.cannotCrossConstraints;
+//
+//		constraints = w.constraints;
+//		constraintCount = w.constraintCount;
+//		start = w.start;
+//		goal = w.goal;
 	}
 
 	Witness<width, height> &operator=(const Witness<width, height> &w)
