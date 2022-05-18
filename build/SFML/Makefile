@@ -25,6 +25,7 @@ PROJECTS = \
   mapalgorithms \
   utils \
   apps/arm \
+  apps/witness \
   apps/snakebird \
   apps/airplane \
   apps/localsensingsearch \
