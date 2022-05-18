@@ -171,6 +171,7 @@ public:
 		constraintCount = w.constraintCount;
 		start = w.start;
 		goal = w.goal;
+		goalMap = w.goalMap;
 		return *this;
 	}
 	
@@ -544,7 +545,7 @@ public:
 	std::vector<std::pair<int, int>> goal;
 	// constant-time lookup for which goal is nearby
 	// value is hte index in the goal array+1 (0 index means no goal)
-	mutable std::array<int, (width+1)*(height+1)> goalMap;
+	std::array<int, (width+1)*(height+1)> goalMap;
 //	const int kStartX = 0, kStartY = 0;
 
 	std::string SaveToHashString() const
