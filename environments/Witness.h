@@ -342,7 +342,7 @@ public:
 
 	
 	/* Triangles - must cross as many edges as triangles */
-	constexpr int GetNumTriangleConstraints() const { return width*height; }
+	static constexpr int GetNumTriangleConstraints() { return width*height; }
 	void ClearTriangleConstraints()
 	{
 		ClearConstraint(kTriangle);
@@ -501,7 +501,7 @@ public:
 	{
 		AddTetrisConstraint(GetRegionFromX(loc), GetRegionFromY(loc), which);
 	}
-	constexpr int GetNumTetrisConstraints() const { return width*height; }
+	static constexpr int GetNumTetrisConstraints() { return width*height; }
 	// TODO: don't increase count if piece is already there
 	const uint16_t tetrisBits[25] =
 	{ 0, 0x8000, 0xC000, 0x8800, 0xC800, 0xC400, 0x8C00, 0x4C00, 0xE000, 0x8880, 0xCC00, 0xE800, 0x8E00, 0xE200, 0x2E00, 0xC880, 0xC440, 0x88C0, 0x44C0, 0xF000, 0x8888,
@@ -527,7 +527,7 @@ public:
 	{
 		ClearConstraint(kStar);
 	}
-	constexpr int GetNumStarConstraints() const { return width*height; }
+	static constexpr int GetNumStarConstraints() { return width*height; }
 	void AddStarConstraint(int x, int y, rgbColor c)
 	{
 		if (x >= width || y >= height || y < 0 || x < 0)
