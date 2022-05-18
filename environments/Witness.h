@@ -372,7 +372,8 @@ public:
 		ClearConstraint(kRegion);
 	}
 	//{ separationConstraints.clear(); separationConstraints.resize(width*height), separationCount = 0; }
-	constexpr int GetNumSeparationConstraints() const { return width*height; }
+	static constexpr int GetNumSeparationConstraints() { return width*height; }
+//	constexpr int GetNumSeparationConstraints() const { return width*height; }
 	void AddSeparationConstraint(int x, int y, rgbColor c)
 	{
 		constraintCount[constraints[x][y].t]--;
