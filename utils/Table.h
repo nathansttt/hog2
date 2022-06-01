@@ -9,10 +9,10 @@
 
 enum class TableColumnFormat
 {
-  AUTO,
-  SCIENTIFIC,
-  FIXED,
-  PERCENT
+  kAUTO,
+  kSCIENTIFIC,
+  kFIXED,
+  kPERCENT
 };
 
 
@@ -50,7 +50,7 @@ public:
   void addRow(Ts... entries) { _data.emplace_back(std::make_tuple(entries...)); }
 
   /**
-   * Pretty print the table of data
+   * Print the table of data
    */
   template <typename StreamType>
   void print(StreamType & stream)
@@ -58,7 +58,7 @@ public:
     size_columns();
 
     // Start computing the total width
-    // First - we will have _num_columns + 1 "|" characters
+    // _num_columns + 1 "|" characters
     unsigned int total_width = _num_columns + 1;
 
     // Now add in the size of each colum
@@ -195,13 +195,13 @@ protected:
       assert(_column_format.size() ==
              std::tuple_size<typename std::remove_reference<TupleType>::type>::value);
 
-      if (_column_format[I] == TableColumnFormat::SCIENTIFIC)
+      if (_column_format[I] == TableColumnFormat::kSCIENTIFIC)
         stream << std::scientific;
 
-      if (_column_format[I] == TableColumnFormat::FIXED)
+      if (_column_format[I] == TableColumnFormat::kFIXED)
         stream << std::fixed;
 
-      if (_column_format[I] == TableColumnFormat::PERCENT)
+      if (_column_format[I] == TableColumnFormat::kPERCENT)
         stream << std::fixed << std::setprecision(2);
     }
 
@@ -220,7 +220,7 @@ protected:
   }
 
   /**
-   * his is what gets called first
+   * This is what gets called first
    */
   template <typename TupleType, typename StreamType>
   void print_each(TupleType && t, StreamType & stream)
@@ -290,7 +290,7 @@ protected:
 
     // Override for Percent
     if (!_column_format.empty())
-      if (_column_format[I] == TableColumnFormat::PERCENT)
+      if (_column_format[I] == TableColumnFormat::kPERCENT)
         sizes[I] = 6; // 100.00
 
     // Continue the recursion
