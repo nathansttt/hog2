@@ -326,6 +326,13 @@ void runProblemSetInconsistent(char *theMap, char *scenario, char *algorithm, ch
 			bgs.GetPath(&e, from, to, &DH, path);
 			t.EndTimer();
 			printf("result: %f\t%llu\t%f\n", bgs.GetSolutionCost(), bgs.GetNodesExpanded(), t.GetElapsedTime());
+			if (fgreater(fabs(bgs.GetSolutionCost()-s.GetNthExperiment(x).GetDistance()), 0.01))
+			{
+				std::cout << "From: " << from << " to " << to << "\n";
+				printf("Found solution %d length %f; expected %f difference %f\n", map->GetTerrainType(from.x, from.y), e.GetPathLength(path), s.GetNthExperiment(x).GetDistance(),
+					bgs.GetSolutionCost()-s.GetNthExperiment(x).GetDistance());
+				exit(1);
+			}
 		}
 
 		if (strcmp(algorithm, "ibex") == 0)
@@ -483,14 +490,13 @@ void runAll(char *theMap, char *scenario)
 			pathlength[3+2*p] += bgs.GetSolutionCost();
 			nodes[3+2*p] += bgs.GetNodesExpanded();
 			time[3+2*p] += t.GetElapsedTime();
-			/*if (fgreater(fabs(bgs.GetSolutionCost()-s.GetNthExperiment(x).GetDistance()), 0.01))
+			if (fgreater(fabs(bgs.GetSolutionCost()-s.GetNthExperiment(x).GetDistance()), 0.01))
 		    {
 				std::cout << "From: " << from << " to " << to << "\n";
 				printf("Found solution %d length %f; expected %f difference %f\n", map->GetTerrainType(from.x, from.y), bgs.GetSolutionCost(), s.GetNthExperiment(x).GetDistance(),
 					bgs.GetSolutionCost()-s.GetNthExperiment(x).GetDistance());
 				exit(1);
 		    }
-			*/
 			ImprovedBGS2<xyLoc, tDirection>  bgs_bpmx;
 			std::vector<xyLoc> path4;
 			t.StartTimer();
@@ -515,20 +521,20 @@ void runAll(char *theMap, char *scenario)
 	table.addRow("BGS+BPMX with no re-expansions",  nodes[4]/n, std::__cxx11::to_string(time[4]/n));
 	table.addRow("BGS with 1*budget",  nodes[5]/n, std::__cxx11::to_string(time[5]/n));
 	table.addRow("BGS+BPMX with 1*budget", nodes[6]/n, std::__cxx11::to_string(time[6]/n));
-/*	table.addRow("BGS-2",  nodes[7]/n, std::__cxx11::to_string(time[7]/n));
+	table.addRow("BGS-2",  nodes[7]/n, std::__cxx11::to_string(time[7]/n));
 	table.addRow("BGS-BPMX-2",  nodes[8]/n, std::__cxx11::to_string(time[8]/n));
 	table.addRow("BGS-3",  nodes[9]/n, std::__cxx11::to_string(time[9]/n));
 	table.addRow("BGS-BPMX-3",  nodes[10]/n, std::__cxx11::to_string(time[10]/n));
 	table.addRow("BGS-4",  nodes[11]/n, std::__cxx11::to_string(time[11]/n));
-	table.addRow("BGS-BPMX-4",  nodes[12]/n, std::__cxx11::to_string(time[12]/n)); */
+	table.addRow("BGS-BPMX-4",  nodes[12]/n, std::__cxx11::to_string(time[12]/n)); 
 	table.addRow("BGS with 5*budget",  nodes[13]/n, std::__cxx11::to_string(time[13]/n));
 	table.addRow("BGS+BPMX with 5*budget",  nodes[14]/n, std::__cxx11::to_string(time[14]/n));
-/*	table.addRow("BGS-6",  nodes[15]/n, std::__cxx11::to_string(time[15]/n));
+	table.addRow("BGS-6",  nodes[15]/n, std::__cxx11::to_string(time[15]/n));
 	table.addRow("BGS-BPMX-6", nodes[16]/n, std::__cxx11::to_string(time[16]/n));
 	table.addRow("BGS-7", nodes[17]/n, std::__cxx11::to_string(time[17]/n));
 	table.addRow("BGS-BPMX-7", nodes[18]/n, std::__cxx11::to_string(time[18]/n));
 	table.addRow("BGS-8",  nodes[19]/n, std::__cxx11::to_string(time[19]/n));
-	table.addRow("BGS-BPMX-8",  nodes[20]/n, std::__cxx11::to_string(time[20]/n));*/
+	table.addRow("BGS-BPMX-8",  nodes[20]/n, std::__cxx11::to_string(time[20]/n));
 	table.addRow("BGS with inf budget", nodes[21]/n, std::__cxx11::to_string(time[21]/n));
 	table.addRow("BGS+BPMX with inf budget",  nodes[22]/n, std::__cxx11::to_string(time[22]/n));
 	table.print(std::cout);
