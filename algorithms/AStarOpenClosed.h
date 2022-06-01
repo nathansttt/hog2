@@ -103,8 +103,8 @@ public:
 	bool empty() const {return (theHeap.size() == 0);}
 	//	void verifyData();
 private:
-	bool HeapifyUp(unsigned int index);
-	void HeapifyDown(unsigned int index);
+	bool HeapifyUp(uint64_t index);
+	void HeapifyDown(uint64_t index);
 	// TODO: don't pass in the hash value any more - use the C++ hash function specialization
 	//	std::hash<state> hashFcn;
 
@@ -277,7 +277,8 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close(uint64_t objKey)
 	theHeap[index] = theHeap[theHeap.size()-1];
 	elements[theHeap[index]].openLocation = index;
 	theHeap.pop_back();
-	HeapifyDown(index);
+	if (!HeapifyUp(index))
+		HeapifyDown(index);
 	
 	return ans;
 }
@@ -318,7 +319,7 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::Reopen(uint64_t objKey)
  * Moves a node up the heap. Returns true if the node was moved, false otherwise.
  */
 template<typename state, typename CmpKey, class dataStructure>
-bool AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyUp(unsigned int index)
+bool AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyUp(uint64_t index)
 {
 	if (index == 0) return false;
 	int parent = (index-1)/2;
@@ -338,7 +339,7 @@ bool AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyUp(unsigned int index
 }
 
 template<typename state, typename CmpKey, class dataStructure>
-void AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyDown(unsigned int index)
+void AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyDown(uint64_t index)
 {
 	CmpKey compare;
 	unsigned int child1 = index*2+1;
@@ -365,5 +366,6 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyDown(unsigned int ind
 		HeapifyDown(which);
 	}
 }
+
 
 #endif
