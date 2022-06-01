@@ -13,7 +13,15 @@
 
 #include "vectorCache.h"
 #include "AStarOpenClosed.h"
+#ifndef DEBUG 
+#define DEBUG 0 // set debug mode
+#endif
 
+#if DEBUG
+#define debug_print(fmt, ...) printf(fmt,__VA_ARGS__)
+#else
+#define debug_print(fmt, ...) do {} while (0)
+#endif
 namespace IBEX {
 	
 	template <class state>
@@ -125,7 +133,7 @@ namespace IBEX {
 		while (fgreater(solutionCost, solutionInterval.lowerBound))
 		{
 			double delta = 1;
-			// printf("IBEX: Base search: f: %1.5f, cost limit ∞, target [%" PRId64 ", %" PRId64 "]\n", solutionInterval.lowerBound, c1*nodeLB, c2*nodeLB);
+			debug_print("IBEX: Base search: f: %1.5f, cost limit ∞, target [%" PRId64 ", %" PRId64 "]\n", solutionInterval.lowerBound, c1*nodeLB, c2*nodeLB);
 			dfsLowerBound = solutionInterval.lowerBound;
 			solutionInterval &= LowLevelSearch(solutionInterval.lowerBound, infiniteWorkBound, currentNodesUsed);
 			
@@ -142,12 +150,12 @@ namespace IBEX {
 			{
 				if (solutionInterval.upperBound == DBL_MAX)
 				{
-					// printf("    ]--Critical f in [%1.5f, ∞]\n", solutionInterval.lowerBound);
+					debug_print("    ]--Critical f in [%1.5f, ∞]\n", solutionInterval.lowerBound);
 				}
 					
 				else
 				{
-					// printf("    ]--Critical f in [%1.5f, %1.5f]\n", solutionInterval.lowerBound, solutionInterval.upperBound);
+					debug_print("    ]--Critical f in [%1.5f, %1.5f]\n", solutionInterval.lowerBound, solutionInterval.upperBound);
 				}
 					
 
@@ -175,7 +183,7 @@ namespace IBEX {
 				break;
 		}
 		thePath = solutionPath;
-		// printf("Found solution cost %1.5f\n", solutionCost);
+		debug_print("Found solution cost %1.5f\n", solutionCost);
 	}
 	
 	
@@ -185,12 +193,12 @@ namespace IBEX {
 		state currState = start;
 		if (nodeLimit == infiniteWorkBound)
 		{
-			// printf("    --+DFBnB f: %1.5f; nodes: ∞; ", costLimit);
+			debug_print("    --+DFBnB f: %1.5f; nodes: ∞; ", costLimit);
 		}
 			
 		else
 		{
-			// printf("    --+DFBnB f: %1.5f; nodes: %" PRId64 "; ", costLimit, nodeLimit);
+			debug_print("    --+DFBnB f: %1.5f; nodes: %" PRId64 "; ", costLimit, nodeLimit);
 		}
 			
 		currPath.clear();
@@ -221,20 +229,20 @@ namespace IBEX {
 		nodesUsed = sd.nodes;
 		if (v.upperBound == DBL_MAX)
 		{
-			// printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, ∞] ", nodesUsed, totalNodesExpanded, v.lowerBound);
+			debug_print("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, ∞] ", nodesUsed, totalNodesExpanded, v.lowerBound);
 		}
 		else
 		{
-			// printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, %1.5f] ", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
+			debug_print("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, %1.5f] ", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
 		}
 			
 		if (solutionCost != DBL_MAX)
 		{
-			// printf("sol: %1.5f\n", solutionCost);
+			debug_print("sol: %1.5f\n", solutionCost);
 		}	
 		else
 		{
-			// printf("\n");
+			debug_print("\n",1);
 		}
 			
 		return v;
@@ -303,7 +311,7 @@ namespace IBEX {
 	double IBEX<state, action, environment, DFS>::RedoMinWork()
 	{
 		ResetNodeCount();
-		// printf("IBEX Validation:\n");
+		debug_print("IBEX Validation:\n",1);
 		oracle = true;
 		uint64_t nodesUsed;
 		LowLevelSearch(solutionCost, -1, nodesUsed);
@@ -316,15 +324,15 @@ namespace IBEX {
 	{
 		if (nodeLimit == -1ull && costLimit == DBL_MAX)
 		{
-			// printf("    --+BFHS f: ∞; nodes: ∞; ");
+			debug_print("    --+BFHS f: ∞; nodes: ∞; ",1);
 		}
 		else if (nodeLimit == -1)
 		{
-			// printf("    --+BFHS f: %1.5f; nodes: ∞; ", costLimit);
+			debug_print("    --+BFHS f: %1.5f; nodes: ∞; ", costLimit);
 		}
 		else
 		{
-			// printf("    --+BFHS f: %1.5f; nodes: %" PRId64 "; ", costLimit, nodeLimit);
+			debug_print("    --+BFHS f: %1.5f; nodes: %" PRId64 "; ", costLimit, nodeLimit);
 		}
 		
 		searchBounds sd;
@@ -446,12 +454,12 @@ namespace IBEX {
 		
 		if (v.upperBound == DBL_MAX)
 		{
-			// printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, ∞]\n", nodesUsed, totalNodesExpanded, v.lowerBound);
+			debug_print("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, ∞]\n", nodesUsed, totalNodesExpanded, v.lowerBound);
 		}
 			
 		else
 		{
-			// printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, %1.5f]\n", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
+			debug_print("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, %1.5f]\n", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
 		}
 			
 
@@ -543,11 +551,11 @@ namespace IBEX {
 
 			if (high != DBL_MAX)
 			{
-				// printf("Running (k=%d, r=%d) with budget %d; [global] low = %f, [loca] high = %f\n", k, r, b, low, high);
+				debug_print("Running (k=%d, r=%d) with budget %d; [global] low = %f, [loca] high = %f\n", k, r, b, low, high);
 			}
 			else
 			{
-				// printf("Running (k=%d, r=%d) with budget %d; [global] low = %f, [loca] high = ∞\n", k, r, b, low);
+				debug_print("Running (k=%d, r=%d) with budget %d; [global] low = %f, [loca] high = ∞\n", k, r, b, low);
 			}
 				
 
@@ -585,7 +593,7 @@ namespace IBEX {
 			if (flesseq(solutionCost, low))
 			{
 				thePath = solutionPath;
-				// printf("proven solution cost %f\n", solutionCost);
+				debug_print("proven solution cost %f\n", solutionCost);
 				break;
 			}
 		}
