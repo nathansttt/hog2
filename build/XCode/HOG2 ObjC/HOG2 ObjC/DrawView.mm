@@ -230,6 +230,7 @@
 		{
 			Graphics::Display::triangleInfo &o = d.triangle;
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			CGContextMoveToPoint(context,
 								 [self hogToScreenX:o.p1.x viewport:port],
 								 [self hogToScreenY:o.p1.y viewport:port]);
@@ -239,6 +240,10 @@
 			CGContextAddLineToPoint(context,
 									[self hogToScreenX:o.p3.x viewport:port],
 									[self hogToScreenY:o.p3.y viewport:port]);
+			CGContextClosePath(context);
+//			CGContextAddLineToPoint(context,
+//									[self hogToScreenX:o.p1.x viewport:port],
+//									[self hogToScreenY:o.p1.y viewport:port]);
 			CGContextStrokePath(context);
 		}
 			break;
