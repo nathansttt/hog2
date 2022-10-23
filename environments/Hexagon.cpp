@@ -15,8 +15,8 @@
 
 constexpr uint64_t bits(uint64_t a, uint64_t b, uint64_t c)
 {
-	const uint64_t one = 1;
-	return ((one<<a)|(one<<b)|(one<<c));
+//	const uint64_t one = 1;
+	return ((((uint64_t)1)<<a)|(((uint64_t)1)<<b)|(((uint64_t)1)<<c));
 }
 
 constexpr uint64_t bits(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f)
