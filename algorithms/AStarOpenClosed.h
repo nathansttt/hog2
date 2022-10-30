@@ -242,7 +242,7 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::Remove(uint64_t hash)
 	theHeap[openLoc] = theHeap.back();
 	theHeap.pop_back();
 	elements[swappedItem].openLocation = openLoc;
-	KeyChanged(openLoc);
+	KeyChanged(index);
 }
 
 /**
