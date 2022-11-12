@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C4A54FF924AEFC3400E9FF7F"
-               BuildableName = "HOG2 ObjC.app"
-               BlueprintName = "HOG2 ObjC"
+               BuildableName = "Snakebird.app"
+               BlueprintName = "Snakebird"
                ReferencedContainer = "container:HOG2 ObjC.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C4A54FF924AEFC3400E9FF7F"
-            BuildableName = "HOG2 ObjC.app"
-            BlueprintName = "HOG2 ObjC"
+            BuildableName = "Snakebird.app"
+            BlueprintName = "Snakebird"
             ReferencedContainer = "container:HOG2 ObjC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -100,8 +100,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C4A54FF924AEFC3400E9FF7F"
-            BuildableName = "HOG2 ObjC.app"
-            BlueprintName = "HOG2 ObjC"
+            BuildableName = "Snakebird.app"
+            BlueprintName = "Snakebird"
             ReferencedContainer = "container:HOG2 ObjC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

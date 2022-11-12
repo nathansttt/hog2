@@ -3,3 +3,5 @@ objs/
 html/
 objs_html/
 .DS_Store
+build/.DS_Store
+build/.DS_Store

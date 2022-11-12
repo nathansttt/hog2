@@ -58,4 +58,5 @@ SRC_CPP = \
 	environments/NaryTree.cpp \
 	environments/RoadMap.cpp \
 	environments/SnakeBird.cpp \
+	environments/Racetrack.cpp \
 

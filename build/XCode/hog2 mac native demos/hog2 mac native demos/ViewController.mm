@@ -93,6 +93,7 @@ const float FRAMERATE = 1.0f/30.0f;
 		case NSEventTypeRightMouseUp:  return kRightButton; break;
 		case NSEventTypeLeftMouseDragged:  return kLeftButton; break;
 		case NSEventTypeRightMouseDragged:  return kRightButton; break;
+		default: break;
 	}
 	return kLeftButton;
 }
@@ -107,6 +108,20 @@ const float FRAMERATE = 1.0f/30.0f;
 //	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseDown);
 }
 	
+- (void)rightMouseDragged:(NSEvent *)event
+{
+	tButtonType bType = kRightButton;
+	NSPoint curPoint = [event locationInWindow];
+	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
+	HandleMouse(getCurrentContext(), p, bType, kMouseDrag);
+}
+
+-(void)rightMouseDown:(NSEvent *)event {
+	tButtonType bType = kRightButton;
+	NSPoint curPoint = [event locationInWindow];
+	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
+	HandleMouse(getCurrentContext(), p, bType, kMouseDown);
+}
 
 
 -(void)mouseUp:(NSEvent *)event

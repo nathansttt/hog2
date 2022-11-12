@@ -2983,11 +2983,14 @@
 		C4C8375F1F30EBD5004E78C0 /* DrawView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawView.h; sourceTree = "<group>"; };
 		C4C837611F3272DD004E78C0 /* CocoaHOG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHOG.h; sourceTree = "<group>"; };
 		C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CocoaHOG.cpp; sourceTree = "<group>"; };
+		C4C9EB3627EA6A9400F0E9AC /* SFML_HOG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SFML_HOG.h; sourceTree = "<group>"; };
+		C4C9EB3727EA6A9400F0E9AC /* SFML_HOG.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SFML_HOG.cpp; sourceTree = "<group>"; };
 		C4CF76BC22F39C37009CF802 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = ../../papers/DWA/Driver.cpp; sourceTree = "<group>"; };
 		C4CF76BD22F39C37009CF802 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Driver.h; path = ../../papers/DWA/Driver.h; sourceTree = "<group>"; };
 		C4CF76BF22F39C46009CF802 /* DynamicWeightedGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DynamicWeightedGrid.h; sourceTree = "<group>"; };
 		C4CF76C022F39C46009CF802 /* DynamicWeightedGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DynamicWeightedGrid.cpp; sourceTree = "<group>"; };
 		C4CF76C322F39C76009CF802 /* BDIndexOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDIndexOpenClosed.h; sourceTree = "<group>"; };
+		C4D432EE2788B02E00A875F9 /* DelayedHeuristicAStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DelayedHeuristicAStar.h; sourceTree = "<group>"; };
 		C4D80DA220A2CB480087E08D /* DH-place.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DH-place.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4D80DA320A2CB480087E08D /* A* (Map) copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Map) copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Map) copy-Info.plist"; sourceTree = "<absolute>"; };
 		C4D80DA520A2CB8F0087E08D /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
@@ -3700,6 +3703,7 @@
 				C4C835D31F2AF6B5004E78C0 /* RandomUnit.h */,
 				C4C835D41F2AF6B5004E78C0 /* SFIDAStar.h */,
 				C4C835D51F2AF6B5004E78C0 /* TemplateAStar.h */,
+				C4D432EE2788B02E00A875F9 /* DelayedHeuristicAStar.h */,
 				C4C835D61F2AF6B5004E78C0 /* UnitCostBidirectionalBFS.h */,
 				C4C835D71F2AF6B5004E78C0 /* VisualizableGenericSearchAlgorithm.h */,
 				C4C835D81F2AF6B5004E78C0 /* WeightedVertexGraph.h */,
@@ -3763,6 +3767,8 @@
 		C4C835F01F2AF6B5004E78C0 /* gui */ = {
 			isa = PBXGroup;
 			children = (
+				C4C9EB3727EA6A9400F0E9AC /* SFML_HOG.cpp */,
+				C4C9EB3627EA6A9400F0E9AC /* SFML_HOG.h */,
 				C473D41220600B5E0044DB14 /* web */,
 				C4C835F11F2AF6B5004E78C0 /* Common.cpp */,
 				C4C835F21F2AF6B5004E78C0 /* Common.h */,

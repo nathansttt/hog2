@@ -43,6 +43,7 @@ PROJECTS = \
   demos/astar \
   demos/astar-map \
   demos/inconsistency-graph \
+  demos/racetrack \
   papers/DWA 
 
 

@@ -235,7 +235,7 @@ void mouseMovedButton(int x, int y)
 /**
  * Called when a mouse button is pressed.
  */
-void mousePressedButton(int button, int state, int x, int y)
+//void mousePressedButton(int button, int state, int x, int y)
 {
 	gCurrButton = button;
 	int modifiers = glutGetModifiers();
