@@ -813,6 +813,82 @@ uint64_t HexagonEnvironment::GetActionHash(HexagonAction act) const
 	return 0;
 }
 
+/** Prints out the triangles used for this piece in HOG2 coordinates */
+void HexagonEnvironment::GeneratePieceCoordinates(tPieceName p)
+{
+	// 1. Start with environment with only one piece type
+	HexagonEnvironment e;
+	std::vector<tPieceName> v;
+	v.push_back(p);
+	e.SetPieces(v);
+	
+	// 2. Get legal actions
+	std::vector<HexagonSearchState> succ;
+	HexagonSearchState s;
+	e.GetSuccessors(s, succ);
+
+	// 3. Place the piece on the board
+	s = succ[0];
+	
+	assert(s.cnt == 1); // should only be 1 piece on the board
+	
+	uint64_t state = s.bits;
+	
+	std::cout << pieceNames[p] << "\t";
+//	// count how many objects we have
+	int count = 0;
+	for (int t = 0; t < 54; t++)
+	{
+		if (((state>>t)&1) == 1)
+		{
+			count++;
+		}
+	}
+	std::cout << count << "\n";
+	// drawing doesn't have to be so fast! (compared to enumeration operations)
+	for (int t = 0; t < 54; t++)
+	{
+		if (((state>>t)&1) == 1)
+		{
+			int x, y;
+			Graphics::point p1, p2, p3;
+			IndexToXY(t, x, y);
+			GetCorners(x, y, p1, p2, p3);
+			
+			std::cout.precision(20);
+			std::cout << std::fixed;
+
+			std::cout << " " << p1 << " " << p2 << " " << p3 << "\t";
+		}
+	}
+	std::cout << "\n";
+}
+
+/** Prints out the outer coorsinates of the board*/
+void HexagonEnvironment::GenerateBoardBorder()
+{
+	// 1. Start with environment with only one piece type
+	HexagonEnvironment e;
+	
+	std::cout << "Board\t";
+//	// count how many objects we have
+	int count = 54;
+	std::cout << count << "\n";
+	// drawing doesn't have to be so fast! (compared to enumeration operations)
+	for (int t = 0; t < 54; t++)
+	{
+		int x, y;
+		Graphics::point p1, p2, p3;
+		IndexToXY(t, x, y);
+		GetCorners(x, y, p1, p2, p3);
+		
+		std::cout.precision(20);
+		std::cout << std::fixed;
+		
+		std::cout << " " << p1 << " " << p2 << " " << p3 << "\t";
+	}
+	std::cout << "\n";
+}
 
 void HexagonEnvironment::Draw(Graphics::Display &display) const
 {
@@ -1465,7 +1541,6 @@ void Hexagon::Draw(Graphics::Display &display, const HexagonState &s) const
 		for (int x = 0; x < 11; x++)
 		{
 			if (!Valid(x, y))
-				//if (!valid[y][x])
 				continue;
 			Graphics::point p1, p2, p3;
 			GetCorners(x, y, p1, p2, p3);
@@ -1473,13 +1548,6 @@ void Hexagon::Draw(Graphics::Display &display, const HexagonState &s) const
 			if (piece < 10)
 			{
 				display.FillTriangle(p1, p2, p3, pieceColors[piece]);
-//				// Note: 0 4 and 6 can't flip over; puzzles starting with "A" have the non-flip constraint
-//				if (piece == 2 || piece == 3 || piece == 8) // 2 is ugly; 3 is green; 8 is purple
-//					display.FillTriangle(p1, p2, p3, rgbColor::hsl((8)/11.0, (8%2)?1.0:0.5, 0.5));
-//				else
-//					display.FillTriangle(p1, p2, p3, rgbColor::hsl((piece)/11.0, (piece%2)?1.0:0.5, 0.5));
-//				if (piece == 0 || piece == 4 || piece == 6) // 2 is ugly; 3 is green; 8 is purple
-//					display.FrameTriangle(p1, p2, p3, 0.01, Colors::red);
 			}
 		}
 	}

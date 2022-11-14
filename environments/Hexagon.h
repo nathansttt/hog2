@@ -110,7 +110,7 @@ public:
 
 	uint64_t GetStateHash(const HexagonState &node) const;
 	uint64_t GetActionHash(HexagonAction act) const;
-	
+		
 	void Draw(Graphics::Display &display) const;
 	/** Draws available pieces and constraints */
 	void DrawSetup(Graphics::Display &display) const;
@@ -206,6 +206,11 @@ public:
 
 	uint64_t GetStateHash(const HexagonSearchState &node) const;
 	uint64_t GetActionHash(HexagonAction act) const;
+	
+	/** Prints out the triangles used for this piece in HOG2 coordinates */
+	void GeneratePieceCoordinates(tPieceName p);
+	/** Prints out the outer coorsinates of the board*/
+	void GenerateBoardBorder();
 	
 	void Draw(Graphics::Display &display) const;
 	/** Draws available pieces and constraints */

@@ -52,6 +52,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Rotate", "Rotate Board", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Analyze1", "Analyze which piece to remove", kAnyModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Analyze2", "Analyze which pieces to make unflippable", kAnyModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Get Coordinates", "Get baseline coordinates of all pieces", kAnyModifier, '=');
 
 	
 	InstallCommandLineHandler(MyCLHandler, "-loadPuzzle", "-loadPuzzle <file>", "Load level from file.");
@@ -326,6 +327,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p':
 			AnalyzeWhichPiecesToUse();
 			break;
+		case '=':
+		{
+			for (int x = 0; x < numPieces; x++)
+			{
+				he.GeneratePieceCoordinates((tPieceName)x);
+			}
+			he.GenerateBoardBorder();
+			break;
+		}
 //		{
 //			const std::vector<tPieceName> allPieces =
 //			{kHexagon, kElbow, kLine, kMountains, kWrench, kTriangle, kHook, kSnake, kButterfly, kTrapezoid, kTrapezoid};
