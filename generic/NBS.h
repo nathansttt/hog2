@@ -116,7 +116,11 @@ public:
 private:
 	void ExtractFromMiddle(std::vector<state> &thePath);
 	void ExtractPathToGoal(state &node, std::vector<state> &thePath)
-	{ uint64_t theID; queue.backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
+	{
+		uint64_t theID;
+		queue.backwardQueue.Lookup(env->GetStateHash(node), theID);
+		ExtractPathToGoalFromID(theID, thePath);
+	}
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
 	{
 		do {
@@ -129,6 +133,7 @@ private:
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
 	{
 		uint64_t theID;
+		queue.forwardQueue.Lookup(env->GetStateHash(node), theID);
 		ExtractPathToStartFromID(theID, thePath);
 	}
 
