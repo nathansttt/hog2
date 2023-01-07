@@ -103,13 +103,13 @@ public:
 		{
 			if (fequal(g, 0))
 				return h;
-			printf("WARNING: Invalid priority lookups %s line %d\n", __FILE_NAME__, __LINE__);
+			printf("WARNING: Invalid priority lookups %s line %d\n", __FILE__, __LINE__);
 			return INFINITY;
 		}
 		float slope = g/h;
 		if (fgreater(slope, data.back().slope))
 		{
-			printf("WARNING: Invalid priority lookups %s line %d\n", __FILE_NAME__, __LINE__);
+			printf("WARNING: Invalid priority lookups %s line %d\n", __FILE__, __LINE__);
 			return INFINITY;
 		}
 		// dumb/slow but correct
