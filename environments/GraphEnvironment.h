@@ -20,6 +20,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <unordered_map>
+#include <functional>
 
 #ifndef UINT32_MAX
 #define UINT32_MAX        4294967295U
