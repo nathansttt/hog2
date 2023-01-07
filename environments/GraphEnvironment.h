@@ -324,6 +324,11 @@ public:
 
 	virtual void Draw(Graphics::Display &disp) const;
 	void DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, float mix) const;
+	void DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, float mix, std::function<float(float, float, float)> l1, std::function<float(float, float, float)> l2) const;
+	void DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, graphState sa, graphState sb, float mix,
+				  std::function<float(float, float, float)> l1,
+				  std::function<float(float, float, float)> l2) const;
+
 	virtual void Draw(Graphics::Display &disp, const graphState &l) const;
 	virtual void DrawStateLabel(Graphics::Display &disp, const graphState &l1, const char *txt) const;
 	virtual void DrawLine(Graphics::Display &disp, const graphState &x, const graphState &y, double width = 1.0) const;

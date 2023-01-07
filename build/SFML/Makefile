@@ -56,8 +56,10 @@ PROJECTS = \
   demos/multiTarget \
   demos/rc \
   papers/IBEX \
+#  papers/FMDH \
   papers/DWA \
   papers/BGS \
+  papers/DSDWA \
   tests/mnpuzzle \
   tests/graphics \
 #  generic \
@@ -112,6 +114,7 @@ PROJECTS_ALL = \
   demos/astar \
   demos/idastar \
   apps/snakebird \
+  papers/DSDWA \
 #  papers/IBEX \
 #	apps/coprobber
 

@@ -558,39 +558,87 @@ std::string GraphEnvironment::SVGDraw() const
 
 void GraphEnvironment::DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, float mix) const
 {
+	DrawLERP(disp, a, b, mix,
+[](float a, float b, float mix) { return (1-mix)*a+mix*b;},
+[](float a, float b, float mix) { return (1-mix)*a+mix*b;});
+}
+
+void GraphEnvironment::DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, float mix,
+			  std::function<float(float, float, float)> l1,
+			  std::function<float(float, float, float)> l2) const
+{
 	if ((a == 0) || (a->GetNumNodes() == 0) || b == 0 || b->GetNumNodes() == 0 || b->GetNumNodes() != a->GetNumNodes())
 		return;
 
 	rgbColor mainColor = GetColor();
-	float mixX = (mix<0.6)?(5*mix/3):1;
-	float mixY = (mix<0.4)?0:5*(mix-0.4)/3;
-//	mix = 1-mix;
+//	float mixX = (mix<0.6)?(5*mix/3):1;
+//	float mixY = (mix<0.4)?0:5*(mix-0.4)/3;
+
 	edge_iterator ei = a->getEdgeIter();
 	for (edge *e = a->edgeIterNext(ei); e; e = a->edgeIterNext(ei))
 	{
-		if (e->getFrom() > e->getTo())
-			continue;
+//		if (e->getFrom() > e->getTo())
+//			continue;
 		//int x, y;
 		//double offsetx, offsety;
 		node *n;
-		n = a->GetNode(e->getFrom());
 		node *n2;
-		n2 = b->GetNode(e->getFrom());
-		
 		GLdouble x1, y1;
 		GLdouble x2, y2;
-		x1 = (1-mixX)*n->GetLabelF(GraphSearchConstants::kXCoordinate)+mixX*n2->GetLabelF(GraphSearchConstants::kXCoordinate);
-		y1 = (1-mixY)*n->GetLabelF(GraphSearchConstants::kYCoordinate)+mixY*n2->GetLabelF(GraphSearchConstants::kYCoordinate);
+
+		n = a->GetNode(e->getFrom());
+		n2 = b->GetNode(e->getFrom());
+		x1 = l1(n->GetLabelF(GraphSearchConstants::kXCoordinate), n2->GetLabelF(GraphSearchConstants::kXCoordinate), mix);
+		y1 = l2(n->GetLabelF(GraphSearchConstants::kYCoordinate), n2->GetLabelF(GraphSearchConstants::kYCoordinate), mix);
+//		x1 = (1-mixX)*+mixX*n2->GetLabelF(GraphSearchConstants::kXCoordinate);
+//		y1 = (1-mixY)*n->GetLabelF(GraphSearchConstants::kYCoordinate)+mixY*n2->GetLabelF(GraphSearchConstants::kYCoordinate);
 		
 		n = a->GetNode(e->getTo());
 		n2 = b->GetNode(e->getTo());
-		x2 = (1-mixX)*n->GetLabelF(GraphSearchConstants::kXCoordinate)+mixX*n2->GetLabelF(GraphSearchConstants::kXCoordinate);
-		y2 = (1-mixY)*n->GetLabelF(GraphSearchConstants::kYCoordinate)+mixY*n2->GetLabelF(GraphSearchConstants::kYCoordinate);
+		x2 = l1(n->GetLabelF(GraphSearchConstants::kXCoordinate), n2->GetLabelF(GraphSearchConstants::kXCoordinate), mix);
+		y2 = l2(n->GetLabelF(GraphSearchConstants::kYCoordinate), n2->GetLabelF(GraphSearchConstants::kYCoordinate), mix);
+//		x2 = (1-mixX)*n->GetLabelF(GraphSearchConstants::kXCoordinate)+mixX*n2->GetLabelF(GraphSearchConstants::kXCoordinate);
+//		y2 = (1-mixY)*n->GetLabelF(GraphSearchConstants::kYCoordinate)+mixY*n2->GetLabelF(GraphSearchConstants::kYCoordinate);
 		
-		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 1.0, mainColor);
+//		auto i = g->GetNumNodes();
+//		auto rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
+		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.005, mainColor);
 	}
 
 }
+
+void GraphEnvironment::DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, graphState sa, graphState sb, float mix,
+			  std::function<float(float, float, float)> l1,
+			  std::function<float(float, float, float)> l2) const
+{
+	if ((a == 0) || (a->GetNumNodes() == 0) || b == 0 || b->GetNumNodes() == 0 || b->GetNumNodes() != a->GetNumNodes())
+		return;
+
+	rgbColor mainColor = GetColor();
+//	float mixX = (mix<0.6)?(5*mix/3):1;
+//	float mixY = (mix<0.4)?0:5*(mix-0.4)/3;
+
+	edge_iterator ei = a->getEdgeIter();
+	for (edge *e = a->edgeIterNext(ei); e; e = a->edgeIterNext(ei))
+	{
+//		if (e->getFrom() > e->getTo())
+//			continue;
+		//int x, y;
+		//double offsetx, offsety;
+		node *n;
+		node *n2;
+		GLdouble x1, y1;
+
+		n = a->GetNode(sa);
+		n2 = b->GetNode(sb);
+		x1 = l1(n->GetLabelF(GraphSearchConstants::kXCoordinate), n2->GetLabelF(GraphSearchConstants::kXCoordinate), mix);
+		y1 = l2(n->GetLabelF(GraphSearchConstants::kYCoordinate), n2->GetLabelF(GraphSearchConstants::kYCoordinate), mix);
+		
+		disp.FillCircle(Graphics::point(x1, y1), 0.005f*7, mainColor);
+	}
+
+}
+
 
 void GraphEnvironment::Draw(Graphics::Display &disp) const
 {
