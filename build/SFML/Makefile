@@ -56,12 +56,12 @@ PROJECTS = \
   demos/multiTarget \
   demos/rc \
   papers/IBEX \
-#  papers/FMDH \
   papers/DWA \
   papers/BGS \
   papers/DSDWA \
   tests/mnpuzzle \
   tests/graphics \
+#  papers/FMDH \
 #  generic \
 
 
