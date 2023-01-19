@@ -624,8 +624,8 @@
             timestampString = "592332118.197726"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "489"
-            endingLineNumber = "489"
+            startingLineNumber = "513"
+            endingLineNumber = "513"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -641,8 +641,8 @@
             timestampString = "592332118.213655"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "479"
-            endingLineNumber = "479"
+            startingLineNumber = "503"
+            endingLineNumber = "503"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -658,8 +658,8 @@
             timestampString = "592332118.2140321"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "483"
-            endingLineNumber = "483"
+            startingLineNumber = "507"
+            endingLineNumber = "507"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -726,9 +726,9 @@
             timestampString = "579645658.687016"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "181"
-            endingLineNumber = "181"
-            landmarkName = "DoOneDimension(label)"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
+            landmarkName = "DoOneDimension(label, e)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -845,8 +845,8 @@
             timestampString = "592332118.220446"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "638"
-            endingLineNumber = "638"
+            startingLineNumber = "662"
+            endingLineNumber = "662"
             landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
@@ -879,8 +879,8 @@
             timestampString = "587402794.817219"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "706"
-            endingLineNumber = "706"
+            startingLineNumber = "754"
+            endingLineNumber = "754"
             landmarkName = "GraphEnvironment::Draw(disp, l)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1175,8 +1175,8 @@
             filePath = "../../../demos/suboptimal-map/Driver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1038"
-            endingLineNumber = "1038"
+            startingLineNumber = "1062"
+            endingLineNumber = "1062"
             landmarkName = "unknown"
             landmarkType = "0">
          </BreakpointContent>
@@ -1351,8 +1351,8 @@
             filePath = "../../../demos/ibex/Driver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "706"
-            endingLineNumber = "706"
+            startingLineNumber = "707"
+            endingLineNumber = "707"
             landmarkName = "MyDisplayHandler(windowID, mod, key)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1409,7 +1409,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "9F8CACD0-9BB9-4829-B634-37F2F74EB091"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/bidir/Driver.cpp"
@@ -1425,7 +1425,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "23D41BB3-2B1E-49FD-9C51-39FA6B74DCF7"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/bidir/Driver.cpp"
@@ -2041,6 +2041,118 @@
             startingLineNumber = "361"
             endingLineNumber = "361"
             landmarkName = "DoSingleSearchStep(thePath)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E5701628-0551-4268-ABBC-38C8AFB146C1"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/AStarEpsilon.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "302"
+            endingLineNumber = "302"
+            landmarkName = "DoSingleSearchStep(thePath)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "445D9C9A-9587-469C-B643-6088B7348EF6"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/suboptimal-map/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "451"
+            endingLineNumber = "451"
+            landmarkName = "GetPlotPoints()"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EF4CB95C-B9A8-41E1-A7B2-CCDB0462CACC"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../utils/Plot2D.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "54"
+            endingLineNumber = "54"
+            landmarkName = "Line::AddPoint(_x, _y)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "3E00917C-AB44-4214-B555-21E557ACF257"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/fastmap/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "359"
+            endingLineNumber = "359"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "93E6D768-921C-43F5-A8B2-2E0E01811991"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/fastmap/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "328"
+            endingLineNumber = "328"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C52E5759-EDC4-44E0-87D2-421E2F29CA5A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/GraphEnvironment.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "605"
+            endingLineNumber = "605"
+            landmarkName = "GraphEnvironment::DrawLERP(disp, a, b, mix, l1, l2)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "26679B3A-C9F9-4437-8A9B-F6C85D7F7D62"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/fastmap/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "601"
+            endingLineNumber = "601"
+            landmarkName = "DoAnimation()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

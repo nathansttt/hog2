@@ -4,45 +4,40 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>DSDWA*.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+		<key>FM+DH.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
 		<key>Hexagon.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
-		<key>RC.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>3</integer>
-		</dict>
-		<key>Snakebird.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>The Witness.xcscheme_^#shared#^_</key>
+		<key>RC.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
+		<key>Snakebird.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>The Witness.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>C403F68B27B37B96001C0043</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>C4045CD42740830900A8B6B5</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>C44B90AF26E6A2CE001A3459</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>C4A54FF924AEFC3400E9FF7F</key>
+		<key>C467498829483B36009BE699</key>
 		<dict>
 			<key>primary</key>
 			<true/>
