@@ -119,6 +119,56 @@ public:
 		return INFINITY;
 	}
 	
+	// directly target next suboptimality
+	void SetNextWeight(float h, float g, float targetWeight) // const Graphics::point &loc
+	{
+		if (fequal(h, 0))
+		{
+			float w;
+			point3d last;
+			if (data.size() > 0)
+				 last = data.back().crossPoint;
+			else
+				last = {1, 0};
+			w = (weight-last.y)/last.x;
+			// connect to y axis at bound*(1)
+			float K = 1/(last.y+w*last.x);
+			data.push_back({INFINITY, w, K, {static_cast<float>(weight), 0.0f}});
+		}
+		if (fgreater(h, 0) && fgreater(g, 0))
+		{
+			float slope = g/h;
+			if (data.size() == 0 || data.back().slope < slope)
+			{
+				//std::cout << "Virtual hit of " << loc << " slope " << slope << "\n";
+				float minWeight, maxWeight;
+				if (data.size() > 0)
+					GetNextWeightRange(minWeight, maxWeight, data.back().crossPoint, slope);
+				else
+					GetNextWeightRange(minWeight, maxWeight, {1, 0}, slope);
+
+				float K;
+				float nextWeight = std::min(maxWeight, std::max(minWeight, targetWeight));
+				point3d last;
+				if (data.size() == 0)
+				{
+					last = point3d(1, 0);
+				}
+				else {
+					last = data.back().crossPoint;
+				}
+				K = 1/(last.y+nextWeight*last.x);
+
+				// our cross point of next slope
+				point3d crossPoint1;
+				crossPoint1.x = 1.0f/(K*(slope+nextWeight));
+				crossPoint1.y = crossPoint1.x*slope;
+				
+				data.push_back({slope, nextWeight, K, crossPoint1});
+			}
+		}
+	}
+	
 	void SetNextPriority(float h, float g, float target) // const Graphics::point &loc
 	{
 		if (fequal(h, 0))
