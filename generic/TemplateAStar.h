@@ -86,8 +86,8 @@ public:
 	
 	bool InitializeSearch(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
-	void AddAdditionalStartState(state& newState);
-	void AddAdditionalStartState(state& newState, double cost);
+	void AddAdditionalStartState(const state& newState);
+	void AddAdditionalStartState(const state& newState, double cost);
 	
 	state CheckNextNode();
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
@@ -282,7 +282,7 @@ bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environm
  * @date 01/06/08
  */
 template <class state, class action, class environment, class openList>
-void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(state& newState)
+void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(const state& newState)
 {
 	double h = theHeuristic->HCost(newState, goal);
 	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), phi(h, 0), 0, h);
@@ -294,7 +294,7 @@ void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(s
  * @date 09/25/10
  */
 template <class state, class action, class environment, class openList>
-void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(state& newState, double cost)
+void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(const state& newState, double cost)
 {
 	double h = theHeuristic->HCost(newState, goal);
 	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), phi(h, cost), cost, h);
