@@ -540,10 +540,15 @@ void ExtractComponents(const char *map)
 					BFS(v, voxelGridState(x, y, z), locs);
 					printf("Component %d has %d items\n", count, locs.size());
 					VoxelGrid tmp(xmax, ymax, zmax);
+					VoxelGrid tmp2(xmax, ymax, zmax);
 					for (auto i = locs.begin(); i != locs.end(); i++)
 					{
 						tmp.SetBlocked(i->first, true);
+						tmp2.SetBlocked(i->first, true);
 					}
+					tmp2.Fill(voxelGridState(0,0,0));
+					tmp2.Invert();
+					tmp.Or(&tmp2);
 					std::string name = map;
 					name.substr(0, name.find_last_of("."));
 					name += "-component"+std::to_string(count);
