@@ -35,5 +35,6 @@ SRC_CPP = \
 	grids/Reach.cpp \
 	grids/CanonicalDijkstra.cpp \
 	grids/JPS.cpp \
+	grids/GridHeuristics.cpp \
 	grids/Transit.cpp
 
