@@ -29,8 +29,8 @@ inline bool fless(double a, double b) { return (a < b - TOLERANCE); }
 inline bool fgreater(double a, double b) { return (a > b + TOLERANCE); }
 inline bool flesseq(double a, double b) { return !fgreater(a, b); }
 inline bool fgreatereq(double a, double b) { return !fless(a, b); }
-inline bool fequal(double a, double b)
-{ return (a >= b - TOLERANCE) && (a <= b+TOLERANCE); }
+inline bool fequal(double a, double b, double tolerance=TOLERANCE)
+{ return (a >= b - tolerance) && (a <= b+tolerance); }
 
 inline double min(double a, double b) { return fless(a, b)?a:b; }
 inline double max(double a, double b) { return fless(a, b)?b:a; }
