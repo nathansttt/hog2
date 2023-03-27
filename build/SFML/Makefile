@@ -61,7 +61,7 @@ PROJECTS = \
   papers/DSDWA \
   tests/mnpuzzle \
   tests/graphics \
-#  papers/FMDH \
+  papers/FMDH \
 #  generic \
 
 
