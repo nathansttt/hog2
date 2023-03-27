@@ -22,9 +22,9 @@ Line::Line(const char *label, tPlotType ptype)
 	ClearColor();
 	strncpy(name,label,1024);
 	xMin = DBL_MAX;
-	xMax = DBL_MIN;
+	xMax = -DBL_MAX;
 	yMin = DBL_MAX;
-	yMax = DBL_MIN;
+	yMax = -DBL_MAX;
 	hidden = false;
 	changedLine = false;
 }
@@ -34,9 +34,9 @@ void Line::Clear()
 	x.resize(0);
 	y.resize(0);
 	xMin = DBL_MAX;
-	xMax = DBL_MIN;
+	xMax = -DBL_MAX;
 	yMin = DBL_MAX;
-	yMax = DBL_MIN;
+	yMax = -DBL_MAX;
 }
 
 void Line::AddPoint(double _y)
@@ -324,9 +324,9 @@ void Plot2D::ResetAxis()
 	forceAxis = false;
 	recomputeBorders = false;
 	xMin = DBL_MAX;
-	xMax = DBL_MIN;
+	xMax = -DBL_MAX;
 	yMin = DBL_MAX;
-	yMax = DBL_MIN;
+	yMax = -DBL_MAX;
 	
 	// recompute max/min stuff
 	for (unsigned int x = 0; x < lines.size(); x++)
@@ -553,7 +553,7 @@ double Plot2D::MakeHOGWidth(double w) const
 {
 	// If we scale the lines as above, they can get really large. The lines
 	// need to always stay the same (relative) size.
-	float baseLineSize = 1.0/150.0;
+	float baseLineSize = 1.0f/150.0f;
 	return w*baseLineSize;
 //	return w*xScale;
 }
@@ -577,12 +577,12 @@ void Plot2D::Draw(Graphics::Display &display) const
 
 	display.DrawText(yLabel.c_str(), MakeHOG(0, dTop+(dTop-dBottom)/100), Colors::black, fontSize, Graphics::textAlignCenter, Graphics::textBaselineBottom);
 
-	for (int x = 0; x < dRight; x+=dRight/10)
+	for (double x = 0; x < dRight; x+=dRight/10)
 	{
 		display.DrawLine(MakeHOG(x, 0)+point3d(0, fontSize/3), MakeHOG(x, 0)-point3d(0, fontSize/3), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
 //		display.DrawLine(MakeHOG(x, (dTop-dBottom)/100), MakeHOG(x, -(dTop-dBottom)/100), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
 	}
-	for (int y = 0; y < dTop; y+=dTop/10)
+	for (double y = 0; y < dTop; y+=dTop/10)
 	{
 		display.DrawLine(MakeHOG(0, y)+point3d(fontSize/3,0), MakeHOG(0, y)-point3d(fontSize/3,0), MakeHOGWidth(lineTicWeight), Colors::black); // y-axis
 //		display.DrawLine(MakeHOG((dRight-dLeft)/100, y), MakeHOG(-(dRight-dLeft)/100, y), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
