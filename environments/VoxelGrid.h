@@ -43,7 +43,10 @@ public:
 	VoxelGrid(int x, int y, int z);
 	VoxelGrid(const char *filename);
 	~VoxelGrid();
-	void Save(const char *filename);
+  
+  void And(VoxelGrid *g);
+  void Or(VoxelGrid *g);
+  void Save(const char *filename);
 	void SaveInMinBB(const char *filename);
 	void GetSuccessors(const voxelGridState &nodeID, std::vector<voxelGridState> &neighbors) const;
 	void GetActions(const voxelGridState &nodeID, std::vector<voxelGridAction> &actions) const;

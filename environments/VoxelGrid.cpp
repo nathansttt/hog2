@@ -65,6 +65,35 @@ VoxelGrid::~VoxelGrid()
 	
 }
 
+void VoxelGrid::And(VoxelGrid *g)
+{
+  for (int y = 0; y < yWidth; y++)
+    {
+      for (int z = 0; z < zWidth; z++)
+	{
+	  for (int x = 0; x < xWidth; x++)
+	    {
+	      SetBlocked(x, y, z, IsBlocked(x, y, z) && g->IsBlocked(x, y, z));
+	    }
+	}
+    }
+}
+
+void VoxelGrid::Or(VoxelGrid *g)
+{
+  for (int y = 0; y < yWidth; y++)
+    {
+      for (int z = 0; z < zWidth; z++)
+	{
+	  for (int x = 0; x < xWidth; x++)
+	    {
+	      if (g->IsBlocked(x, y, z))
+		SetBlocked(x, y, z, true);
+	    }
+	}
+    }
+}
+
 void VoxelGrid::Save(const char *filename)
 {
 	FILE *f = fopen(filename, "w+");
