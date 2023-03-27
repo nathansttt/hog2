@@ -166,6 +166,7 @@ public:
 
 	uint64_t GetMaxHash() const;
 	uint64_t GetStateHash(const xyLoc &node) const;
+	void GetStateFromHash(uint64_t parent, xyLoc &s) const;
 	uint64_t GetActionHash(tDirection act) const;
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const xyLoc &l) const;
@@ -191,7 +192,7 @@ public:
 	void DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v, const char *txt) const;
 	void DrawLine(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
 	void DrawArrow(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
-
+	Graphics::point GetStateLoc(const xyLoc &l1);
 	void SetDrawOptions(drawOptions o) {drawParams = o; }
 	
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;

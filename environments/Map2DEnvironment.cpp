@@ -538,6 +538,12 @@ uint64_t MapEnvironment::GetStateHash(const xyLoc &node) const
 	//	return (node.x<<16)|node.y;
 }
 
+void MapEnvironment::GetStateFromHash(uint64_t parent, xyLoc &s) const
+{
+	s.x = parent%map->GetMapWidth();
+	s.y = parent/map->GetMapWidth();
+}
+
 uint64_t MapEnvironment::GetActionHash(tDirection act) const
 {
 	return (uint32_t) act;
@@ -1374,6 +1380,13 @@ void MapEnvironment::DrawAlternate(Graphics::Display &disp, const xyLoc &l) cons
 		disp.FrameCircle({static_cast<float>(px), static_cast<float>(py)}, rad, c, rad);
 //		disp.FrameCircle(r, c, 2);
 	}
+}
+
+Graphics::point MapEnvironment::GetStateLoc(const xyLoc &l)
+{
+	GLdouble px, py, t, rad;
+	map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+	return Graphics::point(px, py);
 }
 
 void MapEnvironment::DrawStateLabel(Graphics::Display &disp, const xyLoc &l, const char *txt) const
