@@ -44,7 +44,7 @@ PROJECTS = \
   demos/astar-map \
   demos/inconsistency-graph \
   demos/racetrack \
-  papers/DWA 
+  papers/DWA
 
 
 
@@ -96,7 +96,7 @@ PROJECTS_ALL = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
-  papers/DWA 
+  papers/DWA
 
 
 # sequentially to avoid same sub-target in sub-make invoked twice
@@ -132,15 +132,15 @@ clean:
 	@echo ""
 
 # sequentially to avoid same sub-target in sub-make invoked twice
-all: override PROJECTS = $(PROJECTS_ALL)
+#all: override PROJECTS = $(PROJECTS_ALL)
 all:
 	$(MAKE) all-debug
 	$(MAKE) all-release
 
-all-debug: override PROJECTS = $(PROJECTS_ALL)
+#all-debug: override PROJECTS = $(PROJECTS_ALL)
 all-debug: debug
 
-all-release: override PROJECTS = $(PROJECTS_ALL)
+#all-release: override PROJECTS = $(PROJECTS_ALL)
 all-release: release
 
 tags:
