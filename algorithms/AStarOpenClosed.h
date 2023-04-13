@@ -13,6 +13,7 @@
 #define ASTAROPENCLOSED_H
 
 #include <cassert>
+#include <cstddef>
 #include <functional>
 #include <stdint.h>
 #include <unordered_map>
@@ -279,7 +280,7 @@ template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Peek() const
 {
 	assert(OpenSize() != 0);
-	
+
 	return theHeap[0];
 }
 
@@ -299,7 +300,7 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close(uint64_t objKey)
 	theHeap.pop_back();
 	if (!HeapifyUp(index))
 		HeapifyDown(index);
-	
+
 	return ans;
 }
 
@@ -310,14 +311,14 @@ template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close()
 {
 	assert(OpenSize() != 0);
-	
+
 	uint64_t ans = theHeap[0];
 	elements[ans].where = kClosedList;
 	theHeap[0] = theHeap[theHeap.size()-1];
 	elements[theHeap[0]].openLocation = 0;
 	theHeap.pop_back();
 	HeapifyDown(0);
-	
+
 	return ans;
 }
 
@@ -344,7 +345,7 @@ bool AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyUp(uint64_t index)
 	if (index == 0) return false;
 	int parent = (index-1)/2;
 	CmpKey compare;
-	
+
 	if (compare(elements[theHeap[parent]], elements[theHeap[index]]))
 	{
 		unsigned int tmp = theHeap[parent];
@@ -375,7 +376,7 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyDown(uint64_t index)
 		which = child1;
 	else
 		which = child2;
-	
+
 	if (!(compare(elements[theHeap[which]], elements[theHeap[index]])))
 	{
 		unsigned int tmp = theHeap[which];
