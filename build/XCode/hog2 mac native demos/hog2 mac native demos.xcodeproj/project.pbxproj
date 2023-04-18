@@ -2628,12 +2628,12 @@
 
 /* Begin PBXFileReference section */
 		C4017B2126479AED00DE3C91 /* Pancake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pancake.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4017B3A26479AEE00DE3C91 /* STP copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "STP copy2-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/STP copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C4017B3A26479AEE00DE3C91 /* STP copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "STP copy2-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/STP copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4017B8426479B8600DE3C91 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4017B8526479B8600DE3C91 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4017B9F2647A41200DE3C91 /* Permutations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Permutations.h; sourceTree = "<group>"; };
 		C40D4B2421B1BE3800362048 /* Witness3.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Witness3.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C40D4B2521B1BE3900362048 /* A* (Map) copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Map) copy3-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Map) copy3-Info.plist"; sourceTree = "<absolute>"; };
+		C40D4B2521B1BE3900362048 /* AStar (Map) copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Map) copy3-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Map) copy3-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C40D4B2721B1BE6400362048 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C40D4B2821B1BE6400362048 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C40D4B2B21B1BE9200362048 /* Witness.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Witness.h; sourceTree = "<group>"; };
@@ -2643,27 +2643,27 @@
 		C41B351921B33336009025A4 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C41B351A21B33336009025A4 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4231097204F3AA5000DEC53 /* Bidir.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bidir.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4231098204F3AA6000DEC53 /* NBS copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "NBS copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/NBS copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4231098204F3AA6000DEC53 /* NBS copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "NBS copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/NBS copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C423109A204F3ACF000DEC53 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C423109B204F3ACF000DEC53 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4234D1E1F3426DF00B38A95 /* fMM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fMM.h; sourceTree = "<group>"; };
 		C426BEF92302354D0094DABC /* IncrementalBGS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IncrementalBGS.h; sourceTree = "<group>"; };
 		C426BF67230235A30094DABC /* IBEX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IBEX.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C426BF68230235A40094DABC /* IDA* copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "IDA* copy2-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/IDA* copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C426BF68230235A40094DABC /* IDAStar copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "IDAStar copy2-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/IDAStar copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C426BF6A230235CE0094DABC /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C426BF6B230235CE0094DABC /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C428CA3E20B280BC00B27666 /* Transit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transit.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C428CA3F20B280BD00B27666 /* Bounding Boxes copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Bounding Boxes copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Bounding Boxes copy-Info.plist"; sourceTree = "<absolute>"; };
+		C428CA3F20B280BD00B27666 /* Bounding Boxes copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Bounding Boxes copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Bounding Boxes copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C428CA4120B2810200B27666 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C428CA4220B2810200B27666 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C428CA4420B2821400B27666 /* Transit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transit.cpp; sourceTree = "<group>"; };
 		C428CA4520B2821400B27666 /* Transit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Transit.h; sourceTree = "<group>"; };
 		C42B6679206AE4A900C3BF1A /* DFID.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DFID.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C42B667A206AE4A900C3BF1A /* Bidir copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Bidir copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Bidir copy-Info.plist"; sourceTree = "<absolute>"; };
+		C42B667A206AE4A900C3BF1A /* Bidir copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Bidir copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Bidir copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C42B667C206AE4CB00C3BF1A /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C42B667D206AE4CB00C3BF1A /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C44121B921FD860A00421CD7 /* Witness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Witness.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C44121BA21FD860B00421CD7 /* Witness3 copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Witness3 copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Witness3 copy-Info.plist"; sourceTree = "<absolute>"; };
+		C44121BA21FD860B00421CD7 /* Witness3 copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Witness3 copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Witness3 copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C44121BC21FD864100421CD7 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C44121BD21FD864100421CD7 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C44121C021FE425800421CD7 /* AStarEpsilon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AStarEpsilon.h; sourceTree = "<group>"; };
@@ -2683,45 +2683,45 @@
 		C4667F18221CAEE600E1070F /* GraphInconsistencyInstances.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GraphInconsistencyInstances.cpp; sourceTree = "<group>"; };
 		C4667F19221CAEE600E1070F /* GraphInconsistencyInstances.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GraphInconsistencyInstances.h; sourceTree = "<group>"; };
 		C4667FDE22420DB700E1070F /* FastMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FastMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4667FDF22420DB900E1070F /* STP copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "STP copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/STP copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4667FDF22420DB900E1070F /* STP copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "STP copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/STP copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4667FE122420DF300E1070F /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4667FE222420DF300E1070F /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C472A4F821E3114B00A1B41E /* STP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STP.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C472A4F921E3114D00A1B41E /* IDA* copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "IDA* copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/IDA* copy-Info.plist"; sourceTree = "<absolute>"; };
+		C472A4F921E3114D00A1B41E /* IDAStar copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "IDAStar copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/IDAStar copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C472A4FB21E3121600A1B41E /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C472A4FC21E3121600A1B41E /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C473D41320600B5E0044DB14 /* html_hog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = html_hog.cpp; sourceTree = "<group>"; };
 		C48E6F8C23A9A2740024D214 /* Witness Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Witness Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C48E6F8D23A9A2760024D214 /* Witness copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Witness copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Witness copy-Info.plist"; sourceTree = "<absolute>"; };
+		C48E6F8D23A9A2760024D214 /* Witness copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Witness copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Witness copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C48E6F8F23A9A2A30024D214 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C48E6F9023A9A2A30024D214 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C48E6F9223A9A3060024D214 /* Combinations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Combinations.h; sourceTree = "<group>"; };
 		C48E6F9323B703200024D214 /* FocalOpenClosed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FocalOpenClosed.h; sourceTree = "<group>"; };
 		C48E6F9423B908840024D214 /* Treap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Treap.h; sourceTree = "<group>"; };
 		C49A9D9E20721F2400244298 /* Dijkstra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dijkstra.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C49A9D9F20721F2400244298 /* DFID copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "DFID copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/DFID copy-Info.plist"; sourceTree = "<absolute>"; };
+		C49A9D9F20721F2400244298 /* DFID copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "DFID copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/DFID copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C49A9DA420721F6E00244298 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C49A9DA520721F6E00244298 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
-		C49A9E14207489CF00244298 /* A* (Graph).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "A* (Graph).app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C49A9E15207489D000244298 /* Dijkstra copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Dijkstra copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Dijkstra copy-Info.plist"; sourceTree = "<absolute>"; };
+		C49A9E14207489CF00244298 /* AStar (Graph).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AStar (Graph).app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C49A9E15207489D000244298 /* Dijkstra copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Dijkstra copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Dijkstra copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C49A9E1720748A2800244298 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C49A9E1820748A2800244298 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
-		C49A9E862074A5D200244298 /* A* (Map).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "A* (Map).app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C49A9E872074A5D200244298 /* A* (Graph) copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Graph) copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Graph) copy-Info.plist"; sourceTree = "<absolute>"; };
+		C49A9E862074A5D200244298 /* AStar (Map).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AStar (Map).app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C49A9E872074A5D200244298 /* AStar (Graph) copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Graph) copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Graph) copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C49A9E892074A68E00244298 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C49A9E8A2074A68E00244298 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
-		C49A9F152079E63000244298 /* IDA*.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IDA*.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C49A9F162079E63100244298 /* A* (Graph) copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Graph) copy2-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Graph) copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C49A9F152079E63000244298 /* IDAStar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IDAStar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C49A9F162079E63100244298 /* AStar (Graph) copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Graph) copy2-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Graph) copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C49A9F192079E66600244298 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C49A9F1A2079E66600244298 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4B9410723D849BF0091C825 /* FocalAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FocalAdd.h; sourceTree = "<group>"; };
 		C4BE70C221FA724B009CE25B /* DynamicPotentialSearch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DynamicPotentialSearch.h; sourceTree = "<group>"; };
 		C4BEEB7B2096DAD6005E8FBD /* GMX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GMX.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4BEEB7C2096DAD6005E8FBD /* Necessary Expansions copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Necessary Expansions copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Necessary Expansions copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4BEEB7C2096DAD6005E8FBD /* Necessary Expansions copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Necessary Expansions copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Necessary Expansions copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4BEEB7E2096DB0E005E8FBD /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4BEEB7F2096DB0E005E8FBD /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4BEEBFF20A0C3AF005E8FBD /* Inconsistency.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inconsistency.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4BEEC0020A0C3B0005E8FBD /* A* (Graph) copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Graph) copy3-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Graph) copy3-Info.plist"; sourceTree = "<absolute>"; };
+		C4BEEC0020A0C3B0005E8FBD /* AStar (Graph) copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Graph) copy3-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Graph) copy3-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4BEEC0220A0C3DE005E8FBD /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4BEEC0320A0C3DE005E8FBD /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4C835431F2AF5C7004E78C0 /* Necessary Expansions.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Necessary Expansions.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2992,15 +2992,15 @@
 		C4CF76C322F39C76009CF802 /* BDIndexOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDIndexOpenClosed.h; sourceTree = "<group>"; };
 		C4D432EE2788B02E00A875F9 /* DelayedHeuristicAStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DelayedHeuristicAStar.h; sourceTree = "<group>"; };
 		C4D80DA220A2CB480087E08D /* DH-place.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DH-place.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4D80DA320A2CB480087E08D /* A* (Map) copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Map) copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Map) copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4D80DA320A2CB480087E08D /* AStar (Map) copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Map) copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Map) copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D80DA520A2CB8F0087E08D /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4D80DA620A2CB8F0087E08D /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4D80E1620A9408E0087E08D /* JPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4D80E1720A9408F0087E08D /* DH-place copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "DH-place copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/DH-place copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4D80E1720A9408F0087E08D /* DH-place copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "DH-place copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/DH-place copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D80E1920A9410B0087E08D /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4D80E1A20A9410B0087E08D /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4D80EAB20AC03930087E08D /* Reach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reach.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4D80EAC20AC03940087E08D /* JPS copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "JPS copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/JPS copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4D80EAC20AC03940087E08D /* JPS copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "JPS copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/JPS copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D80EAD20AC03BA0087E08D /* CanonicalReach.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CanonicalReach.cpp; sourceTree = "<group>"; };
 		C4D80EAE20AC03BB0087E08D /* CanonicalReach.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanonicalReach.h; sourceTree = "<group>"; };
 		C4D80EAF20AC03BB0087E08D /* Reach.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Reach.cpp; sourceTree = "<group>"; };
@@ -3011,15 +3011,15 @@
 		C4D80EBB20AC8A040087E08D /* BoundingBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BoundingBox.cpp; sourceTree = "<group>"; };
 		C4D80EBC20AC8A040087E08D /* BoundingBox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BoundingBox.h; sourceTree = "<group>"; };
 		C4D80F2E20AC95F30087E08D /* Bounding Boxes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bounding Boxes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4D80F2F20AC95F40087E08D /* Reach copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Reach copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Reach copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4D80F2F20AC95F40087E08D /* Reach copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Reach copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Reach copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D80F3120AC968E0087E08D /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4D80F3220AC968E0087E08D /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4DFD0DE20B5337F0072F0CB /* Grid Abstraction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Grid Abstraction.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4DFD0DF20B533800072F0CB /* A* (Map) copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "A* (Map) copy2-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/A* (Map) copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C4DFD0DF20B533800072F0CB /* AStar (Map) copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Map) copy2-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Map) copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4DFD0E520B5BB140072F0CB /* Map2DSectorAbstractionEnvironment.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Map2DSectorAbstractionEnvironment.cpp; sourceTree = "<group>"; };
 		C4DFD0E620B5BB140072F0CB /* Map2DSectorAbstractionEnvironment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Map2DSectorAbstractionEnvironment.h; sourceTree = "<group>"; };
 		C4DFD16520BE6D300072F0CB /* Suboptimal Map.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Suboptimal Map.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4DFD16620BE6D320072F0CB /* Grid Abstraction copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Grid Abstraction copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Grid Abstraction copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4DFD16620BE6D320072F0CB /* Grid Abstraction copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Grid Abstraction copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Grid Abstraction copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4DFD16820BE6D530072F0CB /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4DFD16920BE6D530072F0CB /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4F134CD2089A31C00AC26BC /* Graphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graphics.h; sourceTree = "<group>"; };
@@ -3027,7 +3027,7 @@
 		C4F134D02089A39A00AC26BC /* STPInstances.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPInstances.h; sourceTree = "<group>"; };
 		C4F134D12089A39A00AC26BC /* STPInstances.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = STPInstances.cpp; sourceTree = "<group>"; };
 		C4F3F31E26935BAB001FB029 /* Racetrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Racetrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4F3F31F26935BAC001FB029 /* Pancake copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Pancake copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 mac native demos/Pancake copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4F3F31F26935BAC001FB029 /* Pancake copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Pancake copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Pancake copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4F3F33A26935BD7001FB029 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4F3F33B26935BD7001FB029 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4F3F36F26935EEE001FB029 /* Racetrack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Racetrack.cpp; sourceTree = "<group>"; };
@@ -3427,22 +3427,22 @@
 				C42B667A206AE4A900C3BF1A /* Bidir copy-Info.plist */,
 				C49A9D9F20721F2400244298 /* DFID copy-Info.plist */,
 				C49A9E15207489D000244298 /* Dijkstra copy-Info.plist */,
-				C49A9E872074A5D200244298 /* A* (Graph) copy-Info.plist */,
-				C49A9F162079E63100244298 /* A* (Graph) copy2-Info.plist */,
+				C49A9E872074A5D200244298 /* AStar (Graph) copy-Info.plist */,
+				C49A9F162079E63100244298 /* AStar (Graph) copy2-Info.plist */,
 				C4BEEB7C2096DAD6005E8FBD /* Necessary Expansions copy-Info.plist */,
-				C4BEEC0020A0C3B0005E8FBD /* A* (Graph) copy3-Info.plist */,
-				C4D80DA320A2CB480087E08D /* A* (Map) copy-Info.plist */,
+				C4BEEC0020A0C3B0005E8FBD /* AStar (Graph) copy3-Info.plist */,
+				C4D80DA320A2CB480087E08D /* AStar (Map) copy-Info.plist */,
 				C4D80E1720A9408F0087E08D /* DH-place copy-Info.plist */,
 				C4D80EAC20AC03940087E08D /* JPS copy-Info.plist */,
 				C4D80F2F20AC95F40087E08D /* Reach copy-Info.plist */,
 				C428CA3F20B280BD00B27666 /* Bounding Boxes copy-Info.plist */,
-				C4DFD0DF20B533800072F0CB /* A* (Map) copy2-Info.plist */,
+				C4DFD0DF20B533800072F0CB /* AStar (Map) copy2-Info.plist */,
 				C4DFD16620BE6D320072F0CB /* Grid Abstraction copy-Info.plist */,
-				C40D4B2521B1BE3900362048 /* A* (Map) copy3-Info.plist */,
-				C472A4F921E3114D00A1B41E /* IDA* copy-Info.plist */,
+				C40D4B2521B1BE3900362048 /* AStar (Map) copy3-Info.plist */,
+				C472A4F921E3114D00A1B41E /* IDAStar copy-Info.plist */,
 				C44121BA21FD860B00421CD7 /* Witness3 copy-Info.plist */,
 				C4667FDF22420DB900E1070F /* STP copy-Info.plist */,
-				C426BF68230235A40094DABC /* IDA* copy2-Info.plist */,
+				C426BF68230235A40094DABC /* IDAStar copy2-Info.plist */,
 				C48E6F8D23A9A2760024D214 /* Witness copy-Info.plist */,
 				C4017B3A26479AEE00DE3C91 /* STP copy2-Info.plist */,
 				C4F3F31F26935BAC001FB029 /* Pancake copy-Info.plist */,
@@ -3457,9 +3457,9 @@
 				C4231097204F3AA5000DEC53 /* Bidir.app */,
 				C42B6679206AE4A900C3BF1A /* DFID.app */,
 				C49A9D9E20721F2400244298 /* Dijkstra.app */,
-				C49A9E14207489CF00244298 /* A* (Graph).app */,
-				C49A9E862074A5D200244298 /* A* (Map).app */,
-				C49A9F152079E63000244298 /* IDA*.app */,
+				C49A9E14207489CF00244298 /* AStar (Graph).app */,
+				C49A9E862074A5D200244298 /* AStar (Map).app */,
+				C49A9F152079E63000244298 /* IDAStar.app */,
 				C4BEEB7B2096DAD6005E8FBD /* GMX.app */,
 				C4BEEBFF20A0C3AF005E8FBD /* Inconsistency.app */,
 				C4D80DA220A2CB480087E08D /* DH-place.app */,
@@ -4238,9 +4238,9 @@
 			productReference = C49A9D9E20721F2400244298 /* Dijkstra.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C49A9DA8207489CF00244298 /* A* (Graph) */ = {
+		C49A9DA8207489CF00244298 /* AStar (Graph) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C49A9E11207489CF00244298 /* Build configuration list for PBXNativeTarget "A* (Graph)" */;
+			buildConfigurationList = C49A9E11207489CF00244298 /* Build configuration list for PBXNativeTarget "AStar (Graph)" */;
 			buildPhases = (
 				C49A9DA9207489CF00244298 /* Sources */,
 				C49A9E0C207489CF00244298 /* Frameworks */,
@@ -4250,14 +4250,14 @@
 			);
 			dependencies = (
 			);
-			name = "A* (Graph)";
+			name = "AStar (Graph)";
 			productName = "hog2 mac native demos";
-			productReference = C49A9E14207489CF00244298 /* A* (Graph).app */;
+			productReference = C49A9E14207489CF00244298 /* AStar (Graph).app */;
 			productType = "com.apple.product-type.application";
 		};
-		C49A9E1A2074A5D200244298 /* A* (Map) */ = {
+		C49A9E1A2074A5D200244298 /* AStar (Map) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C49A9E832074A5D200244298 /* Build configuration list for PBXNativeTarget "A* (Map)" */;
+			buildConfigurationList = C49A9E832074A5D200244298 /* Build configuration list for PBXNativeTarget "AStar (Map)" */;
 			buildPhases = (
 				C49A9E1B2074A5D200244298 /* Sources */,
 				C49A9E7E2074A5D200244298 /* Frameworks */,
@@ -4267,14 +4267,14 @@
 			);
 			dependencies = (
 			);
-			name = "A* (Map)";
+			name = "AStar (Map)";
 			productName = "hog2 mac native demos";
-			productReference = C49A9E862074A5D200244298 /* A* (Map).app */;
+			productReference = C49A9E862074A5D200244298 /* AStar (Map).app */;
 			productType = "com.apple.product-type.application";
 		};
-		C49A9EA92079E63000244298 /* IDA* */ = {
+		C49A9EA92079E63000244298 /* IDAStar */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C49A9F122079E63000244298 /* Build configuration list for PBXNativeTarget "IDA*" */;
+			buildConfigurationList = C49A9F122079E63000244298 /* Build configuration list for PBXNativeTarget "IDAStar" */;
 			buildPhases = (
 				C49A9EAA2079E63000244298 /* Sources */,
 				C49A9F0D2079E63000244298 /* Frameworks */,
@@ -4284,9 +4284,9 @@
 			);
 			dependencies = (
 			);
-			name = "IDA*";
+			name = IDAStar;
 			productName = "hog2 mac native demos";
-			productReference = C49A9F152079E63000244298 /* IDA*.app */;
+			productReference = C49A9F152079E63000244298 /* IDAStar.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C4BEEB0E2096DAD6005E8FBD /* GMX */ = {
@@ -4493,9 +4493,9 @@
 				C423102B204F3AA5000DEC53 /* Bidir */,
 				C42B660D206AE4A900C3BF1A /* DFID */,
 				C49A9D3220721F2400244298 /* Dijkstra */,
-				C49A9DA8207489CF00244298 /* A* (Graph) */,
-				C49A9E1A2074A5D200244298 /* A* (Map) */,
-				C49A9EA92079E63000244298 /* IDA* */,
+				C49A9DA8207489CF00244298 /* AStar (Graph) */,
+				C49A9E1A2074A5D200244298 /* AStar (Map) */,
+				C49A9EA92079E63000244298 /* IDAStar */,
 				C4BEEB0E2096DAD6005E8FBD /* GMX */,
 				C4BEEB9320A0C3AF005E8FBD /* Inconsistency */,
 				C4D80D3620A2CB480087E08D /* DH-place */,
@@ -7544,7 +7544,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Map) copy3-Info.plist";
+				INFOPLIST_FILE = "AStar (Map) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7561,7 +7561,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Map) copy3-Info.plist";
+				INFOPLIST_FILE = "AStar (Map) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7612,7 +7612,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "IDA* copy2-Info.plist";
+				INFOPLIST_FILE = "IDAStar copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7629,7 +7629,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "IDA* copy2-Info.plist";
+				INFOPLIST_FILE = "IDAStar copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7816,7 +7816,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "IDA* copy-Info.plist";
+				INFOPLIST_FILE = "IDAStar copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7833,7 +7833,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "IDA* copy-Info.plist";
+				INFOPLIST_FILE = "IDAStar copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7952,7 +7952,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Graph) copy-Info.plist";
+				INFOPLIST_FILE = "AStar (Graph) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7969,7 +7969,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Graph) copy-Info.plist";
+				INFOPLIST_FILE = "AStar (Graph) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -7986,7 +7986,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Graph) copy2-Info.plist";
+				INFOPLIST_FILE = "AStar (Graph) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8003,7 +8003,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Graph) copy2-Info.plist";
+				INFOPLIST_FILE = "AStar (Graph) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8054,7 +8054,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Graph) copy3-Info.plist";
+				INFOPLIST_FILE = "AStar (Graph) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8071,7 +8071,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Graph) copy3-Info.plist";
+				INFOPLIST_FILE = "AStar (Graph) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8211,7 +8211,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Map) copy-Info.plist";
+				INFOPLIST_FILE = "AStar (Map) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8228,7 +8228,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Map) copy-Info.plist";
+				INFOPLIST_FILE = "AStar (Map) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8347,7 +8347,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Map) copy2-Info.plist";
+				INFOPLIST_FILE = "AStar (Map) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8364,7 +8364,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_SHADOW = YES;
-				INFOPLIST_FILE = "A* (Map) copy2-Info.plist";
+				INFOPLIST_FILE = "AStar (Map) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = "-DNO_OPENGL";
@@ -8552,7 +8552,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C49A9E11207489CF00244298 /* Build configuration list for PBXNativeTarget "A* (Graph)" */ = {
+		C49A9E11207489CF00244298 /* Build configuration list for PBXNativeTarget "AStar (Graph)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C49A9E12207489CF00244298 /* Debug */,
@@ -8561,7 +8561,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C49A9E832074A5D200244298 /* Build configuration list for PBXNativeTarget "A* (Map)" */ = {
+		C49A9E832074A5D200244298 /* Build configuration list for PBXNativeTarget "AStar (Map)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C49A9E842074A5D200244298 /* Debug */,
@@ -8570,7 +8570,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C49A9F122079E63000244298 /* Build configuration list for PBXNativeTarget "IDA*" */ = {
+		C49A9F122079E63000244298 /* Build configuration list for PBXNativeTarget "IDAStar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C49A9F132079E63000244298 /* Debug */,
