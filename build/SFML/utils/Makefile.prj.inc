@@ -63,3 +63,4 @@ SRC_CPP = \
 	utils/ScreenTransition.cpp \
 	utils/Json.cpp \
 	utils/MonoFont.cpp \
+	utils/FileUtil.cpp \

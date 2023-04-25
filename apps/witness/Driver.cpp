@@ -16,16 +16,11 @@
 #include <deque>
 #include "Witness.h"
 #include "Combinations.h"
+#include "FileUtil.h"
 #include "SVGUtil.h"
 #include <thread>
 #include <mutex>
 std::mutex lock;
-#include <sys/stat.h>
-bool fileExists(const char *name)
-{
-	struct stat buffer;
-	return (stat(name, &buffer) == 0);
-}
 
 bool recording = false;
 bool parallel = false;
@@ -89,7 +84,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
-	
+
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseUp|kMouseDrag));
 }
@@ -316,11 +311,11 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, blueColor);
 			p.AddSeparationConstraint(3, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(1, 2, blueColor);
 			p.AddSeparationConstraint(2, 2, blueColor);
 			p.AddSeparationConstraint(3, 2, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 3, blueColor);
 			p.AddSeparationConstraint(1, 2, blueColor);
 			p.AddSeparationConstraint(2, 3, Colors::black);
@@ -350,7 +345,7 @@ void DrawPaperLevel(int which)
 			p1.ws.path.push_back({4, 2});
 			p1.ws.path.push_back({5, 2});
 
-			
+
 			p1.currState = InteractiveWitnessState<4, 4>::kInPoint;
 			p.Draw(d);
 			p.Draw(d, p1);
@@ -367,14 +362,14 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, Colors::black);
 			p.AddSeparationConstraint(3, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 2, blueColor);
 			p.AddSeparationConstraint(3, 2, blueColor);
-			
+
 			p.AddSeparationConstraint(1, 3, blueColor);
 			p.AddSeparationConstraint(2, 3, Colors::black);
 			p.AddSeparationConstraint(3, 3, blueColor);
@@ -412,7 +407,7 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 0, blueColor);
 			p.AddSeparationConstraint(2, 0, blueColor);
 			p.AddSeparationConstraint(3, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, blueColor);
 			p.AddSeparationConstraint(2, 1, blueColor);
@@ -507,19 +502,19 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, Colors::black);
 			p.AddSeparationConstraint(3, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, blueColor);
 			p.AddSeparationConstraint(3, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 2, Colors::black);
 			p.AddSeparationConstraint(2, 2, Colors::black);
 			p.AddSeparationConstraint(3, 2, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 3, Colors::black);
 			p.AddSeparationConstraint(1, 3, Colors::black);
 			p.AddSeparationConstraint(2, 3, blueColor);
-			
+
 			p.SetGoal(4, 0);
 			p.SetStart(0, 0);
 			p1.ws.path.push_back({0, 0});
@@ -552,8 +547,8 @@ void DrawPaperLevel(int which)
 			MakeSVG(d, (fname+std::to_string(which)+".svg").c_str(), 600, 600, 0);
 			break;
 		}
-			
-			
+
+
 		// Spread curriculum
 		case 12:
 		{
@@ -701,14 +696,14 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, Colors::black);
 			p.AddSeparationConstraint(1, 0, blueColor);
 			p.AddSeparationConstraint(2, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(2, 1, Colors::black);
 			p.AddSeparationConstraint(3, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 2, blueColor);
 			p.AddSeparationConstraint(2, 2, blueColor);
 			p.AddSeparationConstraint(3, 2, blueColor);
-			
+
 			p.AddSeparationConstraint(2, 3, blueColor);
 			p.AddSeparationConstraint(3, 3, blueColor);
 
@@ -744,14 +739,14 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, blueColor);
 			p.AddSeparationConstraint(2, 0, Colors::black);
 			p.AddSeparationConstraint(3, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, Colors::black);
 			p.AddSeparationConstraint(3, 1, Colors::black);
-			
+
 			p.AddSeparationConstraint(3, 2, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 3, Colors::black);
 			p.AddSeparationConstraint(1, 3, Colors::black);
 			p.AddSeparationConstraint(3, 3, Colors::black);
@@ -793,18 +788,18 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 0, blueColor);
 			p.AddSeparationConstraint(2, 0, blueColor);
 			p.AddSeparationConstraint(3, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, blueColor);
 			p.AddSeparationConstraint(2, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 2, Colors::black);
 			p.AddSeparationConstraint(1, 2, Colors::black);
 			p.AddSeparationConstraint(3, 2, blueColor);
-			
+
 			p.AddSeparationConstraint(1, 3, Colors::black);
 			p.AddSeparationConstraint(2, 3, Colors::black);
-			
+
 			p.SetGoal(0, 4);
 			p.SetStart(0, 0);
 			p1.ws.path.push_back({0, 0});
@@ -842,7 +837,7 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 0, blueColor);
 			p.AddSeparationConstraint(2, 0, Colors::black);
 			p.AddSeparationConstraint(3, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, Colors::black);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, Colors::black);
@@ -856,7 +851,7 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 3, Colors::black);
 			p.AddSeparationConstraint(2, 3, blueColor);
 			p.AddSeparationConstraint(3, 3, blueColor);
-			
+
 			p.SetGoal(4, 0);
 			p.SetStart(0, 0);
 			p1.ws.path.push_back({0, 0});
@@ -898,11 +893,11 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, Colors::black);
 			p.AddSeparationConstraint(1, 0, blueColor);
 			p.AddSeparationConstraint(2, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, Colors::black);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, Colors::black);
-			
+
 			p.AddSeparationConstraint(1, 2, Colors::black);
 			p.AddSeparationConstraint(2, 2, Colors::black);
 
@@ -931,14 +926,14 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, Colors::black);
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, Colors::black);
 
 			p.AddSeparationConstraint(1, 2, blueColor);
 			p.AddSeparationConstraint(2, 2, Colors::black);
-			
+
 			p.SetGoal(2, 0);
 			p.SetStart(0, 0);
 			p1.ws.path.push_back({0, 0});
@@ -967,7 +962,7 @@ void DrawPaperLevel(int which)
 			Witness<3, 3> p;
 			InteractiveWitnessState<3, 3> p1;
 			p.AddSeparationConstraint(1, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, Colors::black);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, Colors::black);
@@ -1006,19 +1001,19 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, Colors::black);
 			p.AddSeparationConstraint(3, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, blueColor);
 			p.AddSeparationConstraint(3, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 2, Colors::black);
 			p.AddSeparationConstraint(1, 2, Colors::black);
 			p.AddSeparationConstraint(2, 2, Colors::black);
 			p.AddSeparationConstraint(3, 2, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 3, Colors::black);
 			p.AddSeparationConstraint(1, 3, Colors::black);
-			
+
 			p.SetGoal(0, 4);
 			p.SetStart(0, 0);
 			p1.ws.path.push_back({0, 0});
@@ -1051,16 +1046,16 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, Colors::black);
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, Colors::black);
 			p.AddSeparationConstraint(1, 1, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 2, Colors::black);
 			p.AddSeparationConstraint(1, 2, blueColor);
 			p.AddSeparationConstraint(2, 2, blueColor);
 			p.SetGoal(3, 3);
 			p.SetStart(0, 0);
-			
+
 			p1.ws.path.push_back({0, 0});
 			p1.ws.path.push_back({1, 0});
 			p1.ws.path.push_back({2, 0});
@@ -1096,7 +1091,7 @@ void DrawPaperLevel(int which)
 			p1.ws.path.push_back({1, 2});
 			p1.ws.path.push_back({1, 3});
 			p1.ws.path.push_back({1, 4});
-			
+
 			p1.currState = InteractiveWitnessState<1, 3>::kInPoint;
 			p.Draw(d);
 			p.Draw(d, p1);
@@ -1110,7 +1105,7 @@ void DrawPaperLevel(int which)
 			Witness<3, 3> p;
 			InteractiveWitnessState<3, 3> p1;
 			p.AddSeparationConstraint(1, 0, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, blueColor);
 
@@ -1147,7 +1142,7 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, Colors::black);
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, blueColor);
 			p.AddSeparationConstraint(1, 1, blueColor);
 
@@ -1185,19 +1180,19 @@ void DrawPaperLevel(int which)
 			p.AddSeparationConstraint(0, 0, blueColor);
 			p.AddSeparationConstraint(1, 0, Colors::black);
 			p.AddSeparationConstraint(2, 0, blueColor);
-			
+
 			p.AddSeparationConstraint(0, 1, Colors::black);
 			p.AddSeparationConstraint(1, 1, Colors::black);
 			p.AddSeparationConstraint(2, 1, Colors::black);
 			p.AddSeparationConstraint(3, 1, blueColor);
-			
+
 			p.AddSeparationConstraint(3, 2, Colors::black);
-			
+
 			p.AddSeparationConstraint(0, 3, Colors::black);
 			p.AddSeparationConstraint(1, 3, Colors::black);
 			p.AddSeparationConstraint(2, 3, Colors::black);
 			p.AddSeparationConstraint(3, 3, Colors::black);
-			
+
 			p.SetGoal(4, 4);
 			p.SetStart(0, 0);
 			p1.ws.path.push_back({0, 0});
@@ -1236,11 +1231,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 //		for (int x = 0; x < 50; x++)
 //			DrawPaperLevel(x);
-		
+
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		
+
 //		w.AddTriangleConstraint(0, 0, 3);
 //		w.AddGoal(1, -1);
 //		w.AddGoal(-1, 1);
@@ -1362,7 +1357,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			w.Draw(d, iws);
 			std::string fname = "/Users/nathanst/Desktop/SVG/witness_";
 			int count = 0;
-			while (fileExists((fname+std::to_string(count)+".svg").c_str()))
+			while (FileExists(fname + std::to_string(count) + ".svg"))
 			{
 				count++;
 			}
@@ -1437,7 +1432,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 {
 	if (e == kMouseDrag) // ignore movement with mouse button down
 		return true;
-	
+
 	if (e == kMouseUp)
 	{
 		if (w.Click(p, iws)) // found goal
@@ -1476,7 +1471,7 @@ void DFS(const Witness<puzzleWidth, puzzleHeight> &w,
 		puzzles.push_back(s);
 		return;
 	}
-	
+
 	w.GetActions(s, acts);
 	for (auto &a : acts)
 	{
@@ -1629,7 +1624,7 @@ void ExamineMustCross(int count)
 
 	Witness<puzzleWidth, puzzleHeight> w;
 	WitnessState<puzzleWidth, puzzleHeight> s;
-	
+
 	uint64_t maxRank = c.MaxRank(count);
 	for (uint64_t n = 0; n < maxRank; n++)
 	{
@@ -1640,7 +1635,7 @@ void ExamineMustCross(int count)
 		{
 			w.SetMustCrossConstraint(items[x]);
 		}
-		
+
 		int pathLen = 0;
 		int result = CountSolutions(w, allSolutions, pathLen, minCount+1);
 		if (result > minSolutions)
@@ -1657,7 +1652,7 @@ void ExamineMustCross(int count)
 		{
 			best.push_back(w);
 		}
-		
+
 		for (int x = 0; x < count; x++)
 		{
 			w.ClearMustCrossConstraint(items[x]);
@@ -1670,7 +1665,7 @@ void ExamineMustCross(int count)
 		currBoard = 0;
 		Load(currBoard);
 	}
-	
+
 	delete [] items;
 }
 
@@ -1680,7 +1675,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 	t.StartTimer();
 	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 	GetAllSolutions(allSolutions);
-	
+
 	uint64_t minCount = allSolutions.size();
 	int bestPathSize = 0;
 	//	std::vector<uint64_t> best;
@@ -1690,10 +1685,10 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 	Combinations<w.GetNumSeparationConstraints()> regionCombs;
 
 	{
-		
+
 		Witness<puzzleWidth, puzzleHeight> w;
 		WitnessState<puzzleWidth, puzzleHeight> s;
-		
+
 		uint64_t maxRank = c.MaxRank(crossCount);
 		for (uint64_t n = 0; n < maxRank; n++)
 		{
@@ -1715,7 +1710,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 
 				// easy way to reduce symmetry
 				if (t&1) continue;
-				
+
 //				if (0 != bits%3)
 //					continue;
 //				if (1 != (bits/3)%3)
@@ -1732,7 +1727,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 //					w.AddSeparationConstraint(regionItems[x], ((bits>>x)&1)?Colors::white:Colors::black);
 					w.AddSeparationConstraint(regionItems[x], (colour==0)?Colors::white:((colour==1)?Colors::black:Colors::blue));
 				}
-				
+
 				int pathSize = 0;
 				int result = CountSolutions(w, allSolutions, pathSize, minCount+1);
 
@@ -1749,18 +1744,18 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 					best.push_back(w);
 				}
 			}
-			
+
 			w.ClearPathConstraints();
 		}
 	}
-	
+
 	printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
 	if (best.size() > 0)
 	{
 		currBoard = 0;
 		Load(currBoard);
 	}
-	
+
 	delete [] crossItems;
 	delete [] regionItems;
 }
@@ -1771,7 +1766,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 	t.StartTimer();
 	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 	GetAllSolutions(allSolutions);
-	
+
 	uint64_t minCount = allSolutions.size();
 	int bestPathSize = 0;
 	//	std::vector<uint64_t> best;
@@ -1780,12 +1775,12 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 	Combinations<w.GetNumPathConstraints()> c;
 //	Combinations<w.GetNumMustCrossConstraints()> c;
 	Combinations<w.GetNumSeparationConstraints()> regionCombs;
-	
+
 	{
-		
+
 		Witness<puzzleWidth, puzzleHeight> w;
 		WitnessState<puzzleWidth, puzzleHeight> s;
-		
+
 		uint64_t maxRank = c.MaxRank(crossCount);
 		for (uint64_t n = 0; n < maxRank; n++)
 		{
@@ -1804,7 +1799,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 					printf("-->%llu of %llu\n", globalPuzzle, maxRank*regionCombs.MaxRank(regionCount)*colorComb);
 				uint64_t bits = t; // will only use bottom bits
 				uint64_t hash = t/colorComb;
-				
+
 //				// easy way to reduce symmetry
 //				if (t&1) continue;
 //
@@ -1814,7 +1809,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 					continue;
 				if (2 != (bits/9)%3)
 					continue;
-				
+
 				w.ClearSeparationConstraints();
 				regionCombs.Unrank(hash, regionItems, regionCount);
 				for (int x = 0; x < regionCount; x++)
@@ -1823,10 +1818,10 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 					bits = bits/3;
 					w.AddSeparationConstraint(regionItems[x], (colour==0)?Colors::white:((colour==1)?Colors::black:Colors::blue));
 				}
-				
+
 				int pathSize = 0;
 				int result = CountSolutions(w, allSolutions, pathSize, minCount+1);
-				
+
 				if (result < minCount && result > 0)
 				{
 					minCount = result;
@@ -1840,18 +1835,18 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 					best.push_back(w);
 				}
 			}
-			
+
 			w.ClearPathConstraints();
 		}
 	}
-	
+
 	printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
 	if (best.size() > 0)
 	{
 		currBoard = 0;
 		Load(currBoard);
 	}
-	
+
 	delete [] crossItems;
 	delete [] regionItems;
 }
@@ -1862,7 +1857,7 @@ void ExamineRegionsAndStars(int count)
 	t.StartTimer();
 	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 	GetAllSolutions(allSolutions);
-	
+
 	uint64_t minCount = allSolutions.size();
 	int bestPathSize = 0;
 	//	std::vector<uint64_t> best;
@@ -1875,7 +1870,7 @@ void ExamineRegionsAndStars(int count)
 	{
 		Witness<puzzleWidth, puzzleHeight> w;
 		WitnessState<puzzleWidth, puzzleHeight> s;
-		
+
 		if (puzzleWidth!=4 || puzzleHeight!= 4)
 		{
 			printf("This code only works for 4x4");
@@ -1951,15 +1946,15 @@ void ExamineRegionsAndStars(int count)
 			{
 				w.SetMustCrossConstraint(items[x]);
 			}
-			
+
 			int pathSize = 0;
 			//int result = CountSolutions(w, allSolutions, pathSize, minCount+1);
 			int result = CountSolutions(w, allSolutions, currSolutions, forbidden, pathSize, minCount+1);
-			
+
 			// don't return two puzzles with the same solution
 			if (currSolutions.size() == 1)
 				forbidden.push_back(currSolutions[0]);
-			
+
 			if (result < minCount && result > 0)
 			{
 				minCount = result;
@@ -1974,14 +1969,14 @@ void ExamineRegionsAndStars(int count)
 			}
 		}
 	}
-	
+
 	printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
 	if (best.size() > 0)
 	{
 		currBoard = 0;
 		Load(currBoard);
 	}
-	
+
 }
 
 
@@ -1993,11 +1988,11 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 	t.StartTimer();
 	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 	GetAllSolutions(allSolutions);
-	
+
 	Witness<puzzleWidth, puzzleHeight> wp;
 	WitnessState<puzzleWidth, puzzleHeight> s;
 	//wp.SetGoal(puzzleWidth+1, puzzleHeight);
-	
+
 	uint64_t minCount = allSolutions.size();
 	int bestPathSize = 0;
 	std::vector<int> items(count);
@@ -2005,11 +2000,11 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 	//	Combinations<wp.GetNumMustCrossConstraints()> mc;
 	std::vector<int> forbidden;
 	std::vector<int> currSolutions;
-	
+
 	//int *items = new int[count];
-	
+
 	const int pieceTypes = 3;//24+2;
-	
+
 	uint64_t pCount = pow(pieceTypes, count);
 	uint64_t maxRank = c.MaxRank(count)*pCount;
 	for (uint64_t rank = threadID; rank < maxRank; rank+=numThreads)
@@ -2074,16 +2069,16 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 //		}
 //		if (!(t1 && t2 && t3))// && t4 && t5 && t6))
 //			continue;
-		
+
 
 		int pathSize = 0;
 		int result = CountSolutions(wp, allSolutions, pathSize, minCount+1);
 		//int result = CountSolutions(wp, allSolutions, currSolutions, forbidden, pathSize, minCount+1);
-			
+
 			// don't return two puzzles with the same solution
 //			if (currSolutions.size() == 1)
 //				forbidden.push_back(currSolutions[0]);
-			
+
 		if ((result < minCount && result > 0) || (result == minCount && pathSize > bestPathSize))
 		{
 			lock.lock();
@@ -2103,7 +2098,7 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
 			lock.unlock();
 		}
 	}
-	
+
 	printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
 //	if (best.size() > 0)
 //	{
@@ -2218,19 +2213,19 @@ void ExamineTetris(int count)
 
 	Witness<puzzleWidth, puzzleHeight> wp;
 	WitnessState<puzzleWidth, puzzleHeight> s;
-	
+
 //	for (int y = 0; y < puzzleHeight+1; y++)
 //		for (int x = 0; x < puzzleWidth+1; x++)
 //			wp.AddMustCrossConstraint(x, y);
 
 	GetAllSolutions(wp, allSolutions);
-	
+
 	uint64_t minCount = allSolutions.size();
 	int *items = new int[count];
 	Combinations<wp.GetNumTetrisConstraints()> c;
-	
+
 	const int pieceTypes = 24+2;
-	
+
 	uint64_t pCount = pow(pieceTypes, count);
 	uint64_t maxRank = c.MaxRank(count)*pCount;
 	for (uint64_t rank = 0; rank < maxRank; rank++)
@@ -2292,9 +2287,9 @@ void ExamineTetris(int count)
 		{
 			best.push_back(wp);
 		}
-		
+
 	}
-	
+
 	printf("\n%lu boards with %llu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
 //	return;
 
@@ -2303,7 +2298,7 @@ void ExamineTetris(int count)
 //		currBoard = 0;
 //		Load(currBoard, count, 0);
 //	}
-	
+
 	delete [] items;
 }
 
@@ -2313,20 +2308,20 @@ void ExamineTriangles(int count)
 	Timer t;
 	t.StartTimer();
 	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-	
+
 	Witness<puzzleWidth, puzzleHeight> wp;
 	WitnessState<puzzleWidth, puzzleHeight> s;
-	
+
 //	for (int y = 0; y < puzzleHeight+1; y++)
 //		for (int x = 0; x < puzzleWidth+1; x++)
 //			wp.AddMustCrossConstraint(x, y);
-	
+
 	GetAllSolutions(wp, allSolutions);
-	
+
 	uint64_t minCount = allSolutions.size();
 	int *items = new int[count];
 	Combinations<wp.GetNumTriangleConstraints()> c;
-	
+
 	const int NUM_TRI = 4;
 	uint64_t pCount = pow(NUM_TRI, count);
 	uint64_t maxRank = c.MaxRank(count)*pCount;
@@ -2368,15 +2363,15 @@ void ExamineTriangles(int count)
 		wp.ClearStarConstraints();
 		wp.ClearTriangleConstraints();
 	}
-	
+
 	printf("\n%lu boards with %llu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
 	//	return;
-	
+
 	//	if (best.size() > 0)
 	//	{
 	//		currBoard = 0;
 	//		Load(currBoard, count, 0);
 	//	}
-	
+
 	delete [] items;
 }
