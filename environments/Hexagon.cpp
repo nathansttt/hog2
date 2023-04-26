@@ -764,6 +764,7 @@ void HexagonEnvironment::GetActions(const HexagonSearchState &nodeID, std::vecto
 //	}
 }
 
+//QUE: is this on purpose?
 HexagonAction HexagonEnvironment::GetAction(const HexagonSearchState &s1, const HexagonSearchState &s2) const
 {
 	assert(false);
@@ -790,6 +791,7 @@ void HexagonEnvironment::GetNextState(const HexagonSearchState &s1, HexagonActio
 	ApplyAction(s2, a);
 }
 
+//QUE: how does this work?
 bool HexagonEnvironment::InvertAction(HexagonAction &a) const
 {
 	return true;
