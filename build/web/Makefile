@@ -10,7 +10,7 @@
 
 # All projects to build in this order.
 PROJECTS = \
-  gui/GL \
+  gui/STUB \
   gui/ \
   algorithms \
   environments \
@@ -44,6 +44,7 @@ PROJECTS = \
   demos/astar-map \
   demos/inconsistency-graph \
   demos/racetrack \
+  demos/multi-target \
   papers/DWA 
 
 
@@ -96,6 +97,7 @@ PROJECTS_ALL = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
+  demos/multi-target \
   papers/DWA 
 
 

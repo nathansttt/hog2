@@ -18,7 +18,7 @@ LN = $(CXX)
 
 AR = emar
 
-COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
+COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/STUB/GL/ -DNO_OPENGL
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
