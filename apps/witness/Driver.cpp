@@ -28,15 +28,22 @@ std::vector<Witness<puzzleWidth, puzzleHeight>> best;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
-static void InitTetrisPieces() {
-    for (unsigned i = 1; i <= 24; ++i) {
-        if (i <= 9) {
+static void InitTetrisPieces()
+{
+    for (unsigned i = 1; i <= 24; ++i)
+    {
+        if (i <= 9)
+        {
             Graphics::point p = {(float)(-1.0f + i * 0.2), -0.75f};
             gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
-        } else if (i <= 18) {
+        }
+        else if (i <= 18)
+        {
             Graphics::point p = {(float)(-1.0f + (i - 9) * 0.2), -0.55f};
             gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
-        } else {
+        }
+        else
+        {
             Graphics::point p = {(float)(-1.0f + (i - 18) * 0.2), -0.35f};
             gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
         }
@@ -46,17 +53,18 @@ static void InitTetrisPieces() {
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
  */
-void InstallHandlers() {
+void InstallHandlers()
+{
     InstallKeyboardHandler(WitnessKeyboardHandler, "Solve", "Solve current board", kAnyModifier, 'v');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Test", "Test constraints", kAnyModifier, 't');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Record", "Record a movie", kAnyModifier, 'r');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Save", "Save current puzzle as svg", kAnyModifier, 's');
-    InstallKeyboardHandler(WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn",
-                           kAnyModifier, '\t');
+    InstallKeyboardHandler(
+        WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Prev Board", "Jump to next found board.", kAnyModifier, '[');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next Board", "Jump to prev found board", kAnyModifier, ']');
-    InstallKeyboardHandler(WitnessKeyboardHandler, "Prev 100 Board", "Jump to next 100 found board.", kAnyModifier,
-                           '{');
+    InstallKeyboardHandler(
+        WitnessKeyboardHandler, "Prev 100 Board", "Jump to next 100 found board.", kAnyModifier, '{');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next 100 Board", "Jump to prev 100 found board", kAnyModifier, '}');
 
     InstallKeyboardHandler(WitnessKeyboardHandler, "Editor", "Open editor", kAnyModifier, 'e');
@@ -66,11 +74,12 @@ void InstallHandlers() {
     InstallCommandLineHandler(WitnessCLHandler, "-test", "-test", "Basic test with MD heuristic");
 
     InstallWindowHandler(WitnessWindowHandler);
-    InstallMouseClickHandler(WitnessClickHandler,
-                             static_cast<tMouseEventType>(kMouseMove | kMouseUp | kMouseDown | kMouseDrag));
+    InstallMouseClickHandler(
+        WitnessClickHandler, static_cast<tMouseEventType>(kMouseMove | kMouseUp | kMouseDown | kMouseDrag));
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     InitTetrisPieces();
     InstallHandlers();
     RunHOGGUI(argc, argv, 1280, 640);

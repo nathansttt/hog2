@@ -1,12 +1,14 @@
 #include "../Driver.h"
 
-//using namespace hog2::gui;
-
-void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType) {
-    if (eType == kWindowDestroyed) {
+void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
+{
+    if (eType == kWindowDestroyed)
+    {
         printf("Window %ld destroyed\n", windowID);
         RemoveFrameHandler(WitnessFrameHandler, windowID, nullptr);
-    } else if (eType == kWindowCreated) {
+    }
+    else if (eType == kWindowCreated)
+    {
         //		for (int x = 0; x < 50; x++)
         //			DrawPaperLevel(x);
 
@@ -85,8 +87,8 @@ void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType) {
         //		w.AddTetrisConstraint(2, 3, 11);
         ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
         AddViewport(windowID, {1.0f, -1.0f, 2.0f, 1.0f}, kScaleToSquare);
-//        AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare);
+        //        AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare);
         AddViewport(windowID, {1.0f, 0.0f, 2.0f, 2.0f}, kScaleToSquare);
-//        AddViewport(windowID, {0.0f, 1.0f, 1.0f, 2.0f}, kScaleToFill);
+        //        AddViewport(windowID, {0.0f, 1.0f, 1.0f, 2.0f}, kScaleToFill);
     }
 }

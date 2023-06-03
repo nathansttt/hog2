@@ -1,6 +1,7 @@
 #include "../Driver.h"
 
-void GetAllSolutions() {
+void GetAllSolutions()
+{
     //	std::vector<WitnessState<puzzleWidth, puzzleHeight>> puzzles;
     //	GetAllSolutions(puzzles);
 
@@ -21,10 +22,13 @@ void GetAllSolutions() {
 }
 
 int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &wp,
-                   const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit) {
+    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit)
+{
     int count = 0;
-    for (const auto &i : allSolutions) {
-        if (wp.GoalTest(i)) {
+    for (const auto &i : allSolutions)
+    {
+        if (wp.GoalTest(i))
+        {
             len = (int)i.path.size();
             count++;
         }
@@ -34,15 +38,19 @@ int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &wp,
 }
 
 int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-                   const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
-                   std::vector<int> &solutions, const std::vector<int> &forbidden, int &len, int limit) {
+    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, std::vector<int> &solutions,
+    const std::vector<int> &forbidden, int &len, int limit)
+{
     solutions.resize(0);
     int count = 0;
-    for (int x : forbidden) {
+    for (int x : forbidden)
+    {
         if (w.GoalTest(allSolutions[x])) return 0;
     }
-    for (int x = 0; x < allSolutions.size(); x++) {
-        if (w.GoalTest(allSolutions[x])) {
+    for (int x = 0; x < allSolutions.size(); x++)
+    {
+        if (w.GoalTest(allSolutions[x]))
+        {
             len = (int)allSolutions[x].path.size();
             count++;
             solutions.push_back(x);

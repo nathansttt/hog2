@@ -21,7 +21,8 @@ extern Witness<puzzleWidth, puzzleHeight> editor;
 extern InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 extern std::vector<Witness<puzzleWidth, puzzleHeight>> best;
 
-struct EditorItem {
+struct EditorItem
+{
     WitnessRegionConstraint constraint;
     Graphics::point c;
     float radius{};
@@ -29,7 +30,8 @@ struct EditorItem {
 
 extern std::vector<EditorItem> gEditorItems;
 
-struct TetrisItem {
+struct TetrisItem
+{
     int parameter{};
     Graphics::point c;
     float radius{};
@@ -37,7 +39,8 @@ struct TetrisItem {
 
 extern std::vector<TetrisItem> gTetrisPieces;
 
-struct ColorItem {
+struct ColorItem
+{
     rgbColor color;
     Graphics::point c;
     float radius{};
@@ -51,10 +54,10 @@ extern unsigned gSelectedColor;
 
 void GetAllSolutions();
 int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-                   const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit);
+    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit);
 int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-                   const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
-                   std::vector<int> &solutions, const std::vector<int> &forbidden, int &len, int limit);
+    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, std::vector<int> &solutions,
+    const std::vector<int> &forbidden, int &len, int limit);
 
 void Load(uint64_t which);
 void ExamineMustCross(int count);
@@ -66,17 +69,20 @@ void ExamineRegionsAndStars(int count);
 void ParallelExamine(int count);
 
 template <int puzzleWidth, int puzzleHeight>
-void DFS(const Witness<puzzleWidth, puzzleHeight> &w, WitnessState<puzzleWidth, puzzleHeight> &s,  // NOLINT
-         std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles) {
+void DFS(const Witness<puzzleWidth, puzzleHeight> &w, WitnessState<puzzleWidth, puzzleHeight> &s, // NOLINT
+    std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+{
     std::vector<WitnessAction> acts;
 
-    if (w.GoalTest(s)) {
+    if (w.GoalTest(s))
+    {
         puzzles.push_back(s);
         return;
     }
 
     w.GetActions(s, acts);
-    for (auto &a : acts) {
+    for (auto &a : acts)
+    {
         w.ApplyAction(s, a);
         DFS(w, s, puzzles);
         w.UndoAction(s, a);
@@ -84,8 +90,9 @@ void DFS(const Witness<puzzleWidth, puzzleHeight> &w, WitnessState<puzzleWidth, 
 }
 
 template <int puzzleWidth, int puzzleHeight>
-void GetAllSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-                     std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles) {
+void GetAllSolutions(
+    const Witness<puzzleWidth, puzzleHeight> &w, std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+{
     WitnessState<puzzleWidth, puzzleHeight> s;
     s.Reset();
     Timer t;
@@ -96,7 +103,8 @@ void GetAllSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
 }
 
 template <int puzzleWidth, int puzzleHeight>
-void GetAllSolutions(std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles) {
+void GetAllSolutions(std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+{
     Witness<puzzleWidth, puzzleHeight> w;
     GetAllSolutions(w, puzzles);
 }
