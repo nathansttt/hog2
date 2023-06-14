@@ -16,63 +16,79 @@ constexpr int puzzleWidth = 4;
 constexpr int puzzleHeight = 4;
 const int minSolutions = 5000;
 extern unsigned long currBoard;
-extern Witness<puzzleWidth, puzzleHeight> witness;
-extern Witness<puzzleWidth, puzzleHeight> editor;
-extern InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
-extern std::vector<Witness<puzzleWidth, puzzleHeight>> best;
+extern Witness <puzzleWidth, puzzleHeight> witness;
+extern Witness <puzzleWidth, puzzleHeight> editor;
+extern InteractiveWitnessState <puzzleWidth, puzzleHeight> iws;
+extern std::vector <Witness<puzzleWidth, puzzleHeight>> best;
+extern bool solved;
 
-struct EditorItem
-{
+struct RegionConstraintItem {
     WitnessRegionConstraint constraint;
     Graphics::point c;
     float radius{};
 };
 
-extern std::vector<EditorItem> gEditorItems;
+extern std::vector <RegionConstraintItem> gRegionConstraintItems;
 
-struct TetrisItem
-{
+struct PathConstraintItem {
+    WitnessEdgeConstraintType constraint{};
+    Graphics::point c;
+    float radius{};
+};
+
+extern std::vector <PathConstraintItem> gPathConstraintItems;
+
+struct TetrisItem {
     int parameter{};
     Graphics::point c;
     float radius{};
 };
 
-extern std::vector<TetrisItem> gTetrisPieces;
+extern std::vector <TetrisItem> gTetrisPieces;
 
-struct ColorItem
-{
+struct ColorItem {
     rgbColor color;
     Graphics::point c;
     float radius{};
 };
 
-extern std::vector<ColorItem> gProvidedColors;
+extern std::vector <ColorItem> gProvidedColors;
 
 extern int gSelectedEditorItem;
 extern unsigned gSelectedTetrisItem;
 extern unsigned gSelectedColor;
 
 void GetAllSolutions();
-int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit);
-int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, std::vector<int> &solutions,
-    const std::vector<int> &forbidden, int &len, int limit);
+
+int CountSolutions(const Witness <puzzleWidth, puzzleHeight> &w,
+                   const std::vector <WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit);
+
+int CountSolutions(const Witness <puzzleWidth, puzzleHeight> &w,
+                   const std::vector <WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
+                   std::vector<int> &solutions,
+                   const std::vector<int> &forbidden, int &len, int limit);
 
 void Load(uint64_t which);
+
 void ExamineMustCross(int count);
+
 void ExamineMustCrossAndRegions(int crossCount, int regionCount);
+
 void ExamineMustCrossAnd3Regions(int crossCount, int regionCount);
+
 void ExamineTetris(int count);
+
 void ExamineTriangles(int count);
+
 void ExamineRegionsAndStars(int count);
+
 void ParallelExamine(int count);
 
-template <int puzzleWidth, int puzzleHeight>
-void DFS(const Witness<puzzleWidth, puzzleHeight> &w, WitnessState<puzzleWidth, puzzleHeight> &s, // NOLINT
-    std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+template<int puzzleWidth, int puzzleHeight>
+void DFS(const Witness <puzzleWidth, puzzleHeight> &w, WitnessState <puzzleWidth, puzzleHeight> &s, // NOLINT
+         std::vector <WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
 {
-    std::vector<WitnessAction> acts;
+    std::vector <WitnessAction> acts;
 
     if (w.GoalTest(s))
     {
@@ -81,7 +97,7 @@ void DFS(const Witness<puzzleWidth, puzzleHeight> &w, WitnessState<puzzleWidth, 
     }
 
     w.GetActions(s, acts);
-    for (auto &a : acts)
+    for (auto &a: acts)
     {
         w.ApplyAction(s, a);
         DFS(w, s, puzzles);
@@ -89,11 +105,11 @@ void DFS(const Witness<puzzleWidth, puzzleHeight> &w, WitnessState<puzzleWidth, 
     }
 }
 
-template <int puzzleWidth, int puzzleHeight>
+template<int puzzleWidth, int puzzleHeight>
 void GetAllSolutions(
-    const Witness<puzzleWidth, puzzleHeight> &w, std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+        const Witness <puzzleWidth, puzzleHeight> &w, std::vector <WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
 {
-    WitnessState<puzzleWidth, puzzleHeight> s;
+    WitnessState <puzzleWidth, puzzleHeight> s;
     s.Reset();
     Timer t;
     t.StartTimer();
@@ -102,10 +118,10 @@ void GetAllSolutions(
     printf("%lu solutions found in %1.2fs\n", puzzles.size(), t.GetElapsedTime());
 }
 
-template <int puzzleWidth, int puzzleHeight>
-void GetAllSolutions(std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+template<int puzzleWidth, int puzzleHeight>
+void GetAllSolutions(std::vector <WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
 {
-    Witness<puzzleWidth, puzzleHeight> w;
+    Witness <puzzleWidth, puzzleHeight> w;
     GetAllSolutions(w, puzzles);
 }
 
@@ -117,8 +133,13 @@ extern Graphics::point cursor;
 extern int cursorViewport;
 
 void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType);
+
 void WitnessFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
+
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key);
+
 int WitnessCLHandler(char *argument[], int maxNumArgs);
+
 bool WitnessClickHandler(unsigned long windowID, int viewport, int x, int y, point3d p, tButtonType, tMouseEventType e);
+
 void InstallHandlers();

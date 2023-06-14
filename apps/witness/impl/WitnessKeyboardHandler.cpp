@@ -20,7 +20,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         break;
     case 'v':
     {
-        std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+        std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
         GetAllSolutions(witness, allSolutions);
         if (!allSolutions.empty())
         {
@@ -28,7 +28,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             iws.currState = InteractiveWitnessState<puzzleWidth, puzzleHeight>::kWaitingRestart;
         }
     }
-    break;
+        break;
     case 's':
     {
         Graphics::Display d;
@@ -42,14 +42,15 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             count++;
         }
         printf("Save to '%s'\n", (fname + std::to_string(count) + ".svg").c_str());
-        MakeSVG(d, (fname + std::to_string(count) + ".svg").c_str(), 400, 400, 0, witness.SaveToHashString().c_str());
+        MakeSVG(d, (fname + std::to_string(count) + ".svg").c_str(), 400, 400, 0,
+                witness.SaveToHashString().c_str());
 
         {
             int wide, high;
             witness.GetDimensionsFromHashString(witness.SaveToHashString(), wide, high);
         }
     }
-    break;
+        break;
     case 'r':
         recording = !recording;
         break;
@@ -64,7 +65,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     case '[':
         if (!best.empty())
         {
-            currBoard = (currBoard + (int)(best.size()) - 1) % best.size();
+            currBoard = (currBoard + (int) (best.size()) - 1) % best.size();
             Load(currBoard);
             printf("%lu of %lu\n", currBoard + 1, best.size());
         }
@@ -80,7 +81,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     case '{':
         if (!best.empty())
         {
-            currBoard = (currBoard + (int)(100 * best.size()) - 100) % best.size();
+            currBoard = (currBoard + (int) (100 * best.size()) - 100) % best.size();
             Load(currBoard);
             printf("%lu of %lu\n", currBoard + 1, best.size());
         }
@@ -110,6 +111,8 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         if (!drawEditor)
         {
             drawEditor = true;
+            iws.Reset();
+            solved = false;
             MoveViewport(windowID, 1, {0.0f, -1.0f, 1.0f, 1.0f});
         }
         else
