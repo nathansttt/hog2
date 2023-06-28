@@ -67,7 +67,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                             {
                                 printf("Selected Location: %d\n", i);
-                                WitnessEdgeConstraintType constraint =
+                                WitnessPathConstraintType constraint =
                                         gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                                 .constraint;
                                 printf("Selected Constraint: %d\n", constraint);

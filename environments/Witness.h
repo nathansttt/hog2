@@ -166,7 +166,7 @@ struct WitnessRegionConstraint {
     bool operator==(const WitnessRegionConstraint &a) const { return a.t == this->t && a.parameter == this->parameter && a.c == this->c; }
 };
 
-enum WitnessEdgeConstraintType {
+enum WitnessPathConstraintType {
     kNoConstraint = 0,
     kMustCross = 1,
     kCannotCross = 2,
@@ -200,7 +200,7 @@ public:
     /* Hexagon constraints - path must cross this point */
     static constexpr int GetNumPathConstraints();
 
-    std::array<WitnessEdgeConstraintType, Witness<width, height>::GetNumPathConstraints()> pathConstraints;
+    std::array<WitnessPathConstraintType, Witness<width, height>::GetNumPathConstraints()> pathConstraints;
     std::array<std::pair < Graphics::point, Graphics::rect>,
 
     Witness<width, height>::GetNumPathConstraints()

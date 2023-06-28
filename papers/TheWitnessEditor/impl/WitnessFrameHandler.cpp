@@ -17,6 +17,8 @@ std::vector <PathConstraintItem> gPathConstraintItems = {{kNoConstraint, Graphic
 int gSelectedEditorItem = -1;
 unsigned gSelectedTetrisItem = 0;
 unsigned gSelectedColor = 0;
+static Graphics::point gLastPosition = Graphics::point{};
+static size_t gNumSolutions = 0;
 
 std::vector <ColorItem> gProvidedColors = {
     {Colors::red,   Graphics::point{-0.75, -0.15}, 0.1},
@@ -53,6 +55,8 @@ static void DrawGameViewport(unsigned long windowID)
         {
             if (gSelectedEditorItem < gRegionConstraintItems.size())
             {
+                bool cursorInPuzzel = false;
+                WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                 for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
                 {
                     auto &location = witness.regionConstraintLocations[i];
@@ -61,29 +65,52 @@ static void DrawGameViewport(unsigned long windowID)
                     {
                         unsigned y = i % puzzleWidth;
                         unsigned x = (i - y) / puzzleWidth;
-                        display.FrameRect(location.second, Colors::gray, 0.01);
-                        WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
+                        if (p != gLastPosition) {
+                            if (constraint == witness.regionConstraints[x][y])
+                                editor.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
+                            else
+                                editor.regionConstraints[x][y] = constraint;
+                            std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+                            GetAllSolutions(editor, allSolutions);
+                            gNumSolutions = allSolutions.size();
+                        }
+                        display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         witness.DrawRegionConstraint(display, constraint, p);
-                        if (constraint == witness.regionConstraints[x][y])
-                            editor.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
-                        else
-                            editor.regionConstraints[x][y] = constraint;
-                        std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-                        GetAllSolutions(editor, allSolutions);
-                        size_t solutions = allSolutions.size();
-                        display.DrawText(std::to_string(solutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
-                                         Graphics::textAlignRight, Graphics::textBaselineBottom);
+                        gLastPosition = p;
+                        display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+                                        Graphics::textAlignRight, Graphics::textBaselineBottom);
+                        cursorInPuzzel = true;
+                        break;
                     }
                 }
+                if (!cursorInPuzzel)
+                    witness.DrawRegionConstraint(display, constraint, cursor);
             }
             else
             {
-                for (unsigned i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
+                for (unsigned i = 0; i < witness.pathConstraintLocations.size(); ++i)
                 {
-                    if (PointInRect(cursor, witness.pathConstraintLocations[i].second) &&
+                    auto &location = witness.pathConstraintLocations[i];
+                    if (PointInRect(cursor, location.second) &&
                         i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                     {
-                        display.FrameRect(witness.pathConstraintLocations[i].second, Colors::gray, 0.01);
+                        WitnessPathConstraintType constraint =
+                                gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
+                                        .constraint;
+                        if (location.first == gLastPosition) {
+                            if (constraint == witness.pathConstraints[i])
+                                editor.pathConstraints[i] = kNoConstraint;
+                            else
+                                editor.pathConstraints[i] = constraint;
+                            std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+                            GetAllSolutions(editor, allSolutions);
+                            gNumSolutions = allSolutions.size();
+                        }
+                        display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
+                        gLastPosition = location.first;
+                        display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+                                        Graphics::textAlignRight, Graphics::textBaselineBottom);
+                        break;
                     }
                 }
             }
@@ -189,19 +216,5 @@ void WitnessFrameHandler(unsigned long windowID, unsigned int viewport, void * /
         }
         default:
             break;
-    }
-    Graphics::Display &display = GetContext(windowID)->display;
-    if (gSelectedEditorItem != -1 && viewport == cursorViewport)
-    {
-        if (gSelectedEditorItem < gRegionConstraintItems.size())
-        {
-            if (gSelectedEditorItem == 2 || gSelectedEditorItem == 3)
-            {
-                if (gSelectedTetrisItem != 0)
-                    witness.DrawRegionConstraint(display, gRegionConstraintItems[gSelectedEditorItem].constraint, cursor);
-            }
-            else
-                witness.DrawRegionConstraint(display, gRegionConstraintItems[gSelectedEditorItem].constraint, cursor);
-        }
     }
 }

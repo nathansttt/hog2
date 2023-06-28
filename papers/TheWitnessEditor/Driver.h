@@ -31,7 +31,7 @@ struct RegionConstraintItem {
 extern std::vector <RegionConstraintItem> gRegionConstraintItems;
 
 struct PathConstraintItem {
-    WitnessEdgeConstraintType constraint{};
+    WitnessPathConstraintType constraint{};
     Graphics::point c;
     float radius{};
 };
