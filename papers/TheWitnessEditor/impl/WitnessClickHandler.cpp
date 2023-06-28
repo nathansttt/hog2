@@ -16,7 +16,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             if (e == kMouseUp)
             {
                 if (witness.Click(p, iws))
-                { // found goal
+                {
                     if (witness.GoalTest(iws.ws))
                     {
                         printf("Solved!\n");
@@ -50,16 +50,11 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             {
                                 unsigned y = i % puzzleWidth;
                                 unsigned x = (i - y) / puzzleWidth;
-                                if (gRegionConstraintItems[gSelectedEditorItem].constraint ==
-                                    witness.regionConstraints[x][y])
-                                {
+                                WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
+                                if (constraint == witness.regionConstraints[x][y])
                                     witness.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
-                                }
                                 else
-                                {
-                                    witness.regionConstraints[x][y] =
-                                            gRegionConstraintItems[gSelectedEditorItem].constraint;
-                                }
+                                    witness.regionConstraints[x][y] = constraint;
                                 break;
                             }
                         }
@@ -77,13 +72,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                                 .constraint;
                                 printf("Selected Constraint: %d\n", constraint);
                                 if (constraint == witness.pathConstraints[i])
-                                {
                                     witness.pathConstraints[i] = kNoConstraint;
-                                }
                                 else
-                                {
                                     witness.pathConstraints[i] = constraint;
-                                }
                                 break;
                             }
                         }
@@ -104,17 +95,11 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 {
                     gSelectedEditorItem = static_cast<int>(i);
                     if (gSelectedEditorItem == 2)
-                    {
                         selectTetrisPiece = 1;
-                    }
                     else if (gSelectedEditorItem == 3)
-                    {
                         selectTetrisPiece = 2;
-                    }
                     else
-                    {
                         selectTetrisPiece = 0;
-                    }
                     WitnessKeyboardHandler(windowID, kAnyModifier, 'x');
                     selected = true;
                     break;
@@ -129,22 +114,24 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                     break;
                 }
             }
-            if (!selected)
-            {
-                gSelectedEditorItem = -1;
-            }
-            printf("Selected Constraint: %d\n", gSelectedEditorItem);
+            bool selectColor = false;
             for (unsigned i = 0; i < gProvidedColors.size(); ++i)
             {
                 if (PointInRect(p, {gProvidedColors[i].c, gProvidedColors[i].radius}))
                 {
                     gSelectedColor = i;
+                    selectColor = true;
                     printf("Selected Color: %d\n", gSelectedColor);
                     gRegionConstraintItems[0].constraint.c = gProvidedColors[i].color;
                     gRegionConstraintItems[1].constraint.c = gProvidedColors[i].color;
                     break;
                 }
             }
+            if (!selected && !selectColor)
+            {
+                gSelectedEditorItem = -1;
+            }
+            printf("Selected Constraint: %d\n", gSelectedEditorItem);
             if (PointInRect(p, {Graphics::point{0.7, -0.15}, 0.25}))
             {
                 witness.Reset();
@@ -163,13 +150,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                     gSelectedTetrisItem = i + 1;
                     printf("Selected Tetris: %d\n", gSelectedTetrisItem);
                     if (selectTetrisPiece == 1)
-                    {
                         gRegionConstraintItems[2].constraint.parameter = static_cast<int>(gSelectedTetrisItem);
-                    }
                     else
-                    {
                         gRegionConstraintItems[3].constraint.parameter = static_cast<int>(gSelectedTetrisItem);
-                    }
                     selectTetrisPiece = 0;
                     WitnessKeyboardHandler(windowID, kAnyModifier, 'x');
                 }

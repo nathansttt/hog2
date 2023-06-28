@@ -163,7 +163,7 @@ struct WitnessRegionConstraint {
     int parameter{};
     rgbColor c;
 
-    bool operator==(const WitnessRegionConstraint &a) const { return a.t == this->t && a.parameter == this->parameter; }
+    bool operator==(const WitnessRegionConstraint &a) const { return a.t == this->t && a.parameter == this->parameter && a.c == this->c; }
 };
 
 enum WitnessEdgeConstraintType {
@@ -291,7 +291,7 @@ public:
                 Graphics::point p1 = GetScreenCoord(x, y);
                 Graphics::point p2 = GetScreenCoord(x + 1, y + 1);
                 Graphics::point p3 = (p1 + p2) * 0.5;
-                regionConstraintLocations[x * height + y] = std::make_pair(p3, Graphics::rect{p3, 0.08});
+                regionConstraintLocations[x * height + y] = std::make_pair(p3, Graphics::rect{p3, 0.15});
             }
         }
 
@@ -425,7 +425,7 @@ public:
             if (y > height) y = height;
             if (y < 0) y = 0;
             // this is the location from which we reach that goal (note: off by 1 to keep semantics of 0)
-            goalMap[GetPathIndex(x, y)] = goal.size();
+            goalMap[GetPathIndex(x, y)] = (int)goal.size();
             return true;
         }
         else

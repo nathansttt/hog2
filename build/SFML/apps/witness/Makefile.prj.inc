@@ -26,7 +26,7 @@ PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 
 PROJ_DBG_LIB =  -lgraph -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgui -lutils
-PROJ_REL_LIB =  -lgraph -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_REL_LIB =  -lgraph -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgui -lutils 
 
 PROJ_DBG_DEP = \
   $(DBG_BINDIR)/libutils.a \
@@ -50,18 +50,11 @@ PROJ_REL_DEP = \
 ifeq ("$(OPENGL)", "STUB")
 PROJ_DBG_LIB += -lSTUB
 PROJ_REL_LIB += -lSTUB
-PROJ_DBG_DEP += $(DBG_BINDIR)/libSTUB.a
-PROJ_REL_DEP += $(REL_BINDIR)/libSTUB.a
+PROJ_DBG_DEP +=   $(DBG_BINDIR)/libSTUB.a
+PROJ_REL_DEP +=   $(REL_BINDIR)/libSTUB.a
 endif
 
 default : all
 
 SRC_CPP = \
 	apps/witness/Driver.cpp \
-	apps/witness/impl/WitnessCLHandler.cpp \
-	apps/witness/impl/WitnessClickHandler.cpp \
-	apps/witness/impl/WitnessFrameHandler.cpp \
-	apps/witness/impl/WitnessKeyboardHandler.cpp \
-	apps/witness/impl/WitnessWindowHandler.cpp \
-	apps/witness/impl/ExamineUtil.cpp \
-	apps/witness/impl/SolutionUtil.cpp \
