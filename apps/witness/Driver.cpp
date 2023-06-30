@@ -55,6 +55,7 @@ void ExamineTetris(int count);
 void ExamineTriangles(int count);
 void ExamineRegionsAndStars(int count);
 void ParallelExamine(int count);
+void GenerateUnique44();
 
 template <int puzzleWidth, int puzzleHeight>
 void GetAllSolutions(const Witness<puzzleWidth, puzzleHeight> &w, std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles);
@@ -1328,7 +1329,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 		case 't':
-			ParallelExamine(5);
+//			ParallelExamine(5);
+			GenerateUnique44();
 //			ExamineMustCross(numRequiredPieces);
 //			w.ClearTetrisConstraints();
 //			ExamineTetris(4);
@@ -1491,7 +1493,10 @@ void GetAllSolutions(const Witness<puzzleWidth, puzzleHeight> &w, std::vector<Wi
 	t.StartTimer();
 	DFS(w, s, puzzles);
 	t.EndTimer();
-	printf("%lu solutions found in %1.2fs\n", puzzles.size(), t.GetElapsedTime());
+	static bool printed = false;
+	if (!printed)
+		printf("%lu solutions found in %1.2fs\n", puzzles.size(), t.GetElapsedTime());
+	printed = true;
 }
 
 template <int puzzleWidth, int puzzleHeight>
@@ -1977,6 +1982,130 @@ void ExamineRegionsAndStars(int count)
 		Load(currBoard);
 	}
 
+}
+FILE *f = 0;
+int totalCountHere = 0;
+void GenerateUnique44Helper(int count, int threadID, int numThreads)
+{
+	if (f == 0)
+		return;
+	best.clear();
+	currBoard = 0;
+	Timer t;
+	t.StartTimer();
+	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+	GetAllSolutions(allSolutions);
+
+	Witness<puzzleWidth, puzzleHeight> wp;
+	WitnessState<puzzleWidth, puzzleHeight> s;
+
+	uint64_t total = 0;
+//	for (int count = 0; count <= 16; count++)
+	{
+		uint64_t minCount = allSolutions.size();
+		int bestPathSize = 0;
+		std::vector<int> items(count);
+		Combinations<wp.GetNumStarConstraints()> c;
+		std::vector<int> forbidden;
+		std::vector<int> currSolutions;
+
+		//int *items = new int[count];
+		
+		const int pieceTypes = 2;//24+2;
+		
+		uint64_t pCount = pow(pieceTypes, count);
+		uint64_t maxRank = c.MaxRank(count)*pCount;
+		for (uint64_t rank = threadID; rank < maxRank; rank+=numThreads)
+		{
+			wp.ClearInnerConstraints();
+			if (0 == rank%50000)
+				printf("%llu of %llu\n", rank, maxRank);
+			uint64_t n = rank/pCount; // arrangement on board
+			uint64_t pieces = rank%pCount; // pieces in locations
+			c.Unrank(n, &items[0], count);
+			for (int x = 0; x < count; x++)
+			{
+				switch (pieces%pieceTypes)
+				{
+					case 0:
+						wp.AddSeparationConstraint(items[x], Colors::black);
+						break;
+					case 1:
+						wp.AddSeparationConstraint(items[x], Colors::blue);
+						break;
+				}
+				pieces/=pieceTypes;
+			}
+			
+			int pathSize = 0;
+			
+			// find single solution puzzles
+			int result = CountSolutions(wp, allSolutions, pathSize, 1);
+			
+			//lock.lock();
+			if (result == 1)
+			{
+//				Graphics::Display d;
+//				d.FillRect({-1, -1, 1, 1}, Colors::darkgray);
+//				wp.Draw(d);
+//				std::string fname = "/Users/nathanst/Pictures/hog2/witness_"+std::to_string(puzzleWidth)+"x"+std::to_string(puzzleHeight)+"_"+std::to_string(count)+"_";
+				lock.lock();
+//				while (FileExists(fname + std::to_string(total) + ".svg"))
+//				{
+//					total++;
+//				}
+//				printf("Save to '%s'\n", (fname+std::to_string(total)+".svg").c_str());
+//				MakeSVG(d, (fname+std::to_string(total)+".svg").c_str(), 400, 400, 0, wp.SaveToHashString().c_str());
+				fprintf(f, "%s\n", wp.SaveToHashString().c_str());
+				totalCountHere++;
+				lock.unlock();
+			}
+//			best.push_back(wp);
+			//lock.unlock();
+		}
+//		printf("\n%lu boards with %d pieces; %1.2fs elapsed\n", total, count, t.EndTimer());
+	}
+
+//	if (best.size() > 0)
+//	{
+//		currBoard = 0;
+//		Load(currBoard);
+//	}
+//	parallel = false;
+}
+
+void GenerateUnique44()
+{
+	Timer timer;
+	const int numThreads = std::thread::hardware_concurrency();
+	std::vector<std::thread *> t(numThreads);
+	f = fopen("/Users/nathanst/Pictures/hog2/witness_4x4.txt", "a+");
+	if (f == 0)
+	{
+		printf("Failure to open file\n");
+		exit(0);
+	}
+	for (int count = 1; count <= puzzleWidth*puzzleHeight; count++)
+	{
+		printf("Starting %d\n", count);
+		timer.StartTimer();
+		for (int x = 0; x < numThreads; x++)
+		{
+			delete t[x];
+			t[x] = new std::thread(GenerateUnique44Helper, count, x, numThreads);
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			t[x]->join();
+			delete t[x];
+			t[x] = 0;
+		}
+		printf("Total: %d\n", totalCountHere);
+		printf("%1.2fs elapsed\n", timer.EndTimer());
+	}
+	printf("Total: %d\n", totalCountHere);
+	fclose(f);
+	exit(0);
 }
 
 
