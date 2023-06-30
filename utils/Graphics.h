@@ -34,10 +34,12 @@ struct point {
 	point(float x = 0, float y = 0, float z = 0)
 	:x(x), y(y), z(z) {}
 	float x, y, z;
-	
+
 	bool operator==(const point &p) const
 	{ return fequal(p.x, x) && fequal(p.y, y) && fequal(p.z, z); }
-	
+    bool operator!=(const point &p) const
+    { return !(p==*this); }
+
 	point &operator+=(const float v)
 	{ x += v; y += v; z += v; return *this; }
 	point &operator-=(const float v)
@@ -158,10 +160,10 @@ public:
 	void FillTriangle(point p1, point p2, point p3, rgbColor c);
 	void FrameTriangle(point p1, point p2, point p3, float lineWidth, rgbColor c);
 
-	
+
 	void FillNGon(point p, float radius, int sides, float rotation, rgbColor c);
 	void FrameNGon(point p, float radius, float width, int sides, float rotation, rgbColor c);
-	
+
 	void DrawLine(point start, point end, float lineWidth, rgbColor c);
 	void DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
 	void FillLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
