@@ -12,8 +12,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include "BitVector.h"
-#include "MMapUtil.h"
-#include <sys/mman.h>
 #include <cinttypes>
 
 BitVector::BitVector(uint64_t _size)
@@ -23,34 +21,11 @@ BitVector::BitVector(uint64_t _size)
 	storage = new storageElement[size];
 	for (size_t x = 0; x < size; x++)
 		storage[x] = 0;
-	memmap = false;
-}
-
-BitVector::BitVector(uint64_t entries, const char *file, bool zero)
-{
-	// make sure we allocate even space for 32 bit entries
-	while (0 != entries%storageBits)
-	{
-		entries++;
-	}
-	uint8_t *mem = GetMMAP(file, entries/8, fd, zero); // number of bytes needed
-	storage = (storageElement*)mem;
-	size = (entries>>storageBitsPower)+1;
-	true_size = entries;
-	memmap = true;
 }
 
 BitVector::~BitVector()
 {
-	if (!memmap)
-	{
-		delete [] storage;
-	}
-	else {
-		printf("Closing mmap\n");
-		// close memmap
-		CloseMMap((uint8_t*)storage, true_size/8, fd);
-	}
+	delete [] storage;
 }
 
 void BitVector::Save(const char *file)
@@ -68,12 +43,6 @@ void BitVector::Save(const char *file)
 
 void BitVector::Load(const char *file)
 {
-	if (memmap)
-	{
-		printf("BitVector is memmapped; not loading\n");
-		return;
-	}
-	
 	delete [] storage;
 	FILE *f = fopen(file, "r");
 	if (f == 0)
