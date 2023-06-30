@@ -574,11 +574,14 @@ public:
 					hash += quote;
 					hash += std::to_string(constraints[x][y].t)+";";
 					// no point writing garbage
-					if (constraints[x][y].t == kNone)
+					if (constraints[x][y].t == kNone || constraints[x][y].t == kRegion || constraints[x][y].t == kStar)
 						hash += "0;";
 					else
 						hash += std::to_string(constraints[x][y].parameter)+";";
-					hash += constraints[x][y].c.hex();
+					if (constraints[x][y].t == kNone)
+						hash += "#DADFAD";
+					else
+						hash += constraints[x][y].c.hex();
 					hash += quote;
 				}
 			}
