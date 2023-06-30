@@ -1,6 +1,9 @@
-#include "../Driver.h"
-#include "SVGUtil.h"
+#include "Driver.h"
+#include "ExamineUtil.h"
 #include "FileUtil.h"
+#include "Globals.h"
+#include "SolutionUtil.h"
+#include "SVGUtil.h"
 
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {

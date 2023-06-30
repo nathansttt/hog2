@@ -2,7 +2,8 @@
 #include <thread>
 
 #include "Combinations.h"
-#include "../Driver.h"
+#include "ExamineUtil.h"
+#include "SolutionUtil.h"
 
 std::mutex lock;
 
@@ -65,7 +66,7 @@ void ExamineMustCross(int count)
     uint64_t maxRank = c.MaxRank(count);
     for (uint64_t n = 0; n < maxRank; n++)
     {
-        if (0 == n % 50000) printf("%lu of %lu\n", n, maxRank);
+        if (0 == n % 50000) printf("%llu of %llu\n", n, maxRank);
         c.Unrank(n, items, count);
         for (int x = 0; x < count; x++)
         {
@@ -73,7 +74,7 @@ void ExamineMustCross(int count)
         }
 
         int pathLen = 0;
-        int result = CountSolutions(w, allSolutions, pathLen, minCount + 1);
+        int result = CountSolutions(w, allSolutions, pathLen, (int)minCount + 1);
         if (result > minSolutions)
         {
             // ignore
@@ -95,7 +96,7 @@ void ExamineMustCross(int count)
         }
     }
 
-    printf("\n%lu boards with %lu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
+    printf("\n%lu boards with %llu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
     if (!best.empty())
     {
         currBoard = 0;
@@ -127,7 +128,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
         uint64_t maxRank = c.MaxRank(crossCount);
         for (uint64_t n = 0; n < maxRank; n++)
         {
-            if (0 == n % 50000 && regionCount == 0) printf("%lu of %lu\n", n, maxRank);
+            if (0 == n % 50000 && regionCount == 0) printf("%llu of %llu\n", n, maxRank);
             c.Unrank(n, crossItems, crossCount);
             for (int x = 0; x < crossCount; x++)
             {
@@ -138,7 +139,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
             {
                 uint64_t globalPuzzle = n * regionCombs.MaxRank(regionCount) * colorComb + t;
                 if ((0 == globalPuzzle % 50000))
-                    printf("-->%lu of %lu\n", globalPuzzle, maxRank * regionCombs.MaxRank(regionCount) * colorComb);
+                    printf("-->%llu of %llu\n", globalPuzzle, maxRank * regionCombs.MaxRank(regionCount) * colorComb);
                 uint64_t bits = t; // will only use bottom bits
                 uint64_t hash = t / colorComb;
 
@@ -165,7 +166,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
                 }
 
                 int pathSize = 0;
-                int result = CountSolutions(w, allSolutions, pathSize, minCount + 1);
+                int result = CountSolutions(w, allSolutions, pathSize, (int)minCount + 1);
 
                 if (result < minCount && result > 0)
                 {
@@ -185,7 +186,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
         }
     }
 
-    printf("\n%lu boards with %lu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize,
+    printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize,
         timer.EndTimer());
     if (!best.empty())
     {
@@ -220,7 +221,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
         uint64_t maxRank = c.MaxRank(crossCount);
         for (uint64_t n = 0; n < maxRank; n++)
         {
-            if (0 == n % 50000 && regionCount == 0) printf("%lu of %lu\n", n, maxRank);
+            if (0 == n % 50000 && regionCount == 0) printf("%llu of %llu\n", n, maxRank);
             c.Unrank(n, crossItems, crossCount);
             for (int x = 0; x < crossCount; x++)
             {
@@ -231,7 +232,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
             {
                 uint64_t globalPuzzle = n * regionCombs.MaxRank(regionCount) * colorComb + t;
                 if ((0 == globalPuzzle % 50000))
-                    printf("-->%lu of %lu\n", globalPuzzle, maxRank * regionCombs.MaxRank(regionCount) * colorComb);
+                    printf("-->%llu of %llu\n", globalPuzzle, maxRank * regionCombs.MaxRank(regionCount) * colorComb);
                 uint64_t bits = t; // will only use bottom bits
                 uint64_t hash = t / colorComb;
 
@@ -273,7 +274,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
         }
     }
 
-    printf("\n%lu boards with %lu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize,
+    printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize,
         timer.EndTimer());
     if (best.size() > 0)
     {
@@ -314,7 +315,7 @@ void ExamineTetris(int count)
         // wp.ClearTriangleConstraints();
         wp.ClearStarConstraints();
         wp.ClearSeparationConstraints();
-        if (0 == rank % 50000) printf("%lu of %lu\n", rank, maxRank);
+        if (0 == rank % 50000) printf("%llu of %llu\n", rank, maxRank);
         uint64_t n = rank / pCount;      // arrangement on board
         uint64_t pieces = rank % pCount; // pieces in locations
         c.Unrank(n, items, count);
@@ -368,7 +369,7 @@ void ExamineTetris(int count)
         }
     }
 
-    printf("\n%lu boards with %lu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
+    printf("\n%lu boards with %llu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
     //	return;
 
     //	if (best.size() > 0)
@@ -404,7 +405,7 @@ void ExamineTriangles(int count)
     uint64_t maxRank = c.MaxRank(count) * pCount;
     for (uint64_t rank = maxRank / 10; rank < maxRank && best.size() < 5000; rank += 1)
     {
-        if (0 == rank % 50000) printf("%lu of %lu [%zu solutions]\n", rank, maxRank, best.size());
+        if (0 == rank % 50000) printf("%llu of %llu [%zu solutions]\n", rank, maxRank, best.size());
         uint64_t n = rank / pCount;      // arrangement on board
         uint64_t pieces = rank % pCount; // pieces in locations
         c.Unrank(n, items, count);
@@ -441,7 +442,7 @@ void ExamineTriangles(int count)
         wp.ClearTriangleConstraints();
     }
 
-    printf("\n%lu boards with %lu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
+    printf("\n%lu boards with %llu solutions; %1.2fs elapsed\n", best.size(), minCount, t.EndTimer());
     //	return;
 
     //	if (best.size() > 0)
@@ -486,7 +487,7 @@ void ExamineRegionsAndStars(int count)
 
         for (uint64_t n = 0; n < maxRank; n++)
         {
-            if (0 == n % 50000) printf("%lu of %lu\n", n, maxRank);
+            if (0 == n % 50000) printf("%llu of %llu\n", n, maxRank);
             w.ClearInnerConstraints();
             w.ClearPathConstraints();
             //			uint64_t rankPart = n/variations;
@@ -572,7 +573,7 @@ void ExamineRegionsAndStars(int count)
     }
 
     printf(
-        "\n%lu boards with %lu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
+        "\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
     if (best.size() > 0)
     {
         currBoard = 0;
@@ -692,7 +693,7 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
         //		wp.ClearTetrisConstraints();
         //		wp.ClearStarConstraints();
         wp.ClearInnerConstraints();
-        if (0 == rank % 50000) printf("%lu of %lu\n", rank, maxRank);
+        if (0 == rank % 50000) printf("%llu of %llu\n", rank, maxRank);
         uint64_t n = rank / pCount;      // arrangement on board
         uint64_t pieces = rank % pCount; // pieces in locations
         c.Unrank(n, &items[0], count);
@@ -778,7 +779,7 @@ void ParallelExamineHelper(int count, int threadID, int numThreads)
     }
 
     printf(
-        "\n%lu boards with %lu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
+        "\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
     //	if (best.size() > 0)
     //	{
     //		currBoard = 0;

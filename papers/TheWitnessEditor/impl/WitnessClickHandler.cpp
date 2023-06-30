@@ -1,8 +1,21 @@
-#include "../Driver.h"
+#include "Driver.h"
+#include "Globals.h"
 
 Graphics::point cursor;
 int cursorViewport = 0;
 bool solved = false;
+
+static void UpdateSolutionIndicies() {
+    currentSolutionIndices.clear();
+    for (size_t i = 0; i < allSolutions.size(); i++)
+    {
+        auto &solution = allSolutions[i];
+        if (witness.GoalTest(solution))
+        {
+            currentSolutionIndices.emplace_back(i);
+        }
+    }
+}
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
                          tMouseEventType e)
@@ -79,6 +92,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             }
                         }
                     }
+                    UpdateSolutionIndicies();
                 }
             }
         }

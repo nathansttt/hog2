@@ -1,4 +1,5 @@
-#include "../Driver.h"
+#include "Driver.h"
+#include "SolutionUtil.h"
 
 std::vector <RegionConstraintItem> gRegionConstraintItems = {
     {{kRegion,         0,  Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
@@ -10,15 +11,18 @@ std::vector <RegionConstraintItem> gRegionConstraintItems = {
     {{kTriangle,       3,  Colors::cyan}, Graphics::point{-0.2, -0.5},  0.05},
 };
 
-std::vector <PathConstraintItem> gPathConstraintItems = {{kNoConstraint, Graphics::point{0.1, -0.5}, 0.075},
+std::vector <PathConstraintItem> gPathConstraintItems = {
+    {kNoConstraint, Graphics::point{0.1, -0.5}, 0.075},
     {kMustCross,    Graphics::point{0.3, -0.5}, 0.075},
-    {kCannotCross,  Graphics::point{0.5, -0.5}, 0.075}};
+    {kCannotCross,  Graphics::point{0.5, -0.5}, 0.075}
+};
 
 int gSelectedEditorItem = -1;
 unsigned gSelectedTetrisItem = 0;
 unsigned gSelectedColor = 0;
 static Graphics::point gLastPosition = Graphics::point{};
-static size_t gNumSolutions = 0;
+std::vector<size_t> currentSolutionIndices;
+size_t gNumSolutions = 0;
 
 std::vector <ColorItem> gProvidedColors = {
     {Colors::red,   Graphics::point{-0.75, -0.15}, 0.1},
@@ -32,6 +36,27 @@ std::vector <ColorItem> gProvidedColors = {
 };
 
 Witness <puzzleWidth, puzzleHeight> editor;
+
+static size_t GetNumValidSolutions(bool isAdding) {
+    size_t ret = 0;
+    if (isAdding)
+    {
+        for (const size_t &i : currentSolutionIndices)
+        {
+            if (editor.GoalTest(allSolutions[i]))
+                ++ret;
+        }
+    }
+    else
+    {
+        for (const auto &solution : allSolutions)
+        {
+            if (editor.GoalTest(solution))
+                ++ret;
+        }
+    }
+    return ret;
+}
 
 static void DrawGameViewport(unsigned long windowID)
 {
@@ -55,65 +80,76 @@ static void DrawGameViewport(unsigned long windowID)
         {
             if (gSelectedEditorItem < gRegionConstraintItems.size())
             {
-                bool cursorInPuzzel = false;
+                bool cursorInPuzzle = false;
                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                 for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
                 {
-                    auto &location = witness.regionConstraintLocations[i];
+                    const auto &location = witness.regionConstraintLocations[i];
                     Graphics::point p = location.first;
                     if (PointInRect(cursor, location.second))
                     {
                         unsigned y = i % puzzleWidth;
                         unsigned x = (i - y) / puzzleWidth;
                         if (p != gLastPosition) {
+                            bool isAdding;
                             if (constraint == witness.regionConstraints[x][y])
+                            {
                                 editor.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
+                                isAdding = false;
+                            }
                             else
+                            {
                                 editor.regionConstraints[x][y] = constraint;
-                            std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-                            GetAllSolutions(editor, allSolutions);
-                            gNumSolutions = allSolutions.size();
+                                isAdding = true;
+                            }
+                            gNumSolutions = GetNumValidSolutions(isAdding);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         witness.DrawRegionConstraint(display, constraint, p);
                         gLastPosition = p;
-                        display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
-                                        Graphics::textAlignRight, Graphics::textBaselineBottom);
-                        cursorInPuzzel = true;
+                        cursorInPuzzle = true;
                         break;
                     }
                 }
-                if (!cursorInPuzzel)
+                if (!cursorInPuzzle)
                     witness.DrawRegionConstraint(display, constraint, cursor);
             }
             else
             {
                 for (unsigned i = 0; i < witness.pathConstraintLocations.size(); ++i)
                 {
-                    auto &location = witness.pathConstraintLocations[i];
+                    const auto &location = witness.pathConstraintLocations[i];
                     if (PointInRect(cursor, location.second) &&
                         i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                     {
                         WitnessPathConstraintType constraint =
                                 gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                         .constraint;
-                        if (location.first == gLastPosition) {
+                        if (location.first != gLastPosition) {
+                            bool isAdding = false;
                             if (constraint == witness.pathConstraints[i])
                                 editor.pathConstraints[i] = kNoConstraint;
                             else
+                            {
                                 editor.pathConstraints[i] = constraint;
-                            std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-                            GetAllSolutions(editor, allSolutions);
-                            gNumSolutions = allSolutions.size();
+                                if (constraint != kNoConstraint)
+                                    isAdding = true;
+                            }
+                            gNumSolutions = GetNumValidSolutions(isAdding);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         gLastPosition = location.first;
-                        display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
-                                        Graphics::textAlignRight, Graphics::textBaselineBottom);
                         break;
                     }
                 }
             }
+            display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+                             Graphics::textAlignRight, Graphics::textBaselineBottom);
+        }
+        else
+        {
+            display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 1},
+                             Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
     }
 }
@@ -122,9 +158,9 @@ static void DrawEditorViewport(unsigned long windowID)
 {
     if (!drawEditor) return;
     Graphics::Display &display = GetContext(windowID)->display;
-    
+
     display.FillRect({-1.0f, -1.0f, 1.0f, 1.0f}, Colors::gray);
-    
+
     display.DrawText("Select a constraint", Graphics::point{-0.8, -0.83}, Colors::black, 0.05);
     for (unsigned i = 0; i < gRegionConstraintItems.size(); ++i)
     {
