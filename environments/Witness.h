@@ -148,7 +148,7 @@ public:
 };
 
 enum WitnessRegionConstraintType {
-    kNone = 0,
+    kNoRegionConstraint = 0,
     kRegion = 1,
     kStar = 2,
     kTetris = 3,
@@ -167,7 +167,7 @@ struct WitnessRegionConstraint {
 };
 
 enum WitnessPathConstraintType {
-    kNoConstraint = 0,
+    kNoPathConstraint = 0,
     kMustCross = 1,
     kCannotCross = 2,
     kEdgeConstraintCount = 3
@@ -281,13 +281,13 @@ public:
     {
         for (int c = 0; c < kRegionConstraintCount; c++)
             constraintCount[c] = 0;
-        constraintCount[kNone] = width * height;
+        constraintCount[kNoRegionConstraint] = width * height;
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                regionConstraints[x][y].t = kNone;
+                regionConstraints[x][y].t = kNoRegionConstraint;
                 Graphics::point p1 = GetScreenCoord(x, y);
                 Graphics::point p2 = GetScreenCoord(x + 1, y + 1);
                 Graphics::point p3 = (p1 + p2) * 0.5;
@@ -296,7 +296,7 @@ public:
         }
 
         for (int x = 0; x < GetNumPathConstraints(); x++)
-            pathConstraints[x] = kNoConstraint;
+            pathConstraints[x] = kNoPathConstraint;
 
         for (int x = 0; x < width; x++)
         {
@@ -435,7 +435,7 @@ public:
         }
     }
 
-    void ClearPathConstraints() { pathConstraints = {kNoConstraint}; }
+    void ClearPathConstraints() { pathConstraints = {kNoPathConstraint}; }
 
     //{ mustCrossConstraints.clear(); mustCrossEdgeConstraints.clear(); }
     void SetMustCrossConstraint(int);
@@ -480,12 +480,12 @@ public:
         {
             for (int y = 0; y < height; y++)
             {
-                regionConstraints[x][y].t = kNone;
+                regionConstraints[x][y].t = kNoRegionConstraint;
             }
         }
         for (int c = 0; c < kRegionConstraintCount; c++)
             constraintCount[c] = 0;
-        constraintCount[kNone] = width * height;
+        constraintCount[kNoRegionConstraint] = width * height;
     }
 
     void ClearConstraint(WitnessRegionConstraintType t)
@@ -497,8 +497,8 @@ public:
                 if (t == regionConstraints[x][y].t)
                 {
                     constraintCount[t]--;
-                    regionConstraints[x][y].t = kNone;
-                    constraintCount[kNone]++;
+                    regionConstraints[x][y].t = kNoRegionConstraint;
+                    constraintCount[kNoRegionConstraint]++;
                 }
             }
         }
@@ -507,8 +507,8 @@ public:
     void ClearConstraint(int x, int y)
     {
         constraintCount[regionConstraints[x][y].t]--;
-        constraintCount[kNone]++;
-        regionConstraints[x][y].t = kNone;
+        constraintCount[kNoRegionConstraint]++;
+        regionConstraints[x][y].t = kNoRegionConstraint;
     }
 
     /* Triangles - must cross as many edges as triangles */
@@ -778,7 +778,7 @@ public:
                     hash += quote;
                     hash += std::to_string(regionConstraints[x][y].t) + ";";
                     // no point writing garbage
-                    if (regionConstraints[x][y].t == kNone)
+                    if (regionConstraints[x][y].t == kNoRegionConstraint)
                         hash += "0;";
                     else
                         hash += std::to_string(regionConstraints[x][y].parameter) + ";";
@@ -1606,7 +1606,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
                         int xx = GetRegionFromX(r); // l%width;
                         int yy = GetRegionFromY(r); // l/width;
 
-                        if (regionConstraints[xx][yy].t != kNone &&
+                        if (regionConstraints[xx][yy].t != kNoRegionConstraint &&
                             regionConstraints[x][y].c == regionConstraints[xx][yy].c)
                         {
                             count++;
@@ -1833,7 +1833,7 @@ bool Witness<width, height>::GetMustCrossConstraint(int which) const
 template<int width, int height>
 void Witness<width, height>::ClearMustCrossConstraint(int which)
 {
-    pathConstraints[which] = kNoConstraint;
+    pathConstraints[which] = kNoPathConstraint;
 }
 
 template<int width, int height>
@@ -2007,7 +2007,7 @@ bool Witness<width, height>::GetCannotCrossConstraint(int which) const
 template<int width, int height>
 void Witness<width, height>::ClearCannotCrossConstraint(int which)
 {
-    pathConstraints[which] = kNoConstraint;
+    pathConstraints[which] = kNoPathConstraint;
     //	if (which < width*(height+1))
     //	{
     //		int x = which%(width);
@@ -2391,7 +2391,7 @@ void Witness<width, height>::DrawRegionConstraint(
 {
     switch (constraint.t)
     {
-    case kNone:
+    case kNoRegionConstraint:
         break;
     case kRegion:
     {

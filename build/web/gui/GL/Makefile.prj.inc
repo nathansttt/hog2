@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs_html/$(NAME)/release
 DBG_BINDIR = $(ROOT)/html/debug
 REL_BINDIR = $(ROOT)/html/release
 
-PROJ_CXXFLAGS = 
+PROJ_CXXFLAGS =
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -30,8 +30,8 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  gui/GL/gl.cpp \
-  gui/GL/glut.cpp
+  gui/STUB/GL/gl.cpp \
+  gui/STUB/GL/glut.cpp
 
 
 

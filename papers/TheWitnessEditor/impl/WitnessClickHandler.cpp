@@ -65,7 +65,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 unsigned x = (i - y) / puzzleWidth;
                                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                                 if (constraint == witness.regionConstraints[x][y])
-                                    witness.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
+                                    witness.regionConstraints[x][y] = {.t = kNoRegionConstraint, .parameter = 0, .c = Colors::white};
                                 else
                                     witness.regionConstraints[x][y] = constraint;
                                 break;
@@ -85,7 +85,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                                 .constraint;
                                 printf("Selected Constraint: %d\n", constraint);
                                 if (constraint == witness.pathConstraints[i])
-                                    witness.pathConstraints[i] = kNoConstraint;
+                                    witness.pathConstraints[i] = kNoPathConstraint;
                                 else
                                     witness.pathConstraints[i] = constraint;
                                 break;

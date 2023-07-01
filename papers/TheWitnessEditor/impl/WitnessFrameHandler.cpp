@@ -12,7 +12,7 @@ std::vector <RegionConstraintItem> gRegionConstraintItems = {
 };
 
 std::vector <PathConstraintItem> gPathConstraintItems = {
-    {kNoConstraint, Graphics::point{0.1, -0.5}, 0.075},
+    {kNoPathConstraint, Graphics::point{0.1, -0.5}, 0.075},
     {kMustCross,    Graphics::point{0.3, -0.5}, 0.075},
     {kCannotCross,  Graphics::point{0.5, -0.5}, 0.075}
 };
@@ -94,7 +94,7 @@ static void DrawGameViewport(unsigned long windowID)
                             bool isAdding;
                             if (constraint == witness.regionConstraints[x][y])
                             {
-                                editor.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
+                                editor.regionConstraints[x][y] = {.t = kNoRegionConstraint, .parameter = 0, .c = Colors::white};
                                 isAdding = false;
                             }
                             else
@@ -128,11 +128,11 @@ static void DrawGameViewport(unsigned long windowID)
                         if (location.first != gLastPosition) {
                             bool isAdding = false;
                             if (constraint == witness.pathConstraints[i])
-                                editor.pathConstraints[i] = kNoConstraint;
+                                editor.pathConstraints[i] = kNoPathConstraint;
                             else
                             {
                                 editor.pathConstraints[i] = constraint;
-                                if (constraint != kNoConstraint)
+                                if (constraint != kNoPathConstraint)
                                     isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
