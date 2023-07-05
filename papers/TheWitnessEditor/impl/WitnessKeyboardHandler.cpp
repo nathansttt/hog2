@@ -30,8 +30,9 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             iws.ws = allSolutions[0];
             iws.currState = InteractiveWitnessState<puzzleWidth, puzzleHeight>::kWaitingRestart;
         }
-    }
+        solved = true;
         break;
+    }
     case 's':
     {
         Graphics::Display d;
@@ -55,8 +56,11 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
         break;
     case 'r':
-        recording = !recording;
+    {
+        iws.Reset();
+        solved = false;
         break;
+    }
     case '\t':
         if (mod != kShiftDown)
             SetActivePort(windowID, (GetActivePort(windowID) + 1) % GetNumPorts(windowID));
@@ -98,6 +102,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         }
         break;
     case 'o':
+    {
         if (iws.ws.path.empty())
         {
             iws.ws.path.emplace_back(0, 0);
@@ -109,6 +114,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             iws.Reset();
         }
         break;
+    }
     case 'e':
     { // open editor
         if (!drawEditor)

@@ -303,6 +303,7 @@ public:
             for (int y = 0; y <= height; y++)
             {
                 Graphics::point p = (GetScreenCoord(x, y) + GetScreenCoord(x + 1, y)) * 0.5;
+                // horizontal
                 pathConstraintLocations[x + y * width] = std::make_pair(p, Graphics::rect{p, 0.05});
             }
         }
@@ -311,6 +312,7 @@ public:
             for (int y = 0; y < height; y++)
             {
                 Graphics::point p = (GetScreenCoord(x, y) + GetScreenCoord(x, y + 1)) * 0.5;
+                // vertical
                 pathConstraintLocations[width * (height + 1) + x * height + y] =
                         std::make_pair(p, Graphics::rect{p, 0.05});
             }
@@ -320,6 +322,7 @@ public:
             for (int y = 0; y < height + 1; y++)
             {
                 Graphics::point p = GetScreenCoord(x, y);
+                // vertex
                 pathConstraintLocations[width * (height + 1) + (width + 1) * height + (width + 1) * y + x] =
                         std::make_pair(p, Graphics::rect{p, 0.05});
             }
@@ -1788,6 +1791,10 @@ constexpr int Witness<width, height>::GetNumPathConstraints()
     return width * (height + 1) + (width + 1) * height + (width + 1) * (height + 1);
 }
 
+#pragma mark -
+#pragma mark Path Constraints
+#pragma mark -
+
 template<int width, int height>
 void Witness<width, height>::SetMustCrossConstraint(int which)
 {
@@ -1843,7 +1850,7 @@ bool Witness<width, height>::GetMustCrossConstraint(
     if (horiz)
         return GetMustCrossConstraint(y * width + x);
     else
-        return GetMustCrossConstraint(width * (height + 1) + y + x * height);
+        return GetMustCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -1860,7 +1867,7 @@ void Witness<width, height>::AddMustCrossConstraint(bool horiz, int x,
     if (horiz)
         SetMustCrossConstraint(y * width + x);
     else
-        SetMustCrossConstraint(width * (height + 1) + y * width + x);
+        SetMustCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -1902,7 +1909,7 @@ void Witness<width, height>::RemoveMustCrossConstraint(bool horiz, int x,
     if (horiz)
         RemoveMustCrossConstraint(y * width + x);
     else
-        RemoveMustCrossConstraint(width * (height + 1) + y * width + x);
+        RemoveMustCrossConstraint(width * (height + 1) + x * height + y);
 
     //	if (which < width*(height+1))
     //	{
@@ -1931,10 +1938,6 @@ void Witness<width, height>::RemoveMustCrossConstraint(int x, int y) // { mustCr
 {
     ClearMustCrossConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
 }
-
-#pragma mark -
-#pragma mark Path Constraints
-#pragma mark -
 
 template<int width, int height>
 constexpr int Witness<width, height>::GetNumCannotCrossConstraints() const
@@ -2044,7 +2047,7 @@ bool Witness<width, height>::GetCannotCrossConstraint(
     if (horiz)
         return GetCannotCrossConstraint(y * width + x);
     else
-        return GetCannotCrossConstraint(width * (height + 1) + y * width + x);
+        return GetCannotCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -2054,7 +2057,7 @@ void Witness<width, height>::AddCannotCrossConstraint(
     if (horiz)
         AddCannotCrossConstraint(y * width + x);
     else
-        AddCannotCrossConstraint(width * (height + 1) + y * width + x);
+        AddCannotCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -2076,7 +2079,7 @@ void Witness<width, height>::RemoveCannotCrossConstraint(bool horiz, int x,
     if (horiz)
         RemoveCannotCrossConstraint(y * width + x);
     else
-        RemoveCannotCrossConstraint(width * (height + 1) + y * width + x);
+        RemoveCannotCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
