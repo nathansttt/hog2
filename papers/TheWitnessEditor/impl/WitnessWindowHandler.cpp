@@ -1,4 +1,5 @@
-#include "../Driver.h"
+#include "Driver.h"
+#include "Globals.h"
 
 void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
@@ -34,6 +35,15 @@ void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
         witness.AddSeparationConstraint(2, 0, Colors::black);
         //		w.AddSeparationConstraint(2, 4, Colors::black);
         witness.AddSeparationConstraint(0, 2, Colors::orange);
+        for (size_t i = 0; i < allSolutions.size(); i++)
+        {
+            auto &solution = allSolutions[i];
+            if (witness.GoalTest(solution)) {
+                currentSolutionIndices.emplace_back(i);
+            }
+        }
+        gNumSolutions = currentSolutionIndices.size();
+
         //		w.AddSeparationConstraint(4, 2, Colors::orange);
 
         //		std::string s =

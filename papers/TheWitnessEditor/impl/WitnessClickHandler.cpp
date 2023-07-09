@@ -1,8 +1,21 @@
-#include "../Driver.h"
+#include "Driver.h"
+#include "Globals.h"
 
 Graphics::point cursor;
 int cursorViewport = 0;
 bool solved = false;
+
+static void UpdateSolutionIndicies() {
+    currentSolutionIndices.clear();
+    for (size_t i = 0; i < allSolutions.size(); i++)
+    {
+        auto &solution = allSolutions[i];
+        if (witness.GoalTest(solution))
+        {
+            currentSolutionIndices.emplace_back(i);
+        }
+    }
+}
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
                          tMouseEventType e)
@@ -52,7 +65,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 unsigned x = (i - y) / puzzleWidth;
                                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                                 if (constraint == witness.regionConstraints[x][y])
-                                    witness.regionConstraints[x][y] = {.t = kNone, .parameter = 0, .c = Colors::white};
+                                    witness.regionConstraints[x][y] = {.t = kNoRegionConstraint, .parameter = 0, .c = Colors::white};
                                 else
                                     witness.regionConstraints[x][y] = constraint;
                                 break;
@@ -72,13 +85,14 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                                 .constraint;
                                 printf("Selected Constraint: %d\n", constraint);
                                 if (constraint == witness.pathConstraints[i])
-                                    witness.pathConstraints[i] = kNoConstraint;
+                                    witness.pathConstraints[i] = kNoPathConstraint;
                                 else
                                     witness.pathConstraints[i] = constraint;
                                 break;
                             }
                         }
                     }
+                    UpdateSolutionIndicies();
                 }
             }
         }
