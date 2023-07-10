@@ -149,7 +149,7 @@ public:
 
 enum WitnessRegionConstraintType {
     kNoRegionConstraint = 0,
-    kRegion = 1,
+    kSeparation = 1,
     kStar = 2,
     kTetris = 3,
     kNegativeTetris = 4,
@@ -220,9 +220,9 @@ public:
         rgbColor color;
     };
 
-    std::array <std::array<WitnessRegionConstraint, height>, width> regionConstraints;
+    std::array<std::array<WitnessRegionConstraint, height>, width> regionConstraints;
     //	constraint constraints[width][height];
-    std::array<int, (int) kRegionConstraintCount> constraintCount;
+    std::array<int, (int)kRegionConstraintCount> constraintCount;
 
     // TODO: merge these
     //	std::vector<separationObject> separationConstraints;
@@ -233,10 +233,7 @@ public:
     //
     //	std::vector<int> triangleConstraints;
     //	int triangleCount;
-    std::array<std::pair < Graphics::point, Graphics::rect>,
-    width *height
-    >
-    regionConstraintLocations;
+    std::array<std::pair<Graphics::point, Graphics::rect>, width*height> regionConstraintLocations;
 
     Witness() // :separationConstraints(width*height), separationCount(0), tetrisConstraints(width*height),
     // tetrisCount(0)
@@ -546,7 +543,7 @@ public:
 
     /* Color (rounded) square - must separate these */
     /* TODO: Star constraints are a special case */
-    void ClearSeparationConstraints() { ClearConstraint(kRegion); }
+    void ClearSeparationConstraints() { ClearConstraint(kSeparation); }
 
     //{ separationConstraints.clear(); separationConstraints.resize(width*height), separationCount = 0; }
     static constexpr int GetNumSeparationConstraints() { return width * height; }
@@ -555,8 +552,8 @@ public:
     void AddSeparationConstraint(int x, int y, rgbColor c)
     {
         constraintCount[regionConstraints[x][y].t]--;
-        constraintCount[kRegion]++;
-        regionConstraints[x][y].t = kRegion;
+        constraintCount[kSeparation]++;
+        regionConstraints[x][y].t = kSeparation;
         regionConstraints[x][y].c = c;
     }
 
@@ -578,7 +575,7 @@ public:
     void AddEraserConstraint(int x, int y)
     {
         constraintCount[regionConstraints[x][y].t]--;
-        constraintCount[kRegion]++;
+        constraintCount[kSeparation]++;
         regionConstraints[x][y].t = kEraser;
         regionConstraints[x][y].c = Colors::white;
     }
@@ -1546,7 +1543,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
         }
     }
 
-    if (constraintCount[kRegion] == 0 && constraintCount[kTetris] == 0 && constraintCount[kStar] == 0 &&
+    if (constraintCount[kSeparation] == 0 && constraintCount[kTetris] == 0 && constraintCount[kStar] == 0 &&
         constraintCount[kEraser] == 0)
         //	if (separationCount == 0 && tetrisCount == 0)
         return true;
@@ -1557,7 +1554,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
     // TODO: Count the total number of unmatched constraints for checking eraser constraints and for displaying failed
     // constraints
 
-    if (constraintCount[kRegion] > 0)
+    if (constraintCount[kSeparation] > 0)
     {
         for (auto &v: regionList) // vector of locations
         {
@@ -1569,7 +1566,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
                 int y = GetRegionFromY(i); // l/width;
 
                 // if (separationConstraints[i].valid)
-                if (regionConstraints[x][y].t == kRegion)
+                if (regionConstraints[x][y].t == kSeparation)
                 {
                     if (!found)
                     {
@@ -2396,7 +2393,7 @@ void Witness<width, height>::DrawRegionConstraint(
     {
     case kNoRegionConstraint:
         break;
-    case kRegion:
+    case kSeparation:
     {
         Graphics::point delta = Graphics::point{lineWidth, lineWidth};
         display.FillCircle(p3 + delta, lineWidth, constraint.c);

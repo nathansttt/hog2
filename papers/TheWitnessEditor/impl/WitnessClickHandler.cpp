@@ -65,9 +65,29 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 unsigned x = (i - y) / puzzleWidth;
                                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                                 if (constraint == witness.regionConstraints[x][y])
-                                    witness.regionConstraints[x][y] = {.t = kNoRegionConstraint, .parameter = 0, .c = Colors::white};
+                                    witness.ClearConstraint(x, y);
                                 else
-                                    witness.regionConstraints[x][y] = constraint;
+                                    switch (constraint.t) {
+                                        case kSeparation:
+                                            witness.AddSeparationConstraint(x, y, constraint.c);
+                                            break;
+                                        case kStar:
+                                            witness.AddStarConstraint(x, y, constraint.c);
+                                            break;
+                                        case kTetris:
+                                            witness.AddTetrisConstraint(x, y, constraint.parameter);
+                                            break;
+                                        case kNegativeTetris:
+                                            witness.AddNegativeTetrisConstraint(x, y, constraint.parameter);
+                                            break;
+                                        case kTriangle:
+                                            witness.AddTriangleConstraint(x, y, constraint.parameter);
+                                            break;
+                                        case kEraser:
+                                            break;
+                                        default: // kNoRegionConstraint, kRegionConstraintCount
+                                            break;
+                                    }
                                 break;
                             }
                         }

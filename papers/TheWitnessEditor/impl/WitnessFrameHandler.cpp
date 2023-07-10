@@ -2,10 +2,10 @@
 #include "SolutionUtil.h"
 
 std::vector <RegionConstraintItem> gRegionConstraintItems = {
-    {{kRegion,         0,  Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
+    {{kSeparation,      0,  Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
     {{kStar,           0,  Colors::cyan}, Graphics::point{-0.5, -0.7},  0.1},
     {{kTetris,         10, Colors::cyan}, Graphics::point{-0.25, -0.7}, 0.05},
-    {{kNegativeTetris, 10, Colors::cyan}, Graphics::point{-0.05, -0.7}, 0.05},
+    {{kNegativeTetris,  10, Colors::cyan}, Graphics::point{-0.05, -0.7}, 0.05},
     {{kTriangle,       1,  Colors::cyan}, Graphics::point{-0.75, -0.5}, 0.05},
     {{kTriangle,       2,  Colors::cyan}, Graphics::point{-0.5, -0.5},  0.05},
     {{kTriangle,       3,  Colors::cyan}, Graphics::point{-0.2, -0.5},  0.05},
@@ -94,18 +94,38 @@ static void DrawGameViewport(unsigned long windowID)
                             bool isAdding;
                             if (constraint == witness.regionConstraints[x][y])
                             {
-                                editor.regionConstraints[x][y] = {.t = kNoRegionConstraint, .parameter = 0, .c = Colors::white};
+                                editor.ClearConstraint(x, y);
                                 isAdding = false;
                             }
                             else
                             {
-                                editor.regionConstraints[x][y] = constraint;
+                                switch (constraint.t) {
+                                    case kSeparation:
+                                        editor.AddSeparationConstraint(x, y, constraint.c);
+                                        break;
+                                    case kStar:
+                                        editor.AddStarConstraint(x, y, constraint.c);
+                                        break;
+                                    case kTetris:
+                                        editor.AddTetrisConstraint(x, y, constraint.parameter);
+                                        break;
+                                    case kNegativeTetris:
+                                        editor.AddNegativeTetrisConstraint(x, y, constraint.parameter);
+                                        break;
+                                    case kTriangle:
+                                        editor.AddTriangleConstraint(x, y, constraint.parameter);
+                                        break;
+                                    case kEraser:
+                                        break;
+                                    default: // kNoRegionConstraint, kRegionConstraintCount
+                                        break;
+                                }
                                 isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
-                        witness.DrawRegionConstraint(display, constraint, p);
+                        editor.DrawRegionConstraint(display, constraint, p);
                         gLastPosition = p;
                         cursorInPuzzle = true;
                         break;
@@ -171,18 +191,26 @@ static void DrawEditorViewport(unsigned long windowID)
             if (i < gRegionConstraintItems.size() - 2)
                 display.FrameRect({item.c, item.radius + 0.01f}, Colors::white, 0.01);
             else if (i == gRegionConstraintItems.size() - 2)
-                display.FrameRect({item.c.x - item.radius - 0.03f, item.c.y - item.radius - 0.01f, item.c.x + item.radius + 0.03f, item.c.y + item.radius + 0.01f}, Colors::white, 0.01);
+                display.FrameRect({item.c.x - item.radius - 0.03f, item.c.y - item.radius - 0.01f,
+                                   item.c.x + item.radius + 0.03f, item.c.y + item.radius + 0.01f},
+                                  Colors::white, 0.01);
             else
-                display.FrameRect({item.c.x - item.radius - 0.06f, item.c.y - item.radius - 0.01f, item.c.x + item.radius + 0.06f, item.c.y + item.radius + 0.01f}, Colors::white, 0.01);
+                display.FrameRect({item.c.x - item.radius - 0.06f, item.c.y - item.radius - 0.01f,
+                                   item.c.x + item.radius + 0.06f, item.c.y + item.radius + 0.01f},
+                                  Colors::white, 0.01);
         }
         else if (cursorViewport == 1 && PointInRect(cursor, {item.c, item.radius + 0.01f}))
         {
             if (i < gRegionConstraintItems.size() - 2)
                 display.FrameRect({item.c, item.radius + 0.01f}, Colors::lightgray, 0.01);
             else if (i == gRegionConstraintItems.size() - 2)
-                display.FrameRect({item.c.x - item.radius - 0.03f, item.c.y - item.radius - 0.01f, item.c.x + item.radius + 0.03f, item.c.y + item.radius + 0.01f}, Colors::lightgray, 0.01);
+                display.FrameRect({item.c.x - item.radius - 0.03f, item.c.y - item.radius - 0.01f,
+                                   item.c.x + item.radius + 0.03f, item.c.y + item.radius + 0.01f},
+                                  Colors::lightgray, 0.01);
             else
-                display.FrameRect({item.c.x - item.radius - 0.06f, item.c.y - item.radius - 0.01f, item.c.x + item.radius + 0.06f, item.c.y + item.radius + 0.01f}, Colors::lightgray, 0.01);
+                display.FrameRect({item.c.x - item.radius - 0.06f, item.c.y - item.radius - 0.01f,
+                                   item.c.x + item.radius + 0.06f, item.c.y + item.radius + 0.01f},
+                                  Colors::lightgray, 0.01);
         }
     }
     for (unsigned i = 0; i < gPathConstraintItems.size(); ++i)

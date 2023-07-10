@@ -1288,11 +1288,11 @@
 			isa = PBXGroup;
 			children = (
 				4647265D2A4DE56B007A147D /* EntropyUtil.cpp */,
-				4625C14A2A4BD15C004A8BBC /* WitnessClickHandler.cpp */,
-				4625C14B2A4BD15C004A8BBC /* SolutionUtil.cpp */,
 				4625C14C2A4BD15C004A8BBC /* ExamineUtil.cpp */,
-				4625C14D2A4BD15C004A8BBC /* WitnessFrameHandler.cpp */,
+				4625C14B2A4BD15C004A8BBC /* SolutionUtil.cpp */,
 				4625C14E2A4BD15C004A8BBC /* WitnessCLHandler.cpp */,
+				4625C14A2A4BD15C004A8BBC /* WitnessClickHandler.cpp */,
+				4625C14D2A4BD15C004A8BBC /* WitnessFrameHandler.cpp */,
 				4625C14F2A4BD15C004A8BBC /* WitnessKeyboardHandler.cpp */,
 				4625C1502A4BD15C004A8BBC /* WitnessWindowHandler.cpp */,
 			);
@@ -1303,9 +1303,9 @@
 			isa = PBXGroup;
 			children = (
 				464726602A4DE64D007A147D /* EntropyUtil.h */,
-				464726612A4DE836007A147D /* SolutionUtil.h */,
 				464726622A4DE8FE007A147D /* ExamineUtil.h */,
 				464726632A4DEBB5007A147D /* Globals.h */,
+				464726612A4DE836007A147D /* SolutionUtil.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
