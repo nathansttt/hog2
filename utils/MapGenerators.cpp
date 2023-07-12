@@ -9,6 +9,7 @@
 #include "MapGenerators.h"
 #include <vector>
 #include <algorithm>
+#include <random>
 
 /**
  * MakeMaze(map, pathsize)
@@ -376,7 +377,10 @@ void MakeMaze(Map *m, float straightPercent, float branchPercent)
 				Burrow(m, currLoc, next);
 				places.push_back(next);
 			}
-			std::random_shuffle ( places.begin(), places.end() );
+            std::random_device rd;
+            std::mt19937 g(rd());
+			// std::random_shuffle ( places.begin(), places.end() );
+            std::shuffle(places.begin(), places.end(), g);
 		}
 	}
 }

@@ -10,6 +10,7 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <random>
 
 namespace DWG {
 	
@@ -44,7 +45,10 @@ namespace DWG {
 		srand(1);
 		for (int x = 0; x < 20; x++)
 			costs.push_back(1+0.2*x);
-		std::random_shuffle(costs.begin(), costs.end());
+        std::random_device rd;
+        std::mt19937 g(rd());
+		// std::random_shuffle(costs.begin(), costs.end());
+        std::shuffle(costs.begin(), costs.end(), g);
 	}
 
 	DynamicWeightedGridEnvironment::DynamicWeightedGridEnvironment(int width, int height)
@@ -63,7 +67,10 @@ namespace DWG {
 		srand(1);
 		for (int x = 0; x < 20; x++)
 			costs.push_back(1+0.2*x);
-		std::random_shuffle(costs.begin(), costs.end());
+        std::random_device rd;
+        std::mt19937 g(rd());
+        // std::random_shuffle(costs.begin(), costs.end());
+        std::shuffle(costs.begin(), costs.end(), g);
 	}
 	
 	void DynamicWeightedGridEnvironment::GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const
@@ -272,6 +279,4 @@ namespace DWG {
 		//	y = (2*_y-height)*_scale+epsilon;
 		radius = epsilon;
 	}
-	
 }
-
