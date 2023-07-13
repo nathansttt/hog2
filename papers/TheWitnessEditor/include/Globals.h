@@ -23,6 +23,7 @@ extern std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 extern std::vector<size_t> currentSolutionIndices;
 extern size_t gNumSolutions;
 extern bool solved;
+extern double gMuse;
 
 struct RegionConstraintItem {
     WitnessRegionConstraint constraint;

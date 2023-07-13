@@ -36,7 +36,18 @@ int GetEdgeHash(int x1, int y1, int x2, int y2)
 template<int width, int height>
 class WitnessState {
 public:
+    std::vector<std::pair<int, int>> path;
+    std::bitset<(width + 1) * (height + 1)> occupiedCorners;
+    std::bitset<(width + 1) * (height) + (width) * (height + 1)> occupiedEdges;
+    
     WitnessState() { Reset(); }
+    
+    WitnessState(const WitnessState<width, height> &state)
+    {
+        path = state.path;
+        occupiedCorners = state.occupiedCorners;
+        occupiedEdges = state.occupiedEdges;
+    }
 
     void Reset()
     {
@@ -94,10 +105,6 @@ public:
         return (path.back().first < 0 || path.back().first > width || path.back().second < 0 ||
                 path.back().second > height);
     }
-
-    std::vector <std::pair<int, int>> path;
-    std::bitset<(width + 1) * (height + 1)> occupiedCorners;
-    std::bitset<(width + 1) * (height) + (width) * (height + 1)> occupiedEdges;
 };
 
 enum WitnessAction {
@@ -163,7 +170,9 @@ struct WitnessRegionConstraint {
     int parameter{};
     rgbColor c;
 
-    bool operator==(const WitnessRegionConstraint &a) const { return a.t == this->t && a.parameter == this->parameter && a.c == this->c; }
+    bool operator==(const WitnessRegionConstraint &a) const {
+        return a.t == this->t && a.parameter == this->parameter && a.c == this->c;
+    }
 };
 
 enum WitnessPathConstraintType {
@@ -342,6 +351,8 @@ public:
             const WitnessState<width, height> &nodeID, std::vector <WitnessState<width, height>> &neighbors) const;
 
     void GetActions(const WitnessState<width, height> &nodeID, std::vector <WitnessAction> &actions) const;
+    
+    // std::vector<WitnessAction> GetActionsWithLookahead(const WitnessState<width, height> &state, unsigned n) const;
 
     void ApplyAction(WitnessState<width, height> &s, WitnessAction a) const;
 

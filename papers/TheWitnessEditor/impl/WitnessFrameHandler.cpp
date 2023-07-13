@@ -1,14 +1,15 @@
 #include "Driver.h"
 #include "SolutionUtil.h"
+#include "EntropyUtil.h"
 
 std::vector <RegionConstraintItem> gRegionConstraintItems = {
     {{kSeparation,      0,  Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
     {{kStar,           0,  Colors::cyan}, Graphics::point{-0.5, -0.7},  0.1},
-    {{kTetris,         10, Colors::cyan}, Graphics::point{-0.25, -0.7}, 0.05},
-    {{kNegativeTetris,  10, Colors::cyan}, Graphics::point{-0.05, -0.7}, 0.05},
-    {{kTriangle,       1,  Colors::cyan}, Graphics::point{-0.75, -0.5}, 0.05},
-    {{kTriangle,       2,  Colors::cyan}, Graphics::point{-0.5, -0.5},  0.05},
-    {{kTriangle,       3,  Colors::cyan}, Graphics::point{-0.2, -0.5},  0.05},
+    {{kTetris,         10, {0.862745098f, 0.6549019608f, 0.0f}}, Graphics::point{-0.25, -0.7}, 0.05},
+    {{kNegativeTetris,  10, {0.2196078431f, 0.3607843137f, 0.8705882353f}}, Graphics::point{-0.05, -0.7}, 0.05},
+    {{kTriangle,       1,  Colors::orange}, Graphics::point{-0.75, -0.5}, 0.05},
+    {{kTriangle,       2,  Colors::orange}, Graphics::point{-0.5, -0.5},  0.05},
+    {{kTriangle,       3,  Colors::orange}, Graphics::point{-0.2, -0.5},  0.05},
 };
 
 std::vector <PathConstraintItem> gPathConstraintItems = {
@@ -23,6 +24,7 @@ unsigned gSelectedColor = 0;
 static Graphics::point gLastPosition = Graphics::point{};
 std::vector<size_t> currentSolutionIndices;
 size_t gNumSolutions = 0;
+double gMuse = 0.0;
 
 std::vector <ColorItem> gProvidedColors = {
     {Colors::red,   Graphics::point{-0.75, -0.15}, 0.1},
@@ -74,7 +76,9 @@ static void DrawGameViewport(unsigned long windowID)
     }
     else
     {
-        display.DrawText("# of solutions: ", Graphics::point{0.75, 1}, Colors::black, 0.075,
+        display.DrawText("# of solutions: ", Graphics::point{0.75, 0.9}, Colors::black, 0.075,
+                         Graphics::textAlignRight, Graphics::textBaselineBottom);
+        display.DrawText("MUSE: ", Graphics::point{0.7, 1}, Colors::black, 0.07,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
         if (gSelectedEditorItem != -1 && cursorViewport == 0)
         {
@@ -92,7 +96,7 @@ static void DrawGameViewport(unsigned long windowID)
                         unsigned x = (i - y) / puzzleWidth;
                         if (p != gLastPosition) {
                             bool isAdding;
-                            if (constraint == witness.regionConstraints[x][y])
+                            if (constraint == editor.regionConstraints[x][y])
                             {
                                 editor.ClearConstraint(x, y);
                                 isAdding = false;
@@ -123,6 +127,7 @@ static void DrawGameViewport(unsigned long windowID)
                                 isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
+                            // gMuse = MinimumUniformSolutionEntropy(editor, iws.ws);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         editor.DrawRegionConstraint(display, constraint, p);
@@ -147,7 +152,7 @@ static void DrawGameViewport(unsigned long windowID)
                                         .constraint;
                         if (location.first != gLastPosition) {
                             bool isAdding = false;
-                            if (constraint == witness.pathConstraints[i])
+                            if (constraint == editor.pathConstraints[i])
                                 editor.pathConstraints[i] = kNoPathConstraint;
                             else
                             {
@@ -156,6 +161,7 @@ static void DrawGameViewport(unsigned long windowID)
                                     isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
+                            // gMuse = MinimumUniformSolutionEntropy(editor, iws.ws);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         gLastPosition = location.first;
@@ -163,14 +169,16 @@ static void DrawGameViewport(unsigned long windowID)
                     }
                 }
             }
-            display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+            display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 0.9}, Colors::black, 0.075,
                              Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
         else
         {
-            display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 1},
+            display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
+        display.DrawText(to_string_with_precision(gMuse, 2).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+                         Graphics::textAlignRight, Graphics::textBaselineBottom);
     }
 }
 

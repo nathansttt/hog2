@@ -1,11 +1,12 @@
 #include "Driver.h"
 #include "Globals.h"
+#include "EntropyUtil.h"
 
 Graphics::point cursor;
 int cursorViewport = 0;
 bool solved = false;
 
-static void UpdateSolutionIndicies() {
+static void UpdateSolutionIndices() {
     currentSolutionIndices.clear();
     for (size_t i = 0; i < allSolutions.size(); i++)
     {
@@ -15,6 +16,7 @@ static void UpdateSolutionIndicies() {
             currentSolutionIndices.emplace_back(i);
         }
     }
+    gMuse = MinimumUniformSolutionEntropy(witness, iws.ws);
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
@@ -112,7 +114,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             }
                         }
                     }
-                    UpdateSolutionIndicies();
+                    UpdateSolutionIndices();
                 }
             }
         }
