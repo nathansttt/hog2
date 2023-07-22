@@ -23,6 +23,7 @@ int selectTetrisPiece = 0;
 unsigned long currBoard = 0;
 
 Witness<puzzleWidth, puzzleHeight> witness;
+Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<Witness<puzzleWidth, puzzleHeight>> best;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;

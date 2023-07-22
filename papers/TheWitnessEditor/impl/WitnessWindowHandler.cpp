@@ -1,6 +1,5 @@
 #include "Driver.h"
 #include "Globals.h"
-#include "EntropyUtil.h"
 
 void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
@@ -45,7 +44,7 @@ void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
         }
         gNumSolutions = currentSolutionIndices.size();
         WitnessState<puzzleWidth, puzzleHeight> state;
-        gMuse = MinimumUniformSolutionEntropy(witness, state);
+        gMuse = entropy.MinimumUniformSolutionEntropy(witness, state);
 
         //		w.AddSeparationConstraint(4, 2, Colors::orange);
 

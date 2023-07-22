@@ -1,6 +1,5 @@
 #include "Driver.h"
 #include "SolutionUtil.h"
-#include "EntropyUtil.h"
 
 std::vector <RegionConstraintItem> gRegionConstraintItems = {
     {{kSeparation,      0,  Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
@@ -22,7 +21,7 @@ int gSelectedEditorItem = -1;
 unsigned gSelectedTetrisItem = 0;
 unsigned gSelectedColor = 0;
 static Graphics::point gLastPosition = Graphics::point{};
-std::vector<size_t> currentSolutionIndices;
+std::vector<size_t> currentSolutionIndices = {};
 size_t gNumSolutions = 0;
 double gMuse = 0.0;
 

@@ -1,8 +1,7 @@
 #include "Driver.h"
 #include "Globals.h"
-#include "EntropyUtil.h"
 
-Graphics::point cursor;
+Graphics::point cursor = Graphics::point{};
 int cursorViewport = 0;
 bool solved = false;
 
@@ -16,7 +15,7 @@ static void UpdateSolutionIndices() {
             currentSolutionIndices.emplace_back(i);
         }
     }
-    gMuse = MinimumUniformSolutionEntropy(witness, iws.ws);
+    gMuse = entropy.MinimumUniformSolutionEntropy(witness, iws.ws);
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,

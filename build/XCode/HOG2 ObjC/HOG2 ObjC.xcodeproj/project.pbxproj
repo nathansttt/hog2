@@ -861,7 +861,7 @@
 		4625C15C2A4BD1EE004A8BBC /* FileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileUtil.cpp; sourceTree = "<group>"; };
 		4625C2652A4BD80B004A8BBC /* The Witness Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "The Witness Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4625C2662A4BD80B004A8BBC /* The Witness Editor copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "The Witness Editor copy-Info.plist"; path = "/Users/samarium/Documents/hog2/build/XCode/HOG2 ObjC/The Witness Editor copy-Info.plist"; sourceTree = "<absolute>"; };
-		464726602A4DE64D007A147D /* EntropyUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntropyUtil.h; sourceTree = "<group>"; };
+		4646C3EE2A6C8E0900E43949 /* PuzzleEntropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleEntropy.h; sourceTree = "<group>"; };
 		464726612A4DE836007A147D /* SolutionUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SolutionUtil.h; sourceTree = "<group>"; };
 		464726622A4DE8FE007A147D /* ExamineUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExamineUtil.h; sourceTree = "<group>"; };
 		464726632A4DEBB5007A147D /* Globals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Globals.h; sourceTree = "<group>"; };
@@ -1299,7 +1299,6 @@
 		4647265C2A4DE529007A147D /* include */ = {
 			isa = PBXGroup;
 			children = (
-				464726602A4DE64D007A147D /* EntropyUtil.h */,
 				464726622A4DE8FE007A147D /* ExamineUtil.h */,
 				464726632A4DEBB5007A147D /* Globals.h */,
 				464726612A4DE836007A147D /* SolutionUtil.h */,
@@ -1698,6 +1697,7 @@
 				C4A550DF24AEFD6600E9FF7F /* OptimisticSearch.h */,
 				C4A550E024AEFD6600E9FF7F /* ParallelIDAStar.h */,
 				C4A5510224AEFD6600E9FF7F /* PEAStar.h */,
+				4646C3EE2A6C8E0900E43949 /* PuzzleEntropy.h */,
 				C4A550DA24AEFD6500E9FF7F /* RandomUnit.h */,
 				C4A5510124AEFD6600E9FF7F /* SFIDAStar.h */,
 				C4A550E624AEFD6600E9FF7F /* TemplateAStar.h */,
