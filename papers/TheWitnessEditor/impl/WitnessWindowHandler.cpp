@@ -44,7 +44,7 @@ void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
         }
         gNumSolutions = currentSolutionIndices.size();
         WitnessState<puzzleWidth, puzzleHeight> state;
-        gMuse = entropy.MinimumUniformSolutionEntropy(witness, state);
+        gMuse = entropy.Get(witness, state).entropy;
 
         //		w.AddSeparationConstraint(4, 2, Colors::orange);
 

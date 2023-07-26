@@ -6,24 +6,39 @@
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
 
-#ifndef HOG2_GENERIC_PUZZLE_ENTROPY
-#define HOG2_GENERIC_PUZZLE_ENTROPY
+#ifndef HOG2_GENERIC_PUZZLE_ENTROPY_H
+#define HOG2_GENERIC_PUZZLE_ENTROPY_H
 
+#include <numeric>
 #include <vector>
 #include "SearchEnvironment.h"
 #include "vectorCache.h"
 
+struct EntropyInfo
+{
+    double entropy;
+    unsigned depth;
+};
+
 template<class State, class Action>
 class Entropy
 {
-protected:
+private:
+    static constexpr double inf = std::numeric_limits<double>::max();
+    vectorCache<WitnessAction> actCache;
+    vectorCache<EntropyInfo> entropyInfoCache;
+    bool isRelative = false;
+
     static std::vector<double> Softmin(const std::vector<double> &vars)
     {
-        auto ret = std::vector<double>(vars.size());
-        double sum = 0.0;
-        std::for_each(vars.begin(), vars.end(), [&](double i) { sum += std::exp(-i); });
-        size_t i = 0;
-        std::generate(ret.begin(), ret.end(), [&]() { return std::exp(-vars[i++]) / sum;});
+        double sum = std::accumulate(vars.begin(), vars.end(), 0.0, [](double r, double i) {
+            return r + std::exp(-i);
+        });
+        auto ret = std::vector<double>();
+        ret.reserve(vars.size());
+        std::transform(vars.begin(), vars.end(), std::back_inserter(ret), [&](double i) {
+            return std::exp(-i) / sum;
+        });
         return ret;
     }
 
@@ -40,75 +55,79 @@ protected:
         return divergence;
     }
 
-    static constexpr double inf = std::numeric_limits<double>::max();
-    vectorCache<WitnessAction> actCache;
-    vectorCache<double> entropyCache;
+    double ImmediateEntropy(const std::vector<Action> &actions,
+                            const std::vector<double> &childEntropy) const
+    {
+        auto size = static_cast<double>(actions.size());
+        if (!isRelative)
+            return std::log2(size);
+        auto dist = Softmin(childEntropy);
+        auto uniform = std::vector<double>(size);
+        std::generate(uniform.begin(), uniform.end(), [&]() { return 1 / size; });
+        return KlDivergence(dist, uniform);
+    }
+
 public:
-    double MinimumUniformSolutionEntropy(SearchEnvironment<State, Action> &env, State &state)
+    auto& SetRelative(bool val)
+    {
+        this->isRelative = val;
+        return *this;
+    }
+
+    EntropyInfo Get(SearchEnvironment<State, Action> &env, State &state, unsigned lookAhead = 0)
     {
         if (env.GoalTest(state))
-            return 0.0;
+            return { 0.0, 0 };
         std::vector<Action> &allActions = *actCache.getItem();
         env.GetActions(state, allActions);
         if (allActions.empty())
         {
             actCache.returnItem(&allActions);
-            return inf;
+            return { inf, 0 };
         }
-        std::vector<double> &childEntropy = *entropyCache.getItem();
+        // TODO: use inference rules to filter actions
+        std::vector<EntropyInfo> &childEntropyInfo = *entropyInfoCache.getItem();
         for (auto &action: allActions)
         {
             env.ApplyAction(state, action);
-            childEntropy.emplace_back(this->MinimumUniformSolutionEntropy(env, state));
+            childEntropyInfo.emplace_back(Get(env, state, (lookAhead > 0) ? lookAhead - 1 : 0));
             env.UndoAction(state, action);
         }
-        double ret;
-        if (std::all_of(childEntropy.begin(), childEntropy.end(), [](int i) { return i == 0; } ))
-            ret = 0.0;
-        else if(std::all_of(childEntropy.begin(), childEntropy.end(), [](double i) { return i == inf; }))
-            ret = inf;
-        else
-            ret = *std::min_element(childEntropy.begin(), childEntropy.end())
-                + std::log2(static_cast<double>(allActions.size()));
-        actCache.returnItem(&allActions);
-        entropyCache.returnItem(&childEntropy);
-        return ret;
-    }
-
-    double RelativeMUSE(SearchEnvironment<State, Action> &env, State &state)
-    {
-        if (env.GoalTest(state))
-            return 0.0;
-        std::vector<WitnessAction> &allActions = *actCache.getItem();
-        env.GetActions(state, allActions);
-        if (allActions.empty())
+        for (auto it = childEntropyInfo.begin(); it != childEntropyInfo.end(); )
         {
-            actCache.returnItem(&allActions);
-            return inf;
+            auto &info = *it;
+            if (info.entropy == 0 && info.depth < lookAhead)
+                return { 0.0, info.depth + 1 };
+            if (info.entropy == inf && info.depth < lookAhead)
+                it = childEntropyInfo.erase(it);
+            else
+                ++it;
         }
-        std::vector<double> &childEntropy = *entropyCache.getItem();
-        for (auto &action: allActions) {
-            env.ApplyAction(state, action);
-            childEntropy.emplace_back(this->RelativeMUSE(state));
-            env.UndoAction(state, action);
-        }
-        double ret;
-        if (std::all_of(childEntropy.begin(), childEntropy.end(), [](int i) { return i == 0; } ))
-            ret = 0.0;
-        else if(std::all_of(childEntropy.begin(), childEntropy.end(), [](double i) { return i == inf; }))
-            ret = inf;
+        EntropyInfo entropyInfo;
+        if (std::all_of(childEntropyInfo.begin(), childEntropyInfo.end(), [](EntropyInfo &info) {
+            return info.entropy == 0;
+        }))
+            entropyInfo = { 0.0, childEntropyInfo[0].depth + 1 };
+        else if (std::all_of(childEntropyInfo.begin(), childEntropyInfo.end(), [](EntropyInfo &info) {
+            return info.entropy == inf;
+        }))
+            entropyInfo = { inf, childEntropyInfo[0].depth + 1 };
         else
         {
-            auto dist = Entropy<State, Action>::Softmin(childEntropy);
-            auto uniform = std::vector<double>(allActions.size());
-            std::generate(uniform.begin(), uniform.end(), [&]() { return 1 / static_cast<double>(allActions.size()); });
-            ret = *std::min_element(childEntropy.begin(), childEntropy.end())
-                + Entropy<State, Action>::KlDivergence(dist, uniform);
+            auto &min_childEntropyInfo = *std::min_element(childEntropyInfo.begin(), childEntropyInfo.end(),
+                                       [](EntropyInfo &info1, EntropyInfo &info2){
+                return info1.entropy < info2.entropy;
+            });
+            auto childEntropy = std::vector<double>();
+            childEntropy.reserve(childEntropyInfo.size());
+            std::transform(childEntropyInfo.begin(), childEntropyInfo.end(), std::back_inserter(childEntropy),
+                           [](EntropyInfo &info){ return info.entropy; });
+            entropyInfo = { min_childEntropyInfo.entropy + ImmediateEntropy(allActions, childEntropy),
+                            min_childEntropyInfo.depth + 1 };
         }
         actCache.returnItem(&allActions);
-        entropyCache.returnItem(&childEntropy);
-        return ret;
+        return entropyInfo;
     }
 };
 
-#endif /* HOG2_GENERIC_PUZZLE_ENTROPY */
+#endif /* HOG2_GENERIC_PUZZLE_ENTROPY_H */

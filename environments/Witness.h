@@ -475,12 +475,11 @@ public:
 
     void ClearCannotCrossConstraint(int);
 
-    void AddCannotCrossConstraint(bool horiz, int x,
-                                  int y);                                  // { cannotCrossEdgeConstraints.push_back({horiz, {x, y}});}
-    void AddCannotCrossConstraint(int x, int y); // { cannotCrossConstraints.push_back({x, y});}
-    void AddCannotCrossConstraint(int);          // { cannotCrossConstraints.push_back({x, y});}
-    void RemoveCannotCrossConstraint(bool horiz, int x, int y); // { cannotCrossEdgeConstraints.pop_back();}
-    void RemoveCannotCrossConstraint(int x, int y);             // { cannotCrossConstraints.pop_back();}
+    void AddCannotCrossConstraint(bool horiz, int x, int y);  // { cannotCrossEdgeConstraints.push_back({horiz, {x, y}});}
+    void AddCannotCrossConstraint(int x, int y);  // { cannotCrossConstraints.push_back({x, y});}
+    void AddCannotCrossConstraint(int);  // { cannotCrossConstraints.push_back({x, y});}
+    void RemoveCannotCrossConstraint(bool horiz, int x, int y);  // { cannotCrossEdgeConstraints.pop_back();}
+    void RemoveCannotCrossConstraint(int x, int y);  // { cannotCrossConstraints.pop_back();}
 
     void ClearInnerConstraints()
     {

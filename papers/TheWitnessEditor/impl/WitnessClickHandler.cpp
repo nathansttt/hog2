@@ -15,7 +15,7 @@ static void UpdateSolutionIndices() {
             currentSolutionIndices.emplace_back(i);
         }
     }
-    gMuse = entropy.MinimumUniformSolutionEntropy(witness, iws.ws);
+    gMuse = entropy.Get(witness, iws.ws).entropy;
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
