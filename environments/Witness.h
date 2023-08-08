@@ -173,6 +173,9 @@ struct WitnessRegionConstraint {
     bool operator==(const WitnessRegionConstraint &a) const {
         return a.t == this->t && a.parameter == this->parameter && a.c == this->c;
     }
+    bool operator!=(const WitnessRegionConstraint &a) const {
+        return !(*this == a);
+    }
 };
 
 enum WitnessPathConstraintType {

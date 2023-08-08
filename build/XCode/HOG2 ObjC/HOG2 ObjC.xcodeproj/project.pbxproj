@@ -865,6 +865,9 @@
 		464726612A4DE836007A147D /* SolutionUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SolutionUtil.h; sourceTree = "<group>"; };
 		464726622A4DE8FE007A147D /* ExamineUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExamineUtil.h; sourceTree = "<group>"; };
 		464726632A4DEBB5007A147D /* Globals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Globals.h; sourceTree = "<group>"; };
+		4680D3F82A7824AA00593FD0 /* WitnessInferenceRule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WitnessInferenceRule.h; sourceTree = "<group>"; };
+		469A78E42A72342000CD8BED /* PuzzleInferenceRule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PuzzleInferenceRule.h; sourceTree = "<group>"; };
+		46EC6F822A82C3B6007CF84E /* WitnessPuzzleEntropy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WitnessPuzzleEntropy.h; sourceTree = "<group>"; };
 		C403F70727B37B96001C0043 /* RC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C403F70827B37B9F001C0043 /* Hexagon copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Hexagon copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/HOG2 ObjC/Hexagon copy-Info.plist"; sourceTree = "<absolute>"; };
 		C403F70D27B37CFA001C0043 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
@@ -1302,6 +1305,8 @@
 				464726622A4DE8FE007A147D /* ExamineUtil.h */,
 				464726632A4DEBB5007A147D /* Globals.h */,
 				464726612A4DE836007A147D /* SolutionUtil.h */,
+				4680D3F82A7824AA00593FD0 /* WitnessInferenceRule.h */,
+				46EC6F822A82C3B6007CF84E /* WitnessPuzzleEntropy.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -1817,6 +1822,7 @@
 				C4A5516024AEFD6600E9FF7F /* STPInstances.h */,
 				C4A5516124AEFD6600E9FF7F /* GraphInconsistencyInstances.h */,
 				C4A5516224AEFD6600E9FF7F /* VoxelTriangleExtraction.h */,
+				469A78E42A72342000CD8BED /* PuzzleInferenceRule.h */,
 			);
 			path = envutil;
 			sourceTree = "<group>";
@@ -3265,7 +3271,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -3323,7 +3329,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;

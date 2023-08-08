@@ -13,6 +13,7 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "vectorCache.h"
+#include "PuzzleInferenceRule.h"
 
 struct EntropyInfo
 {
@@ -23,9 +24,9 @@ struct EntropyInfo
 template<class State, class Action>
 class Entropy
 {
-private:
+protected:
     static constexpr double inf = std::numeric_limits<double>::max();
-    vectorCache<WitnessAction> actCache;
+    vectorCache<Action> actCache;
     vectorCache<EntropyInfo> entropyInfoCache;
     bool isRelative = false;
 
@@ -62,19 +63,23 @@ private:
         if (!isRelative)
             return std::log2(size);
         auto dist = Softmin(childEntropy);
-        auto uniform = std::vector<double>(size);
+        auto uniform = std::vector<double>(actions.size());
         std::generate(uniform.begin(), uniform.end(), [&]() { return 1 / size; });
         return KlDivergence(dist, uniform);
     }
 
+    virtual void FilterActions(const SearchEnvironment<State, Action> &env, State &state,
+                               std::vector<Action> &actions) const = 0;
+
 public:
+
     auto& SetRelative(bool val)
     {
         this->isRelative = val;
         return *this;
     }
 
-    EntropyInfo Get(SearchEnvironment<State, Action> &env, State &state, unsigned lookAhead = 0)
+    virtual EntropyInfo Get(const SearchEnvironment<State, Action> &env, State &state, unsigned lookAhead)
     {
         if (env.GoalTest(state))
             return { 0.0, 0 };
@@ -85,7 +90,7 @@ public:
             actCache.returnItem(&allActions);
             return { inf, 0 };
         }
-        // TODO: use inference rules to filter actions
+        FilterActions(env, state, allActions);
         std::vector<EntropyInfo> &childEntropyInfo = *entropyInfoCache.getItem();
         for (auto &action: allActions)
         {

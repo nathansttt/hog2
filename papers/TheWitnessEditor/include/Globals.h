@@ -10,14 +10,14 @@
 #define THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H
 
 #include "Witness.h"
-#include "PuzzleEntropy.h"
+#include "WitnessPuzzleEntropy.h"
 
 constexpr int puzzleWidth = 4;
 constexpr int puzzleHeight = 4;
 const int minSolutions = 5000;
 extern unsigned long currBoard;
 extern Witness<puzzleWidth, puzzleHeight> witness;
-extern Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
+extern WitnessPuzzleEntropy<puzzleWidth, puzzleHeight> entropy;
 extern Witness<puzzleWidth, puzzleHeight> editor;
 extern InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 extern std::vector<Witness<puzzleWidth, puzzleHeight>> best;
