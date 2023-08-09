@@ -50,7 +50,7 @@ public:
         if (currX > 0 && currX < width && currY > 0)
         {
             const WitnessRegionConstraint &a = witness->regionConstraints[currX - 1][currY - 1];
-            const WitnessRegionConstraint &b = witness->regionConstraints[currX][currY];
+            const WitnessRegionConstraint &b = witness->regionConstraints[currX][currY - 1];
             if (logics.find(kDown) != logics.end() && Compare(a, b))
                 logics[kDown] = MUST_TAKE;
         }
