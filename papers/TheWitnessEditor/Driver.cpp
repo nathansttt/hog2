@@ -55,6 +55,48 @@ static void InitTetrisPieces()
     }
 }
 
+static void AddInferenceRule()
+{
+    entropy.ruleSet.rules.push_back(SeparationRule<puzzleWidth, puzzleHeight>());
+}
+
+static void InitPuzzle()
+{
+    witness.AddSeparationConstraint(0, 0, Colors::black);
+    witness.AddSeparationConstraint(0, 1, Colors::black);
+    witness.AddSeparationConstraint(0, 2, Colors::black);
+    witness.AddSeparationConstraint(0, 3, Colors::black);
+    
+    witness.AddSeparationConstraint(1, 3, Colors::black);
+    witness.AddSeparationConstraint(2, 3, Colors::black);
+    
+    witness.AddSeparationConstraint(3, 0, Colors::black);
+    witness.AddSeparationConstraint(3, 1, Colors::black);
+    witness.AddSeparationConstraint(3, 2, Colors::black);
+    witness.AddSeparationConstraint(3, 3, Colors::black);
+    
+    witness.AddSeparationConstraint(1, 0, Colors::lightblue);
+    witness.AddSeparationConstraint(1, 1, Colors::lightblue);
+    witness.AddSeparationConstraint(1, 2, Colors::lightblue);
+    
+    witness.AddSeparationConstraint(2, 0, Colors::lightblue);
+    witness.AddSeparationConstraint(2, 1, Colors::lightblue);
+    witness.AddSeparationConstraint(2, 2, Colors::lightblue);
+    
+    for (size_t i = 0; i < allSolutions.size(); i++)
+    {
+        auto &solution = allSolutions[i];
+        if (witness.GoalTest(solution)) {
+            currentSolutionIndices.emplace_back(i);
+        }
+    }
+    gNumSolutions = currentSolutionIndices.size();
+    WitnessState<puzzleWidth, puzzleHeight> state;
+    AddInferenceRule();
+    gMuse = entropy.SetRelative(true).Calculate(witness, state, 0).entropy;
+}
+
+
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
  */
@@ -86,6 +128,7 @@ void InstallHandlers()
 int main(int argc, char *argv[])
 {
     InitTetrisPieces();
+    InitPuzzle();
     GetAllSolutions(allSolutions);
     InstallHandlers();
     RunHOGGUI(argc, argv, 1280, 640);

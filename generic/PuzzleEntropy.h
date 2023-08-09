@@ -5,7 +5,6 @@
 //  Created by Samarium on 2023-07-21.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-
 #ifndef HOG2_GENERIC_PUZZLE_ENTROPY_H
 #define HOG2_GENERIC_PUZZLE_ENTROPY_H
 
@@ -79,23 +78,23 @@ public:
         return *this;
     }
 
-    virtual EntropyInfo Get(const SearchEnvironment<State, Action> &env, State &state, unsigned lookAhead)
+    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookAhead)
     {
         if (env.GoalTest(state))
             return { 0.0, 0 };
         std::vector<Action> &allActions = *actCache.getItem();
         env.GetActions(state, allActions);
+        FilterActions(env, state, allActions);
         if (allActions.empty())
         {
             actCache.returnItem(&allActions);
             return { inf, 0 };
         }
-        FilterActions(env, state, allActions);
         std::vector<EntropyInfo> &childEntropyInfo = *entropyInfoCache.getItem();
         for (auto &action: allActions)
         {
             env.ApplyAction(state, action);
-            childEntropyInfo.emplace_back(Get(env, state, (lookAhead > 0) ? lookAhead - 1 : 0));
+            childEntropyInfo.emplace_back(Calculate(env, state, (lookAhead > 0) ? lookAhead - 1 : 0));
             env.UndoAction(state, action);
         }
         for (auto it = childEntropyInfo.begin(); it != childEntropyInfo.end(); )

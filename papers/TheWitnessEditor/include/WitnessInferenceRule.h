@@ -5,7 +5,6 @@
 //  Created by Samarium on 2023-07-31.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-
 #ifndef THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H
 #define THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H
 
