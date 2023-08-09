@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs_html/$(NAME)/release
 DBG_BINDIR = $(ROOT)/html/debug
 REL_BINDIR = $(ROOT)/html/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/guihtml -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/search -I$(ROOT)/papers/TheWitnessEditor -I$(ROOT)/papers/TheWitnessEditor/include
+PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/guihtml -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/search -I$(ROOT)/envutil -I$(ROOT)/papers/TheWitnessEditor -I$(ROOT)/papers/TheWitnessEditor/include
 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)

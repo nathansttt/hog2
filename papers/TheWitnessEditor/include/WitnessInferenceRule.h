@@ -17,13 +17,24 @@ class SeparationRule: public InferenceRule<WitnessState<width, height>, WitnessA
 private:
     using State = WitnessState<width, height>;
     using Action = WitnessAction;
+    
+    SeparationRule() = default;
 
     static bool Compare(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
     {
         return a.t == kSeparation && b.t == kSeparation && a != b;
     }
-
+    
 public:
+    SeparationRule(const SeparationRule&) = delete;
+    void operator=(const SeparationRule&) = delete;
+    
+    static auto& GetInstance()
+    {
+        static SeparationRule<width, height> instance;
+        return instance;
+    }
+    
     void UpdateActionLogics(const SearchEnvironment<State, Action> &puzzle, const State &state,
                             std::unordered_map<Action, ActionType> &logics) const override
     {
@@ -64,27 +75,21 @@ public:
 };
 
 template <int width, int height>
-using RuleVariant = std::variant<SeparationRule<width, height>>;
-
-template <int width, int height>
 class WitnessPuzzleInferenceRuleSet: public PuzzleInferenceRuleSet<WitnessState<width, height>, WitnessAction>
 {
-
+private:
     using State = WitnessState<width, height>;
     using Action = WitnessAction;
-
+    
 public:
-    std::vector<RuleVariant<width, height>> rules;
+    std::vector<InferenceRule<State, Action>*> rules;
 
     void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
                             std::unordered_map<Action, ActionType> &logics) const override
     {
-        for (auto& rule: rules)
-        {
-          std::visit([&](auto&& arg) {
-              arg.UpdateActionLogics(env, state, logics);
-          }, rule);
-        }
+        std::for_each(rules.begin(), rules.end(), [&](auto rule) {
+            rule->UpdateActionLogics(env, state, logics);
+        });
     }
 };
 

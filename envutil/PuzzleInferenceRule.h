@@ -5,7 +5,6 @@
 //  Created by Samarium on 2023-07-26.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-
 #ifndef HOG2_ENV_UTIL_PUZZLE_INFERENCE_RULE_H
 #define HOG2_ENV_UTIL_PUZZLE_INFERENCE_RULE_H
 

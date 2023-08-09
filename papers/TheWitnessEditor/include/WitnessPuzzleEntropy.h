@@ -15,6 +15,7 @@
 template <int width, int height>
 class WitnessPuzzleEntropy: public Entropy<WitnessState<width, height>, WitnessAction>
 {
+private:
     using State = WitnessState<width, height>;
     using Action = WitnessAction;
 

@@ -57,7 +57,7 @@ static void InitTetrisPieces()
 
 static void AddInferenceRule()
 {
-    entropy.ruleSet.rules.push_back(SeparationRule<puzzleWidth, puzzleHeight>());
+    entropy.ruleSet.rules.push_back(&SeparationRule<puzzleWidth, puzzleHeight>::GetInstance());
 }
 
 static void InitPuzzle()
@@ -128,8 +128,8 @@ void InstallHandlers()
 int main(int argc, char *argv[])
 {
     InitTetrisPieces();
-    InitPuzzle();
     GetAllSolutions(allSolutions);
+    InitPuzzle();
     InstallHandlers();
     RunHOGGUI(argc, argv, 1280, 640);
     return 0;
