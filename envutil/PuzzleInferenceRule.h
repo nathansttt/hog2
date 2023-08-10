@@ -34,7 +34,7 @@ template<class State, class Action>
 class PuzzleInferenceRuleSet {
 protected:
     virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
-                                    std::unordered_map<Action, ActionType> &logics) const = 0;
+                                    std::unordered_map<Action, ActionType> &logics) const { }
 public:
     virtual void FilterActions(const SearchEnvironment<State, Action> &env, const State &state,
                                std::vector<Action> &actions) const

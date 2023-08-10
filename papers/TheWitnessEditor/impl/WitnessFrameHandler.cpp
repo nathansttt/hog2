@@ -95,7 +95,7 @@ static void DrawGameViewport(unsigned long windowID)
                         unsigned x = (i - y) / puzzleWidth;
                         if (p != gLastPosition) {
                             bool isAdding;
-                            if (constraint == editor.regionConstraints[x][y])
+                            if (constraint == editor.GetRegionConstraint(x, y))
                             {
                                 editor.ClearConstraint(x, y);
                                 isAdding = false;
@@ -176,7 +176,11 @@ static void DrawGameViewport(unsigned long windowID)
             display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
-        display.DrawText(to_string_with_precision(gMuse, 2).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+        if (gMuse != std::numeric_limits<double>::max())
+            display.DrawText(to_string_with_precision(gMuse, 2).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
+                         Graphics::textAlignRight, Graphics::textBaselineBottom);
+        else
+            display.DrawText("inf", Graphics::point{0.9, 1}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
     }
 }

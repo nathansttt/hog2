@@ -65,7 +65,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 unsigned y = i % puzzleWidth;
                                 unsigned x = (i - y) / puzzleWidth;
                                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
-                                if (constraint == witness.regionConstraints[x][y])
+                                if (constraint == witness.GetRegionConstraint(x, y))
                                     witness.ClearConstraint(x, y);
                                 else
                                     switch (constraint.t) {

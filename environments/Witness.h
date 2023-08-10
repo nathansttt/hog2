@@ -352,8 +352,6 @@ public:
 
     void GetActions(const WitnessState<width, height> &nodeID, std::vector <WitnessAction> &actions) const;
     
-    std::vector<WitnessAction> GetActionsWithLookahead(const WitnessState<width, height> &state, unsigned n = 0) const;
-
     void ApplyAction(WitnessState<width, height> &s, WitnessAction a) const;
 
     void ApplyAction(std::pair<int, int> &s, WitnessAction a) const;
@@ -410,6 +408,11 @@ public:
     bool Click(Graphics::point, InteractiveWitnessState<width, height> &ws);
 
     void Move(Graphics::point, InteractiveWitnessState<width, height> &ws);
+    
+    const WitnessRegionConstraint& GetRegionConstraint(int x, int y) const
+    {
+        return regionConstraints[x][y];
+    }
 
     void SetStart(int x, int y)
     {
@@ -1072,53 +1075,6 @@ void Witness<width, height>::GetActions(
     if (currX < width && !nodeID.Occupied(currX + 1, currY)) actions.push_back(kRight);
     if (currY > 0 && !nodeID.Occupied(currX, currY - 1)) actions.push_back(kDown);
     if (currY < height && !nodeID.Occupied(currX, currY + 1)) actions.push_back(kUp);
-}
-
-template<int width, int height>
-std::vector<WitnessAction> Witness<width, height>::GetActionsWithLookahead( // DFS
-       const WitnessState<width, height> &state, unsigned n) const
-{
-    auto actions = std::vector<WitnessAction>();
-    if (n == 0)
-    {
-        if (state.path.size() == 0)
-        {
-            actions.push_back(kStart);
-            return actions;
-        }
-        int currX = state.path.back().first;
-        int currY = state.path.back().second;
-        if (goalMap[GetPathIndex(currX, currY)] != 0)
-        {
-            actions.push_back(kEnd);
-            return actions;
-        }
-        if (currX > width || currY > height)
-            return actions;
-        if (currX > 0 && !state.Occupied(currX - 1, currY))
-            actions.push_back(kLeft);
-        if (currX < width && !state.Occupied(currX + 1, currY))
-            actions.push_back(kRight);
-        if (currY > 0 && !state.Occupied(currX, currY - 1))
-            actions.push_back(kDown);
-        if (currY < height && !state.Occupied(currX, currY + 1))
-            actions.push_back(kUp);
-        // TODO: apply inference rules
-    }
-    else
-    {
-        actions.assign(GetActionsWithLookahead(state));
-        for (auto it = actions.begin(); it != actions.end();)
-        {
-            auto future_state = state;
-            this->ApplyAction(future_state, *it);
-            if (GetActionsWithLookahead(future_state, n - 1).empty())
-                it = actions.erase(it);
-            else
-                ++it;
-        }
-    }
-    return actions;
 }
 
 template<int width, int height>

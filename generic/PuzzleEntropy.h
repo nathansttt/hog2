@@ -68,7 +68,7 @@ protected:
     }
 
     virtual void FilterActions(const SearchEnvironment<State, Action> &env, State &state,
-                               std::vector<Action> &actions) const = 0;
+                               std::vector<Action> &actions) const { }
 
 public:
 
