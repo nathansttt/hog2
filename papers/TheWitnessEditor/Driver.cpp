@@ -12,7 +12,6 @@
 
 #include "Globals.h"
 #include "SolutionUtil.h"
-#include "WitnessInferenceRule.h"
 #include "WitnessPuzzleEntropy.h"
 
 bool recording = false;

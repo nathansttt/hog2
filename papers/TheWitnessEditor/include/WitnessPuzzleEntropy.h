@@ -9,7 +9,6 @@
 #define THE_WITNESS_EDITOR_INCLUDE_WITNESS_PUZZLE_ENTROPY_H
 
 #include "PuzzleEntropy.h"
-#include "Witness.h"
 #include "WitnessInferenceRule.h"
 
 template <int width, int height>

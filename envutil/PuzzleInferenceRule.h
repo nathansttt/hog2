@@ -14,7 +14,6 @@
 #include <unordered_set>
 #include <vector>
 #include "SearchEnvironment.h"
-#include "Witness.h"
 
 enum ActionType
 {

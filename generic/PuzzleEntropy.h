@@ -12,7 +12,6 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "vectorCache.h"
-#include "PuzzleInferenceRule.h"
 
 struct EntropyInfo
 {
