@@ -33,8 +33,16 @@ template<class State, class Action>
 class PuzzleInferenceRuleSet {
 protected:
     virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
-                                    std::unordered_map<Action, ActionType> &logics) const { }
+                                    std::unordered_map<Action, ActionType> &logics) const
+    {
+        std::for_each(rules.begin(), rules.end(), [&](auto rule) {
+            rule->UpdateActionLogics(env, state, logics);
+        });
+    }
+    
 public:
+    std::vector<InferenceRule<State, Action>*> rules;
+    
     virtual void FilterActions(const SearchEnvironment<State, Action> &env, const State &state,
                                std::vector<Action> &actions) const
     {

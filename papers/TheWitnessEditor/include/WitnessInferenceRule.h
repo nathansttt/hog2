@@ -131,23 +131,4 @@ public:
     }
 };
 
-template <int width, int height>
-class WitnessPuzzleInferenceRuleSet: public PuzzleInferenceRuleSet<WitnessState<width, height>, WitnessAction>
-{
-private:
-    using State = WitnessState<width, height>;
-    using Action = WitnessAction;
-    
-public:
-    std::vector<InferenceRule<State, Action>*> rules;
-
-    void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
-                            std::unordered_map<Action, ActionType> &logics) const override
-    {
-        std::for_each(rules.begin(), rules.end(), [&](auto rule) {
-            rule->UpdateActionLogics(env, state, logics);
-        });
-    }
-};
-
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */

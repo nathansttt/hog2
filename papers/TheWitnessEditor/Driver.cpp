@@ -12,7 +12,7 @@
 
 #include "Globals.h"
 #include "SolutionUtil.h"
-#include "WitnessPuzzleEntropy.h"
+#include "WitnessInferenceRule.h"
 
 bool recording = false;
 bool parallel = false;
@@ -24,7 +24,7 @@ int selectTetrisPiece = 0;
 unsigned long currBoard = 0;
 
 Witness<puzzleWidth, puzzleHeight> witness;
-WitnessPuzzleEntropy<puzzleWidth, puzzleHeight> entropy;
+Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<Witness<puzzleWidth, puzzleHeight>> best;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;

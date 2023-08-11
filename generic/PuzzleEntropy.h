@@ -10,6 +10,7 @@
 
 #include <numeric>
 #include <vector>
+#include "PuzzleInferenceRule.h"
 #include "SearchEnvironment.h"
 #include "vectorCache.h"
 
@@ -66,10 +67,8 @@ protected:
         return KlDivergence(dist, uniform);
     }
 
-    virtual void FilterActions(const SearchEnvironment<State, Action> &env, State &state,
-                               std::vector<Action> &actions) const { }
-
 public:
+    PuzzleInferenceRuleSet<State, Action> ruleSet;
 
     auto& SetRelative(bool val)
     {
@@ -83,7 +82,7 @@ public:
             return { 0.0, 0 };
         std::vector<Action> &allActions = *actCache.getItem();
         env.GetActions(state, allActions);
-        FilterActions(env, state, allActions);
+        ruleSet.FilterActions(env, state, allActions);
         if (allActions.empty())
         {
             actCache.returnItem(&allActions);
