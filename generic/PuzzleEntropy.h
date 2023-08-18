@@ -27,19 +27,18 @@ protected:
     static constexpr double inf = std::numeric_limits<double>::max();
     vectorCache<Action> actCache;
     vectorCache<EntropyInfo> entropyInfoCache;
+    vectorCache<double> doubleCache;
     bool isRelative = false;
 
-    static std::vector<double> Softmin(const std::vector<double> &vars)
+    static void Softmin(const std::vector<double> &vars, std::vector<double> &ret)
     {
         double sum = std::accumulate(vars.begin(), vars.end(), 0.0, [](double r, double i) {
             return r + std::exp(-i);
         });
-        auto ret = std::vector<double>();
         ret.reserve(vars.size());
         std::transform(vars.begin(), vars.end(), std::back_inserter(ret), [&](double i) {
             return std::exp(-i) / sum;
         });
-        return ret;
     }
 
     static double KlDivergence(const std::vector<double> &p, const std::vector<double> &q)
@@ -50,21 +49,26 @@ protected:
         for (size_t i = 0; i < p.size(); ++i)
         {
             if (p[i] != 0.0 && q[i] != 0.0)
-                divergence += p[i] * std::log(p[i] / q[i]);
+                divergence += p[i] * std::log2(p[i] / q[i]);
         }
         return divergence;
     }
 
     double ImmediateEntropy(const std::vector<Action> &actions,
-                            const std::vector<double> &childEntropy) const
+                            const std::vector<double> &childEntropy)
     {
         auto size = static_cast<double>(actions.size());
         if (!isRelative)
             return std::log2(size);
-        auto dist = Softmin(childEntropy);
-        auto uniform = std::vector<double>(actions.size());
+        std::vector<double> &dist = *doubleCache.getItem();
+        Softmin(childEntropy, dist);
+        std::vector<double> &uniform = *doubleCache.getItem();
+        uniform.resize(actions.size());
         std::generate(uniform.begin(), uniform.end(), [&]() { return 1 / size; });
-        return KlDivergence(dist, uniform);
+        auto kl = KlDivergence(dist, uniform);
+        doubleCache.returnItem(&dist);
+        doubleCache.returnItem(&uniform);
+        return kl;
     }
 
 public:

@@ -126,7 +126,7 @@ static void DrawGameViewport(unsigned long windowID)
                                 isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
-                            // gMuse = MinimumUniformSolutionEntropy(editor, iws.ws);
+                            gMuse = entropy.SetRelative(true).Calculate(witness, iws.ws, 0).entropy;
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         editor.DrawRegionConstraint(display, constraint, p);
@@ -160,7 +160,7 @@ static void DrawGameViewport(unsigned long windowID)
                                     isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
-                            // gMuse = MinimumUniformSolutionEntropy(editor, iws.ws);
+                            gMuse = entropy.SetRelative(true).Calculate(witness, iws.ws, 0).entropy;
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         gLastPosition = location.first;

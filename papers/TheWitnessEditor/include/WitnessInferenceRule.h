@@ -11,124 +11,104 @@
 #include "PuzzleInferenceRule.h"
 #include "Witness.h"
 
-template<int width, int height>
-class SeparationRule: public InferenceRule<WitnessState<width, height>, WitnessAction>
+static bool CompareSC(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
 {
-private:
-    using State = WitnessState<width, height>;
-    using Action = WitnessAction;
-    
-    SeparationRule() = default;
+    return a.t == kSeparation && b.t == kSeparation && a != b;
+}
 
-    static bool Compare(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
-    {
-        return a.t == kSeparation && b.t == kSeparation && a != b;
+template<int width, int height>
+ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
+                          const WitnessState<width, height> &state, const WitnessAction &action)
+{
+    if (state.path.empty())
+        return UNKNOWN;
+    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    int currX = state.path.back().first;
+    int currY = state.path.back().second;
+    switch (action) {
+        case kUp:
+        {
+            if (currX < width && currY < height
+                && CompareSC(witness->GetRegionConstraint(currX - 1, currY),
+                             witness->GetRegionConstraint(currX, currY)))
+                return MUST_TAKE;
+            break;
+        }
+        case kRight:
+        {
+            if (currY > 0 && currY < height
+                && CompareSC(witness->GetRegionConstraint(currX, currY),
+                             witness->GetRegionConstraint(currX, currY - 1)))
+                return MUST_TAKE;
+            break;
+        }
+        case kDown:
+        {
+            if (currX < width && currY > 0
+                && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
+                             witness->GetRegionConstraint(currX, currY - 1)))
+                return MUST_TAKE;
+            break;
+        }
+        case kLeft:
+        {
+            if (currY > 0 && currY < height
+                && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
+                             witness->GetRegionConstraint(currX - 1, currY)))
+                return MUST_TAKE;
+            break;
+        }
+        default:
+            break;
     }
-    
-public:
-    SeparationRule(const SeparationRule&) = delete;
-    void operator=(const SeparationRule&) = delete;
-    
-    static auto& GetInstance()
-    {
-        static SeparationRule<width, height> instance;
-        return instance;
-    }
-    
-    void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
-                            std::unordered_map<Action, ActionType> &logics) const override
-    {
-        if (state.path.empty())
-            return;
-        const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
-        int currX = state.path.back().first;
-        int currY = state.path.back().second;
-        
-        if (logics.find(kUp) != logics.end()
-            && currX < width && currY < height
-            && Compare(witness->GetRegionConstraint(currX - 1, currY),
-                       witness->GetRegionConstraint(currX, currY)))
-            logics[kUp] = MUST_TAKE;
-        
-        if (logics.find(kRight) != logics.end()
-            && currY > 0 && currY < height
-            && Compare(witness->GetRegionConstraint(currX, currY),
-                       witness->GetRegionConstraint(currX, currY - 1)))
-            logics[kRight] = MUST_TAKE;
-        
-        if (logics.find(kDown) != logics.end()
-            && currX < width && currY > 0
-            && Compare(witness->GetRegionConstraint(currX - 1, currY - 1),
-                       witness->GetRegionConstraint(currX, currY - 1)))
-            logics[kDown] = MUST_TAKE;
-        
-        if (logics.find(kLeft) != logics.end()
-            && currY > 0 && currY < height
-            && Compare(witness->GetRegionConstraint(currX - 1, currY - 1),
-                       witness->GetRegionConstraint(currX - 1, currY)))
-            logics[kLeft] = MUST_TAKE;
-    }
-};
+    return UNKNOWN;
+}
 
 template <int width, int height>
-class PathConstraintRule: public InferenceRule<WitnessState<width, height>, WitnessAction>
+ActionType PathConstraintRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
+                              const WitnessState<width, height> &state, const WitnessAction &action)
 {
-private:
-    using State = WitnessState<width, height>;
-    using Action = WitnessAction;
-    
-    PathConstraintRule() = default;
-public:
-    PathConstraintRule(const PathConstraintRule&) = delete;
-    void operator=(const PathConstraintRule&) = delete;
-    
-    static auto& GetInstance()
-    {
-        static PathConstraintRule instance;
-        return instance;
-    }
-    
-    void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
-                            std::unordered_map<Action, ActionType> &logics) const override
-    {
-        if (state.path.empty() || logics.empty())
-            return;
-        const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
-        int currX = state.path.back().first;
-        int currY = state.path.back().second;
-        
-        if (logics.find(kUp) != logics.end())
+    if (state.path.empty())
+        return UNKNOWN;
+    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    int currX = state.path.back().first;
+    int currY = state.path.back().second;
+    switch (action) {
+        case kUp:
         {
             if (witness->GetMustCrossConstraint(false, currX, currY))
-                logics[kUp] = MUST_TAKE;
+                return MUST_TAKE;
             if (witness->GetCannotCrossConstraint(false, currX, currY))
-                logics[kUp] = CANNOT_TAKE;
+                return CANNOT_TAKE;
+            break;
         }
-        
-        if (logics.find(kRight) != logics.end())
+        case kRight:
         {
             if (witness->GetMustCrossConstraint(true, currX, currY))
-                logics[kRight] = MUST_TAKE;
+                return MUST_TAKE;
             if (witness->GetCannotCrossConstraint(true, currX, currY))
-                logics[kRight] = CANNOT_TAKE;
+                return CANNOT_TAKE;
+            break;
         }
-        
-        if (logics.find(kDown) != logics.end())
+        case kDown:
         {
             if (witness->GetMustCrossConstraint(false, currX, currY - 1))
-                logics[kDown] = MUST_TAKE;
+                return MUST_TAKE;
             if (witness->GetCannotCrossConstraint(false, currX, currY - 1))
-                logics[kDown] = CANNOT_TAKE;
+                return CANNOT_TAKE;
+            break;
         }
-        
-        if (logics.find(kLeft) != logics.end())
+        case kLeft:
         {
             if (witness->GetMustCrossConstraint(true, currX - 1, currY))
-                logics[kLeft] = MUST_TAKE;
+                return MUST_TAKE;
             if (witness->GetCannotCrossConstraint(true, currX - 1, currY))
-                logics[kLeft] = CANNOT_TAKE;
+                return CANNOT_TAKE;
         }
+        default:
+            break;
     }
-};
+    return UNKNOWN;
+}
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */
