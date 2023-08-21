@@ -60,3 +60,4 @@ SRC_CPP = \
 	utils/RangeCompression.cpp \
 	utils/MR1Permutation.cpp \
 	utils/ScreenTransition.cpp \
+	utils/FileUtil.cpp

@@ -45,7 +45,8 @@ PROJECTS = \
   demos/inconsistency-graph \
   demos/racetrack \
   demos/multi-target \
-  papers/DWA 
+  papers/DWA\
+  papers/TheWitnessEditor
 
 
 
@@ -98,7 +99,8 @@ PROJECTS_ALL = \
   demos/astar \
   demos/idastar \
   demos/multi-target \
-  papers/DWA 
+  papers/DWA \
+  papers/TheWitnessEditor
 
 
 # sequentially to avoid same sub-target in sub-make invoked twice

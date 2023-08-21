@@ -6,12 +6,12 @@
 #-----------------------------------------------------------------------------
 
 CXX = emcc # clang++
-COMMON_CXXFLAGS += -Wall -std=c++11 # -stdlib=libc++
+COMMON_CXXFLAGS += -Wall -std=c++14 # -stdlib=libc++
 
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = emcc
-COMMON_CFLAGS += -Wall 
+COMMON_CFLAGS += -Wall
 
 LN = $(CXX)
 #COMMON_LNFLAGS += -stdlib=libc++
@@ -20,14 +20,14 @@ AR = emar
 
 COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/STUB/GL/ -DNO_OPENGL
 
-# if Linux need some other pthread call 
+# if Linux need some other pthread call
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
 COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread
 else
 COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread
 endif
 
-COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
+# COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
 
 DBG_CXXFLAGS = $(PROJ_DBG_CXXFLAGS) $(COMMON_CXXFLAGS) -g
 REL_CXXFLAGS = $(PROJ_REL_CXXFLAGS) $(COMMON_CXXFLAGS) -g -O3 #-DNDEBUG
@@ -35,8 +35,8 @@ REL_CXXFLAGS = $(PROJ_REL_CXXFLAGS) $(COMMON_CXXFLAGS) -g -O3 #-DNDEBUG
 DBG_CFLAGS = $(PROJ_DBG_CFLAGS) $(COMMON_CFLAGS) -g
 REL_CFLAGS = $(PROJ_REL_CFLAGS) $(COMMON_CFLAGS) -g -O3 #-DNDEBUG
 
-DBG_LNFLAGS = $(PROJ_DBG_LNFLAGS) $(COMMON_LNFLAGS) -g -s EXPORTED_FUNCTIONS="['_InitHOG', '_InitHOGArg', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']" -s EXTRA_EXPORTED_RUNTIME_METHODS=["cwrap"]
-REL_LNFLAGS = $(PROJ_REL_LNFLAGS) $(COMMON_LNFLAGS) -g -O3 -s EXPORTED_FUNCTIONS="['_InitHOG', '_InitHOGArg', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']" -s EXTRA_EXPORTED_RUNTIME_METHODS=["cwrap"]
+DBG_LNFLAGS = $(PROJ_DBG_LNFLAGS) $(COMMON_LNFLAGS) -g -s EXPORTED_FUNCTIONS="['_InitHOG', '_InitHOGArg', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']" -s EXPORTED_RUNTIME_METHODS=["cwrap"]
+REL_LNFLAGS = $(PROJ_REL_LNFLAGS) $(COMMON_LNFLAGS) -g -O3 -s EXPORTED_FUNCTIONS="['_InitHOG', '_InitHOGArg', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']" -s EXPORTED_RUNTIME_METHODS=["cwrap"]
 
 DBG_OBJS = \
   $(patsubst %.cpp, $(DBG_OBJDIR)/%.o, $(SRC_CPP)) \
@@ -69,7 +69,7 @@ $(REL_OBJDIR)/%.o: %.c
 
 # Creation of dependency files using the compiler with -MM option and
 # sed for postprocessing of its output (including the dependency file in
-# the target section and adding the correct path to the object file). 
+# the target section and adding the correct path to the object file).
 # Dependency files are separated for each project, even if the
 # object files are shared, since the compiler generated dependency lines
 # contain relative paths.

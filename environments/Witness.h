@@ -148,7 +148,7 @@ public:
 };
 
 enum WitnessRegionConstraintType {
-    kNone = 0,
+    kNoRegionConstraint = 0,
     kRegion = 1,
     kStar = 2,
     kTetris = 3,
@@ -167,7 +167,7 @@ struct WitnessRegionConstraint {
 };
 
 enum WitnessPathConstraintType {
-    kNoConstraint = 0,
+    kNoPathConstraint = 0,
     kMustCross = 1,
     kCannotCross = 2,
     kEdgeConstraintCount = 3
@@ -278,67 +278,68 @@ public:
     }
 
     void Reset()
-	{
-		for (int c = 0; c < kRegionConstraintCount; c++)
-			constraintCount[c] = 0;
-		constraintCount[kNone] = width * height;
-		
-		for (int x = 0; x < width; x++)
-		{
-			for (int y = 0; y < height; y++)
-			{
-				regionConstraints[x][y].t = kNone;
-				Graphics::point p1 = GetScreenCoord(x, y);
-				Graphics::point p2 = GetScreenCoord(x + 1, y + 1);
-				Graphics::point p3 = (p1 + p2) * 0.5;
-				regionConstraintLocations[x * height + y] = std::make_pair(p3, Graphics::rect{p3, 0.15});
-			}
-		}
-		
-		for (int x = 0; x < GetNumPathConstraints(); x++)
-			pathConstraints[x] = kNoConstraint;
-		
-		
-		for (int x = 0; x < width; x++)
-		{
-			for (int y = 0; y <= height; y++)
-			{
-				Graphics::point p = (GetScreenCoord(x, y) + GetScreenCoord(x + 1, y)) * 0.5;
-				pathConstraintLocations[x + y * width] = std::make_pair(p, Graphics::rect{p, 0.05});
-			}
-		}
-		for (int x = 0; x <= width; x++)
-		{
-			for (int y = 0; y < height; y++)
-			{
-				Graphics::point p = (GetScreenCoord(x, y) + GetScreenCoord(x, y + 1)) * 0.5;
-				pathConstraintLocations[width * (height + 1) + x * height + y] =
-				std::make_pair(p, Graphics::rect{p, 0.05});
-			}
-		}
-		for (int x = 0; x < width + 1; x++)
-		{
-			for (int y = 0; y < height + 1; y++)
-			{
-				Graphics::point p = GetScreenCoord(x, y);
-				pathConstraintLocations[width * (height + 1) + (width + 1) * height + (width + 1) * y + x] =
-				std::make_pair(p, Graphics::rect{p, 0.05});
-			}
-		}
-		
-		//		mustCrossConstraints.clear();
-		//		mustCrossEdgeConstraints.clear();
-		//		cannotCrossConstraints.clear();
-		//		cannotCrossEdgeConstraints.clear();
-		start.clear();
-		start.emplace_back(0, 0);
-		SetGoal(width, height + 1);
-		//		goal.clear();
-		//		goal.push_back({width,height});
-		//		goal.push_back({width-1,height});
-		//		goal.push_back({width,height-1});
-	}
+    {
+        for (int c = 0; c < kRegionConstraintCount; c++)
+            constraintCount[c] = 0;
+        constraintCount[kNoRegionConstraint] = width * height;
 
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                regionConstraints[x][y].t = kNoRegionConstraint;
+                Graphics::point p1 = GetScreenCoord(x, y);
+                Graphics::point p2 = GetScreenCoord(x + 1, y + 1);
+                Graphics::point p3 = (p1 + p2) * 0.5;
+                regionConstraintLocations[x * height + y] = std::make_pair(p3, Graphics::rect{p3, 0.15});
+            }
+        }
+
+        for (int x = 0; x < GetNumPathConstraints(); x++)
+            pathConstraints[x] = kNoPathConstraint;
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y <= height; y++)
+            {
+                Graphics::point p = (GetScreenCoord(x, y) + GetScreenCoord(x + 1, y)) * 0.5;
+                // horizontal
+                pathConstraintLocations[x + y * width] = std::make_pair(p, Graphics::rect{p, 0.05});
+            }
+        }
+        for (int x = 0; x <= width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Graphics::point p = (GetScreenCoord(x, y) + GetScreenCoord(x, y + 1)) * 0.5;
+                // vertical
+                pathConstraintLocations[width * (height + 1) + x * height + y] =
+                        std::make_pair(p, Graphics::rect{p, 0.05});
+            }
+        }
+        for (int x = 0; x < width + 1; x++)
+        {
+            for (int y = 0; y < height + 1; y++)
+            {
+                Graphics::point p = GetScreenCoord(x, y);
+                // vertex
+                pathConstraintLocations[width * (height + 1) + (width + 1) * height + (width + 1) * y + x] =
+                        std::make_pair(p, Graphics::rect{p, 0.05});
+            }
+        }
+
+        //		mustCrossConstraints.clear();
+        //		mustCrossEdgeConstraints.clear();
+        //		cannotCrossConstraints.clear();
+        //		cannotCrossEdgeConstraints.clear();
+        start.clear();
+        start.emplace_back(0, 0);
+        SetGoal(width, height + 1);
+        //		goal.clear();
+        //		goal.push_back({width,height});
+        //		goal.push_back({width-1,height});
+        //		goal.push_back({width,height-1});
+    }
 
     void GetSuccessors(
             const WitnessState<width, height> &nodeID, std::vector <WitnessState<width, height>> &neighbors) const;
@@ -437,7 +438,7 @@ public:
         }
     }
 
-    void ClearPathConstraints() { pathConstraints = {kNoConstraint}; }
+    void ClearPathConstraints() { pathConstraints = {kNoPathConstraint}; }
 
     //{ mustCrossConstraints.clear(); mustCrossEdgeConstraints.clear(); }
     void SetMustCrossConstraint(int);
@@ -482,12 +483,12 @@ public:
         {
             for (int y = 0; y < height; y++)
             {
-                regionConstraints[x][y].t = kNone;
+                regionConstraints[x][y].t = kNoRegionConstraint;
             }
         }
         for (int c = 0; c < kRegionConstraintCount; c++)
             constraintCount[c] = 0;
-        constraintCount[kNone] = width * height;
+        constraintCount[kNoRegionConstraint] = width * height;
     }
 
     void ClearConstraint(WitnessRegionConstraintType t)
@@ -499,8 +500,8 @@ public:
                 if (t == regionConstraints[x][y].t)
                 {
                     constraintCount[t]--;
-                    regionConstraints[x][y].t = kNone;
-                    constraintCount[kNone]++;
+                    regionConstraints[x][y].t = kNoRegionConstraint;
+                    constraintCount[kNoRegionConstraint]++;
                 }
             }
         }
@@ -509,8 +510,8 @@ public:
     void ClearConstraint(int x, int y)
     {
         constraintCount[regionConstraints[x][y].t]--;
-        constraintCount[kNone]++;
-        regionConstraints[x][y].t = kNone;
+        constraintCount[kNoRegionConstraint]++;
+        regionConstraints[x][y].t = kNoRegionConstraint;
     }
 
     /* Triangles - must cross as many edges as triangles */
@@ -771,41 +772,40 @@ public:
         }
 
 		{
-			hash += quote + "cc" + quote + ":{";
-			for (int x = 0; x < width; x++)
-			{
-				for (int y = 0; y < height; y++)
-				{
-					if (x != 0 || y != 0)
-						hash += ",";
-					hash += quote;
-					hash += std::to_string(regionConstraints[x][y].t)+";";
-					// no point writing garbage
-					if (regionConstraints[x][y].t == kNone || regionConstraints[x][y].t == kRegion || regionConstraints[x][y].t == kStar)
-						hash += "0;";
-					else
-						hash += std::to_string(regionConstraints[x][y].parameter)+";";
-					if (regionConstraints[x][y].t == kNone)
+            hash += quote + "cc" + quote + ":{";
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (x != 0 || y != 0) hash += ",";
+                    hash += quote;
+                    hash += std::to_string(regionConstraints[x][y].t) + ";";
+                    // no point writing garbage
+                    if (regionConstraints[x][y].t == kNoRegionConstraint)
+                        hash += "0;";
+                    else
+                        hash += std::to_string(regionConstraints[x][y].parameter) + ";";
+					if (regionConstraints[x][y].t == kNoRegionConstraint)
 						hash += "#DADFAD";
 					else
 						hash += regionConstraints[x][y].c.hex();
-					hash += quote;
-				}
-			}
-			hash += "},";
-		}
-				
-		{
-			hash += quote + "mc" + quote + ":" + quote;
-			// add must-cross constraints
-			for (int x = 0; x < GetNumPathConstraints(); x++)
-				hash += GetMustCrossConstraint(x)?"1":(GetCannotCrossConstraint(x)?"2":"0");
-			hash += quote;
-		}
-		hash += "}";
-		return hash;
-	}
-		
+                    hash += quote;
+                }
+            }
+            hash += "},";
+        }
+
+        {
+            hash += quote + "mc" + quote + ":" + quote;
+            // add must-cross constraints
+            for (int x = 0; x < GetNumPathConstraints(); x++)
+                hash += GetMustCrossConstraint(x) ? "1" : (GetCannotCrossConstraint(x) ? "2" : "0");
+            hash += quote;
+        }
+        hash += "}";
+        return hash;
+    }
+
     void GetDimensionsFromHashString(const std::string &s, int &w, int &h) const
     {
         const char *loc = strstr(s.c_str(), "dim");
@@ -1612,7 +1612,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
                         int xx = GetRegionFromX(r); // l%width;
                         int yy = GetRegionFromY(r); // l/width;
 
-                        if (regionConstraints[xx][yy].t != kNone &&
+                        if (regionConstraints[xx][yy].t != kNoRegionConstraint &&
                             regionConstraints[x][y].c == regionConstraints[xx][yy].c)
                         {
                             count++;
@@ -1794,6 +1794,10 @@ constexpr int Witness<width, height>::GetNumPathConstraints()
     return width * (height + 1) + (width + 1) * height + (width + 1) * (height + 1);
 }
 
+#pragma mark -
+#pragma mark Path Constraints
+#pragma mark -
+
 template<int width, int height>
 void Witness<width, height>::SetMustCrossConstraint(int which)
 {
@@ -1839,7 +1843,7 @@ bool Witness<width, height>::GetMustCrossConstraint(int which) const
 template<int width, int height>
 void Witness<width, height>::ClearMustCrossConstraint(int which)
 {
-    pathConstraints[which] = kNoConstraint;
+    pathConstraints[which] = kNoPathConstraint;
 }
 
 template<int width, int height>
@@ -1849,7 +1853,7 @@ bool Witness<width, height>::GetMustCrossConstraint(
     if (horiz)
         return GetMustCrossConstraint(y * width + x);
     else
-        return GetMustCrossConstraint(width * (height + 1) + y + x * height);
+        return GetMustCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -1866,7 +1870,7 @@ void Witness<width, height>::AddMustCrossConstraint(bool horiz, int x,
     if (horiz)
         SetMustCrossConstraint(y * width + x);
     else
-        SetMustCrossConstraint(width * (height + 1) + y * width + x);
+        SetMustCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -1908,7 +1912,7 @@ void Witness<width, height>::RemoveMustCrossConstraint(bool horiz, int x,
     if (horiz)
         RemoveMustCrossConstraint(y * width + x);
     else
-        RemoveMustCrossConstraint(width * (height + 1) + y * width + x);
+        RemoveMustCrossConstraint(width * (height + 1) + x * height + y);
 
     //	if (which < width*(height+1))
     //	{
@@ -1937,10 +1941,6 @@ void Witness<width, height>::RemoveMustCrossConstraint(int x, int y) // { mustCr
 {
     ClearMustCrossConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
 }
-
-#pragma mark -
-#pragma mark Path Constraints
-#pragma mark -
 
 template<int width, int height>
 constexpr int Witness<width, height>::GetNumCannotCrossConstraints() const
@@ -2013,7 +2013,7 @@ bool Witness<width, height>::GetCannotCrossConstraint(int which) const
 template<int width, int height>
 void Witness<width, height>::ClearCannotCrossConstraint(int which)
 {
-    pathConstraints[which] = kNoConstraint;
+    pathConstraints[which] = kNoPathConstraint;
     //	if (which < width*(height+1))
     //	{
     //		int x = which%(width);
@@ -2050,7 +2050,7 @@ bool Witness<width, height>::GetCannotCrossConstraint(
     if (horiz)
         return GetCannotCrossConstraint(y * width + x);
     else
-        return GetCannotCrossConstraint(width * (height + 1) + y * width + x);
+        return GetCannotCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -2060,7 +2060,7 @@ void Witness<width, height>::AddCannotCrossConstraint(
     if (horiz)
         AddCannotCrossConstraint(y * width + x);
     else
-        AddCannotCrossConstraint(width * (height + 1) + y * width + x);
+        AddCannotCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -2082,7 +2082,7 @@ void Witness<width, height>::RemoveCannotCrossConstraint(bool horiz, int x,
     if (horiz)
         RemoveCannotCrossConstraint(y * width + x);
     else
-        RemoveCannotCrossConstraint(width * (height + 1) + y * width + x);
+        RemoveCannotCrossConstraint(width * (height + 1) + x * height + y);
 }
 
 template<int width, int height>
@@ -2397,7 +2397,7 @@ void Witness<width, height>::DrawRegionConstraint(
 {
     switch (constraint.t)
     {
-    case kNone:
+    case kNoRegionConstraint:
         break;
     case kRegion:
     {

@@ -1,4 +1,4 @@
-#include "../Driver.h"
+#include "SolutionUtil.h"
 
 void GetAllSolutions()
 {
@@ -22,7 +22,8 @@ void GetAllSolutions()
 }
 
 int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &wp,
-    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, int &len, int limit)
+    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
+                   int &len, uint64_t limit)
 {
     int count = 0;
     for (const auto &i : allSolutions)
@@ -39,7 +40,7 @@ int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &wp,
 
 int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
     const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, std::vector<int> &solutions,
-    const std::vector<int> &forbidden, int &len, int limit)
+    const std::vector<int> &forbidden, int &len, uint64_t limit)
 {
     solutions.resize(0);
     int count = 0;

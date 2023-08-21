@@ -3,14 +3,15 @@
  *  hog2
  *
  *  Created by Nathan Sturtevant on 5/31/05.
- *  Modified by Junwen Shen on 06/01/23.
+ *  Modified by Junwen Shen on 06/29/23.
  *
  * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
  */
 #include "Driver.h"
 
-#include "FileUtil.h"
+#include "Globals.h"
+#include "SolutionUtil.h"
 
 bool recording = false;
 bool parallel = false;
@@ -24,6 +25,7 @@ unsigned long currBoard = 0;
 Witness<puzzleWidth, puzzleHeight> witness;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<Witness<puzzleWidth, puzzleHeight>> best;
+std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 // std::vector<uint64_t> otherbest;
 
 std::vector<TetrisItem> gTetrisPieces = {};
@@ -81,6 +83,7 @@ void InstallHandlers()
 int main(int argc, char *argv[])
 {
     InitTetrisPieces();
+    GetAllSolutions(allSolutions);
     InstallHandlers();
     RunHOGGUI(argc, argv, 1280, 640);
     return 0;
