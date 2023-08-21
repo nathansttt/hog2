@@ -964,7 +964,7 @@ void ExtractUniqueStates(int depth)
 	char fname[255];
 	sprintf(fname, "fling-unique-%d.dat", depth);
 	printf("Reading from '%s'\n", fname);
-	BitVector *b = new BitVector(f.getMaxSinglePlayerRank(56, depth), fname, false);
+	BitVector *b = new BitVector(f.getMaxSinglePlayerRank(56, depth), fname);
 	uint64_t maxVal = f.getMaxSinglePlayerRank(56, depth);
 	FlingBoard board;
 	for (uint64_t t = 0; t < maxVal; t++)
@@ -1009,6 +1009,7 @@ void ExtractUniqueStates(int depth)
 			}
 		}
 	}
+	b->Save(fname);
 }
 
 void BuildTables(unsigned long , tKeyboardModifier, char)
@@ -1020,9 +1021,9 @@ void BuildTables(unsigned long , tKeyboardModifier, char)
 
 	char fname[255];
 	sprintf(fname, "fling-%d.dat", currSize);
-	table[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname, true);
+	table[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname);
 	sprintf(fname, "fling-unique-%d.dat", currSize);
-	unique[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname, true);
+	unique[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname);
 	//table[currSize].resize(f.getMaxSinglePlayerRank(56, currSize));
 
 	solvable = 0;
@@ -1050,6 +1051,7 @@ void BuildTables(unsigned long , tKeyboardModifier, char)
 	perc /= (double)f.getMaxSinglePlayerRank(56, currSize);
 	printf("%lld are uniquely solvable (%3.1f%%)\n%3.2f sec elapsed\n", uniqueSolvable, 100*perc, t.EndTimer());
 	fflush(stdout);
+	// TODO: save bits -- old code did so when using mmap
 //	char fname[255];
 //	sprintf(fname, "/Users/nathanst/fling-%d.dat", currSize);
 	//t.StartTimer();
@@ -1077,7 +1079,7 @@ void ReadTables(unsigned long , tKeyboardModifier, char)
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-%d.dat", x);
 		t.StartTimer();
-		table[x] = new BitVector(f.getMaxSinglePlayerRank(56, x), fname, false);
+		table[x] = new BitVector(f.getMaxSinglePlayerRank(56, x), fname);
 //		if (ReadData(table[x], fname) != true)
 //		{
 //			printf("Error reading data\n");
