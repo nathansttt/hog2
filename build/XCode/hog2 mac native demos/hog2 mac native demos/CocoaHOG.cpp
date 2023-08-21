@@ -50,6 +50,8 @@ void RunHOGGUI(int argc, char* argv[], int windowDimension)
 void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 {
 	ProcessCommandLineArgs(argc, argv);
+	context.windowWidth = xDimension;
+	context.windowHeight = yDimension;
 //	initialConditions(pContextInfo);
 //	HandleWindowEvent(pContextInfo, kWindowCreated);
 }
