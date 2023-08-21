@@ -13,6 +13,7 @@
 #include <cstdio>
 #include "BitVector.h"
 #include <cinttypes>
+#include <cassert>
 
 BitVector::BitVector(uint64_t _size)
 {
@@ -21,6 +22,12 @@ BitVector::BitVector(uint64_t _size)
 	storage = new storageElement[size];
 	for (size_t x = 0; x < size; x++)
 		storage[x] = 0;
+}
+
+BitVector::BitVector(uint64_t size, const char *fname)
+{
+	Load(fname);
+	assert(size == true_size);
 }
 
 BitVector::~BitVector()
