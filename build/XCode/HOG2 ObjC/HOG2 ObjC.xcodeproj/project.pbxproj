@@ -117,7 +117,6 @@
 		4625C2542A4BD80B004A8BBC /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
 		4625C2552A4BD80B004A8BBC /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5511624AEFD6600E9FF7F /* CanonicalGrid.cpp */; };
 		4625C2562A4BD80B004A8BBC /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5502824AEFD6400E9FF7F /* Perceptron.cpp */; };
-		4625C2572A4BD80B004A8BBC /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		4625C2582A4BD80B004A8BBC /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504724AEFD6400E9FF7F /* EnvUtil.cpp */; };
 		4625C2592A4BD80B004A8BBC /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5508124AEFD6500E9FF7F /* FloydWarshall.cpp */; };
 		4625C25A2A4BD80B004A8BBC /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5505224AEFD6400E9FF7F /* NBitArray.cpp */; };
@@ -242,7 +241,6 @@
 		C403F6F627B37B96001C0043 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
 		C403F6F727B37B96001C0043 /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5511624AEFD6600E9FF7F /* CanonicalGrid.cpp */; };
 		C403F6F827B37B96001C0043 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5502824AEFD6400E9FF7F /* Perceptron.cpp */; };
-		C403F6F927B37B96001C0043 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		C403F6FA27B37B96001C0043 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504724AEFD6400E9FF7F /* EnvUtil.cpp */; };
 		C403F6FB27B37B96001C0043 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5508124AEFD6500E9FF7F /* FloydWarshall.cpp */; };
 		C403F6FC27B37B96001C0043 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5505224AEFD6400E9FF7F /* NBitArray.cpp */; };
@@ -366,7 +364,6 @@
 		C4045D3E2740830900A8B6B5 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
 		C4045D3F2740830900A8B6B5 /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5511624AEFD6600E9FF7F /* CanonicalGrid.cpp */; };
 		C4045D402740830900A8B6B5 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5502824AEFD6400E9FF7F /* Perceptron.cpp */; };
-		C4045D412740830900A8B6B5 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		C4045D422740830900A8B6B5 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504724AEFD6400E9FF7F /* EnvUtil.cpp */; };
 		C4045D432740830900A8B6B5 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5508124AEFD6500E9FF7F /* FloydWarshall.cpp */; };
 		C4045D442740830900A8B6B5 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5505224AEFD6400E9FF7F /* NBitArray.cpp */; };
@@ -483,7 +480,6 @@
 		C44B911926E6A2CE001A3459 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
 		C44B911A26E6A2CE001A3459 /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5511624AEFD6600E9FF7F /* CanonicalGrid.cpp */; };
 		C44B911B26E6A2CE001A3459 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5502824AEFD6400E9FF7F /* Perceptron.cpp */; };
-		C44B911C26E6A2CE001A3459 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		C44B911D26E6A2CE001A3459 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504724AEFD6400E9FF7F /* EnvUtil.cpp */; };
 		C44B911E26E6A2CE001A3459 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5508124AEFD6500E9FF7F /* FloydWarshall.cpp */; };
 		C44B911F26E6A2CE001A3459 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5505224AEFD6400E9FF7F /* NBitArray.cpp */; };
@@ -601,7 +597,6 @@
 		C467496029455187009BE699 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
 		C467496129455187009BE699 /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5511624AEFD6600E9FF7F /* CanonicalGrid.cpp */; };
 		C467496229455187009BE699 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5502824AEFD6400E9FF7F /* Perceptron.cpp */; };
-		C467496329455187009BE699 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		C467496429455187009BE699 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504724AEFD6400E9FF7F /* EnvUtil.cpp */; };
 		C467496529455187009BE699 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5508124AEFD6500E9FF7F /* FloydWarshall.cpp */; };
 		C467496629455187009BE699 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5505224AEFD6400E9FF7F /* NBitArray.cpp */; };
@@ -719,7 +714,6 @@
 		C46749F629483B36009BE699 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
 		C46749F729483B36009BE699 /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5511624AEFD6600E9FF7F /* CanonicalGrid.cpp */; };
 		C46749F829483B36009BE699 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5502824AEFD6400E9FF7F /* Perceptron.cpp */; };
-		C46749F929483B36009BE699 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		C46749FA29483B36009BE699 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504724AEFD6400E9FF7F /* EnvUtil.cpp */; };
 		C46749FB29483B36009BE699 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5508124AEFD6500E9FF7F /* FloydWarshall.cpp */; };
 		C46749FC29483B36009BE699 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5505224AEFD6400E9FF7F /* NBitArray.cpp */; };
@@ -824,7 +818,6 @@
 		C4A551CB24AEFD6700E9FF7F /* RubiksCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513424AEFD6600E9FF7F /* RubiksCube.cpp */; };
 		C4A551CC24AEFD6700E9FF7F /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513624AEFD6600E9FF7F /* MountainCar.cpp */; };
 		C4A551CD24AEFD6700E9FF7F /* BurnedPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513724AEFD6600E9FF7F /* BurnedPancakePuzzle.cpp */; };
-		C4A551CE24AEFD6700E9FF7F /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513C24AEFD6600E9FF7F /* TOH.cpp */; };
 		C4A551CF24AEFD6700E9FF7F /* DynamicWeightedGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513F24AEFD6600E9FF7F /* DynamicWeightedGrid.cpp */; };
 		C4A551D024AEFD6700E9FF7F /* MotionCaptureMovement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514024AEFD6600E9FF7F /* MotionCaptureMovement.cpp */; };
 		C4A551D124AEFD6700E9FF7F /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5514124AEFD6600E9FF7F /* NQueens.cpp */; };
@@ -1171,7 +1164,6 @@
 		C4A5513924AEFD6600E9FF7F /* CanonicalGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanonicalGrid.h; sourceTree = "<group>"; };
 		C4A5513A24AEFD6600E9FF7F /* Witness.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Witness.h; sourceTree = "<group>"; };
 		C4A5513B24AEFD6600E9FF7F /* RubiksCubeEdges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RubiksCubeEdges.h; sourceTree = "<group>"; };
-		C4A5513C24AEFD6600E9FF7F /* TOH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TOH.cpp; sourceTree = "<group>"; };
 		C4A5513D24AEFD6600E9FF7F /* Map2DConstrainedEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DConstrainedEnvironment.h; sourceTree = "<group>"; };
 		C4A5513E24AEFD6600E9FF7F /* SequenceAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequenceAlignment.h; sourceTree = "<group>"; };
 		C4A5513F24AEFD6600E9FF7F /* DynamicWeightedGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DynamicWeightedGrid.cpp; sourceTree = "<group>"; };
@@ -1794,7 +1786,6 @@
 				C4A5514D24AEFD6600E9FF7F /* SnakeBird.h */,
 				C4A5510E24AEFD6600E9FF7F /* SteeringEnvironment.cpp */,
 				C4A5512F24AEFD6600E9FF7F /* SteeringEnvironment.h */,
-				C4A5513C24AEFD6600E9FF7F /* TOH.cpp */,
 				C4A5513824AEFD6600E9FF7F /* TOH.h */,
 				C4A5515224AEFD6600E9FF7F /* TopSpin.cpp */,
 				C4A5511424AEFD6600E9FF7F /* TopSpin.h */,
@@ -2253,7 +2244,6 @@
 				4625C2542A4BD80B004A8BBC /* NQueens.cpp in Sources */,
 				4625C2552A4BD80B004A8BBC /* CanonicalGrid.cpp in Sources */,
 				4625C2562A4BD80B004A8BBC /* Perceptron.cpp in Sources */,
-				4625C2572A4BD80B004A8BBC /* TOH.cpp in Sources */,
 				4625C2582A4BD80B004A8BBC /* EnvUtil.cpp in Sources */,
 				4625C2592A4BD80B004A8BBC /* FloydWarshall.cpp in Sources */,
 				4625C25A2A4BD80B004A8BBC /* NBitArray.cpp in Sources */,
@@ -2374,7 +2364,6 @@
 				C403F6F627B37B96001C0043 /* NQueens.cpp in Sources */,
 				C403F6F727B37B96001C0043 /* CanonicalGrid.cpp in Sources */,
 				C403F6F827B37B96001C0043 /* Perceptron.cpp in Sources */,
-				C403F6F927B37B96001C0043 /* TOH.cpp in Sources */,
 				C403F6FA27B37B96001C0043 /* EnvUtil.cpp in Sources */,
 				C403F6FB27B37B96001C0043 /* FloydWarshall.cpp in Sources */,
 				C403F6FC27B37B96001C0043 /* NBitArray.cpp in Sources */,
@@ -2496,7 +2485,6 @@
 				C4045D3E2740830900A8B6B5 /* NQueens.cpp in Sources */,
 				C4045D3F2740830900A8B6B5 /* CanonicalGrid.cpp in Sources */,
 				C4045D402740830900A8B6B5 /* Perceptron.cpp in Sources */,
-				C4045D412740830900A8B6B5 /* TOH.cpp in Sources */,
 				C4045D422740830900A8B6B5 /* EnvUtil.cpp in Sources */,
 				C4045D432740830900A8B6B5 /* FloydWarshall.cpp in Sources */,
 				C4045D442740830900A8B6B5 /* NBitArray.cpp in Sources */,
@@ -2618,7 +2606,6 @@
 				C44B911926E6A2CE001A3459 /* NQueens.cpp in Sources */,
 				C44B911A26E6A2CE001A3459 /* CanonicalGrid.cpp in Sources */,
 				C44B911B26E6A2CE001A3459 /* Perceptron.cpp in Sources */,
-				C44B911C26E6A2CE001A3459 /* TOH.cpp in Sources */,
 				C44B911D26E6A2CE001A3459 /* EnvUtil.cpp in Sources */,
 				C44B911E26E6A2CE001A3459 /* FloydWarshall.cpp in Sources */,
 				C44B911F26E6A2CE001A3459 /* NBitArray.cpp in Sources */,
@@ -2740,7 +2727,6 @@
 				C467496029455187009BE699 /* NQueens.cpp in Sources */,
 				C467496129455187009BE699 /* CanonicalGrid.cpp in Sources */,
 				C467496229455187009BE699 /* Perceptron.cpp in Sources */,
-				C467496329455187009BE699 /* TOH.cpp in Sources */,
 				C467496429455187009BE699 /* EnvUtil.cpp in Sources */,
 				C467496529455187009BE699 /* FloydWarshall.cpp in Sources */,
 				C467496629455187009BE699 /* NBitArray.cpp in Sources */,
@@ -2862,7 +2848,6 @@
 				C46749F629483B36009BE699 /* NQueens.cpp in Sources */,
 				C46749F729483B36009BE699 /* CanonicalGrid.cpp in Sources */,
 				C46749F829483B36009BE699 /* Perceptron.cpp in Sources */,
-				C46749F929483B36009BE699 /* TOH.cpp in Sources */,
 				C46749FA29483B36009BE699 /* EnvUtil.cpp in Sources */,
 				C46749FB29483B36009BE699 /* FloydWarshall.cpp in Sources */,
 				C46749FC29483B36009BE699 /* NBitArray.cpp in Sources */,
@@ -2983,7 +2968,6 @@
 				C4A551D124AEFD6700E9FF7F /* NQueens.cpp in Sources */,
 				C4A551BD24AEFD6700E9FF7F /* CanonicalGrid.cpp in Sources */,
 				C4A5516C24AEFD6700E9FF7F /* Perceptron.cpp in Sources */,
-				C4A551CE24AEFD6700E9FF7F /* TOH.cpp in Sources */,
 				C4A5517A24AEFD6700E9FF7F /* EnvUtil.cpp in Sources */,
 				C4A5519624AEFD6700E9FF7F /* FloydWarshall.cpp in Sources */,
 				C4A5518124AEFD6700E9FF7F /* NBitArray.cpp in Sources */,

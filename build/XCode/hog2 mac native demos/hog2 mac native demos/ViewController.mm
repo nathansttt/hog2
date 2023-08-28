@@ -17,7 +17,7 @@ const float FRAMERATE = 1.0f/30.0f;
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-
+	
 	NSArray *arguments = [[NSProcessInfo processInfo] arguments];
 	// use -objectAtIndex: to obtain an element of the array
 	// and -count to obtain the number of elements in the array
@@ -32,24 +32,23 @@ const float FRAMERATE = 1.0f/30.0f;
 	}
 	
 	hog_main([arguments count], args);
-//	[[[self view] window] setAcceptsMouseMovedEvents:YES];
+	//	[[[self view] window] setAcceptsMouseMovedEvents:YES];
 	NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self.view bounds] options: (NSTrackingMouseMoved | NSTrackingActiveInKeyWindow | NSTrackingInVisibleRect) owner:self userInfo:nil];
 	[self.view addTrackingArea:trackingArea];
-
-	
-	
 	[NSTimer scheduledTimerWithTimeInterval:FRAMERATE
 									 target:self
 								   selector:@selector(onTick:)
 								   userInfo:nil
 									repeats:YES];
-
+	
 	pRecContext pContextInfo = getCurrentContext();
 	initialConditions(pContextInfo);
 	HandleWindowEvent(pContextInfo, kWindowCreated);
-//	initialConditions(pContextInfo);
+	//	initialConditions(pContextInfo);
 	drawingView.display = &pContextInfo->display;
-//	self.drawingView.display = pContextInfo->display;
+	//	self.drawingView.display = pContextInfo->display;
+	[self.view.window setContentSize:NSMakeSize(pContextInfo->windowWidth, pContextInfo->windowHeight)];
+	[self.view setFrame:NSMakeRect(0, 0, pContextInfo->windowWidth, pContextInfo->windowHeight)];
 }
 
 
@@ -129,7 +128,7 @@ const float FRAMERATE = 1.0f/30.0f;
 	tButtonType bType = [self getButton:event];
 	NSPoint curPoint = [event locationInWindow];
 	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
-	HandleMouse(getCurrentContext(), p, bType, kMouseUp);
+	HandleMouse(getCurrentContext(), curPoint.x, curPoint.y, p, bType, kMouseUp);
 //	int viewport = [drawingView getViewport:curPoint];
 //	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseUp);
 }
@@ -138,7 +137,8 @@ const float FRAMERATE = 1.0f/30.0f;
 {
 	NSPoint curPoint = [event locationInWindow];
 	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
-	HandleMouse(getCurrentContext(), p, kNoButton, kMouseMove);
+//	HandleMouse(getCurrentContext(), p, kNoButton, kMouseMove);
+	HandleMouse(getCurrentContext(), curPoint.x, curPoint.y, p, kNoButton, kMouseMove);
 }
 
 -(void)mouseDragged:(NSEvent *)event
@@ -146,7 +146,7 @@ const float FRAMERATE = 1.0f/30.0f;
 	tButtonType bType = [self getButton:event];
 	NSPoint curPoint = [event locationInWindow];
 	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
-	HandleMouse(getCurrentContext(), p, bType, kMouseDrag);
+	HandleMouse(getCurrentContext(), curPoint.x, curPoint.y, p, bType, kMouseDrag);
 //	int viewport = [drawingView getViewport:curPoint];
 //	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseDrag);
 }

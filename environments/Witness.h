@@ -781,7 +781,7 @@ public:
             hash += ",";
         }
 
-        {
+		{
             hash += quote + "cc" + quote + ":{";
             for (int x = 0; x < width; x++)
             {
@@ -795,7 +795,10 @@ public:
                         hash += "0;";
                     else
                         hash += std::to_string(regionConstraints[x][y].parameter) + ";";
-                    hash += regionConstraints[x][y].c.hex();
+					if (regionConstraints[x][y].t == kNoRegionConstraint)
+						hash += "#DADFAD";
+					else
+						hash += regionConstraints[x][y].c.hex();
                     hash += quote;
                 }
             }
