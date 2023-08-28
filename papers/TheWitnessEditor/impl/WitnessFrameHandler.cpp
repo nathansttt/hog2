@@ -36,7 +36,7 @@ std::vector <ColorItem> gProvidedColors = {
     {Colors::black,   Graphics::point{0.3, -0.15},   0.1},
 };
 
-Witness <puzzleWidth, puzzleHeight> editor;
+Witness<puzzleWidth, puzzleHeight> editor;
 
 static size_t GetNumValidSolutions(bool isAdding) {
     size_t ret = 0;

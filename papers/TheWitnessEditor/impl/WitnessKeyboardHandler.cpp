@@ -23,7 +23,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         break;
     case 'v':
     {
-        std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+        std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
         GetAllSolutions(witness, allSolutions);
         if (!allSolutions.empty())
         {

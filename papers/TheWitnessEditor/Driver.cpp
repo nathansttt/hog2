@@ -59,6 +59,7 @@ static void AddInferenceRule()
 {
     entropy.ruleSet.rules.push_back(&SeparationRule<puzzleWidth, puzzleHeight>);
     entropy.ruleSet.rules.push_back(&PathConstraintRule<puzzleWidth, puzzleHeight>);
+    entropy.ruleSet.rules.push_back(&TowardsGoalRule<puzzleWidth, puzzleHeight>);
 }
 
 static void InitPuzzle()

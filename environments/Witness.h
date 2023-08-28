@@ -39,9 +39,9 @@ public:
     std::vector<std::pair<int, int>> path;
     std::bitset<(width + 1) * (height + 1)> occupiedCorners;
     std::bitset<(width + 1) * (height) + (width) * (height + 1)> occupiedEdges;
-    
+
     WitnessState() { Reset(); }
-    
+
     WitnessState(const WitnessState<width, height> &state)
     {
         path = state.path;
@@ -79,6 +79,25 @@ public:
         // AddCannotCrossConstraint(x, y);
     }
 
+    bool isAlongTheWall() const
+    {
+        if (path.size() < 2)
+            return false;
+        auto &prevPos = path[path.size() - 2];
+        auto &currPos = path.back();
+        return ((currPos.first == 0 || currPos.first == width) && currPos.first == prevPos.first) ||
+            ((currPos.second == 0 || currPos.second == height) && currPos.second == prevPos.second);
+    }
+
+    bool hitTheWall() const
+    {
+        if (path.empty())
+            return false;
+        auto &p = path.back();
+        return (p.first == 0 || p.first == width) ||
+            (p.second == 0 || p.second == height);
+    }
+
     bool Occupied(int x, int y) const { return occupiedCorners[y * (width + 1) + x]; }
 
     void Occupy(int x, int y) { occupiedCorners.set(y * (width + 1) + x, true); }
@@ -102,8 +121,8 @@ public:
 
     bool InGoal() const
     {
-        return (path.back().first < 0 || path.back().first > width || path.back().second < 0 ||
-                path.back().second > height);
+        return path.back().first < 0 || path.back().first > width ||
+            path.back().second < 0 || path.back().second > height;
     }
 };
 
@@ -215,7 +234,7 @@ public:
     std::array<WitnessPathConstraintType, Witness<width, height>::GetNumPathConstraints()> pathConstraints;
     std::array<std::pair<Graphics::point, Graphics::rect>,
         Witness<width, height>::GetNumPathConstraints()> pathConstraintLocations;
-    
+
     //	std::vector<mustCrossEdgeConstraint> mustCrossEdgeConstraints;
     //	std::vector<std::pair<int, int>> mustCrossConstraints;
     //
@@ -351,7 +370,7 @@ public:
             const WitnessState<width, height> &nodeID, std::vector <WitnessState<width, height>> &neighbors) const;
 
     void GetActions(const WitnessState<width, height> &nodeID, std::vector <WitnessAction> &actions) const;
-    
+
     void ApplyAction(WitnessState<width, height> &s, WitnessAction a) const;
 
     void ApplyAction(std::pair<int, int> &s, WitnessAction a) const;
@@ -408,7 +427,7 @@ public:
     bool Click(Graphics::point, InteractiveWitnessState<width, height> &ws);
 
     void Move(Graphics::point, InteractiveWitnessState<width, height> &ws);
-    
+
     const WitnessRegionConstraint& GetRegionConstraint(int x, int y) const
     {
         return regionConstraints[x][y];
