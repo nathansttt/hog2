@@ -16,7 +16,7 @@
 
 struct EntropyInfo
 {
-    double entropy;
+    double value;
     unsigned depth;
 };
 
@@ -102,33 +102,33 @@ public:
         for (auto it = childEntropyInfo.begin(); it != childEntropyInfo.end(); )
         {
             auto &info = *it;
-            if (info.entropy == 0 && info.depth < lookAhead)
+            if (info.value == 0 && info.depth < lookAhead)
                 return { 0.0, info.depth + 1 };
-            if (info.entropy == inf && info.depth < lookAhead)
+            if (info.value == inf && info.depth < lookAhead)
                 it = childEntropyInfo.erase(it);
             else
                 ++it;
         }
         EntropyInfo entropyInfo;
         if (std::all_of(childEntropyInfo.begin(), childEntropyInfo.end(), [](EntropyInfo &info) {
-            return info.entropy == 0;
+            return info.value == 0;
         }))
             entropyInfo = { 0.0, childEntropyInfo[0].depth + 1 };
         else if (std::all_of(childEntropyInfo.begin(), childEntropyInfo.end(), [](EntropyInfo &info) {
-            return info.entropy == inf;
+            return info.value == inf;
         }))
             entropyInfo = { inf, childEntropyInfo[0].depth + 1 };
         else
         {
             auto &min_childEntropyInfo = *std::min_element(childEntropyInfo.begin(), childEntropyInfo.end(),
                                        [](EntropyInfo &info1, EntropyInfo &info2){
-                return info1.entropy < info2.entropy;
+                return info1.value < info2.value;
             });
             auto childEntropy = std::vector<double>();
             childEntropy.reserve(childEntropyInfo.size());
             std::transform(childEntropyInfo.begin(), childEntropyInfo.end(), std::back_inserter(childEntropy),
-                           [](EntropyInfo &info){ return info.entropy; });
-            entropyInfo = { min_childEntropyInfo.entropy + ImmediateEntropy(allActions, childEntropy),
+                           [](EntropyInfo &info){ return info.value; });
+            entropyInfo = { min_childEntropyInfo.value + ImmediateEntropy(allActions, childEntropy),
                             min_childEntropyInfo.depth + 1 };
         }
         actCache.returnItem(&allActions);

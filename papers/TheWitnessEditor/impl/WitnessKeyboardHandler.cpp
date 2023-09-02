@@ -23,14 +23,12 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         break;
     case 'v':
     {
-        std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-        GetAllSolutions(witness, allSolutions);
-        if (!allSolutions.empty())
+        if (!currentSolutionIndices.empty())
         {
-            iws.ws = allSolutions[0];
+            iws.ws = allSolutions[currentSolutionIndices[0]];
             iws.currState = InteractiveWitnessState<puzzleWidth, puzzleHeight>::kWaitingRestart;
+            solved = true;
         }
-        solved = true;
         break;
     }
     case 's':

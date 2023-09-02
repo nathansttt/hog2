@@ -33,6 +33,11 @@ std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
+double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight>& env)
+{
+    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookAhead).value;
+}
+
 static void InitTetrisPieces()
 {
     for (unsigned i = 1; i <= 24; ++i)
@@ -64,7 +69,7 @@ static void AddInferenceRule()
 
 static void InitPuzzle()
 {
-    Fig6Puzzle1();
+    Fig6Puzzle4();
     for (size_t i = 0; i < allSolutions.size(); i++)
     {
         auto &solution = allSolutions[i];
@@ -73,9 +78,8 @@ static void InitPuzzle()
         }
     }
     gNumSolutions = currentSolutionIndices.size();
-    WitnessState<puzzleWidth, puzzleHeight> state;
     AddInferenceRule();
-    gMuse = entropy.SetRelative(true).Calculate(witness, state, 0).entropy;
+    gEntropy = GetCurrentEntropy(witness);
 }
 
 

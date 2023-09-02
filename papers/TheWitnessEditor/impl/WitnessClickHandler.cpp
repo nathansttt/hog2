@@ -15,7 +15,7 @@ static void UpdateSolutionIndices() {
             currentSolutionIndices.emplace_back(i);
         }
     }
-    gMuse = entropy.SetRelative(true).Calculate(witness, iws.ws, 0).entropy;
+    gEntropy = GetCurrentEntropy(witness);
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
@@ -170,6 +170,11 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             if (PointInRect(p, {Graphics::point{0.7, -0.15}, 0.25}))
             {
                 witness.Reset();
+            }
+            if (PointInRect(p, Graphics::rect{-0.33, -0.10, -0.225, -0.04}))
+            {
+                gUseRelativeEntropy ^= true;
+                gEntropy = GetCurrentEntropy(witness);
             }
         }
         break;

@@ -1,20 +1,20 @@
 #include "Driver.h"
 #include "SolutionUtil.h"
 
-std::vector <RegionConstraintItem> gRegionConstraintItems = {
-    {{kSeparation,      0,  Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
-    {{kStar,           0,  Colors::cyan}, Graphics::point{-0.5, -0.7},  0.1},
-    {{kTetris,         10, {0.862745098f, 0.6549019608f, 0.0f}}, Graphics::point{-0.25, -0.7}, 0.05},
-    {{kNegativeTetris,  10, {0.2196078431f, 0.3607843137f, 0.8705882353f}}, Graphics::point{-0.05, -0.7}, 0.05},
-    {{kTriangle,       1,  Colors::orange}, Graphics::point{-0.75, -0.5}, 0.05},
-    {{kTriangle,       2,  Colors::orange}, Graphics::point{-0.5, -0.5},  0.05},
-    {{kTriangle,       3,  Colors::orange}, Graphics::point{-0.2, -0.5},  0.05},
+std::vector<RegionConstraintItem> gRegionConstraintItems = {
+    {{kSeparation, 0, Colors::cyan}, Graphics::point{-0.75, -0.7}, 0.1},
+    {{kStar, 0, Colors::cyan}, Graphics::point{-0.5, -0.7},  0.1},
+    {{kTetris, 10, {0.862745098f, 0.6549019608f, 0.0f}}, Graphics::point{-0.25, -0.7}, 0.05},
+    {{kNegativeTetris, 10, {0.2196078431f, 0.3607843137f, 0.8705882353f}}, Graphics::point{-0.05, -0.7}, 0.05},
+    {{kTriangle, 1, Colors::orange}, Graphics::point{-0.75, -0.5}, 0.05},
+    {{kTriangle, 2, Colors::orange}, Graphics::point{-0.5, -0.5}, 0.05},
+    {{kTriangle, 3, Colors::orange}, Graphics::point{-0.2, -0.5}, 0.05},
 };
 
-std::vector <PathConstraintItem> gPathConstraintItems = {
+std::vector<PathConstraintItem> gPathConstraintItems = {
     {kNoPathConstraint, Graphics::point{0.1, -0.5}, 0.075},
-    {kMustCross,    Graphics::point{0.3, -0.5}, 0.075},
-    {kCannotCross,  Graphics::point{0.5, -0.5}, 0.075}
+    {kMustCross, Graphics::point{0.3, -0.5}, 0.075},
+    {kCannotCross, Graphics::point{0.5, -0.5}, 0.075}
 };
 
 int gSelectedEditorItem = -1;
@@ -23,17 +23,19 @@ unsigned gSelectedColor = 0;
 static Graphics::point gLastPosition = Graphics::point{};
 std::vector<size_t> currentSolutionIndices = {};
 size_t gNumSolutions = 0;
-double gMuse = 0.0;
+double gEntropy = 0.0;
+bool gUseRelativeEntropy = true;
+unsigned gLookAhead = 0;
 
-std::vector <ColorItem> gProvidedColors = {
-    {Colors::red,   Graphics::point{-0.75, -0.15}, 0.1},
-    {Colors::orange,     Graphics::point{-0.6, -0.15},  0.1},
-    {{0.862745098f, 0.6549019608f, 0.0f},   Graphics::point{-0.45, -0.15}, 0.1},
-    {Colors::blue,    Graphics::point{-0.3, -0.15},  0.1},
-    {Colors::cyan,  Graphics::point{-0.15, -0.15}, 0.1},
-    {Colors::magenta,    Graphics::point{0.0, -0.15},   0.1},
-    {Colors::pink, Graphics::point{0.15, -0.15},  0.1},
-    {Colors::black,   Graphics::point{0.3, -0.15},   0.1},
+std::vector<ColorItem> gProvidedColors = {
+    {Colors::red, Graphics::point{-0.75, -0.2}, 0.1},
+    {Colors::orange, Graphics::point{-0.6, -0.2}, 0.1},
+    {{0.862745098f, 0.6549019608f, 0.0f}, Graphics::point{-0.45, -0.2}, 0.1},
+    {Colors::blue, Graphics::point{-0.3, -0.2}, 0.1},
+    {Colors::cyan, Graphics::point{-0.15, -0.2}, 0.1},
+    {Colors::magenta, Graphics::point{0.0, -0.2}, 0.1},
+    {Colors::pink, Graphics::point{0.15, -0.2}, 0.1},
+    {Colors::black, Graphics::point{0.3, -0.2}, 0.1},
 };
 
 Witness<puzzleWidth, puzzleHeight> editor;
@@ -42,7 +44,7 @@ static size_t GetNumValidSolutions(bool isAdding) {
     size_t ret = 0;
     if (isAdding)
     {
-        for (const size_t &i : currentSolutionIndices)
+        for (const size_t &i: currentSolutionIndices)
         {
             if (editor.GoalTest(allSolutions[i]))
                 ++ret;
@@ -50,7 +52,7 @@ static size_t GetNumValidSolutions(bool isAdding) {
     }
     else
     {
-        for (const auto &solution : allSolutions)
+        for (const auto &solution: allSolutions)
         {
             if (editor.GoalTest(solution))
                 ++ret;
@@ -77,7 +79,7 @@ static void DrawGameViewport(unsigned long windowID)
     {
         display.DrawText("# of solutions: ", Graphics::point{0.75, 0.9}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
-        display.DrawText("MUSE: ", Graphics::point{0.7, 1}, Colors::black, 0.07,
+        display.DrawText("Entropy: ", Graphics::point{0.7, 1}, Colors::black, 0.07,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
         if (gSelectedEditorItem != -1 && cursorViewport == 0)
         {
@@ -126,7 +128,7 @@ static void DrawGameViewport(unsigned long windowID)
                                 isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
-                            gMuse = entropy.SetRelative(true).Calculate(witness, iws.ws, 0).entropy;
+                            gEntropy = GetCurrentEntropy(editor);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         editor.DrawRegionConstraint(display, constraint, p);
@@ -160,7 +162,7 @@ static void DrawGameViewport(unsigned long windowID)
                                     isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
-                            gMuse = entropy.SetRelative(true).Calculate(witness, iws.ws, 0).entropy;
+                            gEntropy = GetCurrentEntropy(editor);
                         }
                         display.FrameRect(location.second, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         gLastPosition = location.first;
@@ -170,19 +172,23 @@ static void DrawGameViewport(unsigned long windowID)
             }
             display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 0.9}, Colors::black, 0.075,
                              Graphics::textAlignRight, Graphics::textBaselineBottom);
+            display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
+                             Graphics::point{0.9, 1}, Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
         else
         {
             display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
+            display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
+                             Graphics::point{0.9, 1}, Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
-        if (gMuse != std::numeric_limits<double>::max())
-            display.DrawText(to_string_with_precision(gMuse, 2).c_str(), Graphics::point{0.9, 1}, Colors::black, 0.075,
-                         Graphics::textAlignRight, Graphics::textBaselineBottom);
-        else
-            display.DrawText("inf", Graphics::point{0.9, 1}, Colors::black, 0.075,
-                         Graphics::textAlignRight, Graphics::textBaselineBottom);
     }
+}
+
+static void FrameLightgrayRect(Graphics::Display& display, int viewport, const Graphics::rect& rect)
+{
+    if (cursorViewport == viewport && PointInRect(cursor, rect))
+        display.FrameRect(rect, Colors::lightgray, 0.01);
 }
 
 static void DrawEditorViewport(unsigned long windowID)
@@ -240,18 +246,22 @@ static void DrawEditorViewport(unsigned long windowID)
         else if (item.constraint == kMustCross)
             display.FillNGon(item.c, 0.025, 6, 30, witness.backColor);
     }
-    display.DrawText("Select a color", Graphics::point{-0.8, -0.25}, Colors::black, 0.05);
+    display.DrawText("Select a color", Graphics::point{-0.8, -0.3}, Colors::black, 0.05);
+    Graphics::rect rc;
     for (const auto &item: gProvidedColors)
     {
-        Graphics::rect rc = {item.c, 0.05f};
+        rc = {item.c, 0.05f};
         display.FillRect(rc, item.color);
-        if (cursorViewport == 1 && PointInRect(cursor, rc))
-            display.FrameRect(rc, Colors::lightgray, 0.01);
+        FrameLightgrayRect(display, 1, rc);
     }
     display.DrawText("Clear All", Graphics::point{0.5, -0.15}, Colors::black, 0.05);
-    Graphics::rect rc = {0.49, -0.22, 0.7, -0.14};
-    if (cursorViewport == 1 && PointInRect(cursor, rc))
-        display.FrameRect(rc, Colors::lightgray, 0.01);
+    rc = {0.49, -0.22, 0.7, -0.14};
+    FrameLightgrayRect(display, 1, rc);
+    display.DrawText("Use relative entropy: ", Graphics::point{-0.8, -0.04}, Colors::black, 0.05);
+    display.DrawText((gUseRelativeEntropy) ? "true" : "false", Graphics::point{-0.32, -0.04},
+                     (gUseRelativeEntropy) ? Colors::lightgreen : Colors::lightred, 0.05);
+    rc = (gUseRelativeEntropy) ? Graphics::rect{-0.33, -0.10, -0.225, -0.04} : Graphics::rect{-0.33, -0.10, -0.21, -0.04};
+    FrameLightgrayRect(display, 1, rc);
 }
 
 static void DrawTetrisPiecesViewport(unsigned long windowID)
