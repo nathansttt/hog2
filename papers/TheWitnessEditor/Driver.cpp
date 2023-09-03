@@ -11,7 +11,7 @@
 #include "Driver.h"
 
 #include "Globals.h"
-#include "PaperPuzzles.h"
+#include "Puzzles.h"
 #include "SolutionUtil.h"
 #include "WitnessInferenceRule.h"
 
@@ -35,7 +35,7 @@ std::vector<TetrisItem> gTetrisPieces = {};
 
 double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight>& env)
 {
-    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookAhead).value;
+    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead).value;
 }
 
 static void InitTetrisPieces()
@@ -69,7 +69,7 @@ static void AddInferenceRule()
 
 static void InitPuzzle()
 {
-    Fig6Puzzle4();
+    k87fxsr();
     for (size_t i = 0; i < allSolutions.size(); i++)
     {
         auto &solution = allSolutions[i];

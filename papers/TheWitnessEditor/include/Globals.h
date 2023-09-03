@@ -5,7 +5,6 @@
 //  Created by Samarium on 2023-06-29.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-
 #ifndef THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H
 #define THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H
 
@@ -27,7 +26,7 @@ extern std::vector<size_t> currentSolutionIndices;
 extern size_t gNumSolutions;
 extern bool solved;
 extern double gEntropy;
-extern unsigned gLookAhead;
+extern unsigned gLookahead;
 
 struct RegionConstraintItem {
     WitnessRegionConstraint constraint;

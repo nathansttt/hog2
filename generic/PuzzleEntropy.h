@@ -80,7 +80,7 @@ public:
         return *this;
     }
 
-    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookAhead)
+    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookahead)
     {
         if (env.GoalTest(state))
             return { 0.0, 0 };
@@ -96,15 +96,15 @@ public:
         for (auto &action: allActions)
         {
             env.ApplyAction(state, action);
-            childEntropyInfo.emplace_back(Calculate(env, state, (lookAhead > 0) ? lookAhead - 1 : 0));
+            childEntropyInfo.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0));
             env.UndoAction(state, action);
         }
         for (auto it = childEntropyInfo.begin(); it != childEntropyInfo.end(); )
         {
             auto &info = *it;
-            if (info.value == 0 && info.depth < lookAhead)
+            if (info.value == 0 && info.depth < lookahead)
                 return { 0.0, info.depth + 1 };
-            if (info.value == inf && info.depth < lookAhead)
+            if (info.value == inf && info.depth < lookahead)
                 it = childEntropyInfo.erase(it);
             else
                 ++it;

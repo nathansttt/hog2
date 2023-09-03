@@ -55,7 +55,7 @@ default : all
 SRC_CPP = \
 	papers/TheWitnessEditor/Driver.cpp \
 	papers/TheWitnessEditor/impl/ExamineUtil.cpp \
-	papers/TheWitnessEditor/impl/PaperPuzzles.cpp \
+	papers/TheWitnessEditor/impl/Puzzles.cpp \
 	papers/TheWitnessEditor/impl/SolutionUtil.cpp \
 	papers/TheWitnessEditor/impl/WitnessCLHandler.cpp \
 	papers/TheWitnessEditor/impl/WitnessClickHandler.cpp \

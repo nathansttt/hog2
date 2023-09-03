@@ -166,14 +166,28 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             {
                 gSelectedEditorItem = -1;
             }
-            printf("Selected Constraint: %d\n", gSelectedEditorItem);
-            if (PointInRect(p, {Graphics::point{0.7, -0.15}, 0.25}))
+            if (PointInRect(p, Graphics::rect{0.49, -0.22, 0.7, -0.14}))
             {
                 witness.Reset();
             }
             if (PointInRect(p, Graphics::rect{-0.33, -0.10, -0.225, -0.04}))
             {
                 gUseRelativeEntropy ^= true;
+                gEntropy = GetCurrentEntropy(witness);
+            }
+            if (PointInRect(p, Graphics::rect{0.31, -0.10, 0.36, -0.03}))
+            {
+                switch (gLookahead) {
+                    case 0:
+                        gLookahead = 1;
+                        break;
+                    case 1:
+                        gLookahead = 2;
+                        break;
+                    default:
+                        gLookahead = 0;
+                        break;
+                }
                 gEntropy = GetCurrentEntropy(witness);
             }
         }

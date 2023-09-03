@@ -134,7 +134,7 @@
 		4625C26E2A4BD910004A8BBC /* WitnessCLHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C14E2A4BD15C004A8BBC /* WitnessCLHandler.cpp */; };
 		4625C26F2A4BD912004A8BBC /* WitnessKeyboardHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C14F2A4BD15C004A8BBC /* WitnessKeyboardHandler.cpp */; };
 		4625C2702A4BD914004A8BBC /* WitnessWindowHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C1502A4BD15C004A8BBC /* WitnessWindowHandler.cpp */; };
-		462A61602A8BE50200DBB8B3 /* PaperPuzzles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462A615E2A8BE50200DBB8B3 /* PaperPuzzles.cpp */; };
+		462A61602A8BE50200DBB8B3 /* Puzzles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */; };
 		C403F68E27B37B96001C0043 /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504524AEFD6400E9FF7F /* Graphics.cpp */; };
 		C403F68F27B37B96001C0043 /* Reach.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5507A24AEFD6500E9FF7F /* Reach.cpp */; };
 		C403F69027B37B96001C0043 /* CanonicalGraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513024AEFD6600E9FF7F /* CanonicalGraphEnvironment.cpp */; };
@@ -855,8 +855,8 @@
 		4625C15C2A4BD1EE004A8BBC /* FileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileUtil.cpp; sourceTree = "<group>"; };
 		4625C2652A4BD80B004A8BBC /* The Witness Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "The Witness Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4625C2662A4BD80B004A8BBC /* The Witness Editor copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "The Witness Editor copy-Info.plist"; path = "/Users/samarium/Documents/hog2/build/XCode/HOG2 ObjC/The Witness Editor copy-Info.plist"; sourceTree = "<absolute>"; };
-		462A615E2A8BE50200DBB8B3 /* PaperPuzzles.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PaperPuzzles.cpp; sourceTree = "<group>"; };
-		462A615F2A8BE50200DBB8B3 /* PaperPuzzles.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PaperPuzzles.h; sourceTree = "<group>"; };
+		462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Puzzles.cpp; sourceTree = "<group>"; };
+		462A615F2A8BE50200DBB8B3 /* Puzzles.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Puzzles.h; sourceTree = "<group>"; };
 		4646C3EE2A6C8E0900E43949 /* PuzzleEntropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleEntropy.h; sourceTree = "<group>"; };
 		464726612A4DE836007A147D /* SolutionUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SolutionUtil.h; sourceTree = "<group>"; };
 		464726622A4DE8FE007A147D /* ExamineUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExamineUtil.h; sourceTree = "<group>"; };
@@ -1283,7 +1283,7 @@
 			isa = PBXGroup;
 			children = (
 				4625C14C2A4BD15C004A8BBC /* ExamineUtil.cpp */,
-				462A615E2A8BE50200DBB8B3 /* PaperPuzzles.cpp */,
+				462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */,
 				4625C14B2A4BD15C004A8BBC /* SolutionUtil.cpp */,
 				4625C14E2A4BD15C004A8BBC /* WitnessCLHandler.cpp */,
 				4625C14A2A4BD15C004A8BBC /* WitnessClickHandler.cpp */,
@@ -1299,7 +1299,7 @@
 			children = (
 				464726622A4DE8FE007A147D /* ExamineUtil.h */,
 				464726632A4DEBB5007A147D /* Globals.h */,
-				462A615F2A8BE50200DBB8B3 /* PaperPuzzles.h */,
+				462A615F2A8BE50200DBB8B3 /* Puzzles.h */,
 				464726612A4DE836007A147D /* SolutionUtil.h */,
 				4680D3F82A7824AA00593FD0 /* WitnessInferenceRule.h */,
 			);
@@ -2157,7 +2157,7 @@
 				4625C2042A4BD80B004A8BBC /* BurnedPancakePuzzle.cpp in Sources */,
 				4625C2052A4BD80B004A8BBC /* StatUtil.cpp in Sources */,
 				4625C2062A4BD80B004A8BBC /* Trackball.cpp in Sources */,
-				462A61602A8BE50200DBB8B3 /* PaperPuzzles.cpp in Sources */,
+				462A61602A8BE50200DBB8B3 /* Puzzles.cpp in Sources */,
 				4625C2072A4BD80B004A8BBC /* Map3DGrid.cpp in Sources */,
 				4625C2082A4BD80B004A8BBC /* SequenceAlignment.cpp in Sources */,
 				4625C2092A4BD80B004A8BBC /* MR1Permutation.cpp in Sources */,

@@ -5,7 +5,7 @@
 //  Created by Samarium on 2023-08-15.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-#include "PaperPuzzles.h"
+#include "Puzzles.h"
 
 void Fig6Puzzle1()
 {
@@ -114,4 +114,19 @@ void Fig6Puzzle4()
     witness.AddSeparationConstraint(1, 3, Colors::lightblue);
     witness.AddSeparationConstraint(2, 3, Colors::black);
     witness.AddSeparationConstraint(3, 3, Colors::lightblue);
+}
+
+void k87fxsr()
+{
+    witness.AddSeparationConstraint(0, 0, Colors::cyan);
+    witness.AddSeparationConstraint(0, 3, Colors::cyan);
+    
+    witness.AddSeparationConstraint(1, 1, Colors::yellow);
+    witness.AddSeparationConstraint(2, 1, Colors::yellow);
+    
+    witness.AddSeparationConstraint(1, 2, Colors::lightgray);
+    witness.AddSeparationConstraint(2, 2, Colors::lightgray);
+    
+    witness.AddSeparationConstraint(3, 0, Colors::magenta);
+    witness.AddSeparationConstraint(3, 3, Colors::magenta);
 }

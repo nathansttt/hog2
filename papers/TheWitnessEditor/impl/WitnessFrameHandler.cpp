@@ -25,7 +25,7 @@ std::vector<size_t> currentSolutionIndices = {};
 size_t gNumSolutions = 0;
 double gEntropy = 0.0;
 bool gUseRelativeEntropy = true;
-unsigned gLookAhead = 0;
+unsigned gLookahead = 0;
 
 std::vector<ColorItem> gProvidedColors = {
     {Colors::red, Graphics::point{-0.75, -0.2}, 0.1},
@@ -172,16 +172,14 @@ static void DrawGameViewport(unsigned long windowID)
             }
             display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 0.9}, Colors::black, 0.075,
                              Graphics::textAlignRight, Graphics::textBaselineBottom);
-            display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
-                             Graphics::point{0.9, 1}, Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
         else
         {
             display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
-            display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
-                             Graphics::point{0.9, 1}, Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
+        display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
+                         Graphics::point{0.9, 1}, Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
     }
 }
 
@@ -260,7 +258,11 @@ static void DrawEditorViewport(unsigned long windowID)
     display.DrawText("Use relative entropy: ", Graphics::point{-0.8, -0.04}, Colors::black, 0.05);
     display.DrawText((gUseRelativeEntropy) ? "true" : "false", Graphics::point{-0.32, -0.04},
                      (gUseRelativeEntropy) ? Colors::lightgreen : Colors::lightred, 0.05);
-    rc = (gUseRelativeEntropy) ? Graphics::rect{-0.33, -0.10, -0.225, -0.04} : Graphics::rect{-0.33, -0.10, -0.21, -0.04};
+    rc = (gUseRelativeEntropy) ? Graphics::rect{-0.33, -0.10, -0.225, -0.03} : Graphics::rect{-0.33, -0.10, -0.21, -0.03};
+    FrameLightgrayRect(display, 1, rc);
+    display.DrawText("Lookahead steps: ", Graphics::point{-0.1, -0.04}, Colors::black, 0.05);
+    display.DrawText(std::to_string(gLookahead).c_str(), Graphics::point{0.32, -0.04}, Colors::black, 0.05);
+    rc = {0.31, -0.10, 0.36, -0.03};
     FrameLightgrayRect(display, 1, rc);
 }
 
