@@ -5,7 +5,8 @@ Graphics::point cursor = Graphics::point{};
 int cursorViewport = 0;
 bool solved = false;
 
-static void UpdateSolutionIndices() {
+static void UpdateSolutionIndices()
+{
     currentSolutionIndices.clear();
     for (size_t i = 0; i < allSolutions.size(); i++)
     {
@@ -16,6 +17,73 @@ static void UpdateSolutionIndices() {
         }
     }
     gEntropy = GetCurrentEntropy(witness);
+}
+
+static double MaximizedEntropy(const WitnessRegionConstraint &constraint, unsigned &location)
+{
+    double ret = 0.0;
+    for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
+    {
+        unsigned y = i % puzzleWidth;
+        unsigned x = (i - y) / puzzleWidth;
+        if (constraint == editor.GetRegionConstraint(x, y))
+        {
+            editor.RemoveRegionConstraint(x, y);
+            double e = GetCurrentEntropy(editor);
+            if (e > ret && e != inf)
+            {
+                ret = e;
+                location = i;
+            }
+            editor.AddRegionConstraint(x, y, constraint);
+        }
+        else
+        {
+            auto c = WitnessRegionConstraint(editor.GetRegionConstraint(x, y));
+            editor.AddRegionConstraint(x, y, constraint);
+            double e = GetCurrentEntropy(editor);
+            if (e > ret && e != inf)
+            {
+                ret = e;
+                location = i;
+            }
+            editor.RemoveRegionConstraint(x, y);
+            editor.AddRegionConstraint(x, y, c);
+        }
+    }
+    return ret;
+}
+
+static double MaximizedEntropy(const WitnessPathConstraintType &constraint, unsigned &location)
+{
+    double ret = 0.0;
+    for (unsigned i = 1; i < witness.pathConstraintLocations.size() - 1; ++i)
+    {
+        if (constraint == editor.pathConstraints[i])
+        {
+            editor.pathConstraints[i] = kNoPathConstraint;
+            double e = GetCurrentEntropy(editor);
+            if (e > ret && e != inf)
+            {
+                ret = e;
+                location = i;
+            }
+            editor.pathConstraints[i] = constraint;
+        }
+        else
+        {
+            auto p = editor.pathConstraints[i];
+            editor.pathConstraints[i] = constraint;
+            double e = GetCurrentEntropy(editor);
+            if (e > ret && e != inf)
+            {
+                ret = e;
+                location = i;
+            }
+            editor.pathConstraints[i] = p;
+        }
+    }
+    return ret;
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
@@ -66,29 +134,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 unsigned x = (i - y) / puzzleWidth;
                                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                                 if (constraint == witness.GetRegionConstraint(x, y))
-                                    witness.ClearConstraint(x, y);
+                                    witness.RemoveRegionConstraint(x, y);
                                 else
-                                    switch (constraint.t) {
-                                        case kSeparation:
-                                            witness.AddSeparationConstraint(x, y, constraint.c);
-                                            break;
-                                        case kStar:
-                                            witness.AddStarConstraint(x, y, constraint.c);
-                                            break;
-                                        case kTetris:
-                                            witness.AddTetrisConstraint(x, y, constraint.parameter);
-                                            break;
-                                        case kNegativeTetris:
-                                            witness.AddNegativeTetrisConstraint(x, y, constraint.parameter);
-                                            break;
-                                        case kTriangle:
-                                            witness.AddTriangleConstraint(x, y, constraint.parameter);
-                                            break;
-                                        case kEraser:
-                                            break;
-                                        default: // kNoRegionConstraint, kRegionConstraintCount
-                                            break;
-                                    }
+                                    witness.AddRegionConstraint(x, y, constraint);
                                 break;
                             }
                         }
@@ -137,6 +185,10 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         selectTetrisPiece = 0;
                     WitnessKeyboardHandler(windowID, kAnyModifier, 'x');
                     selected = true;
+                    unsigned location = 0;
+                    double e = MaximizedEntropy(gRegionConstraintItems[i].constraint, location);
+                    std::cout << "max entropy: " << to_string_with_precision(e, 2) << ", location: ("
+                        << witness.GetRegionFromX(location) << ", " << witness.GetRegionFromY(location) << ")" << std::endl;
                     break;
                 }
             }
@@ -146,6 +198,11 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 {
                     gSelectedEditorItem = static_cast<int>(i + gRegionConstraintItems.size());
                     selected = true;
+                    unsigned location = 0;
+                    double e = MaximizedEntropy(gPathConstraintItems[i].constraint, location);
+                    auto p = witness.GetPathLocation(location);
+                    std::cout << "max entropy: " << to_string_with_precision(e, 2) << ", location: "
+                        << location << "(" << p.t << ", " << p.x << ", " << p.y << ")" << std::endl;
                     break;
                 }
             }

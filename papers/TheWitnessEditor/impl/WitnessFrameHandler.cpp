@@ -40,7 +40,8 @@ std::vector<ColorItem> gProvidedColors = {
 
 Witness<puzzleWidth, puzzleHeight> editor;
 
-static size_t GetNumValidSolutions(bool isAdding) {
+static size_t GetNumValidSolutions(bool isAdding)
+{
     size_t ret = 0;
     if (isAdding)
     {
@@ -95,36 +96,17 @@ static void DrawGameViewport(unsigned long windowID)
                     {
                         unsigned y = i % puzzleWidth;
                         unsigned x = (i - y) / puzzleWidth;
-                        if (p != gLastPosition) {
+                        if (p != gLastPosition)
+                        {
                             bool isAdding;
                             if (constraint == editor.GetRegionConstraint(x, y))
                             {
-                                editor.ClearConstraint(x, y);
+                                editor.RemoveRegionConstraint(x, y);
                                 isAdding = false;
                             }
                             else
                             {
-                                switch (constraint.t) {
-                                    case kSeparation:
-                                        editor.AddSeparationConstraint(x, y, constraint.c);
-                                        break;
-                                    case kStar:
-                                        editor.AddStarConstraint(x, y, constraint.c);
-                                        break;
-                                    case kTetris:
-                                        editor.AddTetrisConstraint(x, y, constraint.parameter);
-                                        break;
-                                    case kNegativeTetris:
-                                        editor.AddNegativeTetrisConstraint(x, y, constraint.parameter);
-                                        break;
-                                    case kTriangle:
-                                        editor.AddTriangleConstraint(x, y, constraint.parameter);
-                                        break;
-                                    case kEraser:
-                                        break;
-                                    default: // kNoRegionConstraint, kRegionConstraintCount
-                                        break;
-                                }
+                                editor.AddRegionConstraint(x, y, constraint);
                                 isAdding = true;
                             }
                             gNumSolutions = GetNumValidSolutions(isAdding);
@@ -277,7 +259,8 @@ static void DrawTetrisPiecesViewport(unsigned long windowID)
         WitnessRegionConstraintType t = (selectTetrisPiece == 2) ? kNegativeTetris : kTetris;
         WitnessRegionConstraint constraint = {.t = t, .parameter = item.parameter, .c = Colors::white};
         editor.DrawRegionConstraint(display, constraint, item.c);
-        if (cursorViewport == 2 && PointInRect(cursor, {item.c, item.radius})) {
+        if (cursorViewport == 2 && PointInRect(cursor, {item.c, item.radius}))
+        {
             display.FrameRect({item.c, item.radius}, Colors::lightgray, 0.01);
         }
     }
@@ -291,16 +274,12 @@ void WitnessFrameHandler(unsigned long windowID, unsigned int viewport, void * /
             DrawGameViewport(windowID);
             break;
         case 1:
-        {
-            DrawEditorViewport(windowID);
             editor = witness;
+            DrawEditorViewport(windowID);
             break;
-        }
         case 2:
-        {
             DrawTetrisPiecesViewport(windowID);
             break;
-        }
         default:
             break;
     }

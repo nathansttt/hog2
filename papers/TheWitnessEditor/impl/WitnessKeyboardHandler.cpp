@@ -117,6 +117,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     { // open editor
         if (!drawEditor)
         {
+            editor = witness;
             drawEditor = true;
             iws.Reset();
             solved = false;

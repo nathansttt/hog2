@@ -536,7 +536,7 @@ public:
         }
     }
 
-    void ClearConstraint(int x, int y)
+    void RemoveRegionConstraint(int x, int y)
     {
         constraintCount[regionConstraints[x][y].t]--;
         constraintCount[kNoRegionConstraint]++;
@@ -779,9 +779,41 @@ public:
     {
         AddStarConstraint(GetRegionFromX(which), GetRegionFromY(which), c);
     }
+    
+    void AddRegionConstraint(int x, int y, const WitnessRegionConstraint &constraint)
+    {
+        switch (constraint.t)
+        {
+            case kSeparation:
+                AddSeparationConstraint(x, y, constraint.c);
+                break;
+            case kStar:
+                AddStarConstraint(x, y, constraint.c);
+                break;
+            case kTetris:
+                AddTetrisConstraint(x, y, constraint.parameter);
+                break;
+            case kNegativeTetris:
+                AddNegativeTetrisConstraint(x, y, constraint.parameter);
+                break;
+            case kTriangle:
+                AddTriangleConstraint(x, y, constraint.parameter);
+                break;
+            case kEraser:
+                AddEraserConstraint(x, y);
+                break;
+            default: // kNoRegionConstraint, kRegionConstraintCount
+                break;
+        }
+    }
+    
+    void AddRegionConstraint(int which, const WitnessRegionConstraint &constraint)
+    {
+        AddRegionConstraint(GetRegionFromX(which), GetRegionFromY(which), constraint);
+    }
 
-    std::vector <std::pair<int, int>> start;
-    std::vector <std::pair<int, int>> goal;
+    std::vector<std::pair<int, int>> start;
+    std::vector<std::pair<int, int>> goal;
     // constant-time lookup for which goal is nearby
     // value is hte index in the goal array+1 (0 index means no goal)
     std::array<int, (width + 1) * (height + 1)> goalMap;
@@ -953,6 +985,30 @@ public:
     float yGap = -(((width > height) ? (width) : (height)) - height) * gapOffset / 2.0f;
 
     int GetPathIndex(int x, int y) const { return y * (width + 1) + x; }
+    
+    struct PathLocation
+    {
+        unsigned t;
+        int x;
+        int y;
+    };
+    
+    PathLocation GetPathLocation(int index)
+    {
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y <= height; y++)
+                if (index == (x + y * width))
+                    return {0, x, y};
+        for (int x = 0; x <= width; x++)
+            for (int y = 0; y < height; y++)
+                if (index == (width * (height + 1) + x * height + y))
+                    return {1, x, y};
+        for (int x = 0; x < width + 1; x++)
+            for (int y = 0; y < height + 1; y++)
+                if (index == (width * (height + 1) + (width + 1) * height + (width + 1) * y + x))
+                    return {2, x, y};
+        return {};
+    }
 
     int GetRegionIndex(int x, int y) const { return y * width + x; }
 
