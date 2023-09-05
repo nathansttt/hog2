@@ -91,7 +91,7 @@ public:
 
     bool hitTheWall() const
     {
-        if (path.empty())
+        if (path.size() <= 1)
             return false;
         auto &p = path.back();
         return (p.first == 0 || p.first == width) ||

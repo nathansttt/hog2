@@ -111,15 +111,6 @@ ActionType PathConstraintRule(const SearchEnvironment<WitnessState<width, height
     return UNKNOWN;
 }
 
-static void CalculateDistances(const std::pair<int, int> &pos, const std::vector<std::pair<int, int>> &goals, std::vector<double> &dists)
-{
-    for (size_t i = 0; i < goals.size(); ++i)
-    {
-        auto &g = goals[i];
-        dists[i] = std::sqrt(std::pow(g.first - pos.first, 2.0) + std::pow(g.second - pos.second, 2.0));
-    }
-}
-
 template <int width, int height>
 ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
                            const WitnessState<width, height> &state, const WitnessAction &action)
@@ -131,41 +122,44 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
     if (!state.hitTheWall() || state.isAlongTheWall())
         return UNKNOWN;
     const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
-    auto &currPos = state.path.back();
-    auto nextPos = currPos;
-    switch (action) {
-        case kUp:
+    if (witness->start.size() > 1 || witness->goal.size() > 1)
+        return UNKNOWN;
+    std::pair<int, int> start = witness->start[0];
+    if (start.first != 0 && start.second != 0)
+        return UNKNOWN;
+    std::pair<int, int> goal = witness->goal[0];
+    int currX = state.path.back().first;
+    int currY = state.path.back().second;
+    if (currX == 0 || currX == width) // vertical wall
+    {
+        if (currY < goal.second) // should choose kUP
         {
-            ++nextPos.second;
-            break;
+            if (currX == start.first && start.second > currY && start.second <= goal.second) // unless the start is in the middle
+                return (action == kDown) ? MUST_TAKE : CANNOT_TAKE;
+            return (action == kUp) ? MUST_TAKE : CANNOT_TAKE;
         }
-        case kRight:
+        else // should choose kDown
         {
-            ++nextPos.first;
-            break;
+            if (currX == start.first && start.second < currY && start.second >= goal.second)
+                return (action == kUp) ? MUST_TAKE : CANNOT_TAKE;
+            return (action == kDown) ? MUST_TAKE : CANNOT_TAKE;
         }
-        case kDown:
-        {
-            --nextPos.second;
-            break;
-        }
-        case kLeft:
-        {
-            --nextPos.first;
-            break;
-        }
-        default:
-            return UNKNOWN;
     }
-    auto currDists = std::vector<double>(witness->goal.size());
-    auto nextDists = std::vector<double>(witness->goal.size());
-    CalculateDistances(currPos, witness->goal, currDists);
-    CalculateDistances(nextPos, witness->goal, nextDists);
-    for (size_t i = 0; i < nextDists.size(); ++i)
-        nextDists[i] -= currDists[i];
-    if (std::all_of(nextDists.begin(), nextDists.end(), [](double d){ return d > 0; }))
-        return CANNOT_TAKE;
-    return UNKNOWN;
+    else // horizontal wall
+    {
+        if (currX < goal.first) // should choose kRight
+        {
+            if (currY == start.second && start.first > currX && start.first <= goal.first)
+                return (action == kLeft) ? MUST_TAKE : CANNOT_TAKE;
+            return (action == kRight) ? MUST_TAKE : CANNOT_TAKE;
+        }
+        else // should choose kLeft
+        {
+            if (currY == start.second && start.first < currX && start.first >= goal.first)
+                return (action == kRight) ? MUST_TAKE : CANNOT_TAKE;
+            return (action == kLeft) ? MUST_TAKE : CANNOT_TAKE;
+        }
+    }
 }
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */
