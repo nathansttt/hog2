@@ -62,9 +62,7 @@ static void InitTetrisPieces()
 
 static void AddInferenceRule()
 {
-    entropy.ruleSet.rules.push_back(&SeparationRule<puzzleWidth, puzzleHeight>);
-    entropy.ruleSet.rules.push_back(&PathConstraintRule<puzzleWidth, puzzleHeight>);
-    entropy.ruleSet.rules.push_back(&TowardsGoalRule<puzzleWidth, puzzleHeight>);
+    entropy.ruleSet.rules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
 }
 
 static void InitPuzzle()
@@ -77,6 +75,10 @@ static void InitPuzzle()
             currentSolutionIndices.emplace_back(i);
         }
     }
+    std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
+        return entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[a], gLookahead).value >
+            entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
+    });
     gNumSolutions = currentSolutionIndices.size();
     AddInferenceRule();
     gEntropy = GetCurrentEntropy(witness);

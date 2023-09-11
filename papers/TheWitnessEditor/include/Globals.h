@@ -27,6 +27,8 @@ extern size_t gNumSolutions;
 extern bool solved;
 extern double gEntropy;
 extern unsigned gLookahead;
+extern bool gWithReplacement;
+extern unsigned gSuggestedLocation;
 
 struct RegionConstraintItem {
     WitnessRegionConstraint constraint;

@@ -316,7 +316,7 @@ public:
                 Graphics::point p1 = GetScreenCoord(x, y);
                 Graphics::point p2 = GetScreenCoord(x + 1, y + 1);
                 Graphics::point p3 = (p1 + p2) * 0.5;
-                regionConstraintLocations[x * height + y] = std::make_pair(p3, Graphics::rect{p3, 0.15});
+                regionConstraintLocations[x + y * width] = std::make_pair(p3, Graphics::rect{p3, 0.15});
             }
         }
 
@@ -779,7 +779,7 @@ public:
     {
         AddStarConstraint(GetRegionFromX(which), GetRegionFromY(which), c);
     }
-    
+
     void AddRegionConstraint(int x, int y, const WitnessRegionConstraint &constraint)
     {
         switch (constraint.t)
@@ -806,7 +806,7 @@ public:
                 break;
         }
     }
-    
+
     void AddRegionConstraint(int which, const WitnessRegionConstraint &constraint)
     {
         AddRegionConstraint(GetRegionFromX(which), GetRegionFromY(which), constraint);
@@ -985,14 +985,14 @@ public:
     float yGap = -(((width > height) ? (width) : (height)) - height) * gapOffset / 2.0f;
 
     int GetPathIndex(int x, int y) const { return y * (width + 1) + x; }
-    
+
     struct PathLocation
     {
         unsigned t;
         int x;
         int y;
     };
-    
+
     PathLocation GetPathLocation(int index)
     {
         for (int x = 0; x < width; x++)

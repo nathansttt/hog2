@@ -162,4 +162,14 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
     }
 }
 
+template<int width, int height>
+std::vector<std::function<ActionType(const SearchEnvironment<WitnessState<width, height>, WitnessAction>&,
+                                     const WitnessState<width, height>&, const WitnessAction&)>>
+witnessInferenceRules =
+{
+    &SeparationRule<width, height>,
+    &PathConstraintRule<width, height>,
+    &TowardsGoalRule<width, height>
+};
+
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */

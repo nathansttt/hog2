@@ -82,6 +82,8 @@ static void DrawGameViewport(unsigned long windowID)
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
         display.DrawText("Entropy: ", Graphics::point{0.7, 1}, Colors::black, 0.07,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
+        display.DrawText("Suggestion: ", Graphics::point{-1, 1}, Colors::black, 0.075,
+                         Graphics::textAlignLeft, Graphics::textBaselineBottom);
         if (gSelectedEditorItem != -1 && cursorViewport == 0)
         {
             if (gSelectedEditorItem < gRegionConstraintItems.size())
@@ -94,8 +96,8 @@ static void DrawGameViewport(unsigned long windowID)
                     Graphics::point p = location.first;
                     if (PointInRect(cursor, location.second))
                     {
-                        unsigned y = i % puzzleWidth;
-                        unsigned x = (i - y) / puzzleWidth;
+                        int x = witness.GetRegionFromX(i);
+                        int y = witness.GetRegionFromY(i);
                         if (p != gLastPosition)
                         {
                             bool isAdding;
@@ -121,6 +123,10 @@ static void DrawGameViewport(unsigned long windowID)
                 }
                 if (!cursorInPuzzle)
                     witness.DrawRegionConstraint(display, constraint, cursor);
+                display.DrawText((std::to_string(witness.GetRegionFromX(gSuggestedLocation)) + ", " +
+                                  std::to_string(witness.GetRegionFromY(gSuggestedLocation))).c_str(),
+                                 Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                 Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
             else
             {
@@ -151,6 +157,12 @@ static void DrawGameViewport(unsigned long windowID)
                         break;
                     }
                 }
+                auto p = witness.GetPathLocation(gSuggestedLocation);
+                display.DrawText((((p.t == 0) ? "horizontal, " : (p.t == 1) ? "vertical, " : "vertex, ") +
+                                  std::to_string(p.x) + ", " +
+                                  std::to_string(p.y)).c_str(),
+                                 Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                 Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
             display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 0.9}, Colors::black, 0.075,
                              Graphics::textAlignRight, Graphics::textBaselineBottom);
@@ -242,9 +254,14 @@ static void DrawEditorViewport(unsigned long windowID)
                      (gUseRelativeEntropy) ? Colors::lightgreen : Colors::lightred, 0.05);
     rc = (gUseRelativeEntropy) ? Graphics::rect{-0.33, -0.10, -0.225, -0.03} : Graphics::rect{-0.33, -0.10, -0.21, -0.03};
     FrameLightgrayRect(display, 1, rc);
-    display.DrawText("Lookahead steps: ", Graphics::point{-0.1, -0.04}, Colors::black, 0.05);
-    display.DrawText(std::to_string(gLookahead).c_str(), Graphics::point{0.32, -0.04}, Colors::black, 0.05);
-    rc = {0.31, -0.10, 0.36, -0.03};
+    display.DrawText("Lookahead steps: ", Graphics::point{-0.15, -0.04}, Colors::black, 0.05);
+    display.DrawText(std::to_string(gLookahead).c_str(), Graphics::point{0.27, -0.04}, Colors::black, 0.05);
+    rc = {0.26, -0.10, 0.31, -0.03};
+    FrameLightgrayRect(display, 1, rc);
+    display.DrawText("Replacement: ", Graphics::point{0.38, -0.04}, Colors::black, 0.05);
+    display.DrawText((gWithReplacement) ? "true" : "false", Graphics::point{0.71, -0.04},
+                     (gWithReplacement) ? Colors::lightgreen : Colors::lightred, 0.05);
+    rc = (gWithReplacement) ? Graphics::rect{0.7, -0.10, 0.805, -0.03} : Graphics::rect{0.7, -0.10, 0.82, -0.03};
     FrameLightgrayRect(display, 1, rc);
 }
 
