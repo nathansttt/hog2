@@ -117,10 +117,10 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     { // open editor
         if (!drawEditor)
         {
-            editor = witness;
             drawEditor = true;
             iws.Reset();
             solved = false;
+            UpdateSolutionIndicies();
             MoveViewport(windowID, 1, {0.0f, -1.0f, 1.0f, 1.0f});
         }
         else

@@ -129,4 +129,8 @@ void k87fxsr()
     
     witness.AddSeparationConstraint(3, 0, Colors::magenta);
     witness.AddSeparationConstraint(3, 3, Colors::magenta);
+//    witness.AddTriangleConstraint(3, 3, 1);
+//    witness.AddTriangleConstraint(1, 0, 2);
+//    witness.AddTriangleConstraint(2, 0, 3);
+
 }

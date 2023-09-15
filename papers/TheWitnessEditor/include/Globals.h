@@ -74,5 +74,6 @@ extern int cursorViewport;
 extern bool gUseRelativeEntropy;
 
 double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight>& env);
+void UpdateSolutionIndicies();
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H */

@@ -20,7 +20,7 @@ std::vector<PathConstraintItem> gPathConstraintItems = {
 int gSelectedEditorItem = -1;
 unsigned gSelectedTetrisItem = 0;
 unsigned gSelectedColor = 0;
-static Graphics::point gLastPosition = Graphics::point{};
+static Graphics::point gLastPosition = Graphics::point{-1, -1};
 std::vector<size_t> currentSolutionIndices = {};
 size_t gNumSolutions = 0;
 double gEntropy = 0.0;
@@ -65,9 +65,9 @@ static size_t GetNumValidSolutions(bool isAdding)
 static void DrawGameViewport(unsigned long windowID)
 {
     Graphics::Display &display = GetContext(windowID)->display;
-    witness.Draw(display);
     if (!drawEditor)
     {
+        witness.Draw(display);
         iws.IncrementTime();
         witness.Draw(display, iws);
         if (solved)
@@ -78,6 +78,7 @@ static void DrawGameViewport(unsigned long windowID)
     }
     else
     {
+        editor.Draw(display);
         display.DrawText("# of solutions: ", Graphics::point{0.75, 0.9}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
         display.DrawText("Entropy: ", Graphics::point{0.7, 1}, Colors::black, 0.07,
@@ -90,14 +91,14 @@ static void DrawGameViewport(unsigned long windowID)
             {
                 bool cursorInPuzzle = false;
                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
-                for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
+                for (unsigned i = 0; i < editor.regionConstraintLocations.size(); ++i)
                 {
-                    const auto &location = witness.regionConstraintLocations[i];
+                    const auto &location = editor.regionConstraintLocations[i];
                     Graphics::point p = location.first;
                     if (PointInRect(cursor, location.second))
                     {
-                        int x = witness.GetRegionFromX(i);
-                        int y = witness.GetRegionFromY(i);
+                        int x = editor.GetRegionFromX(i);
+                        int y = editor.GetRegionFromY(i);
                         if (p != gLastPosition)
                         {
                             bool isAdding;
@@ -122,17 +123,26 @@ static void DrawGameViewport(unsigned long windowID)
                     }
                 }
                 if (!cursorInPuzzle)
-                    witness.DrawRegionConstraint(display, constraint, cursor);
-                display.DrawText((std::to_string(witness.GetRegionFromX(gSuggestedLocation)) + ", " +
-                                  std::to_string(witness.GetRegionFromY(gSuggestedLocation))).c_str(),
-                                 Graphics::point{-0.57, 1}, Colors::black, 0.075,
-                                 Graphics::textAlignLeft, Graphics::textBaselineBottom);
+                    editor.DrawRegionConstraint(display, constraint, cursor);
+                if (gSuggestedLocation != std::numeric_limits<unsigned>::max())
+                {
+                    int x = editor.GetRegionFromX(gSuggestedLocation);
+                    int y = editor.GetRegionFromY(gSuggestedLocation);
+                    display.DrawText((std::to_string(x) + ", " + std::to_string(y)).c_str(),
+                                     Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                     Graphics::textAlignLeft, Graphics::textBaselineBottom);
+                    if (editor.GetRegionConstraint(x, y).t == kNoRegionConstraint)
+                        display.FrameRect(editor.regionConstraintLocations[gSuggestedLocation].second, Colors::green, 0.01);
+                }
+                else
+                    display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                     Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
             else
             {
-                for (unsigned i = 0; i < witness.pathConstraintLocations.size(); ++i)
+                for (unsigned i = 0; i < editor.pathConstraintLocations.size(); ++i)
                 {
-                    const auto &location = witness.pathConstraintLocations[i];
+                    const auto &location = editor.pathConstraintLocations[i];
                     if (PointInRect(cursor, location.second) &&
                         i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                     {
@@ -157,20 +167,29 @@ static void DrawGameViewport(unsigned long windowID)
                         break;
                     }
                 }
-                auto p = witness.GetPathLocation(gSuggestedLocation);
-                display.DrawText((((p.t == 0) ? "horizontal, " : (p.t == 1) ? "vertical, " : "vertex, ") +
-                                  std::to_string(p.x) + ", " +
-                                  std::to_string(p.y)).c_str(),
-                                 Graphics::point{-0.57, 1}, Colors::black, 0.075,
-                                 Graphics::textAlignLeft, Graphics::textBaselineBottom);
+                if (gSuggestedLocation != std::numeric_limits<unsigned>::max())
+                {
+                    auto p = editor.GetPathLocation(gSuggestedLocation);
+                    display.DrawText((((p.t == 0) ? "horizontal, " : (p.t == 1) ? "vertical, " : "vertex, ") +
+                                      std::to_string(p.x) + ", " +
+                                      std::to_string(p.y)).c_str(),
+                                     Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                     Graphics::textAlignLeft, Graphics::textBaselineBottom);
+                    display.FrameRect(editor.pathConstraintLocations[gSuggestedLocation].second, Colors::green, 0.01);
+                }
+                else
+                    display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                     Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
             display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 0.9}, Colors::black, 0.075,
                              Graphics::textAlignRight, Graphics::textBaselineBottom);
         }
         else
         {
+            gLastPosition = Graphics::point{-1, -1};
             display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
+            gEntropy = GetCurrentEntropy(witness);
         }
         display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
                          Graphics::point{0.9, 1}, Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);

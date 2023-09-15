@@ -28,7 +28,7 @@ ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, W
     switch (action) {
         case kUp:
         {
-            if (currX < width && currY < height
+            if (currX > 0 && currX < width
                 && CompareSC(witness->GetRegionConstraint(currX - 1, currY),
                              witness->GetRegionConstraint(currX, currY)))
                 return MUST_TAKE;
@@ -44,7 +44,7 @@ ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, W
         }
         case kDown:
         {
-            if (currX < width && currY > 0
+            if (currX > 0 && currX < width
                 && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
                              witness->GetRegionConstraint(currX, currY - 1)))
                 return MUST_TAKE;
@@ -134,13 +134,13 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
     {
         if (currY < goal.second) // should choose kUP
         {
-            if (currX == start.first && start.second > currY && start.second <= goal.second) // unless the start is in the middle
+            if (start.second > currY && start.second <= goal.second) // unless the start is in the middle
                 return (action == kDown) ? MUST_TAKE : CANNOT_TAKE;
             return (action == kUp) ? MUST_TAKE : CANNOT_TAKE;
         }
         else // should choose kDown
         {
-            if (currX == start.first && start.second < currY && start.second >= goal.second)
+            if (start.second < currY && start.second >= goal.second)
                 return (action == kUp) ? MUST_TAKE : CANNOT_TAKE;
             return (action == kDown) ? MUST_TAKE : CANNOT_TAKE;
         }
@@ -149,13 +149,13 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
     {
         if (currX < goal.first) // should choose kRight
         {
-            if (currY == start.second && start.first > currX && start.first <= goal.first)
+            if (start.first > currX && start.first <= goal.first)
                 return (action == kLeft) ? MUST_TAKE : CANNOT_TAKE;
             return (action == kRight) ? MUST_TAKE : CANNOT_TAKE;
         }
         else // should choose kLeft
         {
-            if (currY == start.second && start.first < currX && start.first >= goal.first)
+            if (start.first < currX && start.first >= goal.first)
                 return (action == kRight) ? MUST_TAKE : CANNOT_TAKE;
             return (action == kLeft) ? MUST_TAKE : CANNOT_TAKE;
         }
