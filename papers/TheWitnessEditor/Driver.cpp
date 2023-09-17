@@ -33,25 +33,6 @@ std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
-double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight> &env)
-{
-    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead).value;
-}
-
-void UpdateSolutionIndicies()
-{
-    currentSolutionIndices.clear();
-    for (size_t i = 0; i < allSolutions.size(); i++)
-    {
-        auto &solution = allSolutions[i];
-        if (witness.GoalTest(solution))
-        {
-            currentSolutionIndices.emplace_back(i);
-        }
-    }
-    gEntropy = GetCurrentEntropy(witness);
-}
-
 static void InitTetrisPieces()
 {
     for (unsigned i = 1; i <= 24; ++i)

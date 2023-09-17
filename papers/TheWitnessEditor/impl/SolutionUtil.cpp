@@ -20,3 +20,17 @@ void GetAllSolutions()
     std::vector<WitnessState<5, 5>> p7;
     GetAllSolutions(p7);
 }
+
+void UpdateSolutionIndicies()
+{
+    currentSolutionIndices.clear();
+    for (size_t i = 0; i < allSolutions.size(); i++)
+    {
+        auto &solution = allSolutions[i];
+        if (witness.GoalTest(solution))
+        {
+            currentSolutionIndices.emplace_back(i);
+        }
+    }
+    gEntropy = GetCurrentEntropy(witness);
+}

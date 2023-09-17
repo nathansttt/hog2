@@ -13,6 +13,9 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <numeric>
+#include <sstream>
+#include <string>
 
 #include "SearchEnvironment.h"
 #include "vectorCache.h"
@@ -189,11 +192,19 @@ struct WitnessRegionConstraint {
     int parameter{};
     rgbColor c;
 
-    bool operator==(const WitnessRegionConstraint &a) const {
+    bool operator==(const WitnessRegionConstraint &a) const
+    {
         return a.t == this->t && a.parameter == this->parameter && a.c == this->c;
     }
-    bool operator!=(const WitnessRegionConstraint &a) const {
+    bool operator!=(const WitnessRegionConstraint &a) const
+    {
         return !(*this == a);
+    }
+    operator std::string() const
+    {
+        std::stringstream ss;
+        ss << "{\"type\":" << t << ",\"param\":" << parameter << ",\"color\":\"" << c.hex() << "\"}";
+        return ss.str();
     }
 };
 
@@ -819,6 +830,73 @@ public:
     std::array<int, (width + 1) * (height + 1)> goalMap;
     //	const int kStartX = 0, kStartY = 0;
 
+    operator std::string() const
+    {
+        std::string quote = "\"";
+        std::stringstream ss;
+        ss << "{\"width\":" << width << ", \"height\":" << height << ", \"start\":[";
+        for (const auto &s: start)
+        {
+            ss << "{\"x\":" << s.first << ", \"y\":" << s.second << "}";
+            if (&s != &start.back())
+                ss << ",";
+        }
+        ss << "], \"goal\":[";
+        for (const auto &g: goal)
+        {
+            ss << "{\"x\":" << g.first << ", \"y\":" << g.second << "}";
+            if (&g != &goal.back())
+                ss << ",";
+        }
+        ss << "], \"constraints\":{\"regionConstraints\":[";
+        unsigned count = std::accumulate(constraintCount.begin() + 1, constraintCount.end(), 0);
+        for (unsigned x = 0; x < width; ++x)
+        {
+            for (unsigned y = 0; y < height; ++y)
+            {
+                const WitnessRegionConstraint &constraint = regionConstraints[x][y];
+                if (constraint.t != kNoRegionConstraint)
+                {
+                    ss << "{\"x\":" << x << ",\"y\":" << y
+                        << ",\"constraint\":" << std::string(constraint) << "}";
+                    if (count > 1)
+                    {
+                        ss << ",";
+                        --count;
+                    }
+                }
+            }
+        }
+        ss << "], \"pathConstraints\":[";
+        count = std::accumulate(pathConstraints.begin(), pathConstraints.end(), 0, [&](int c, WitnessPathConstraintType t) {
+            if (t != kNoPathConstraint)
+                return c + 1;
+            return c;
+        });
+        for (unsigned i = 0; i < pathConstraints.size(); ++i)
+        {
+            PathLocation p = GetPathLocation(i);
+            if (pathConstraints[i] != 0)
+            {
+                ss << "{\"locationType\":" << p.t << ",\"x\":" << p.x << ",\"y\":" << p.y
+                    << ",\"constraint\":" << pathConstraints[i] << "}";
+                if (count > 1)
+                {
+                    ss << ",";
+                    --count;
+                }
+            }
+        }
+        ss << "]}";
+        ss << "}";
+        return ss.str();
+    }
+
+    std::ostream& serialize(std::ostream &os) const
+    {
+        return os << std::string(*this);
+    }
+
     std::string SaveToHashString() const
     {
         // JSON string { "name":"value" }
@@ -993,7 +1071,7 @@ public:
         int y;
     };
 
-    PathLocation GetPathLocation(int index)
+    PathLocation GetPathLocation(int index) const
     {
         for (int x = 0; x < width; x++)
             for (int y = 0; y <= height; y++)
@@ -2933,6 +3011,12 @@ void Witness<width, height>::Draw(Graphics::Display &display, const InteractiveW
         Graphics::point p2 = GetScreenCoord(iws.ws.path.back().first, iws.ws.path.back().second);
         display.FillCircle(p2, lineWidth * 0.5f, lineColor);
     }
+}
+
+template<int width, int height>
+inline std::ostream& operator<<(std::ostream &os, const Witness<width, height> &witness)
+{
+  return witness.serialize(os);
 }
 
 #endif // HOG2_ENVIRONMENTS_WITNESS_H

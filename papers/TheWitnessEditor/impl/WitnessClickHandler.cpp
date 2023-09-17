@@ -1,5 +1,6 @@
 #include "Driver.h"
 #include "Globals.h"
+#include "SolutionUtil.h"
 
 Graphics::point cursor = Graphics::point{};
 int cursorViewport = 0;
@@ -259,7 +260,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 gUseRelativeEntropy ^= true;
                 gEntropy = GetCurrentEntropy(witness);
             }
-            if (PointInRect(p, Graphics::rect{0.31, -0.10, 0.36, -0.03}))
+            if (PointInRect(p, Graphics::rect{0.26, -0.10, 0.31, -0.03}))
             {
                 switch (gLookahead) {
                     case 0:

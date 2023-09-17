@@ -73,7 +73,9 @@ extern Graphics::point cursor;
 extern int cursorViewport;
 extern bool gUseRelativeEntropy;
 
-double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight>& env);
-void UpdateSolutionIndicies();
+inline double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight> &env)
+{
+    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead).value;
+}
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H */

@@ -289,7 +289,6 @@ static void DrawTetrisPiecesViewport(unsigned long windowID)
     if (!drawEditor) return;
     Graphics::Display &display = GetContext(windowID)->display;
     display.FillRect({-1.0f, -1.0f, 1.0f, 1.0f}, Colors::bluegray);
-    //    printf("selected tetris piece: %d\n", selectTetrisPiece);
     for (const auto &item: gTetrisPieces)
     {
         WitnessRegionConstraintType t = (selectTetrisPiece == 2) ? kNegativeTetris : kTetris;
