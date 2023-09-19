@@ -8,12 +8,14 @@
 #ifndef HOG2_ENVIRONMENTS_WITNESS_H
 #define HOG2_ENVIRONMENTS_WITNESS_H
 
+#include <algorithm>
 #include <array>
 #include <bitset>
 #include <cassert>
 #include <cstring>
 #include <iostream>
 #include <numeric>
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -212,7 +214,7 @@ enum WitnessPathConstraintType {
     kNoPathConstraint = 0,
     kMustCross = 1,
     kCannotCross = 2,
-    kEdgeConstraintCount = 3
+    kPathConstraintCount = 3
 };
 
 template<int width, int height>
@@ -892,9 +894,130 @@ public:
         return ss.str();
     }
 
-    std::ostream& serialize(std::ostream &os) const
+    std::ostream& Serialize(std::ostream &os) const
     {
         return os << std::string(*this);
+    }
+
+    std::istream& Deserialize(std::istream &is)
+    {
+        std::string input((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+        std::regex wh("\"width\":\\s*(\\d+),\\s*\"height\":\\s*(\\d+)");
+        std::smatch match;
+        if (!std::regex_search(input, match, wh))
+        {
+            std::cerr << "incorrect string" << std::endl;
+            return is;
+        }
+        int w = std::stoi(match[1].str());
+        int h = std::stoi(match[2].str());
+        if (w != width || h != height)
+        {
+            std::cerr << "unmatched width and height" << std::endl;
+            return is;
+        }
+        std::regex regStart("\"start\":\\s*\\[(\\{\"x\":\\s*\\d+,\\s*\"y\":\\s*\\d+\\})*\\],");
+        if (!std::regex_search(input, match, regStart))
+        {
+            std::cerr << "incorrect string" << std::endl;
+            return is;
+        }
+        std::regex regXy("\"x\":\\s*(\\d+),\\s*\"y\":\\s*(\\d+)");
+        for (size_t i = 1; i < match.size(); ++i)
+        {
+            std::string s = match[i].str();
+            std::smatch nums;
+            std::regex_search(s, nums, regXy);
+            int x = std::stoi(nums[1].str());
+            int y = std::stoi(nums[2].str());
+            if (std::find(start.begin(), start.end(), std::pair<int, int>{x, y}) == start.end())
+                AddStart(x, y);
+        }
+        std::regex regGoal("\"goal\":\\s*\\[(\\{\"x\":\\s*\\d+,\\s*\"y\":\\s*\\d+\\})*\\],");
+        if (!std::regex_search(input, match, regGoal))
+        {
+            std::cerr << "incorrect string" << std::endl;
+            return is;
+        }
+        for (size_t i = 1; i < match.size(); ++i)
+        {
+            std::string s = match[i].str();
+            std::smatch nums;
+            std::regex_search(s, nums, regXy);
+            int x = std::stoi(nums[1].str());
+            int y = std::stoi(nums[2].str());
+            if (std::find(goal.begin(), goal.end(), std::pair<int, int>{x, y}) == goal.end())
+                AddGoal(x, y);
+        }
+        std::regex regConstraints("\"constraints\":\\s*\\{\"regionConstraints\":\\s*\\[(.*)\\],\\s*\"pathConstraints\":\\[(.*)\\]\\}");
+        if (!std::regex_search(input, match, regConstraints))
+        {
+            std::cerr << "incorrect string" << std::endl;
+            return is;
+        }
+        std::string rc = match[1].str();
+        std::string pc = match[2].str();
+        std::regex regRegionConstraint("\\{\"x\":\\s*(\\d+),\\s*\"y\":\\s*(\\d+),\\s*\"constraint\":\\s*\\{\"type\":\\s*(\\d),\\s*\"param\":\\s*(\\d),\\s*\"color\":\\s*\"(#[a-fA-F0-9]{6})\"\\}");
+        auto begin = std::sregex_iterator(input.begin(), input.end(), regRegionConstraint);
+        auto end = std::sregex_iterator();
+        for (auto i = begin; i != end; ++i)
+        {
+            match = *i;
+            int x = std::stoi(match[1]);
+            int y = std::stoi(match[2]);
+            if (x >= width || y >= height)
+            {
+                std::cerr << "incorrect location type" << std::endl;
+                return is;
+            }
+            int type = std::stoi(match[3]);
+            if (type >= kRegionConstraintCount)
+            {
+                std::cerr << "incorrect region constraint type" << std::endl;
+                return is;
+            }
+            int param = std::stoi(match[4]);
+            rgbColor color;
+            color.hex(match[5].str().c_str());
+            WitnessRegionConstraint c;
+            c.t = static_cast<WitnessRegionConstraintType>(type);
+            c.parameter = param;
+            c.c = color;
+            AddRegionConstraint(x, y, c);
+        }
+        std::regex regPathConstraint("\\{\"locationType\":\\s*(\\d),\\s*\"x\":\\s*(\\d),\\s*\"y\":\\s*(\\d),\\s*\"constraint\":\\s*(\\d)\\}");
+        begin = std::sregex_iterator(input.begin(), input.end(), regPathConstraint);
+        for (auto i = begin; i != end; ++i)
+        {
+            match = *i;
+            int locationType = std::stoi(match[1]);
+            if (locationType != 0 && locationType != 1 && locationType != 2)
+            {
+                std::cerr << "incorrect location type" << std::endl;
+                return is;
+            }
+            int x = std::stoi(match[2]);
+            int y = std::stoi(match[3]);
+            if (x > width || y > height)
+            {
+                std::cerr << "incorrect location" << std::endl;
+                return is;
+            }
+            int c = std::stoi(match[4]);
+            if (c >= kPathConstraintCount)
+            {
+                std::cerr << "incorrect path constraint type" << std::endl;
+                return is;
+            }
+            int p = (locationType == 0) ? (x + y * width) :
+                ((locationType == 1) ? (width * (height + 1) + x * height + y) :
+                 (width * (height + 1) + (width + 1) * height + (width + 1) * y + x));
+            if (c == 1)
+                SetMustCrossConstraint(p);
+            if (c == 2)
+                SetCannotCrossConstraint(p);
+        }
+        return is;
     }
 
     std::string SaveToHashString() const
@@ -3016,7 +3139,13 @@ void Witness<width, height>::Draw(Graphics::Display &display, const InteractiveW
 template<int width, int height>
 inline std::ostream& operator<<(std::ostream &os, const Witness<width, height> &witness)
 {
-  return witness.serialize(os);
+  return witness.Serialize(os);
+}
+
+template<int width, int height>
+inline std::istream& operator>>(std::istream &is, Witness<width, height> &witness)
+{
+    return witness.Deserialize(is);
 }
 
 #endif // HOG2_ENVIRONMENTS_WITNESS_H
