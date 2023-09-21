@@ -6,7 +6,7 @@
 #-----------------------------------------------------------------------------
 
 CXX = emcc # clang++
-COMMON_CXXFLAGS += -Wall -std=c++14 # -stdlib=libc++
+COMMON_CXXFLAGS += -Wall -std=gnu++17 # -stdlib=libc++
 
 #COMMON_CXXFLAGS += -ansi -pedantic
 

@@ -27,9 +27,7 @@ unsigned long currBoard = 0;
 Witness<puzzleWidth, puzzleHeight> witness;
 Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
-std::vector<Witness<puzzleWidth, puzzleHeight>> best;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-// std::vector<uint64_t> otherbest;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
@@ -114,6 +112,7 @@ int main(int argc, char *argv[])
     GetAllSolutions(allSolutions);
     InitPuzzle();
     InstallHandlers();
+    std::cout << "size: " << sizeof(iws) << std::endl;
     RunHOGGUI(argc, argv, 1280, 640);
     return 0;
 }

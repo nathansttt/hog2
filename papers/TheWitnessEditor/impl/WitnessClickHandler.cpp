@@ -62,6 +62,8 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
             }
         }
     }
+    if (ret == -1)
+        gSuggestedLocation = std::numeric_limits<unsigned>::max();
     return ret;
 }
 
@@ -114,6 +116,8 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
             }
         }
     }
+    if (ret == -1)
+        gSuggestedLocation = std::numeric_limits<unsigned>::max();
     return ret;
 }
 
@@ -168,6 +172,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                     witness.RemoveRegionConstraint(x, y);
                                 else
                                     witness.AddRegionConstraint(x, y, constraint);
+                                double e = MaximizedEntropy(constraint);
+                                std::cout << "max entropy: "
+                                    << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
                             }
                         }
@@ -188,10 +195,14 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                     witness.pathConstraints[i] = kNoPathConstraint;
                                 else
                                     witness.pathConstraints[i] = constraint;
+                                double e = MaximizedEntropy(constraint);
+                                std::cout << "max entropy: "
+                                    << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
                             }
                         }
                     }
+                    
                     UpdateSolutionIndicies();
                 }
             }
