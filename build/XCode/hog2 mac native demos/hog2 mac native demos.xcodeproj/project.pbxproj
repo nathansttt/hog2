@@ -97,7 +97,6 @@
 		C4017B0E26479AED00DE3C91 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4017B0F26479AED00DE3C91 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4017B1026479AED00DE3C91 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4017B1126479AED00DE3C91 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4017B1226479AED00DE3C91 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4017B1326479AED00DE3C91 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4017B1426479AED00DE3C91 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -199,7 +198,6 @@
 		C40D4B1121B1BE3800362048 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C40D4B1221B1BE3800362048 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C40D4B1321B1BE3800362048 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C40D4B1421B1BE3800362048 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C40D4B1521B1BE3800362048 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C40D4B1621B1BE3800362048 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C40D4B1721B1BE3800362048 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -211,6 +209,135 @@
 		C40D4B1F21B1BE3800362048 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4C8354F1F2AF5C7004E78C0 /* Assets.xcassets */; };
 		C40D4B2021B1BE3800362048 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4C835511F2AF5C7004E78C0 /* Main.storyboard */; };
 		C40D4B2A21B1BE6B00362048 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40D4B2721B1BE6400362048 /* Driver.cpp */; };
+		C40E89DD2A2690C30041936F /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836491F2AF6B5004E78C0 /* BitVector.cpp */; };
+		C40E89DE2A2690C30041936F /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
+		C40E89DF2A2690C30041936F /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836711F2AF6B5004E78C0 /* Plot2D.cpp */; };
+		C40E89E02A2690C30041936F /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A51F2AF6B4004E78C0 /* SFBDPancakePuzzle.cpp */; };
+		C40E89E12A2690C30041936F /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835B81F2AF6B5004E78C0 /* VoxelTriangleExtraction.cpp */; };
+		C40E89E22A2690C30041936F /* MNPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8358B1F2AF6B4004E78C0 /* MNPuzzle.cpp */; };
+		C40E89E32A2690C30041936F /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8359F1F2AF6B4004E78C0 /* RubiksCubeCorners.cpp */; };
+		C40E89E42A2690C30041936F /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836611F2AF6B5004E78C0 /* MapGenerators.cpp */; };
+		C40E89E52A2690C30041936F /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AB1F2AF6B4004E78C0 /* TopSpin.cpp */; };
+		C40E89E62A2690C30041936F /* OpenListB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835681F2AF6B4004E78C0 /* OpenListB.cpp */; };
+		C40E89E72A2690C30041936F /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836101F2AF6B5004E78C0 /* TextBox.cpp */; };
+		C40E89E82A2690C30041936F /* Airplane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8356B1F2AF6B4004E78C0 /* Airplane.cpp */; };
+		C40E89E92A2690C30041936F /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AF1F2AF6B4004E78C0 /* VoxelGrid.cpp */; };
+		C40E89EA2A2690C30041936F /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836121F2AF6B5004E78C0 /* Trackball.cpp */; };
+		C40E89EB2A2690C30041936F /* ScenarioLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836751F2AF6B5004E78C0 /* ScenarioLoader.cpp */; };
+		C40E89EC2A2690C30041936F /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C8354D1F2AF5C7004E78C0 /* ViewController.mm */; };
+		C40E89ED2A2690C30041936F /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836551F2AF6B5004E78C0 /* FPUtil.cpp */; };
+		C40E89EE2A2690C30041936F /* StatCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836781F2AF6B5004E78C0 /* StatCollection.cpp */; };
+		C40E89EF2A2690C30041936F /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A71F2AF6B4004E78C0 /* SteeringEnvironment.cpp */; };
+		C40E89F02A2690C30041936F /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835DF1F2AF6B5004E78C0 /* FloydWarshall.cpp */; };
+		C40E89F12A2690C30041936F /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835831F2AF6B4004E78C0 /* Map2DHeading.cpp */; };
+		C40E89F22A2690C30041936F /* MNAgentPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835891F2AF6B4004E78C0 /* MNAgentPuzzle.cpp */; };
+		C40E89F32A2690C30041936F /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836841F2AF6B5004E78C0 /* Timer.cpp */; };
+		C40E89F42A2690C30041936F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C4C8354A1F2AF5C7004E78C0 /* main.m */; };
+		C40E89F52A2690C30041936F /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8365F1F2AF6B5004E78C0 /* Map.cpp */; };
+		C40E89F62A2690C30041936F /* DrawView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C8375B1F2E95E9004E78C0 /* DrawView.mm */; };
+		C40E89F72A2690C30041936F /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E91F2AF6B5004E78C0 /* Propagation.cpp */; };
+		C40E89F82A2690C30041936F /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835991F2AF6B4004E78C0 /* RoboticArm.cpp */; };
+		C40E89F92A2690C30041936F /* MMapUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836671F2AF6B5004E78C0 /* MMapUtil.cpp */; };
+		C40E89FA2A2690C30041936F /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8365D1F2AF6B5004E78C0 /* LogisticRegression.cpp */; };
+		C40E89FB2A2690C30041936F /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835931F2AF6B4004E78C0 /* NQueens.cpp */; };
+		C40E89FC2A2690C30041936F /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E11F2AF6B5004E78C0 /* GraphAlgorithm.cpp */; };
+		C40E89FD2A2690C30041936F /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835751F2AF6B4004E78C0 /* Directional2DEnvironment.cpp */; };
+		C40E89FE2A2690C30041936F /* RubiksCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8359B1F2AF6B4004E78C0 /* RubiksCube.cpp */; };
+		C40E89FF2A2690C30041936F /* MinimalSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835871F2AF6B4004E78C0 /* MinimalSectorAbstraction.cpp */; };
+		C40E8A002A2690C30041936F /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836501F2AF6B5004E78C0 /* EnvUtil.cpp */; };
+		C40E8A012A2690C30041936F /* Transit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C428CA4420B2821400B27666 /* Transit.cpp */; };
+		C40E8A022A2690C30041936F /* NN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8366D1F2AF6B5004E78C0 /* NN.cpp */; };
+		C40E8A032A2690C30041936F /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8359D1F2AF6B4004E78C0 /* RubiksCube7Edges.cpp */; };
+		C40E8A042A2690C30041936F /* MR1Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836691F2AF6B5004E78C0 /* MR1Permutation.cpp */; };
+		C40E8A052A2690C30041936F /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836201F2AF6B5004E78C0 /* MapUnit.cpp */; };
+		C40E8A062A2690C30041936F /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8367E1F2AF6B5004E78C0 /* SVGUtil.cpp */; };
+		C40E8A072A2690C30041936F /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836221F2AF6B5004E78C0 /* RandomUnits.cpp */; };
+		C40E8A082A2690C30041936F /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8367A1F2AF6B5004E78C0 /* StatUtil.cpp */; };
+		C40E8A092A2690C30041936F /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835711F2AF6B4004E78C0 /* CanonicalGrid.cpp */; };
+		C40E8A0A2A2690C30041936F /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835DD1F2AF6B5004E78C0 /* AStarDelay.cpp */; };
+		C40E8A0B2A2690C30041936F /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E71F2AF6B5004E78C0 /* Path.cpp */; };
+		C40E8A0C2A2690C30041936F /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835611F2AF6B4004E78C0 /* GenericIDAStar.cpp */; };
+		C40E8A0D2A2690C30041936F /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836731F2AF6B5004E78C0 /* RangeCompression.cpp */; };
+		C40E8A0E2A2690C30041936F /* Map2DSectorAbstractionEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD0E520B5BB140072F0CB /* Map2DSectorAbstractionEnvironment.cpp */; };
+		C40E8A0F2A2690C30041936F /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835791F2AF6B4004E78C0 /* FlipSide.cpp */; };
+		C40E8A102A2690C30041936F /* MapOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836631F2AF6B5004E78C0 /* MapOverlay.cpp */; };
+		C40E8A112A2690C30041936F /* Voxels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835B11F2AF6B5004E78C0 /* Voxels.cpp */; };
+		C40E8A122A2690C30041936F /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E51F2AF6B5004E78C0 /* MeroB.cpp */; };
+		C40E8A132A2690C30041936F /* DiskBitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8364E1F2AF6B5004E78C0 /* DiskBitFile.cpp */; };
+		C40E8A142A2690C30041936F /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F134CE2089A31C00AC26BC /* Graphics.cpp */; };
+		C40E8A152A2690C30041936F /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8364B1F2AF6B5004E78C0 /* Bloom.cpp */; };
+		C40E8A162A2690C30041936F /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8357B1F2AF6B4004E78C0 /* GraphEnvironment.cpp */; };
+		C40E8A172A2690C30041936F /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AD1F2AF6B4004E78C0 /* TopSpinGraph.cpp */; };
+		C40E8A182A2690C30041936F /* Heap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E31F2AF6B5004E78C0 /* Heap.cpp */; };
+		C40E8A192A2690C30041936F /* GLUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836591F2AF6B5004E78C0 /* GLUtil.cpp */; };
+		C40E8A1A2A2690C30041936F /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836531F2AF6B5004E78C0 /* FourBitArray.cpp */; };
+		C40E8A1B2A2690C30041936F /* CocoaHOG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */; };
+		C40E8A1C2A2690C30041936F /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835DA1F2AF6B5004E78C0 /* Graph.cpp */; };
+		C40E8A1D2A2690C30041936F /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835661F2AF6B4004E78C0 /* OpenClosedList.cpp */; };
+		C40E8A1E2A2690C30041936F /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836651F2AF6B5004E78C0 /* MinBloom.cpp */; };
+		C40E8A1F2A2690C30041936F /* JPS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EE1F2AF6B5004E78C0 /* JPS.cpp */; };
+		C40E8A202A2690C30041936F /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835971F2AF6B4004E78C0 /* PermutationPuzzleEnvironment.cpp */; };
+		C40E8A212A2690C30041936F /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8366F1F2AF6B5004E78C0 /* Perceptron.cpp */; };
+		C40E8A222A2690C30041936F /* LinearRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8365B1F2AF6B5004E78C0 /* LinearRegression.cpp */; };
+		C40E8A232A2690C30041936F /* RC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F3F4B92698F469001FB029 /* RC.cpp */; };
+		C40E8A242A2690C30041936F /* PancakeInstances.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835B61F2AF6B5004E78C0 /* PancakeInstances.cpp */; };
+		C40E8A252A2690C30041936F /* NaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835911F2AF6B4004E78C0 /* NaryTree.cpp */; };
+		C40E8A262A2690C30041936F /* SwapEndian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836801F2AF6B5004E78C0 /* SwapEndian.cpp */; };
+		C40E8A272A2690C30041936F /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835731F2AF6B4004E78C0 /* ConfigEnvironment.cpp */; };
+		C40E8A282A2690C30041936F /* gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F41F2AF6B5004E78C0 /* gl.cpp */; };
+		C40E8A292A2690C30041936F /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8357F1F2AF6B4004E78C0 /* Map2DConstrainedEnvironment.cpp */; };
+		C40E8A2A2A2690C30041936F /* Map3DGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835851F2AF6B4004E78C0 /* Map3DGrid.cpp */; };
+		C40E8A2B2A2690C30041936F /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8358F1F2AF6B4004E78C0 /* MountainCar.cpp */; };
+		C40E8A2C2A2690C30041936F /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836471F2AF6B5004E78C0 /* BitMap.cpp */; };
+		C40E8A2D2A2690C30041936F /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8367C1F2AF6B5004E78C0 /* StringUtils.cpp */; };
+		C40E8A2E2A2690C30041936F /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A11F2AF6B4004E78C0 /* RubiksCubeEdges.cpp */; };
+		C40E8A2F2A2690C30041936F /* Map2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835811F2AF6B4004E78C0 /* Map2DEnvironment.cpp */; };
+		C40E8A302A2690C30041936F /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A31F2AF6B4004E78C0 /* SequenceAlignment.cpp */; };
+		C40E8A312A2690C30041936F /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835641F2AF6B4004E78C0 /* OldSearchEnvironment.cpp */; };
+		C40E8A322A2690C30041936F /* Fling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835771F2AF6B4004E78C0 /* Fling.cpp */; };
+		C40E8A332A2690C30041936F /* glut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F61F2AF6B5004E78C0 /* glut.cpp */; };
+		C40E8A342A2690C30041936F /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8366B1F2AF6B5004E78C0 /* NBitArray.cpp */; };
+		C40E8A352A2690C30041936F /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
+		C40E8A362A2690C30041936F /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
+		C40E8A372A2690C30041936F /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
+		C40E8A392A2690C30041936F /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
+		C40E8A3A2A2690C30041936F /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
+		C40E8A3B2A2690C30041936F /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
+		C40E8A3C2A2690C30041936F /* Racetrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F3F36F26935EEE001FB029 /* Racetrack.cpp */; };
+		C40E8A3D2A2690C30041936F /* CanonicalGraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8356F1F2AF6B4004E78C0 /* CanonicalGraphEnvironment.cpp */; };
+		C40E8A3E2A2690C30041936F /* BurnedPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8356D1F2AF6B4004E78C0 /* BurnedPancakePuzzle.cpp */; };
+		C40E8A3F2A2690C30041936F /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836821F2AF6B5004E78C0 /* TextOverlay.cpp */; };
+		C40E8A402A2690C30041936F /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355F1F2AF6B4004E78C0 /* GenericAStar.cpp */; };
+		C40E8A422A2690C30041936F /* MonoFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F3F38B26979531001FB029 /* MonoFont.cpp */; };
+		C40E8A452A2690C30041936F /* DrawView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4C8375D1F2E9634004E78C0 /* DrawView.xib */; };
+		C40E8A462A2690C30041936F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4C8354F1F2AF5C7004E78C0 /* Assets.xcassets */; };
+		C40E8A472A2690C30041936F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4C835511F2AF5C7004E78C0 /* Main.storyboard */; };
+		C40E8A532A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A542A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A552A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A562A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A572A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A582A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A592A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A5A2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A5B2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A5C2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A5D2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A5E2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A5F2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A602A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A612A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A622A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A632A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A642A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A652A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A662A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A672A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A682A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A692A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A6A2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A6B2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C40E8A6C2A2691400041936F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
 		C41B351B21B33336009025A4 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C41B351921B33336009025A4 /* Driver.cpp */; };
 		C423102D204F3AA5000DEC53 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836491F2AF6B5004E78C0 /* BitVector.cpp */; };
 		C423102E204F3AA5000DEC53 /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
@@ -299,7 +426,6 @@
 		C4231083204F3AA5000DEC53 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4231084204F3AA5000DEC53 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4231085204F3AA5000DEC53 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4231086204F3AA5000DEC53 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4231087204F3AA5000DEC53 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4231088204F3AA5000DEC53 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C423108A204F3AA5000DEC53 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -400,7 +526,6 @@
 		C426BF53230235A30094DABC /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C426BF54230235A30094DABC /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C426BF55230235A30094DABC /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C426BF56230235A30094DABC /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C426BF57230235A30094DABC /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C426BF59230235A30094DABC /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C426BF5A230235A30094DABC /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -503,7 +628,6 @@
 		C428CA2B20B280BC00B27666 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C428CA2C20B280BC00B27666 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C428CA2D20B280BC00B27666 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C428CA2E20B280BC00B27666 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C428CA2F20B280BC00B27666 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C428CA3020B280BC00B27666 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C428CA3120B280BC00B27666 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -617,7 +741,6 @@
 		C42B6665206AE4A900C3BF1A /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C42B6666206AE4A900C3BF1A /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C42B6667206AE4A900C3BF1A /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C42B6668206AE4A900C3BF1A /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C42B6669206AE4A900C3BF1A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C42B666A206AE4A900C3BF1A /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C42B666C206AE4A900C3BF1A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -629,6 +752,112 @@
 		C42B6674206AE4A900C3BF1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4C8354F1F2AF5C7004E78C0 /* Assets.xcassets */; };
 		C42B6675206AE4A900C3BF1A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4C835511F2AF5C7004E78C0 /* Main.storyboard */; };
 		C42B667F206AE4D200C3BF1A /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C42B667C206AE4CB00C3BF1A /* Driver.cpp */; };
+		C4411ADA2A91CAD90039584F /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836491F2AF6B5004E78C0 /* BitVector.cpp */; };
+		C4411ADB2A91CAD90039584F /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
+		C4411ADC2A91CAD90039584F /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836711F2AF6B5004E78C0 /* Plot2D.cpp */; };
+		C4411ADD2A91CAD90039584F /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A51F2AF6B4004E78C0 /* SFBDPancakePuzzle.cpp */; };
+		C4411ADE2A91CAD90039584F /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835B81F2AF6B5004E78C0 /* VoxelTriangleExtraction.cpp */; };
+		C4411ADF2A91CAD90039584F /* MNPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8358B1F2AF6B4004E78C0 /* MNPuzzle.cpp */; };
+		C4411AE02A91CAD90039584F /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8359F1F2AF6B4004E78C0 /* RubiksCubeCorners.cpp */; };
+		C4411AE12A91CAD90039584F /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836611F2AF6B5004E78C0 /* MapGenerators.cpp */; };
+		C4411AE22A91CAD90039584F /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AB1F2AF6B4004E78C0 /* TopSpin.cpp */; };
+		C4411AE32A91CAD90039584F /* OpenListB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835681F2AF6B4004E78C0 /* OpenListB.cpp */; };
+		C4411AE42A91CAD90039584F /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836101F2AF6B5004E78C0 /* TextBox.cpp */; };
+		C4411AE52A91CAD90039584F /* Airplane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8356B1F2AF6B4004E78C0 /* Airplane.cpp */; };
+		C4411AE62A91CAD90039584F /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AF1F2AF6B4004E78C0 /* VoxelGrid.cpp */; };
+		C4411AE72A91CAD90039584F /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836121F2AF6B5004E78C0 /* Trackball.cpp */; };
+		C4411AE82A91CAD90039584F /* ScenarioLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836751F2AF6B5004E78C0 /* ScenarioLoader.cpp */; };
+		C4411AE92A91CAD90039584F /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C8354D1F2AF5C7004E78C0 /* ViewController.mm */; };
+		C4411AEA2A91CAD90039584F /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836551F2AF6B5004E78C0 /* FPUtil.cpp */; };
+		C4411AEB2A91CAD90039584F /* StatCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836781F2AF6B5004E78C0 /* StatCollection.cpp */; };
+		C4411AEC2A91CAD90039584F /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A71F2AF6B4004E78C0 /* SteeringEnvironment.cpp */; };
+		C4411AED2A91CAD90039584F /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835DF1F2AF6B5004E78C0 /* FloydWarshall.cpp */; };
+		C4411AEE2A91CAD90039584F /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835831F2AF6B4004E78C0 /* Map2DHeading.cpp */; };
+		C4411AEF2A91CAD90039584F /* MNAgentPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835891F2AF6B4004E78C0 /* MNAgentPuzzle.cpp */; };
+		C4411AF02A91CAD90039584F /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836841F2AF6B5004E78C0 /* Timer.cpp */; };
+		C4411AF12A91CAD90039584F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C4C8354A1F2AF5C7004E78C0 /* main.m */; };
+		C4411AF22A91CAD90039584F /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8365F1F2AF6B5004E78C0 /* Map.cpp */; };
+		C4411AF32A91CAD90039584F /* DrawView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C8375B1F2E95E9004E78C0 /* DrawView.mm */; };
+		C4411AF42A91CAD90039584F /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E91F2AF6B5004E78C0 /* Propagation.cpp */; };
+		C4411AF52A91CAD90039584F /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835991F2AF6B4004E78C0 /* RoboticArm.cpp */; };
+		C4411AF62A91CAD90039584F /* MMapUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836671F2AF6B5004E78C0 /* MMapUtil.cpp */; };
+		C4411AF72A91CAD90039584F /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8365D1F2AF6B5004E78C0 /* LogisticRegression.cpp */; };
+		C4411AF82A91CAD90039584F /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835931F2AF6B4004E78C0 /* NQueens.cpp */; };
+		C4411AF92A91CAD90039584F /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E11F2AF6B5004E78C0 /* GraphAlgorithm.cpp */; };
+		C4411AFA2A91CAD90039584F /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835751F2AF6B4004E78C0 /* Directional2DEnvironment.cpp */; };
+		C4411AFB2A91CAD90039584F /* RubiksCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8359B1F2AF6B4004E78C0 /* RubiksCube.cpp */; };
+		C4411AFC2A91CAD90039584F /* MinimalSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835871F2AF6B4004E78C0 /* MinimalSectorAbstraction.cpp */; };
+		C4411AFD2A91CAD90039584F /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836501F2AF6B5004E78C0 /* EnvUtil.cpp */; };
+		C4411AFE2A91CAD90039584F /* Transit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C428CA4420B2821400B27666 /* Transit.cpp */; };
+		C4411AFF2A91CAD90039584F /* NN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8366D1F2AF6B5004E78C0 /* NN.cpp */; };
+		C4411B002A91CAD90039584F /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8359D1F2AF6B4004E78C0 /* RubiksCube7Edges.cpp */; };
+		C4411B012A91CAD90039584F /* MR1Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836691F2AF6B5004E78C0 /* MR1Permutation.cpp */; };
+		C4411B022A91CAD90039584F /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836201F2AF6B5004E78C0 /* MapUnit.cpp */; };
+		C4411B032A91CAD90039584F /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8367E1F2AF6B5004E78C0 /* SVGUtil.cpp */; };
+		C4411B042A91CAD90039584F /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836221F2AF6B5004E78C0 /* RandomUnits.cpp */; };
+		C4411B052A91CAD90039584F /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8367A1F2AF6B5004E78C0 /* StatUtil.cpp */; };
+		C4411B062A91CAD90039584F /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835711F2AF6B4004E78C0 /* CanonicalGrid.cpp */; };
+		C4411B072A91CAD90039584F /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835DD1F2AF6B5004E78C0 /* AStarDelay.cpp */; };
+		C4411B082A91CAD90039584F /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E71F2AF6B5004E78C0 /* Path.cpp */; };
+		C4411B092A91CAD90039584F /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835611F2AF6B4004E78C0 /* GenericIDAStar.cpp */; };
+		C4411B0A2A91CAD90039584F /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836731F2AF6B5004E78C0 /* RangeCompression.cpp */; };
+		C4411B0B2A91CAD90039584F /* Map2DSectorAbstractionEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD0E520B5BB140072F0CB /* Map2DSectorAbstractionEnvironment.cpp */; };
+		C4411B0C2A91CAD90039584F /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835791F2AF6B4004E78C0 /* FlipSide.cpp */; };
+		C4411B0D2A91CAD90039584F /* MapOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836631F2AF6B5004E78C0 /* MapOverlay.cpp */; };
+		C4411B0E2A91CAD90039584F /* Voxels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835B11F2AF6B5004E78C0 /* Voxels.cpp */; };
+		C4411B0F2A91CAD90039584F /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E51F2AF6B5004E78C0 /* MeroB.cpp */; };
+		C4411B102A91CAD90039584F /* DiskBitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8364E1F2AF6B5004E78C0 /* DiskBitFile.cpp */; };
+		C4411B112A91CAD90039584F /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F134CE2089A31C00AC26BC /* Graphics.cpp */; };
+		C4411B122A91CAD90039584F /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8364B1F2AF6B5004E78C0 /* Bloom.cpp */; };
+		C4411B132A91CAD90039584F /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8357B1F2AF6B4004E78C0 /* GraphEnvironment.cpp */; };
+		C4411B142A91CAD90039584F /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AD1F2AF6B4004E78C0 /* TopSpinGraph.cpp */; };
+		C4411B152A91CAD90039584F /* Heap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835E31F2AF6B5004E78C0 /* Heap.cpp */; };
+		C4411B162A91CAD90039584F /* GLUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836591F2AF6B5004E78C0 /* GLUtil.cpp */; };
+		C4411B172A91CAD90039584F /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836531F2AF6B5004E78C0 /* FourBitArray.cpp */; };
+		C4411B182A91CAD90039584F /* CocoaHOG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */; };
+		C4411B192A91CAD90039584F /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835DA1F2AF6B5004E78C0 /* Graph.cpp */; };
+		C4411B1A2A91CAD90039584F /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835661F2AF6B4004E78C0 /* OpenClosedList.cpp */; };
+		C4411B1B2A91CAD90039584F /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836651F2AF6B5004E78C0 /* MinBloom.cpp */; };
+		C4411B1C2A91CAD90039584F /* JPS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EE1F2AF6B5004E78C0 /* JPS.cpp */; };
+		C4411B1D2A91CAD90039584F /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835971F2AF6B4004E78C0 /* PermutationPuzzleEnvironment.cpp */; };
+		C4411B1E2A91CAD90039584F /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8366F1F2AF6B5004E78C0 /* Perceptron.cpp */; };
+		C4411B1F2A91CAD90039584F /* LinearRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8365B1F2AF6B5004E78C0 /* LinearRegression.cpp */; };
+		C4411B202A91CAD90039584F /* RC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F3F4B92698F469001FB029 /* RC.cpp */; };
+		C4411B212A91CAD90039584F /* PancakeInstances.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835B61F2AF6B5004E78C0 /* PancakeInstances.cpp */; };
+		C4411B222A91CAD90039584F /* NaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835911F2AF6B4004E78C0 /* NaryTree.cpp */; };
+		C4411B232A91CAD90039584F /* SwapEndian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836801F2AF6B5004E78C0 /* SwapEndian.cpp */; };
+		C4411B242A91CAD90039584F /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835731F2AF6B4004E78C0 /* ConfigEnvironment.cpp */; };
+		C4411B252A91CAD90039584F /* gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F41F2AF6B5004E78C0 /* gl.cpp */; };
+		C4411B262A91CAD90039584F /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8357F1F2AF6B4004E78C0 /* Map2DConstrainedEnvironment.cpp */; };
+		C4411B272A91CAD90039584F /* Map3DGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835851F2AF6B4004E78C0 /* Map3DGrid.cpp */; };
+		C4411B282A91CAD90039584F /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8358F1F2AF6B4004E78C0 /* MountainCar.cpp */; };
+		C4411B292A91CAD90039584F /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836471F2AF6B5004E78C0 /* BitMap.cpp */; };
+		C4411B2A2A91CAD90039584F /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8367C1F2AF6B5004E78C0 /* StringUtils.cpp */; };
+		C4411B2B2A91CAD90039584F /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A11F2AF6B4004E78C0 /* RubiksCubeEdges.cpp */; };
+		C4411B2C2A91CAD90039584F /* Map2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835811F2AF6B4004E78C0 /* Map2DEnvironment.cpp */; };
+		C4411B2D2A91CAD90039584F /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A31F2AF6B4004E78C0 /* SequenceAlignment.cpp */; };
+		C4411B2E2A91CAD90039584F /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835641F2AF6B4004E78C0 /* OldSearchEnvironment.cpp */; };
+		C4411B2F2A91CAD90039584F /* Fling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835771F2AF6B4004E78C0 /* Fling.cpp */; };
+		C4411B302A91CAD90039584F /* glut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F61F2AF6B5004E78C0 /* glut.cpp */; };
+		C4411B312A91CAD90039584F /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8366B1F2AF6B5004E78C0 /* NBitArray.cpp */; };
+		C4411B322A91CAD90039584F /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
+		C4411B332A91CAD90039584F /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
+		C4411B342A91CAD90039584F /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
+		C4411B352A91CAD90039584F /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
+		C4411B362A91CAD90039584F /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
+		C4411B372A91CAD90039584F /* GridHeuristics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A522A2691400041936F /* GridHeuristics.cpp */; };
+		C4411B382A91CAD90039584F /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
+		C4411B392A91CAD90039584F /* Racetrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F3F36F26935EEE001FB029 /* Racetrack.cpp */; };
+		C4411B3A2A91CAD90039584F /* CanonicalGraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8356F1F2AF6B4004E78C0 /* CanonicalGraphEnvironment.cpp */; };
+		C4411B3B2A91CAD90039584F /* BurnedPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8356D1F2AF6B4004E78C0 /* BurnedPancakePuzzle.cpp */; };
+		C4411B3C2A91CAD90039584F /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836821F2AF6B5004E78C0 /* TextOverlay.cpp */; };
+		C4411B3D2A91CAD90039584F /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355F1F2AF6B4004E78C0 /* GenericAStar.cpp */; };
+		C4411B3E2A91CAD90039584F /* MonoFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F3F38B26979531001FB029 /* MonoFont.cpp */; };
+		C4411B412A91CAD90039584F /* DrawView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4C8375D1F2E9634004E78C0 /* DrawView.xib */; };
+		C4411B422A91CAD90039584F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4C8354F1F2AF5C7004E78C0 /* Assets.xcassets */; };
+		C4411B432A91CAD90039584F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4C835511F2AF5C7004E78C0 /* Main.storyboard */; };
+		C4411B4C2A91CD150039584F /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4411B4B2A91CD150039584F /* Driver.cpp */; };
+		C4411B4D2A92018A0039584F /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40E8A4F2A2690E80041936F /* Driver.cpp */; };
 		C441214D21FD860A00421CD7 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836491F2AF6B5004E78C0 /* BitVector.cpp */; };
 		C441214E21FD860A00421CD7 /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
 		C441214F21FD860A00421CD7 /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836711F2AF6B5004E78C0 /* Plot2D.cpp */; };
@@ -719,7 +948,6 @@
 		C44121A621FD860A00421CD7 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C44121A721FD860A00421CD7 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C44121A821FD860A00421CD7 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C44121A921FD860A00421CD7 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C44121AA21FD860A00421CD7 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C44121AB21FD860A00421CD7 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C44121AC21FD860A00421CD7 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -819,7 +1047,6 @@
 		C44F381220354234000FBBD9 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C44F381420354234000FBBD9 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C44F381520354234000FBBD9 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C44F381620354234000FBBD9 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C44F381720354234000FBBD9 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C44F381820354234000FBBD9 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C44F381A20354234000FBBD9 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -922,7 +1149,6 @@
 		C4667FCB22420DB700E1070F /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4667FCC22420DB700E1070F /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4667FCD22420DB700E1070F /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4667FCE22420DB700E1070F /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4667FCF22420DB700E1070F /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4667FD022420DB700E1070F /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4667FD122420DB700E1070F /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1024,7 +1250,6 @@
 		C472A4E421E3114B00A1B41E /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C472A4E521E3114B00A1B41E /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C472A4E621E3114B00A1B41E /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C472A4E721E3114B00A1B41E /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C472A4E821E3114B00A1B41E /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C472A4EA21E3114B00A1B41E /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C472A4EB21E3114B00A1B41E /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1126,7 +1351,6 @@
 		C48E6F7823A9A2740024D214 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C48E6F7923A9A2740024D214 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C48E6F7A23A9A2740024D214 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C48E6F7B23A9A2740024D214 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C48E6F7C23A9A2740024D214 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C48E6F7D23A9A2740024D214 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C48E6F7E23A9A2740024D214 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1225,7 +1449,6 @@
 		C49A9D8A20721F2400244298 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C49A9D8B20721F2400244298 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C49A9D8C20721F2400244298 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C49A9D8D20721F2400244298 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C49A9D8E20721F2400244298 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C49A9D8F20721F2400244298 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C49A9D9120721F2400244298 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1324,7 +1547,6 @@
 		C49A9DFF207489CF00244298 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C49A9E00207489CF00244298 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C49A9E01207489CF00244298 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C49A9E02207489CF00244298 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C49A9E04207489CF00244298 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C49A9E05207489CF00244298 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C49A9E07207489CF00244298 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1423,7 +1645,6 @@
 		C49A9E712074A5D200244298 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C49A9E722074A5D200244298 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C49A9E732074A5D200244298 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C49A9E742074A5D200244298 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C49A9E762074A5D200244298 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C49A9E772074A5D200244298 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C49A9E792074A5D200244298 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1522,7 +1743,6 @@
 		C49A9F002079E63000244298 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C49A9F012079E63000244298 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C49A9F022079E63000244298 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C49A9F032079E63000244298 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C49A9F052079E63000244298 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C49A9F062079E63000244298 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C49A9F082079E63000244298 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1631,7 +1851,6 @@
 		C4BEEB672096DAD6005E8FBD /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4BEEB692096DAD6005E8FBD /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4BEEB6A2096DAD6005E8FBD /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4BEEB6B2096DAD6005E8FBD /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4BEEB6C2096DAD6005E8FBD /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4BEEB6D2096DAD6005E8FBD /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4BEEB6E2096DAD6005E8FBD /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1731,7 +1950,6 @@
 		C4BEEBEB20A0C3AF005E8FBD /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4BEEBEC20A0C3AF005E8FBD /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4BEEBED20A0C3AF005E8FBD /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4BEEBEE20A0C3AF005E8FBD /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4BEEBF020A0C3AF005E8FBD /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4BEEBF120A0C3AF005E8FBD /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4BEEBF220A0C3AF005E8FBD /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -1782,7 +2000,6 @@
 		C4C836A91F2AF6B5004E78C0 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A31F2AF6B4004E78C0 /* SequenceAlignment.cpp */; };
 		C4C836AA1F2AF6B5004E78C0 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A51F2AF6B4004E78C0 /* SFBDPancakePuzzle.cpp */; };
 		C4C836AB1F2AF6B5004E78C0 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A71F2AF6B4004E78C0 /* SteeringEnvironment.cpp */; };
-		C4C836AC1F2AF6B5004E78C0 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4C836AD1F2AF6B5004E78C0 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AB1F2AF6B4004E78C0 /* TopSpin.cpp */; };
 		C4C836AE1F2AF6B5004E78C0 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AD1F2AF6B4004E78C0 /* TopSpinGraph.cpp */; };
 		C4C836AF1F2AF6B5004E78C0 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835AF1F2AF6B4004E78C0 /* VoxelGrid.cpp */; };
@@ -1930,7 +2147,6 @@
 		C4D80D8F20A2CB480087E08D /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4D80D9020A2CB480087E08D /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4D80D9120A2CB480087E08D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4D80D9220A2CB480087E08D /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4D80D9320A2CB480087E08D /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4D80D9420A2CB480087E08D /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4D80D9520A2CB480087E08D /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2030,7 +2246,6 @@
 		C4D80E0220A9408E0087E08D /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4D80E0320A9408E0087E08D /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4D80E0420A9408E0087E08D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4D80E0620A9408E0087E08D /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4D80E0720A9408E0087E08D /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4D80E0820A9408E0087E08D /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4D80E0920A9408E0087E08D /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2130,7 +2345,6 @@
 		C4D80E9820AC03930087E08D /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4D80E9920AC03930087E08D /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4D80E9A20AC03930087E08D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4D80E9B20AC03930087E08D /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4D80E9C20AC03930087E08D /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4D80E9D20AC03930087E08D /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4D80E9E20AC03930087E08D /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2239,7 +2453,6 @@
 		C4D80F1B20AC95F30087E08D /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4D80F1C20AC95F30087E08D /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4D80F1D20AC95F30087E08D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4D80F1E20AC95F30087E08D /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4D80F1F20AC95F30087E08D /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4D80F2020AC95F30087E08D /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4D80F2120AC95F30087E08D /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2340,7 +2553,6 @@
 		C4DFD0CB20B5337F0072F0CB /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4DFD0CC20B5337F0072F0CB /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4DFD0CD20B5337F0072F0CB /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4DFD0CE20B5337F0072F0CB /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4DFD0CF20B5337F0072F0CB /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4DFD0D020B5337F0072F0CB /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4DFD0D120B5337F0072F0CB /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2457,7 +2669,6 @@
 		C4DFD15120BE6D300072F0CB /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4DFD15220BE6D300072F0CB /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4DFD15320BE6D300072F0CB /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4DFD15520BE6D300072F0CB /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4DFD15620BE6D300072F0CB /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4DFD15720BE6D300072F0CB /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4DFD15820BE6D300072F0CB /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2561,7 +2772,6 @@
 		C4F3F30A26935BAB001FB029 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836571F2AF6B5004E78C0 /* FunctionApproximator.cpp */; };
 		C4F3F30B26935BAB001FB029 /* CanonicalDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EC1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp */; };
 		C4F3F30C26935BAB001FB029 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
-		C4F3F30E26935BAB001FB029 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835A91F2AF6B4004E78C0 /* TOH.cpp */; };
 		C4F3F30F26935BAB001FB029 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */; };
 		C4F3F31026935BAB001FB029 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836241F2AF6B5004E78C0 /* RHRUnit.cpp */; };
 		C4F3F31126935BAB001FB029 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */; };
@@ -2637,6 +2847,13 @@
 		C40D4B2721B1BE6400362048 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C40D4B2821B1BE6400362048 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C40D4B2B21B1BE9200362048 /* Witness.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Witness.h; sourceTree = "<group>"; };
+		C40E8A4B2A2690C30041936F /* BOAStar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BOAStar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C40E8A4C2A2690C30041936F /* Racetrack copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Racetrack copy2-Info.plist"; path = "/Users/nathanst/Documents/GitHub/hog2/build/XCode/hog2 mac native demos/Racetrack copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C40E8A4E2A2690E80041936F /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
+		C40E8A4F2A2690E80041936F /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
+		C40E8A512A2691400041936F /* GridHeuristics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridHeuristics.h; sourceTree = "<group>"; };
+		C40E8A522A2691400041936F /* GridHeuristics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridHeuristics.cpp; sourceTree = "<group>"; };
+		C40E8A6D2A27124A0041936F /* BOAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BOAStar.h; sourceTree = "<group>"; };
 		C4101CF51F465F4200CCBB43 /* NBS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NBS.h; sourceTree = "<group>"; };
 		C4101CF61F465F8500CCBB43 /* BDOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDOpenClosed.h; sourceTree = "<group>"; };
 		C4101CF81F46604E00CCBB43 /* NBSQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NBSQueue.h; sourceTree = "<group>"; };
@@ -2662,6 +2879,11 @@
 		C42B667A206AE4A900C3BF1A /* Bidir copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Bidir copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Bidir copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C42B667C206AE4CB00C3BF1A /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C42B667D206AE4CB00C3BF1A /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
+		C4411AD72A91AD6D0039584F /* BOBAStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BOBAStar.h; sourceTree = "<group>"; };
+		C4411B472A91CAD90039584F /* BOBAStar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BOBAStar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4411B482A91CADA0039584F /* BOAStar copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "BOAStar copy-Info.plist"; path = "/Users/nathanst/Documents/GitHub/hog2/build/XCode/hog2 mac native demos/BOAStar copy-Info.plist"; sourceTree = "<absolute>"; };
+		C4411B4A2A91CD150039584F /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
+		C4411B4B2A91CD150039584F /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C44121B921FD860A00421CD7 /* Witness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Witness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C44121BA21FD860B00421CD7 /* Witness3 copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "Witness3 copy-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/Witness3 copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C44121BC21FD864100421CD7 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
@@ -2714,6 +2936,7 @@
 		C49A9F162079E63100244298 /* AStar (Graph) copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AStar (Graph) copy2-Info.plist"; path = "../../../../../../nathanst/hog2/build/XCode/hog2 mac native demos/AStar (Graph) copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C49A9F192079E66600244298 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C49A9F1A2079E66600244298 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
+		C4B37D9C2A5CFAF7001F37C6 /* GenericAStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GenericAStar.h; sourceTree = "<group>"; };
 		C4B9410723D849BF0091C825 /* FocalAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FocalAdd.h; sourceTree = "<group>"; };
 		C4BE70C221FA724B009CE25B /* DynamicPotentialSearch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DynamicPotentialSearch.h; sourceTree = "<group>"; };
 		C4BEEB7B2096DAD6005E8FBD /* GMX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GMX.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2806,7 +3029,6 @@
 		C4C835A61F2AF6B4004E78C0 /* SFBDPancakePuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFBDPancakePuzzle.h; sourceTree = "<group>"; };
 		C4C835A71F2AF6B4004E78C0 /* SteeringEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SteeringEnvironment.cpp; sourceTree = "<group>"; };
 		C4C835A81F2AF6B4004E78C0 /* SteeringEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SteeringEnvironment.h; sourceTree = "<group>"; };
-		C4C835A91F2AF6B4004E78C0 /* TOH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TOH.cpp; sourceTree = "<group>"; };
 		C4C835AA1F2AF6B4004E78C0 /* TOH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TOH.h; sourceTree = "<group>"; };
 		C4C835AB1F2AF6B4004E78C0 /* TopSpin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TopSpin.cpp; sourceTree = "<group>"; };
 		C4C835AC1F2AF6B4004E78C0 /* TopSpin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpin.h; sourceTree = "<group>"; };
@@ -3053,6 +3275,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C40E8A432A2690C30041936F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C423108F204F3AA5000DEC53 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3075,6 +3304,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C42B6671206AE4A900C3BF1A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C4411B3F2A91CAD90039584F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3237,6 +3473,16 @@
 			path = ../../../demos/witness3;
 			sourceTree = "<group>";
 		};
+		C40E8A4D2A2690E80041936F /* BOA */ = {
+			isa = PBXGroup;
+			children = (
+				C40E8A4E2A2690E80041936F /* Driver.h */,
+				C40E8A4F2A2690E80041936F /* Driver.cpp */,
+			);
+			name = BOA;
+			path = ../../../demos/BOA;
+			sourceTree = "<group>";
+		};
 		C41B351821B33336009025A4 /* gridabstraction */ = {
 			isa = PBXGroup;
 			children = (
@@ -3287,6 +3533,16 @@
 			);
 			name = DFID;
 			path = ../../../demos/DFID;
+			sourceTree = "<group>";
+		};
+		C4411B492A91CD150039584F /* BOBA */ = {
+			isa = PBXGroup;
+			children = (
+				C4411B4A2A91CD150039584F /* Driver.h */,
+				C4411B4B2A91CD150039584F /* Driver.cpp */,
+			);
+			name = BOBA;
+			path = ../../../demos/BOBA;
 			sourceTree = "<group>";
 		};
 		C44121BB21FD864100421CD7 /* witness */ = {
@@ -3446,6 +3702,8 @@
 				C48E6F8D23A9A2760024D214 /* Witness copy-Info.plist */,
 				C4017B3A26479AEE00DE3C91 /* STP copy2-Info.plist */,
 				C4F3F31F26935BAC001FB029 /* Pancake copy-Info.plist */,
+				C40E8A4C2A2690C30041936F /* Racetrack copy2-Info.plist */,
+				C4411B482A91CADA0039584F /* BOAStar copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -3477,6 +3735,8 @@
 				C48E6F8C23A9A2740024D214 /* Witness Editor.app */,
 				C4017B2126479AED00DE3C91 /* Pancake.app */,
 				C4F3F31E26935BAB001FB029 /* Racetrack.app */,
+				C40E8A4B2A2690C30041936F /* BOAStar.app */,
+				C4411B472A91CAD90039584F /* BOBAStar.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3631,7 +3891,6 @@
 				C4C835A61F2AF6B4004E78C0 /* SFBDPancakePuzzle.h */,
 				C4C835A71F2AF6B4004E78C0 /* SteeringEnvironment.cpp */,
 				C4C835A81F2AF6B4004E78C0 /* SteeringEnvironment.h */,
-				C4C835A91F2AF6B4004E78C0 /* TOH.cpp */,
 				C4C835AA1F2AF6B4004E78C0 /* TOH.h */,
 				C4C835AB1F2AF6B4004E78C0 /* TopSpin.cpp */,
 				C4C835AC1F2AF6B4004E78C0 /* TopSpin.h */,
@@ -3668,6 +3927,8 @@
 		C4C835BA1F2AF6B5004E78C0 /* generic */ = {
 			isa = PBXGroup;
 			children = (
+				C40E8A6D2A27124A0041936F /* BOAStar.h */,
+				C4411AD72A91AD6D0039584F /* BOBAStar.h */,
 				C4B9410723D849BF0091C825 /* FocalAdd.h */,
 				C4C835BB1F2AF6B5004E78C0 /* AbstractWeightedSearchAlgorithm.h */,
 				C44121C021FE425800421CD7 /* AStarEpsilon.h */,
@@ -3702,6 +3963,7 @@
 				C4C835D11F2AF6B5004E78C0 /* PEAStar.h */,
 				C4C835D31F2AF6B5004E78C0 /* RandomUnit.h */,
 				C4C835D41F2AF6B5004E78C0 /* SFIDAStar.h */,
+				C4B37D9C2A5CFAF7001F37C6 /* GenericAStar.h */,
 				C4C835D51F2AF6B5004E78C0 /* TemplateAStar.h */,
 				C4D432EE2788B02E00A875F9 /* DelayedHeuristicAStar.h */,
 				C4C835D61F2AF6B5004E78C0 /* UnitCostBidirectionalBFS.h */,
@@ -3747,6 +4009,8 @@
 		C4C835EB1F2AF6B5004E78C0 /* grids */ = {
 			isa = PBXGroup;
 			children = (
+				C40E8A522A2691400041936F /* GridHeuristics.cpp */,
+				C40E8A512A2691400041936F /* GridHeuristics.h */,
 				C4D80EAD20AC03BA0087E08D /* CanonicalReach.cpp */,
 				C4D80EAE20AC03BB0087E08D /* CanonicalReach.h */,
 				C4D80EAF20AC03BB0087E08D /* Reach.cpp */,
@@ -3943,6 +4207,8 @@
 		C4C837681F32778F004E78C0 /* demos */ = {
 			isa = PBXGroup;
 			children = (
+				C4411B492A91CD150039584F /* BOBA */,
+				C40E8A4D2A2690E80041936F /* BOA */,
 				C4F3F33926935BD7001FB029 /* racetrack */,
 				C4017B8326479B8600DE3C91 /* pancake */,
 				C426BF69230235CE0094DABC /* ibex */,
@@ -4068,6 +4334,23 @@
 			productReference = C40D4B2421B1BE3800362048 /* Witness3.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C40E89DB2A2690C30041936F /* BOAStar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C40E8A482A2690C30041936F /* Build configuration list for PBXNativeTarget "BOAStar" */;
+			buildPhases = (
+				C40E89DC2A2690C30041936F /* Sources */,
+				C40E8A432A2690C30041936F /* Frameworks */,
+				C40E8A442A2690C30041936F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BOAStar;
+			productName = "hog2 mac native demos";
+			productReference = C40E8A4B2A2690C30041936F /* BOAStar.app */;
+			productType = "com.apple.product-type.application";
+		};
 		C423102B204F3AA5000DEC53 /* Bidir */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C4231094204F3AA5000DEC53 /* Build configuration list for PBXNativeTarget "Bidir" */;
@@ -4134,6 +4417,23 @@
 			name = DFID;
 			productName = "hog2 mac native demos";
 			productReference = C42B6679206AE4A900C3BF1A /* DFID.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C4411AD82A91CAD90039584F /* BOBAStar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C4411B442A91CAD90039584F /* Build configuration list for PBXNativeTarget "BOBAStar" */;
+			buildPhases = (
+				C4411AD92A91CAD90039584F /* Sources */,
+				C4411B3F2A91CAD90039584F /* Frameworks */,
+				C4411B402A91CAD90039584F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BOBAStar;
+			productName = "hog2 mac native demos";
+			productReference = C4411B472A91CAD90039584F /* BOBAStar.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C441214B21FD860A00421CD7 /* Witness */ = {
@@ -4513,6 +4813,8 @@
 				C48E6F1F23A9A2740024D214 /* Witness Editor */,
 				C4017AB426479AED00DE3C91 /* Pancake */,
 				C4F3F2B126935BAB001FB029 /* Racetrack */,
+				C40E89DB2A2690C30041936F /* BOAStar */,
+				C4411AD82A91CAD90039584F /* BOBAStar */,
 			);
 		};
 /* End PBXProject section */
@@ -4535,6 +4837,16 @@
 				C40D4B1E21B1BE3800362048 /* DrawView.xib in Resources */,
 				C40D4B1F21B1BE3800362048 /* Assets.xcassets in Resources */,
 				C40D4B2021B1BE3800362048 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C40E8A442A2690C30041936F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C40E8A452A2690C30041936F /* DrawView.xib in Resources */,
+				C40E8A462A2690C30041936F /* Assets.xcassets in Resources */,
+				C40E8A472A2690C30041936F /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4575,6 +4887,16 @@
 				C42B6673206AE4A900C3BF1A /* DrawView.xib in Resources */,
 				C42B6674206AE4A900C3BF1A /* Assets.xcassets in Resources */,
 				C42B6675206AE4A900C3BF1A /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C4411B402A91CAD90039584F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4411B412A91CAD90039584F /* DrawView.xib in Resources */,
+				C4411B422A91CAD90039584F /* Assets.xcassets in Resources */,
+				C4411B432A91CAD90039584F /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4849,6 +5171,7 @@
 				C4017AFD26479AED00DE3C91 /* PancakeInstances.cpp in Sources */,
 				C4017AFE26479AED00DE3C91 /* NaryTree.cpp in Sources */,
 				C4017AFF26479AED00DE3C91 /* SwapEndian.cpp in Sources */,
+				C40E8A6A2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4017B0026479AED00DE3C91 /* ConfigEnvironment.cpp in Sources */,
 				C4017B0126479AED00DE3C91 /* gl.cpp in Sources */,
 				C4017B0226479AED00DE3C91 /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -4868,7 +5191,6 @@
 				C4017B0F26479AED00DE3C91 /* CanonicalDijkstra.cpp in Sources */,
 				C4017B1026479AED00DE3C91 /* Common.cpp in Sources */,
 				C4017B8626479B8600DE3C91 /* Driver.cpp in Sources */,
-				C4017B1126479AED00DE3C91 /* TOH.cpp in Sources */,
 				C4017B1226479AED00DE3C91 /* AppDelegate.mm in Sources */,
 				C4017B1326479AED00DE3C91 /* RHRUnit.cpp in Sources */,
 				C4017B1426479AED00DE3C91 /* AStarOpenClosed.cpp in Sources */,
@@ -4957,6 +5279,7 @@
 				C40D4AFE21B1BE3800362048 /* LinearRegression.cpp in Sources */,
 				C40D4AFF21B1BE3800362048 /* PancakeInstances.cpp in Sources */,
 				C40D4B0121B1BE3800362048 /* NaryTree.cpp in Sources */,
+				C40E8A642A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C40D4B0221B1BE3800362048 /* SwapEndian.cpp in Sources */,
 				C40D4B0321B1BE3800362048 /* ConfigEnvironment.cpp in Sources */,
 				C40D4B0421B1BE3800362048 /* gl.cpp in Sources */,
@@ -4976,7 +5299,6 @@
 				C40D4B1121B1BE3800362048 /* FunctionApproximator.cpp in Sources */,
 				C40D4B1221B1BE3800362048 /* CanonicalDijkstra.cpp in Sources */,
 				C40D4B1321B1BE3800362048 /* Common.cpp in Sources */,
-				C40D4B1421B1BE3800362048 /* TOH.cpp in Sources */,
 				C40D4B1521B1BE3800362048 /* AppDelegate.mm in Sources */,
 				C40D4B1621B1BE3800362048 /* RHRUnit.cpp in Sources */,
 				C40D4B1721B1BE3800362048 /* AStarOpenClosed.cpp in Sources */,
@@ -4984,6 +5306,115 @@
 				C40D4B1921B1BE3800362048 /* BurnedPancakePuzzle.cpp in Sources */,
 				C40D4B1A21B1BE3800362048 /* TextOverlay.cpp in Sources */,
 				C40D4B1B21B1BE3800362048 /* GenericAStar.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C40E89DC2A2690C30041936F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C40E89DD2A2690C30041936F /* BitVector.cpp in Sources */,
+				C40E89DE2A2690C30041936F /* Colors.cpp in Sources */,
+				C40E89DF2A2690C30041936F /* Plot2D.cpp in Sources */,
+				C40E89E02A2690C30041936F /* SFBDPancakePuzzle.cpp in Sources */,
+				C40E89E12A2690C30041936F /* VoxelTriangleExtraction.cpp in Sources */,
+				C40E89E22A2690C30041936F /* MNPuzzle.cpp in Sources */,
+				C40E89E32A2690C30041936F /* RubiksCubeCorners.cpp in Sources */,
+				C40E89E42A2690C30041936F /* MapGenerators.cpp in Sources */,
+				C40E89E52A2690C30041936F /* TopSpin.cpp in Sources */,
+				C40E89E62A2690C30041936F /* OpenListB.cpp in Sources */,
+				C40E89E72A2690C30041936F /* TextBox.cpp in Sources */,
+				C40E89E82A2690C30041936F /* Airplane.cpp in Sources */,
+				C40E89E92A2690C30041936F /* VoxelGrid.cpp in Sources */,
+				C40E89EA2A2690C30041936F /* Trackball.cpp in Sources */,
+				C40E89EB2A2690C30041936F /* ScenarioLoader.cpp in Sources */,
+				C40E89EC2A2690C30041936F /* ViewController.mm in Sources */,
+				C40E89ED2A2690C30041936F /* FPUtil.cpp in Sources */,
+				C40E89EE2A2690C30041936F /* StatCollection.cpp in Sources */,
+				C40E89EF2A2690C30041936F /* SteeringEnvironment.cpp in Sources */,
+				C40E89F02A2690C30041936F /* FloydWarshall.cpp in Sources */,
+				C40E89F12A2690C30041936F /* Map2DHeading.cpp in Sources */,
+				C40E89F22A2690C30041936F /* MNAgentPuzzle.cpp in Sources */,
+				C40E89F32A2690C30041936F /* Timer.cpp in Sources */,
+				C40E89F42A2690C30041936F /* main.m in Sources */,
+				C40E89F52A2690C30041936F /* Map.cpp in Sources */,
+				C40E89F62A2690C30041936F /* DrawView.mm in Sources */,
+				C40E89F72A2690C30041936F /* Propagation.cpp in Sources */,
+				C40E89F82A2690C30041936F /* RoboticArm.cpp in Sources */,
+				C40E89F92A2690C30041936F /* MMapUtil.cpp in Sources */,
+				C40E89FA2A2690C30041936F /* LogisticRegression.cpp in Sources */,
+				C40E89FB2A2690C30041936F /* NQueens.cpp in Sources */,
+				C40E89FC2A2690C30041936F /* GraphAlgorithm.cpp in Sources */,
+				C40E89FD2A2690C30041936F /* Directional2DEnvironment.cpp in Sources */,
+				C40E89FE2A2690C30041936F /* RubiksCube.cpp in Sources */,
+				C40E89FF2A2690C30041936F /* MinimalSectorAbstraction.cpp in Sources */,
+				C40E8A002A2690C30041936F /* EnvUtil.cpp in Sources */,
+				C40E8A012A2690C30041936F /* Transit.cpp in Sources */,
+				C40E8A022A2690C30041936F /* NN.cpp in Sources */,
+				C40E8A032A2690C30041936F /* RubiksCube7Edges.cpp in Sources */,
+				C40E8A042A2690C30041936F /* MR1Permutation.cpp in Sources */,
+				C40E8A052A2690C30041936F /* MapUnit.cpp in Sources */,
+				C40E8A062A2690C30041936F /* SVGUtil.cpp in Sources */,
+				C40E8A072A2690C30041936F /* RandomUnits.cpp in Sources */,
+				C40E8A082A2690C30041936F /* StatUtil.cpp in Sources */,
+				C40E8A092A2690C30041936F /* CanonicalGrid.cpp in Sources */,
+				C4411B4D2A92018A0039584F /* Driver.cpp in Sources */,
+				C40E8A0A2A2690C30041936F /* AStarDelay.cpp in Sources */,
+				C40E8A0B2A2690C30041936F /* Path.cpp in Sources */,
+				C40E8A0C2A2690C30041936F /* GenericIDAStar.cpp in Sources */,
+				C40E8A0D2A2690C30041936F /* RangeCompression.cpp in Sources */,
+				C40E8A0E2A2690C30041936F /* Map2DSectorAbstractionEnvironment.cpp in Sources */,
+				C40E8A0F2A2690C30041936F /* FlipSide.cpp in Sources */,
+				C40E8A102A2690C30041936F /* MapOverlay.cpp in Sources */,
+				C40E8A112A2690C30041936F /* Voxels.cpp in Sources */,
+				C40E8A122A2690C30041936F /* MeroB.cpp in Sources */,
+				C40E8A132A2690C30041936F /* DiskBitFile.cpp in Sources */,
+				C40E8A142A2690C30041936F /* Graphics.cpp in Sources */,
+				C40E8A152A2690C30041936F /* Bloom.cpp in Sources */,
+				C40E8A162A2690C30041936F /* GraphEnvironment.cpp in Sources */,
+				C40E8A172A2690C30041936F /* TopSpinGraph.cpp in Sources */,
+				C40E8A182A2690C30041936F /* Heap.cpp in Sources */,
+				C40E8A192A2690C30041936F /* GLUtil.cpp in Sources */,
+				C40E8A1A2A2690C30041936F /* FourBitArray.cpp in Sources */,
+				C40E8A1B2A2690C30041936F /* CocoaHOG.cpp in Sources */,
+				C40E8A1C2A2690C30041936F /* Graph.cpp in Sources */,
+				C40E8A1D2A2690C30041936F /* OpenClosedList.cpp in Sources */,
+				C40E8A1E2A2690C30041936F /* MinBloom.cpp in Sources */,
+				C40E8A1F2A2690C30041936F /* JPS.cpp in Sources */,
+				C40E8A202A2690C30041936F /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C40E8A212A2690C30041936F /* Perceptron.cpp in Sources */,
+				C40E8A222A2690C30041936F /* LinearRegression.cpp in Sources */,
+				C40E8A232A2690C30041936F /* RC.cpp in Sources */,
+				C40E8A242A2690C30041936F /* PancakeInstances.cpp in Sources */,
+				C40E8A252A2690C30041936F /* NaryTree.cpp in Sources */,
+				C40E8A262A2690C30041936F /* SwapEndian.cpp in Sources */,
+				C40E8A272A2690C30041936F /* ConfigEnvironment.cpp in Sources */,
+				C40E8A282A2690C30041936F /* gl.cpp in Sources */,
+				C40E8A292A2690C30041936F /* Map2DConstrainedEnvironment.cpp in Sources */,
+				C40E8A2A2A2690C30041936F /* Map3DGrid.cpp in Sources */,
+				C40E8A2B2A2690C30041936F /* MountainCar.cpp in Sources */,
+				C40E8A2C2A2690C30041936F /* BitMap.cpp in Sources */,
+				C40E8A2D2A2690C30041936F /* StringUtils.cpp in Sources */,
+				C40E8A2E2A2690C30041936F /* RubiksCubeEdges.cpp in Sources */,
+				C40E8A2F2A2690C30041936F /* Map2DEnvironment.cpp in Sources */,
+				C40E8A302A2690C30041936F /* SequenceAlignment.cpp in Sources */,
+				C40E8A312A2690C30041936F /* OldSearchEnvironment.cpp in Sources */,
+				C40E8A322A2690C30041936F /* Fling.cpp in Sources */,
+				C40E8A332A2690C30041936F /* glut.cpp in Sources */,
+				C40E8A342A2690C30041936F /* NBitArray.cpp in Sources */,
+				C40E8A352A2690C30041936F /* FunctionApproximator.cpp in Sources */,
+				C40E8A362A2690C30041936F /* CanonicalDijkstra.cpp in Sources */,
+				C40E8A372A2690C30041936F /* Common.cpp in Sources */,
+				C40E8A392A2690C30041936F /* AppDelegate.mm in Sources */,
+				C40E8A3A2A2690C30041936F /* RHRUnit.cpp in Sources */,
+				C40E8A6C2A2691400041936F /* GridHeuristics.cpp in Sources */,
+				C40E8A3B2A2690C30041936F /* AStarOpenClosed.cpp in Sources */,
+				C40E8A3C2A2690C30041936F /* Racetrack.cpp in Sources */,
+				C40E8A3D2A2690C30041936F /* CanonicalGraphEnvironment.cpp in Sources */,
+				C40E8A3E2A2690C30041936F /* BurnedPancakePuzzle.cpp in Sources */,
+				C40E8A3F2A2690C30041936F /* TextOverlay.cpp in Sources */,
+				C40E8A402A2690C30041936F /* GenericAStar.cpp in Sources */,
+				C40E8A422A2690C30041936F /* MonoFont.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5083,9 +5514,9 @@
 				C4231083204F3AA5000DEC53 /* FunctionApproximator.cpp in Sources */,
 				C4231084204F3AA5000DEC53 /* CanonicalDijkstra.cpp in Sources */,
 				C4231085204F3AA5000DEC53 /* Common.cpp in Sources */,
-				C4231086204F3AA5000DEC53 /* TOH.cpp in Sources */,
 				C4231087204F3AA5000DEC53 /* AppDelegate.mm in Sources */,
 				C4231088204F3AA5000DEC53 /* RHRUnit.cpp in Sources */,
+				C40E8A552A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C423108A204F3AA5000DEC53 /* AStarOpenClosed.cpp in Sources */,
 				C423108B204F3AA5000DEC53 /* CanonicalGraphEnvironment.cpp in Sources */,
 				C423108C204F3AA5000DEC53 /* BurnedPancakePuzzle.cpp in Sources */,
@@ -5174,6 +5605,7 @@
 				C426BF42230235A30094DABC /* PancakeInstances.cpp in Sources */,
 				C426BF43230235A30094DABC /* NaryTree.cpp in Sources */,
 				C426BF44230235A30094DABC /* SwapEndian.cpp in Sources */,
+				C40E8A682A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C426BF45230235A30094DABC /* ConfigEnvironment.cpp in Sources */,
 				C426BF46230235A30094DABC /* gl.cpp in Sources */,
 				C426BF47230235A30094DABC /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -5192,7 +5624,6 @@
 				C426BF53230235A30094DABC /* FunctionApproximator.cpp in Sources */,
 				C426BF54230235A30094DABC /* CanonicalDijkstra.cpp in Sources */,
 				C426BF55230235A30094DABC /* Common.cpp in Sources */,
-				C426BF56230235A30094DABC /* TOH.cpp in Sources */,
 				C426BF57230235A30094DABC /* AppDelegate.mm in Sources */,
 				C426BF59230235A30094DABC /* RHRUnit.cpp in Sources */,
 				C426BF5A230235A30094DABC /* AStarOpenClosed.cpp in Sources */,
@@ -5264,6 +5695,7 @@
 				C428CA0520B280BC00B27666 /* MapOverlay.cpp in Sources */,
 				C428CA0620B280BC00B27666 /* Voxels.cpp in Sources */,
 				C428CA0720B280BC00B27666 /* MeroB.cpp in Sources */,
+				C40E8A612A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C428CA0820B280BC00B27666 /* DiskBitFile.cpp in Sources */,
 				C428CA0920B280BC00B27666 /* Graphics.cpp in Sources */,
 				C428CA0A20B280BC00B27666 /* Bloom.cpp in Sources */,
@@ -5304,7 +5736,6 @@
 				C428CA2B20B280BC00B27666 /* FunctionApproximator.cpp in Sources */,
 				C428CA2C20B280BC00B27666 /* CanonicalDijkstra.cpp in Sources */,
 				C428CA2D20B280BC00B27666 /* Common.cpp in Sources */,
-				C428CA2E20B280BC00B27666 /* TOH.cpp in Sources */,
 				C428CA2F20B280BC00B27666 /* AppDelegate.mm in Sources */,
 				C428CA3020B280BC00B27666 /* RHRUnit.cpp in Sources */,
 				C428CA3120B280BC00B27666 /* AStarOpenClosed.cpp in Sources */,
@@ -5393,6 +5824,7 @@
 				C42B6653206AE4A900C3BF1A /* PancakeInstances.cpp in Sources */,
 				C42B667F206AE4D200C3BF1A /* Driver.cpp in Sources */,
 				C42B6655206AE4A900C3BF1A /* NaryTree.cpp in Sources */,
+				C40E8A562A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C42B6656206AE4A900C3BF1A /* SwapEndian.cpp in Sources */,
 				C42B6657206AE4A900C3BF1A /* ConfigEnvironment.cpp in Sources */,
 				C42B6658206AE4A900C3BF1A /* gl.cpp in Sources */,
@@ -5412,7 +5844,6 @@
 				C42B6665206AE4A900C3BF1A /* FunctionApproximator.cpp in Sources */,
 				C42B6666206AE4A900C3BF1A /* CanonicalDijkstra.cpp in Sources */,
 				C42B6667206AE4A900C3BF1A /* Common.cpp in Sources */,
-				C42B6668206AE4A900C3BF1A /* TOH.cpp in Sources */,
 				C42B6669206AE4A900C3BF1A /* AppDelegate.mm in Sources */,
 				C42B666A206AE4A900C3BF1A /* RHRUnit.cpp in Sources */,
 				C42B666C206AE4A900C3BF1A /* AStarOpenClosed.cpp in Sources */,
@@ -5420,6 +5851,115 @@
 				C42B666E206AE4A900C3BF1A /* BurnedPancakePuzzle.cpp in Sources */,
 				C42B666F206AE4A900C3BF1A /* TextOverlay.cpp in Sources */,
 				C42B6670206AE4A900C3BF1A /* GenericAStar.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C4411AD92A91CAD90039584F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4411ADA2A91CAD90039584F /* BitVector.cpp in Sources */,
+				C4411ADB2A91CAD90039584F /* Colors.cpp in Sources */,
+				C4411ADC2A91CAD90039584F /* Plot2D.cpp in Sources */,
+				C4411ADD2A91CAD90039584F /* SFBDPancakePuzzle.cpp in Sources */,
+				C4411ADE2A91CAD90039584F /* VoxelTriangleExtraction.cpp in Sources */,
+				C4411ADF2A91CAD90039584F /* MNPuzzle.cpp in Sources */,
+				C4411AE02A91CAD90039584F /* RubiksCubeCorners.cpp in Sources */,
+				C4411AE12A91CAD90039584F /* MapGenerators.cpp in Sources */,
+				C4411AE22A91CAD90039584F /* TopSpin.cpp in Sources */,
+				C4411AE32A91CAD90039584F /* OpenListB.cpp in Sources */,
+				C4411AE42A91CAD90039584F /* TextBox.cpp in Sources */,
+				C4411AE52A91CAD90039584F /* Airplane.cpp in Sources */,
+				C4411AE62A91CAD90039584F /* VoxelGrid.cpp in Sources */,
+				C4411AE72A91CAD90039584F /* Trackball.cpp in Sources */,
+				C4411AE82A91CAD90039584F /* ScenarioLoader.cpp in Sources */,
+				C4411AE92A91CAD90039584F /* ViewController.mm in Sources */,
+				C4411AEA2A91CAD90039584F /* FPUtil.cpp in Sources */,
+				C4411AEB2A91CAD90039584F /* StatCollection.cpp in Sources */,
+				C4411AEC2A91CAD90039584F /* SteeringEnvironment.cpp in Sources */,
+				C4411AED2A91CAD90039584F /* FloydWarshall.cpp in Sources */,
+				C4411AEE2A91CAD90039584F /* Map2DHeading.cpp in Sources */,
+				C4411AEF2A91CAD90039584F /* MNAgentPuzzle.cpp in Sources */,
+				C4411AF02A91CAD90039584F /* Timer.cpp in Sources */,
+				C4411AF12A91CAD90039584F /* main.m in Sources */,
+				C4411AF22A91CAD90039584F /* Map.cpp in Sources */,
+				C4411AF32A91CAD90039584F /* DrawView.mm in Sources */,
+				C4411AF42A91CAD90039584F /* Propagation.cpp in Sources */,
+				C4411AF52A91CAD90039584F /* RoboticArm.cpp in Sources */,
+				C4411AF62A91CAD90039584F /* MMapUtil.cpp in Sources */,
+				C4411AF72A91CAD90039584F /* LogisticRegression.cpp in Sources */,
+				C4411AF82A91CAD90039584F /* NQueens.cpp in Sources */,
+				C4411AF92A91CAD90039584F /* GraphAlgorithm.cpp in Sources */,
+				C4411AFA2A91CAD90039584F /* Directional2DEnvironment.cpp in Sources */,
+				C4411AFB2A91CAD90039584F /* RubiksCube.cpp in Sources */,
+				C4411AFC2A91CAD90039584F /* MinimalSectorAbstraction.cpp in Sources */,
+				C4411AFD2A91CAD90039584F /* EnvUtil.cpp in Sources */,
+				C4411AFE2A91CAD90039584F /* Transit.cpp in Sources */,
+				C4411AFF2A91CAD90039584F /* NN.cpp in Sources */,
+				C4411B002A91CAD90039584F /* RubiksCube7Edges.cpp in Sources */,
+				C4411B012A91CAD90039584F /* MR1Permutation.cpp in Sources */,
+				C4411B022A91CAD90039584F /* MapUnit.cpp in Sources */,
+				C4411B032A91CAD90039584F /* SVGUtil.cpp in Sources */,
+				C4411B042A91CAD90039584F /* RandomUnits.cpp in Sources */,
+				C4411B052A91CAD90039584F /* StatUtil.cpp in Sources */,
+				C4411B062A91CAD90039584F /* CanonicalGrid.cpp in Sources */,
+				C4411B4C2A91CD150039584F /* Driver.cpp in Sources */,
+				C4411B072A91CAD90039584F /* AStarDelay.cpp in Sources */,
+				C4411B082A91CAD90039584F /* Path.cpp in Sources */,
+				C4411B092A91CAD90039584F /* GenericIDAStar.cpp in Sources */,
+				C4411B0A2A91CAD90039584F /* RangeCompression.cpp in Sources */,
+				C4411B0B2A91CAD90039584F /* Map2DSectorAbstractionEnvironment.cpp in Sources */,
+				C4411B0C2A91CAD90039584F /* FlipSide.cpp in Sources */,
+				C4411B0D2A91CAD90039584F /* MapOverlay.cpp in Sources */,
+				C4411B0E2A91CAD90039584F /* Voxels.cpp in Sources */,
+				C4411B0F2A91CAD90039584F /* MeroB.cpp in Sources */,
+				C4411B102A91CAD90039584F /* DiskBitFile.cpp in Sources */,
+				C4411B112A91CAD90039584F /* Graphics.cpp in Sources */,
+				C4411B122A91CAD90039584F /* Bloom.cpp in Sources */,
+				C4411B132A91CAD90039584F /* GraphEnvironment.cpp in Sources */,
+				C4411B142A91CAD90039584F /* TopSpinGraph.cpp in Sources */,
+				C4411B152A91CAD90039584F /* Heap.cpp in Sources */,
+				C4411B162A91CAD90039584F /* GLUtil.cpp in Sources */,
+				C4411B172A91CAD90039584F /* FourBitArray.cpp in Sources */,
+				C4411B182A91CAD90039584F /* CocoaHOG.cpp in Sources */,
+				C4411B192A91CAD90039584F /* Graph.cpp in Sources */,
+				C4411B1A2A91CAD90039584F /* OpenClosedList.cpp in Sources */,
+				C4411B1B2A91CAD90039584F /* MinBloom.cpp in Sources */,
+				C4411B1C2A91CAD90039584F /* JPS.cpp in Sources */,
+				C4411B1D2A91CAD90039584F /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C4411B1E2A91CAD90039584F /* Perceptron.cpp in Sources */,
+				C4411B1F2A91CAD90039584F /* LinearRegression.cpp in Sources */,
+				C4411B202A91CAD90039584F /* RC.cpp in Sources */,
+				C4411B212A91CAD90039584F /* PancakeInstances.cpp in Sources */,
+				C4411B222A91CAD90039584F /* NaryTree.cpp in Sources */,
+				C4411B232A91CAD90039584F /* SwapEndian.cpp in Sources */,
+				C4411B242A91CAD90039584F /* ConfigEnvironment.cpp in Sources */,
+				C4411B252A91CAD90039584F /* gl.cpp in Sources */,
+				C4411B262A91CAD90039584F /* Map2DConstrainedEnvironment.cpp in Sources */,
+				C4411B272A91CAD90039584F /* Map3DGrid.cpp in Sources */,
+				C4411B282A91CAD90039584F /* MountainCar.cpp in Sources */,
+				C4411B292A91CAD90039584F /* BitMap.cpp in Sources */,
+				C4411B2A2A91CAD90039584F /* StringUtils.cpp in Sources */,
+				C4411B2B2A91CAD90039584F /* RubiksCubeEdges.cpp in Sources */,
+				C4411B2C2A91CAD90039584F /* Map2DEnvironment.cpp in Sources */,
+				C4411B2D2A91CAD90039584F /* SequenceAlignment.cpp in Sources */,
+				C4411B2E2A91CAD90039584F /* OldSearchEnvironment.cpp in Sources */,
+				C4411B2F2A91CAD90039584F /* Fling.cpp in Sources */,
+				C4411B302A91CAD90039584F /* glut.cpp in Sources */,
+				C4411B312A91CAD90039584F /* NBitArray.cpp in Sources */,
+				C4411B322A91CAD90039584F /* FunctionApproximator.cpp in Sources */,
+				C4411B332A91CAD90039584F /* CanonicalDijkstra.cpp in Sources */,
+				C4411B342A91CAD90039584F /* Common.cpp in Sources */,
+				C4411B352A91CAD90039584F /* AppDelegate.mm in Sources */,
+				C4411B362A91CAD90039584F /* RHRUnit.cpp in Sources */,
+				C4411B372A91CAD90039584F /* GridHeuristics.cpp in Sources */,
+				C4411B382A91CAD90039584F /* AStarOpenClosed.cpp in Sources */,
+				C4411B392A91CAD90039584F /* Racetrack.cpp in Sources */,
+				C4411B3A2A91CAD90039584F /* CanonicalGraphEnvironment.cpp in Sources */,
+				C4411B3B2A91CAD90039584F /* BurnedPancakePuzzle.cpp in Sources */,
+				C4411B3C2A91CAD90039584F /* TextOverlay.cpp in Sources */,
+				C4411B3D2A91CAD90039584F /* GenericAStar.cpp in Sources */,
+				C4411B3E2A91CAD90039584F /* MonoFont.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5501,6 +6041,7 @@
 				C441219521FD860A00421CD7 /* PancakeInstances.cpp in Sources */,
 				C441219621FD860A00421CD7 /* NaryTree.cpp in Sources */,
 				C441219721FD860A00421CD7 /* SwapEndian.cpp in Sources */,
+				C40E8A662A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C441219821FD860A00421CD7 /* ConfigEnvironment.cpp in Sources */,
 				C441219921FD860A00421CD7 /* gl.cpp in Sources */,
 				C441219A21FD860A00421CD7 /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -5519,7 +6060,6 @@
 				C44121A621FD860A00421CD7 /* FunctionApproximator.cpp in Sources */,
 				C44121A721FD860A00421CD7 /* CanonicalDijkstra.cpp in Sources */,
 				C44121A821FD860A00421CD7 /* Common.cpp in Sources */,
-				C44121A921FD860A00421CD7 /* TOH.cpp in Sources */,
 				C44121AA21FD860A00421CD7 /* AppDelegate.mm in Sources */,
 				C44121AB21FD860A00421CD7 /* RHRUnit.cpp in Sources */,
 				C44121AC21FD860A00421CD7 /* AStarOpenClosed.cpp in Sources */,
@@ -5609,6 +6149,7 @@
 				C44F380020354234000FBBD9 /* LinearRegression.cpp in Sources */,
 				C44F380120354234000FBBD9 /* PancakeInstances.cpp in Sources */,
 				C44F380220354234000FBBD9 /* NaryTree.cpp in Sources */,
+				C40E8A542A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C44F380320354234000FBBD9 /* SwapEndian.cpp in Sources */,
 				C44F380420354234000FBBD9 /* ConfigEnvironment.cpp in Sources */,
 				C44F380520354234000FBBD9 /* gl.cpp in Sources */,
@@ -5628,7 +6169,6 @@
 				C44F381220354234000FBBD9 /* FunctionApproximator.cpp in Sources */,
 				C44F381420354234000FBBD9 /* CanonicalDijkstra.cpp in Sources */,
 				C44F381520354234000FBBD9 /* Common.cpp in Sources */,
-				C44F381620354234000FBBD9 /* TOH.cpp in Sources */,
 				C44F381720354234000FBBD9 /* AppDelegate.mm in Sources */,
 				C44F381820354234000FBBD9 /* RHRUnit.cpp in Sources */,
 				C44F381A20354234000FBBD9 /* AStarOpenClosed.cpp in Sources */,
@@ -5717,6 +6257,7 @@
 				C4667FBA22420DB700E1070F /* PancakeInstances.cpp in Sources */,
 				C4667FBB22420DB700E1070F /* NaryTree.cpp in Sources */,
 				C4667FBC22420DB700E1070F /* SwapEndian.cpp in Sources */,
+				C40E8A672A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4667FBD22420DB700E1070F /* ConfigEnvironment.cpp in Sources */,
 				C4667FBE22420DB700E1070F /* gl.cpp in Sources */,
 				C4667FBF22420DB700E1070F /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -5736,7 +6277,6 @@
 				C4667FCC22420DB700E1070F /* CanonicalDijkstra.cpp in Sources */,
 				C4667FCD22420DB700E1070F /* Common.cpp in Sources */,
 				C4667FE322420DF300E1070F /* Driver.cpp in Sources */,
-				C4667FCE22420DB700E1070F /* TOH.cpp in Sources */,
 				C4667FCF22420DB700E1070F /* AppDelegate.mm in Sources */,
 				C4667FD022420DB700E1070F /* RHRUnit.cpp in Sources */,
 				C4667FD122420DB700E1070F /* AStarOpenClosed.cpp in Sources */,
@@ -5825,6 +6365,7 @@
 				C472A4D221E3114B00A1B41E /* LinearRegression.cpp in Sources */,
 				C472A4D321E3114B00A1B41E /* PancakeInstances.cpp in Sources */,
 				C472A4D421E3114B00A1B41E /* NaryTree.cpp in Sources */,
+				C40E8A652A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C472A4D521E3114B00A1B41E /* SwapEndian.cpp in Sources */,
 				C472A4D621E3114B00A1B41E /* ConfigEnvironment.cpp in Sources */,
 				C472A4D721E3114B00A1B41E /* gl.cpp in Sources */,
@@ -5844,7 +6385,6 @@
 				C472A4E421E3114B00A1B41E /* FunctionApproximator.cpp in Sources */,
 				C472A4E521E3114B00A1B41E /* CanonicalDijkstra.cpp in Sources */,
 				C472A4E621E3114B00A1B41E /* Common.cpp in Sources */,
-				C472A4E721E3114B00A1B41E /* TOH.cpp in Sources */,
 				C472A4E821E3114B00A1B41E /* AppDelegate.mm in Sources */,
 				C472A4EA21E3114B00A1B41E /* RHRUnit.cpp in Sources */,
 				C472A4EB21E3114B00A1B41E /* AStarOpenClosed.cpp in Sources */,
@@ -5933,6 +6473,7 @@
 				C48E6F6723A9A2740024D214 /* PancakeInstances.cpp in Sources */,
 				C48E6F6823A9A2740024D214 /* NaryTree.cpp in Sources */,
 				C48E6F6923A9A2740024D214 /* SwapEndian.cpp in Sources */,
+				C40E8A692A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C48E6F6A23A9A2740024D214 /* ConfigEnvironment.cpp in Sources */,
 				C48E6F6B23A9A2740024D214 /* gl.cpp in Sources */,
 				C48E6F6C23A9A2740024D214 /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -5951,7 +6492,6 @@
 				C48E6F7823A9A2740024D214 /* FunctionApproximator.cpp in Sources */,
 				C48E6F7923A9A2740024D214 /* CanonicalDijkstra.cpp in Sources */,
 				C48E6F7A23A9A2740024D214 /* Common.cpp in Sources */,
-				C48E6F7B23A9A2740024D214 /* TOH.cpp in Sources */,
 				C48E6F7C23A9A2740024D214 /* AppDelegate.mm in Sources */,
 				C48E6F7D23A9A2740024D214 /* RHRUnit.cpp in Sources */,
 				C48E6F7E23A9A2740024D214 /* AStarOpenClosed.cpp in Sources */,
@@ -6041,6 +6581,7 @@
 				C49A9D7820721F2400244298 /* PancakeInstances.cpp in Sources */,
 				C49A9D7A20721F2400244298 /* NaryTree.cpp in Sources */,
 				C49A9D7B20721F2400244298 /* SwapEndian.cpp in Sources */,
+				C40E8A572A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C49A9D7C20721F2400244298 /* ConfigEnvironment.cpp in Sources */,
 				C49A9D7D20721F2400244298 /* gl.cpp in Sources */,
 				C49A9D7E20721F2400244298 /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -6059,7 +6600,6 @@
 				C49A9D8A20721F2400244298 /* FunctionApproximator.cpp in Sources */,
 				C49A9D8B20721F2400244298 /* CanonicalDijkstra.cpp in Sources */,
 				C49A9D8C20721F2400244298 /* Common.cpp in Sources */,
-				C49A9D8D20721F2400244298 /* TOH.cpp in Sources */,
 				C49A9DA720721F7400244298 /* Driver.cpp in Sources */,
 				C49A9D8E20721F2400244298 /* AppDelegate.mm in Sources */,
 				C49A9D8F20721F2400244298 /* RHRUnit.cpp in Sources */,
@@ -6149,6 +6689,7 @@
 				C49A9DEE207489CF00244298 /* PancakeInstances.cpp in Sources */,
 				C49A9DEF207489CF00244298 /* NaryTree.cpp in Sources */,
 				C49A9DF0207489CF00244298 /* SwapEndian.cpp in Sources */,
+				C40E8A582A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C49A9DF1207489CF00244298 /* ConfigEnvironment.cpp in Sources */,
 				C49A9DF2207489CF00244298 /* gl.cpp in Sources */,
 				C49A9DF3207489CF00244298 /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -6167,7 +6708,6 @@
 				C49A9DFF207489CF00244298 /* FunctionApproximator.cpp in Sources */,
 				C49A9E00207489CF00244298 /* CanonicalDijkstra.cpp in Sources */,
 				C49A9E01207489CF00244298 /* Common.cpp in Sources */,
-				C49A9E02207489CF00244298 /* TOH.cpp in Sources */,
 				C49A9E1920748A2900244298 /* Driver.cpp in Sources */,
 				C49A9E04207489CF00244298 /* AppDelegate.mm in Sources */,
 				C49A9E05207489CF00244298 /* RHRUnit.cpp in Sources */,
@@ -6257,6 +6797,7 @@
 				C49A9E602074A5D200244298 /* PancakeInstances.cpp in Sources */,
 				C49A9E8D2074A69600244298 /* Driver.cpp in Sources */,
 				C49A9E612074A5D200244298 /* NaryTree.cpp in Sources */,
+				C40E8A592A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C49A9E622074A5D200244298 /* SwapEndian.cpp in Sources */,
 				C49A9E632074A5D200244298 /* ConfigEnvironment.cpp in Sources */,
 				C49A9E642074A5D200244298 /* gl.cpp in Sources */,
@@ -6276,7 +6817,6 @@
 				C49A9E712074A5D200244298 /* FunctionApproximator.cpp in Sources */,
 				C49A9E722074A5D200244298 /* CanonicalDijkstra.cpp in Sources */,
 				C49A9E732074A5D200244298 /* Common.cpp in Sources */,
-				C49A9E742074A5D200244298 /* TOH.cpp in Sources */,
 				C49A9E762074A5D200244298 /* AppDelegate.mm in Sources */,
 				C49A9E772074A5D200244298 /* RHRUnit.cpp in Sources */,
 				C49A9E792074A5D200244298 /* AStarOpenClosed.cpp in Sources */,
@@ -6365,6 +6905,7 @@
 				C49A9EEF2079E63000244298 /* PancakeInstances.cpp in Sources */,
 				C49A9EF02079E63000244298 /* NaryTree.cpp in Sources */,
 				C49A9EF12079E63000244298 /* SwapEndian.cpp in Sources */,
+				C40E8A5A2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C49A9EF22079E63000244298 /* ConfigEnvironment.cpp in Sources */,
 				C49A9EF32079E63000244298 /* gl.cpp in Sources */,
 				C49A9EF42079E63000244298 /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -6383,7 +6924,6 @@
 				C49A9F002079E63000244298 /* FunctionApproximator.cpp in Sources */,
 				C49A9F012079E63000244298 /* CanonicalDijkstra.cpp in Sources */,
 				C49A9F022079E63000244298 /* Common.cpp in Sources */,
-				C49A9F032079E63000244298 /* TOH.cpp in Sources */,
 				C49A9F052079E63000244298 /* AppDelegate.mm in Sources */,
 				C49A9F1C2079E66700244298 /* Driver.cpp in Sources */,
 				C49A9F062079E63000244298 /* RHRUnit.cpp in Sources */,
@@ -6492,8 +7032,8 @@
 				C4BEEB692096DAD6005E8FBD /* CanonicalDijkstra.cpp in Sources */,
 				C4BEEB6A2096DAD6005E8FBD /* Common.cpp in Sources */,
 				C4BEEB812096DB27005E8FBD /* Driver.cpp in Sources */,
-				C4BEEB6B2096DAD6005E8FBD /* TOH.cpp in Sources */,
 				C4BEEB6C2096DAD6005E8FBD /* AppDelegate.mm in Sources */,
+				C40E8A5B2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4BEEB6D2096DAD6005E8FBD /* RHRUnit.cpp in Sources */,
 				C4BEEB6E2096DAD6005E8FBD /* AStarOpenClosed.cpp in Sources */,
 				C4BEEB6F2096DAD6005E8FBD /* CanonicalGraphEnvironment.cpp in Sources */,
@@ -6601,8 +7141,8 @@
 				C4BEEBEB20A0C3AF005E8FBD /* FunctionApproximator.cpp in Sources */,
 				C4BEEBEC20A0C3AF005E8FBD /* CanonicalDijkstra.cpp in Sources */,
 				C4BEEBED20A0C3AF005E8FBD /* Common.cpp in Sources */,
-				C4BEEBEE20A0C3AF005E8FBD /* TOH.cpp in Sources */,
 				C4BEEBF020A0C3AF005E8FBD /* AppDelegate.mm in Sources */,
+				C40E8A5C2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4BEEBF120A0C3AF005E8FBD /* RHRUnit.cpp in Sources */,
 				C4BEEBF220A0C3AF005E8FBD /* AStarOpenClosed.cpp in Sources */,
 				C4BEEBF320A0C3AF005E8FBD /* CanonicalGraphEnvironment.cpp in Sources */,
@@ -6710,8 +7250,8 @@
 				C449A770202632A300F9FEB8 /* Driver.cpp in Sources */,
 				C4C836BF1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp in Sources */,
 				C4C837601F326C97004E78C0 /* Common.cpp in Sources */,
-				C4C836AC1F2AF6B5004E78C0 /* TOH.cpp in Sources */,
 				C4C835481F2AF5C7004E78C0 /* AppDelegate.mm in Sources */,
+				C40E8A532A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4C836D21F2AF6B5004E78C0 /* RHRUnit.cpp in Sources */,
 				C4C836871F2AF6B5004E78C0 /* AStarOpenClosed.cpp in Sources */,
 				C4C8368F1F2AF6B5004E78C0 /* CanonicalGraphEnvironment.cpp in Sources */,
@@ -6800,6 +7340,7 @@
 				C4D80D7D20A2CB480087E08D /* PancakeInstances.cpp in Sources */,
 				C4D80D7F20A2CB480087E08D /* NaryTree.cpp in Sources */,
 				C4D80D8020A2CB480087E08D /* SwapEndian.cpp in Sources */,
+				C40E8A5D2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4D80D8120A2CB480087E08D /* ConfigEnvironment.cpp in Sources */,
 				C4D80D8220A2CB480087E08D /* gl.cpp in Sources */,
 				C4D80D8320A2CB480087E08D /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -6819,7 +7360,6 @@
 				C4D80D9020A2CB480087E08D /* CanonicalDijkstra.cpp in Sources */,
 				C4D80D9120A2CB480087E08D /* Common.cpp in Sources */,
 				C4D80DA720A2CB8F0087E08D /* Driver.cpp in Sources */,
-				C4D80D9220A2CB480087E08D /* TOH.cpp in Sources */,
 				C4D80D9320A2CB480087E08D /* AppDelegate.mm in Sources */,
 				C4D80D9420A2CB480087E08D /* RHRUnit.cpp in Sources */,
 				C4D80D9520A2CB480087E08D /* AStarOpenClosed.cpp in Sources */,
@@ -6890,6 +7430,7 @@
 				C4D80DDE20A9408E0087E08D /* MapOverlay.cpp in Sources */,
 				C4D80DDF20A9408E0087E08D /* Voxels.cpp in Sources */,
 				C4D80DE020A9408E0087E08D /* MeroB.cpp in Sources */,
+				C40E8A5E2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4D80DE120A9408E0087E08D /* DiskBitFile.cpp in Sources */,
 				C4D80DE220A9408E0087E08D /* Graphics.cpp in Sources */,
 				C4D80DE320A9408E0087E08D /* Bloom.cpp in Sources */,
@@ -6930,7 +7471,6 @@
 				C4D80E0220A9408E0087E08D /* FunctionApproximator.cpp in Sources */,
 				C4D80E0320A9408E0087E08D /* CanonicalDijkstra.cpp in Sources */,
 				C4D80E0420A9408E0087E08D /* Common.cpp in Sources */,
-				C4D80E0620A9408E0087E08D /* TOH.cpp in Sources */,
 				C4D80E0720A9408E0087E08D /* AppDelegate.mm in Sources */,
 				C4D80E0820A9408E0087E08D /* RHRUnit.cpp in Sources */,
 				C4D80E0920A9408E0087E08D /* AStarOpenClosed.cpp in Sources */,
@@ -7001,6 +7541,7 @@
 				C4D80E7320AC03930087E08D /* MapOverlay.cpp in Sources */,
 				C4D80E7420AC03930087E08D /* Voxels.cpp in Sources */,
 				C4D80E7520AC03930087E08D /* MeroB.cpp in Sources */,
+				C40E8A5F2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4D80E7620AC03930087E08D /* DiskBitFile.cpp in Sources */,
 				C4D80E7720AC03930087E08D /* Graphics.cpp in Sources */,
 				C4D80E7820AC03930087E08D /* Bloom.cpp in Sources */,
@@ -7041,7 +7582,6 @@
 				C4D80E9820AC03930087E08D /* FunctionApproximator.cpp in Sources */,
 				C4D80E9920AC03930087E08D /* CanonicalDijkstra.cpp in Sources */,
 				C4D80E9A20AC03930087E08D /* Common.cpp in Sources */,
-				C4D80E9B20AC03930087E08D /* TOH.cpp in Sources */,
 				C4D80E9C20AC03930087E08D /* AppDelegate.mm in Sources */,
 				C4D80E9D20AC03930087E08D /* RHRUnit.cpp in Sources */,
 				C4D80E9E20AC03930087E08D /* AStarOpenClosed.cpp in Sources */,
@@ -7112,6 +7652,7 @@
 				C4D80EF520AC95F30087E08D /* MapOverlay.cpp in Sources */,
 				C4D80EF620AC95F30087E08D /* Voxels.cpp in Sources */,
 				C4D80EF720AC95F30087E08D /* MeroB.cpp in Sources */,
+				C40E8A602A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4D80EF820AC95F30087E08D /* DiskBitFile.cpp in Sources */,
 				C4D80EF920AC95F30087E08D /* Graphics.cpp in Sources */,
 				C4D80EFA20AC95F30087E08D /* Bloom.cpp in Sources */,
@@ -7152,7 +7693,6 @@
 				C4D80F1B20AC95F30087E08D /* FunctionApproximator.cpp in Sources */,
 				C4D80F1C20AC95F30087E08D /* CanonicalDijkstra.cpp in Sources */,
 				C4D80F1D20AC95F30087E08D /* Common.cpp in Sources */,
-				C4D80F1E20AC95F30087E08D /* TOH.cpp in Sources */,
 				C4D80F1F20AC95F30087E08D /* AppDelegate.mm in Sources */,
 				C4D80F2020AC95F30087E08D /* RHRUnit.cpp in Sources */,
 				C4D80F2120AC95F30087E08D /* AStarOpenClosed.cpp in Sources */,
@@ -7241,6 +7781,7 @@
 				C4DFD0B920B5337F0072F0CB /* PancakeInstances.cpp in Sources */,
 				C4DFD0BB20B5337F0072F0CB /* NaryTree.cpp in Sources */,
 				C4DFD0BC20B5337F0072F0CB /* SwapEndian.cpp in Sources */,
+				C40E8A622A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4DFD0BD20B5337F0072F0CB /* ConfigEnvironment.cpp in Sources */,
 				C4DFD0BE20B5337F0072F0CB /* gl.cpp in Sources */,
 				C4DFD0BF20B5337F0072F0CB /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -7259,7 +7800,6 @@
 				C4DFD0CB20B5337F0072F0CB /* FunctionApproximator.cpp in Sources */,
 				C4DFD0CC20B5337F0072F0CB /* CanonicalDijkstra.cpp in Sources */,
 				C4DFD0CD20B5337F0072F0CB /* Common.cpp in Sources */,
-				C4DFD0CE20B5337F0072F0CB /* TOH.cpp in Sources */,
 				C4DFD0CF20B5337F0072F0CB /* AppDelegate.mm in Sources */,
 				C4DFD0D020B5337F0072F0CB /* RHRUnit.cpp in Sources */,
 				C4DFD0D120B5337F0072F0CB /* AStarOpenClosed.cpp in Sources */,
@@ -7349,6 +7889,7 @@
 				C4DFD14020BE6D300072F0CB /* PancakeInstances.cpp in Sources */,
 				C4DFD14120BE6D300072F0CB /* NaryTree.cpp in Sources */,
 				C4DFD14220BE6D300072F0CB /* SwapEndian.cpp in Sources */,
+				C40E8A632A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4DFD14320BE6D300072F0CB /* ConfigEnvironment.cpp in Sources */,
 				C4DFD14420BE6D300072F0CB /* gl.cpp in Sources */,
 				C4DFD14520BE6D300072F0CB /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -7367,7 +7908,6 @@
 				C4DFD15120BE6D300072F0CB /* FunctionApproximator.cpp in Sources */,
 				C4DFD15220BE6D300072F0CB /* CanonicalDijkstra.cpp in Sources */,
 				C4DFD15320BE6D300072F0CB /* Common.cpp in Sources */,
-				C4DFD15520BE6D300072F0CB /* TOH.cpp in Sources */,
 				C4DFD15620BE6D300072F0CB /* AppDelegate.mm in Sources */,
 				C4DFD15720BE6D300072F0CB /* RHRUnit.cpp in Sources */,
 				C4DFD15820BE6D300072F0CB /* AStarOpenClosed.cpp in Sources */,
@@ -7474,10 +8014,10 @@
 				C4F3F30A26935BAB001FB029 /* FunctionApproximator.cpp in Sources */,
 				C4F3F30B26935BAB001FB029 /* CanonicalDijkstra.cpp in Sources */,
 				C4F3F30C26935BAB001FB029 /* Common.cpp in Sources */,
-				C4F3F30E26935BAB001FB029 /* TOH.cpp in Sources */,
 				C4F3F30F26935BAB001FB029 /* AppDelegate.mm in Sources */,
 				C4F3F31026935BAB001FB029 /* RHRUnit.cpp in Sources */,
 				C4F3F31126935BAB001FB029 /* AStarOpenClosed.cpp in Sources */,
+				C40E8A6B2A2691400041936F /* GridHeuristics.cpp in Sources */,
 				C4F3F37126935EEF001FB029 /* Racetrack.cpp in Sources */,
 				C4F3F31226935BAB001FB029 /* CanonicalGraphEnvironment.cpp in Sources */,
 				C4F3F31326935BAB001FB029 /* BurnedPancakePuzzle.cpp in Sources */,
@@ -7512,7 +8052,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "STP copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7529,7 +8069,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "STP copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7546,7 +8086,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Map) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7563,7 +8103,41 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Map) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "-DNO_OPENGL";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		C40E8A492A2690C30041936F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_SHADOW = YES;
+				INFOPLIST_FILE = "Racetrack copy2-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "-DNO_OPENGL";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C40E8A4A2A2690C30041936F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_SHADOW = YES;
+				INFOPLIST_FILE = "Racetrack copy2-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7580,7 +8154,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "NBS copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7597,7 +8171,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "NBS copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7614,7 +8188,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "IDAStar copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7631,7 +8205,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "IDAStar copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7648,7 +8222,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Bounding Boxes copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7665,7 +8239,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Bounding Boxes copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7682,7 +8256,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Bidir copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7699,7 +8273,41 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Bidir copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "-DNO_OPENGL";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		C4411B452A91CAD90039584F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_SHADOW = YES;
+				INFOPLIST_FILE = "BOAStar copy-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "-DNO_OPENGL";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C4411B462A91CAD90039584F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_SHADOW = YES;
+				INFOPLIST_FILE = "BOAStar copy-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7716,7 +8324,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Witness3 copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7733,7 +8341,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Witness3 copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7750,7 +8358,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "hog2 mac native demos/NBS.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7767,7 +8375,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "hog2 mac native demos/NBS.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7784,7 +8392,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "STP copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7801,7 +8409,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "STP copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7818,7 +8426,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "IDAStar copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7835,7 +8443,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "IDAStar copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7852,7 +8460,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Witness copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7869,7 +8477,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Witness copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7886,7 +8494,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "DFID copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7903,7 +8511,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "DFID copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7920,7 +8528,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Dijkstra copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7937,7 +8545,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Dijkstra copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7954,7 +8562,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Graph) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7971,7 +8579,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Graph) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -7988,7 +8596,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Graph) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8005,7 +8613,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Graph) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8022,7 +8630,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Necessary Expansions copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8039,7 +8647,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Necessary Expansions copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8056,7 +8664,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Graph) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8073,7 +8681,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Graph) copy3-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8179,7 +8787,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "hog2 mac native demos/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8196,7 +8804,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "hog2 mac native demos/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8213,7 +8821,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Map) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8230,7 +8838,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Map) copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8247,7 +8855,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "DH-place copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8264,7 +8872,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "DH-place copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8281,7 +8889,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "JPS copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8298,7 +8906,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "JPS copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8315,7 +8923,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Reach copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8332,7 +8940,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Reach copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8349,7 +8957,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Map) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8366,7 +8974,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "AStar (Map) copy2-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8383,7 +8991,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Grid Abstraction copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8400,7 +9008,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Grid Abstraction copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8417,7 +9025,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Pancake copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8434,7 +9042,7 @@
 				GCC_WARN_SHADOW = YES;
 				INFOPLIST_FILE = "Pancake copy-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "-DNO_OPENGL";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ns-software.hog2-mac-native-demos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -8458,6 +9066,15 @@
 			buildConfigurations = (
 				C40D4B2221B1BE3800362048 /* Debug */,
 				C40D4B2321B1BE3800362048 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C40E8A482A2690C30041936F /* Build configuration list for PBXNativeTarget "BOAStar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C40E8A492A2690C30041936F /* Debug */,
+				C40E8A4A2A2690C30041936F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -8494,6 +9111,15 @@
 			buildConfigurations = (
 				C42B6677206AE4A900C3BF1A /* Debug */,
 				C42B6678206AE4A900C3BF1A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C4411B442A91CAD90039584F /* Build configuration list for PBXNativeTarget "BOBAStar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C4411B452A91CAD90039584F /* Debug */,
+				C4411B462A91CAD90039584F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

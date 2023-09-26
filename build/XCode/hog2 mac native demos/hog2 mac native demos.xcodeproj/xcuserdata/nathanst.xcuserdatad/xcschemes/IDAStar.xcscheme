@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C49A9EA92079E63000244298"
-               BuildableName = "IDA*.app"
-               BlueprintName = "IDA*"
+               BuildableName = "IDAStar.app"
+               BlueprintName = "IDAStar"
                ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -27,19 +27,17 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <Testables>
-      </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C49A9EA92079E63000244298"
-            BuildableName = "IDA*.app"
-            BlueprintName = "IDA*"
+            BuildableName = "IDAStar.app"
+            BlueprintName = "IDAStar"
             ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
+      <Testables>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -56,13 +54,11 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C49A9EA92079E63000244298"
-            BuildableName = "IDA*.app"
-            BlueprintName = "IDA*"
+            BuildableName = "IDAStar.app"
+            BlueprintName = "IDAStar"
             ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -75,8 +71,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C49A9EA92079E63000244298"
-            BuildableName = "IDA*.app"
-            BlueprintName = "IDA*"
+            BuildableName = "IDAStar.app"
+            BlueprintName = "IDAStar"
             ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

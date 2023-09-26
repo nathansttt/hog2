@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C49A9E1A2074A5D200244298"
-               BuildableName = "A* (Map).app"
-               BlueprintName = "A* (Map)"
+               BuildableName = "AStar (Map).app"
+               BlueprintName = "AStar (Map)"
                ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -31,8 +31,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C49A9E1A2074A5D200244298"
-            BuildableName = "A* (Map).app"
-            BlueprintName = "A* (Map)"
+            BuildableName = "AStar (Map).app"
+            BlueprintName = "AStar (Map)"
             ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -54,8 +54,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C49A9E1A2074A5D200244298"
-            BuildableName = "A* (Map).app"
-            BlueprintName = "A* (Map)"
+            BuildableName = "AStar (Map).app"
+            BlueprintName = "AStar (Map)"
             ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -71,8 +71,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C49A9E1A2074A5D200244298"
-            BuildableName = "A* (Map).app"
-            BlueprintName = "A* (Map)"
+            BuildableName = "AStar (Map).app"
+            BlueprintName = "AStar (Map)"
             ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

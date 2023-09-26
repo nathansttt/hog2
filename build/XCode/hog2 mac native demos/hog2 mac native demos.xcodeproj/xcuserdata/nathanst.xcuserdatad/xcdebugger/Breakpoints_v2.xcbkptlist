@@ -15,8 +15,8 @@
             timestampString = "584991658.972756"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "72"
-            endingLineNumber = "72"
+            startingLineNumber = "71"
+            endingLineNumber = "71"
             landmarkName = "-onTick:"
             landmarkType = "7">
          </BreakpointContent>
@@ -100,8 +100,8 @@
             timestampString = "584991658.9731719"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "49"
-            endingLineNumber = "49"
+            startingLineNumber = "46"
+            endingLineNumber = "46"
             landmarkName = "-viewDidLoad"
             landmarkType = "7">
          </BreakpointContent>
@@ -270,8 +270,8 @@
             timestampString = "584991658.973514"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "103"
-            endingLineNumber = "103"
+            startingLineNumber = "102"
+            endingLineNumber = "102"
             landmarkName = "-mouseDown:"
             landmarkType = "7">
          </BreakpointContent>
@@ -321,8 +321,8 @@
             timestampString = "584991658.973786"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "141"
-            endingLineNumber = "141"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
             landmarkName = "-mouseMoved:"
             landmarkType = "7">
          </BreakpointContent>
@@ -389,9 +389,9 @@
             timestampString = "576217889.179826"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "563"
-            endingLineNumber = "563"
-            landmarkName = "GetDimensionsFromHashString(s, w, h)"
+            startingLineNumber = "512"
+            endingLineNumber = "512"
+            landmarkName = "ClearConstraint(x, y)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -456,9 +456,9 @@
             timestampString = "576217889.179896"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "593"
-            endingLineNumber = "593"
-            landmarkName = "LoadFromHashString(s)"
+            startingLineNumber = "542"
+            endingLineNumber = "542"
+            landmarkName = "AddTriangleConstraint(which, count)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -523,10 +523,10 @@
             timestampString = "576217889.179942"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "597"
-            endingLineNumber = "597"
-            landmarkName = "LoadFromHashString(s)"
-            landmarkType = "7">
+            startingLineNumber = "546"
+            endingLineNumber = "546"
+            landmarkName = "Witness"
+            landmarkType = "3">
             <Locations>
                <Location
                   uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - bc9bf091dd206c09"
@@ -1447,8 +1447,8 @@
             filePath = "../../../generic/TemplateAStar.h"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "270"
-            endingLineNumber = "270"
+            startingLineNumber = "272"
+            endingLineNumber = "272"
             landmarkName = "InitializeSearch(_env, from, to, thePath)"
             landmarkType = "9">
             <Locations>
@@ -1849,6 +1849,53 @@
             endingLineNumber = "426"
             landmarkName = "Racetrack::Draw(display, s, a)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "DD87DEF2-4EF5-4206-966D-CB897258024A - b897e281ce1a1e7e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Racetrack::Draw(Graphics::Display&amp;, RacetrackState const&amp;, RacetrackMove&amp;) const"
+                  moduleName = "BOAStar"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/Documents/GitHub/hog2/environments/Racetrack.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "426"
+                  endingLineNumber = "426"
+                  offsetFromSymbolStart = "24">
+               </Location>
+               <Location
+                  uuid = "DD87DEF2-4EF5-4206-966D-CB897258024A - b897e281ce1a1e7e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Racetrack::Draw(Graphics::Display&amp;, RacetrackState const&amp;, RacetrackMove&amp;) const"
+                  moduleName = "BOAStar"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/Documents/GitHub/hog2/environments/Racetrack.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "426"
+                  endingLineNumber = "426"
+                  offsetFromSymbolStart = "36">
+               </Location>
+               <Location
+                  uuid = "DD87DEF2-4EF5-4206-966D-CB897258024A - 18f8112d7d27e73b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Racetrack::Draw(Graphics::Display&amp;, RacetrackState const&amp;, RacetrackMove&amp;) const"
+                  moduleName = "BOBAStar"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/Documents/GitHub/hog2/environments/Racetrack.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "426"
+                  endingLineNumber = "426"
+                  offsetFromSymbolStart = "36">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2153,6 +2200,38 @@
             startingLineNumber = "601"
             endingLineNumber = "601"
             landmarkName = "DoAnimation()"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4EDC942F-C816-49A4-8908-46759D231043"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/BOAStar.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "228"
+            endingLineNumber = "228"
+            landmarkName = "GetBestStateOnOpen()"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C3DFCFA1-1863-404E-9183-FD101BB1DCE0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/BOAStar.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "414"
+            endingLineNumber = "414"
+            landmarkName = "DrawAllPaths(d)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

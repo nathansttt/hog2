@@ -38,7 +38,7 @@ public:
 	virtual action GetAction(const state &s1, const state &s2) const;
 	virtual void ApplyAction(state &s, action a) const = 0;
 	virtual void UndoAction(state &s, action a) const
-	{ assert(InvertAction(a)); ApplyAction(s, a); }
+	{ bool success = InvertAction(a); assert(success); ApplyAction(s, a); }
 
 	virtual void GetNextState(const state &s1, action a, state &s2) const
 	{

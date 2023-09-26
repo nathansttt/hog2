@@ -64,6 +64,8 @@ struct point {
 
 	float length() const
 	{ return sqrtf(x * x + y * y + z * z); }
+	float squaredLength() const
+	{ return (x * x + y * y + z * z); }
 	void normalise()
 	{
 		float length = this->length();
