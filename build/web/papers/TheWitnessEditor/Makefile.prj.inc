@@ -50,7 +50,7 @@ PROJ_REL_DEP = \
   $(REL_BINDIR)/libgui.a \
   $(REL_BINDIR)/libSTUB.a
 
-default : all
+default: all
 
 SRC_CPP = \
 	papers/TheWitnessEditor/Driver.cpp \
