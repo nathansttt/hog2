@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 53;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -134,7 +134,7 @@
 		4625C26E2A4BD910004A8BBC /* WitnessCLHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C14E2A4BD15C004A8BBC /* WitnessCLHandler.cpp */; };
 		4625C26F2A4BD912004A8BBC /* WitnessKeyboardHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C14F2A4BD15C004A8BBC /* WitnessKeyboardHandler.cpp */; };
 		4625C2702A4BD914004A8BBC /* WitnessWindowHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C1502A4BD15C004A8BBC /* WitnessWindowHandler.cpp */; };
-		4647265F2A4DE56B007A147D /* EntropyUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4647265D2A4DE56B007A147D /* EntropyUtil.cpp */; };
+		462A61602A8BE50200DBB8B3 /* Puzzles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */; };
 		C403F68E27B37B96001C0043 /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5504524AEFD6400E9FF7F /* Graphics.cpp */; };
 		C403F68F27B37B96001C0043 /* Reach.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5507A24AEFD6500E9FF7F /* Reach.cpp */; };
 		C403F69027B37B96001C0043 /* CanonicalGraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A5513024AEFD6600E9FF7F /* CanonicalGraphEnvironment.cpp */; };
@@ -855,11 +855,14 @@
 		4625C15C2A4BD1EE004A8BBC /* FileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileUtil.cpp; sourceTree = "<group>"; };
 		4625C2652A4BD80B004A8BBC /* The Witness Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "The Witness Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4625C2662A4BD80B004A8BBC /* The Witness Editor copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "The Witness Editor copy-Info.plist"; path = "/Users/samarium/Documents/hog2/build/XCode/HOG2 ObjC/The Witness Editor copy-Info.plist"; sourceTree = "<absolute>"; };
-		4647265D2A4DE56B007A147D /* EntropyUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntropyUtil.cpp; sourceTree = "<group>"; };
-		464726602A4DE64D007A147D /* EntropyUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntropyUtil.h; sourceTree = "<group>"; };
+		462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Puzzles.cpp; sourceTree = "<group>"; };
+		462A615F2A8BE50200DBB8B3 /* Puzzles.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Puzzles.h; sourceTree = "<group>"; };
+		4646C3EE2A6C8E0900E43949 /* PuzzleEntropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleEntropy.h; sourceTree = "<group>"; };
 		464726612A4DE836007A147D /* SolutionUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SolutionUtil.h; sourceTree = "<group>"; };
 		464726622A4DE8FE007A147D /* ExamineUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExamineUtil.h; sourceTree = "<group>"; };
 		464726632A4DEBB5007A147D /* Globals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Globals.h; sourceTree = "<group>"; };
+		4680D3F82A7824AA00593FD0 /* WitnessInferenceRule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WitnessInferenceRule.h; sourceTree = "<group>"; };
+		469A78E42A72342000CD8BED /* PuzzleInferenceRule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PuzzleInferenceRule.h; sourceTree = "<group>"; };
 		C403F70727B37B96001C0043 /* RC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C403F70827B37B9F001C0043 /* Hexagon copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Hexagon copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/HOG2 ObjC/Hexagon copy-Info.plist"; sourceTree = "<absolute>"; };
 		C403F70D27B37CFA001C0043 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
@@ -1279,12 +1282,12 @@
 		4625C1492A4BD15C004A8BBC /* impl */ = {
 			isa = PBXGroup;
 			children = (
-				4647265D2A4DE56B007A147D /* EntropyUtil.cpp */,
-				4625C14A2A4BD15C004A8BBC /* WitnessClickHandler.cpp */,
-				4625C14B2A4BD15C004A8BBC /* SolutionUtil.cpp */,
 				4625C14C2A4BD15C004A8BBC /* ExamineUtil.cpp */,
-				4625C14D2A4BD15C004A8BBC /* WitnessFrameHandler.cpp */,
+				462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */,
+				4625C14B2A4BD15C004A8BBC /* SolutionUtil.cpp */,
 				4625C14E2A4BD15C004A8BBC /* WitnessCLHandler.cpp */,
+				4625C14A2A4BD15C004A8BBC /* WitnessClickHandler.cpp */,
+				4625C14D2A4BD15C004A8BBC /* WitnessFrameHandler.cpp */,
 				4625C14F2A4BD15C004A8BBC /* WitnessKeyboardHandler.cpp */,
 				4625C1502A4BD15C004A8BBC /* WitnessWindowHandler.cpp */,
 			);
@@ -1294,10 +1297,11 @@
 		4647265C2A4DE529007A147D /* include */ = {
 			isa = PBXGroup;
 			children = (
-				464726602A4DE64D007A147D /* EntropyUtil.h */,
-				464726612A4DE836007A147D /* SolutionUtil.h */,
 				464726622A4DE8FE007A147D /* ExamineUtil.h */,
 				464726632A4DEBB5007A147D /* Globals.h */,
+				462A615F2A8BE50200DBB8B3 /* Puzzles.h */,
+				464726612A4DE836007A147D /* SolutionUtil.h */,
+				4680D3F82A7824AA00593FD0 /* WitnessInferenceRule.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -1693,6 +1697,7 @@
 				C4A550DF24AEFD6600E9FF7F /* OptimisticSearch.h */,
 				C4A550E024AEFD6600E9FF7F /* ParallelIDAStar.h */,
 				C4A5510224AEFD6600E9FF7F /* PEAStar.h */,
+				4646C3EE2A6C8E0900E43949 /* PuzzleEntropy.h */,
 				C4A550DA24AEFD6500E9FF7F /* RandomUnit.h */,
 				C4A5510124AEFD6600E9FF7F /* SFIDAStar.h */,
 				C4A550E624AEFD6600E9FF7F /* TemplateAStar.h */,
@@ -1811,6 +1816,7 @@
 				C4A5516024AEFD6600E9FF7F /* STPInstances.h */,
 				C4A5516124AEFD6600E9FF7F /* GraphInconsistencyInstances.h */,
 				C4A5516224AEFD6600E9FF7F /* VoxelTriangleExtraction.h */,
+				469A78E42A72342000CD8BED /* PuzzleInferenceRule.h */,
 			);
 			path = envutil;
 			sourceTree = "<group>";
@@ -2002,7 +2008,8 @@
 		C4A54FF224AEFC3400E9FF7F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1150;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = MovingAI;
 				TargetAttributes = {
 					C4A54FF924AEFC3400E9FF7F = {
@@ -2017,7 +2024,6 @@
 			knownRegions = (
 				en,
 				Base,
-				English,
 			);
 			mainGroup = C4A54FF124AEFC3400E9FF7F;
 			productRefGroup = C4A54FFB24AEFC3400E9FF7F /* Products */;
@@ -2142,7 +2148,6 @@
 				4625C1FC2A4BD80B004A8BBC /* Bloom.cpp in Sources */,
 				4625C1FD2A4BD80B004A8BBC /* RHRUnit.cpp in Sources */,
 				4625C1FE2A4BD80B004A8BBC /* Propagation.cpp in Sources */,
-				4647265F2A4DE56B007A147D /* EntropyUtil.cpp in Sources */,
 				4625C26C2A4BD90C004A8BBC /* WitnessFrameHandler.cpp in Sources */,
 				4625C1FF2A4BD80B004A8BBC /* StringUtils.cpp in Sources */,
 				4625C2002A4BD80B004A8BBC /* Voxels.cpp in Sources */,
@@ -2152,6 +2157,7 @@
 				4625C2042A4BD80B004A8BBC /* BurnedPancakePuzzle.cpp in Sources */,
 				4625C2052A4BD80B004A8BBC /* StatUtil.cpp in Sources */,
 				4625C2062A4BD80B004A8BBC /* Trackball.cpp in Sources */,
+				462A61602A8BE50200DBB8B3 /* Puzzles.cpp in Sources */,
 				4625C2072A4BD80B004A8BBC /* Map3DGrid.cpp in Sources */,
 				4625C2082A4BD80B004A8BBC /* SequenceAlignment.cpp in Sources */,
 				4625C2092A4BD80B004A8BBC /* MR1Permutation.cpp in Sources */,
@@ -3253,7 +3259,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -3311,7 +3317,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;

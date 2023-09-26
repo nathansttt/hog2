@@ -26,23 +26,16 @@ void WitnessWindowHandler(unsigned long windowID, tWindowEventType eType)
         //		w.AddTriangleConstraint(0, 1, 2);
         //		w.AddTriangleConstraint(1, 0, 1);
         //		ExamineMustCross(numRequiredPieces);
-        witness.AddStarConstraint(0, 0, Colors::pink);
+        //        witness.AddStarConstraint(0, 0, Colors::pink);
         //		w.AddSeparationConstraint(0, 0, Colors::green);
         //		w.AddSeparationConstraint(0, 4, Colors::white);
         //		w.AddSeparationConstraint(4, 0, Colors::white);
-        witness.AddSeparationConstraint(2, 2, Colors::pink);
+        //        witness.AddSeparationConstraint(2, 2, Colors::pink);
         //		w.AddSeparationConstraint(4, 4, Colors::black);
-        witness.AddSeparationConstraint(2, 0, Colors::black);
+        //        witness.AddSeparationConstraint(2, 0, Colors::black);
         //		w.AddSeparationConstraint(2, 4, Colors::black);
-        witness.AddSeparationConstraint(0, 2, Colors::orange);
-        for (size_t i = 0; i < allSolutions.size(); i++)
-        {
-            auto &solution = allSolutions[i];
-            if (witness.GoalTest(solution)) {
-                currentSolutionIndices.emplace_back(i);
-            }
-        }
-        gNumSolutions = currentSolutionIndices.size();
+        //        witness.AddSeparationConstraint(0, 2, Colors::orange);
+        //        witness.AddSeparationConstraint(0, 0, Colors::black);
 
         //		w.AddSeparationConstraint(4, 2, Colors::orange);
 

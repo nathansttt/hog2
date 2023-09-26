@@ -5,7 +5,6 @@
 //  Created by Samarium on 2023-06-29.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-
 #ifndef THE_WITNESS_EDITOR_INCLUDE_SOLUTION_UTIL_H
 #define THE_WITNESS_EDITOR_INCLUDE_SOLUTION_UTIL_H
 
@@ -14,18 +13,51 @@
 
 void GetAllSolutions();
 
-int CountSolutions(const Witness <puzzleWidth, puzzleHeight> &w,
-                   const std::vector <WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
-                   int &len, uint64_t limit);
+template<int width, int height>
+int CountSolutions(const Witness<width, height> &wp,
+    const std::vector<WitnessState<width, height>> &allSolutions,
+                   int &len, uint64_t limit)
+{
+    int count = 0;
+    for (const auto &i : allSolutions)
+    {
+        if (wp.GoalTest(i))
+        {
+            len = (int)i.path.size();
+            count++;
+        }
+        if (count > limit) break;
+    }
+    return count;
+}
 
-int CountSolutions(const Witness <puzzleWidth, puzzleHeight> &w,
-                   const std::vector <WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
-                   std::vector<int> &solutions,
-                   const std::vector<int> &forbidden, int &len, uint64_t limit);
+template<int width, int height>
+int CountSolutions(const Witness<width, height> &w,
+    const std::vector<WitnessState<width, height>> &allSolutions, std::vector<int> &solutions,
+    const std::vector<int> &forbidden, int &len, uint64_t limit)
+{
+    solutions.resize(0);
+    int count = 0;
+    for (int x : forbidden)
+    {
+        if (w.GoalTest(allSolutions[x])) return 0;
+    }
+    for (int x = 0; x < allSolutions.size(); x++)
+    {
+        if (w.GoalTest(allSolutions[x]))
+        {
+            len = (int)allSolutions[x].path.size();
+            count++;
+            solutions.push_back(x);
+        }
+        if (count > limit) break;
+    }
+    return count;
+}
 
-template<int puzzleWidth, int puzzleHeight>
-void DFS(const Witness <puzzleWidth, puzzleHeight> &w, WitnessState <puzzleWidth, puzzleHeight> &s, // NOLINT
-         std::vector <WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+template<int width, int height>
+void DFS(const Witness<width, height> &w, WitnessState<width, height> &s, // NOLINT
+         std::vector <WitnessState<width, height>> &puzzles)
 {
     std::vector <WitnessAction> acts;
 
@@ -44,24 +76,26 @@ void DFS(const Witness <puzzleWidth, puzzleHeight> &w, WitnessState <puzzleWidth
     }
 }
 
-template<int puzzleWidth, int puzzleHeight>
+template<int width, int height>
 void GetAllSolutions(
-        const Witness <puzzleWidth, puzzleHeight> &w, std::vector <WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+        const Witness<width, height> &w, std::vector<WitnessState<width, height>> &puzzles)
 {
-    WitnessState <puzzleWidth, puzzleHeight> s;
+    WitnessState<width, height> s;
     s.Reset();
     Timer t;
     t.StartTimer();
     DFS(w, s, puzzles);
     t.EndTimer();
-    printf("%lu solutions found in %1.2fs\n", puzzles.size(), t.GetElapsedTime());
+    // printf("%lu solutions found in %1.2fs\n", puzzles.size(), t.GetElapsedTime());
 }
 
-template<int puzzleWidth, int puzzleHeight>
-void GetAllSolutions(std::vector <WitnessState<puzzleWidth, puzzleHeight>> &puzzles)
+template<int width, int height>
+void GetAllSolutions(std::vector<WitnessState<width, height>> &puzzles)
 {
-    Witness <puzzleWidth, puzzleHeight> w;
+    Witness<width, height> w;
     GetAllSolutions(w, puzzles);
 }
+
+void UpdateSolutionIndicies();
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_SOLUTION_UTIL_H */

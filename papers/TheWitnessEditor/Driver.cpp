@@ -11,7 +11,9 @@
 #include "Driver.h"
 
 #include "Globals.h"
+#include "Puzzles.h"
 #include "SolutionUtil.h"
+#include "WitnessInferenceRule.h"
 
 bool recording = false;
 bool parallel = false;
@@ -23,10 +25,9 @@ int selectTetrisPiece = 0;
 unsigned long currBoard = 0;
 
 Witness<puzzleWidth, puzzleHeight> witness;
+Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
-std::vector<Witness<puzzleWidth, puzzleHeight>> best;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-// std::vector<uint64_t> otherbest;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
@@ -51,6 +52,31 @@ static void InitTetrisPieces()
         }
     }
 }
+
+static void AddInferenceRule()
+{
+    entropy.ruleSet.rules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
+}
+
+static void InitPuzzle()
+{
+    k87fxsr();
+    for (size_t i = 0; i < allSolutions.size(); i++)
+    {
+        auto &solution = allSolutions[i];
+        if (witness.GoalTest(solution)) {
+            currentSolutionIndices.emplace_back(i);
+        }
+    }
+    std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
+        return entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[a], gLookahead).value >
+            entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
+    });
+    gNumSolutions = currentSolutionIndices.size();
+    AddInferenceRule();
+    gEntropy = GetCurrentEntropy(witness);
+}
+
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -84,7 +110,9 @@ int main(int argc, char *argv[])
 {
     InitTetrisPieces();
     GetAllSolutions(allSolutions);
+    InitPuzzle();
     InstallHandlers();
+    std::cout << "size: " << sizeof(iws) << std::endl;
     RunHOGGUI(argc, argv, 1280, 640);
     return 0;
 }

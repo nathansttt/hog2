@@ -21,42 +21,16 @@ void GetAllSolutions()
     GetAllSolutions(p7);
 }
 
-int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &wp,
-    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
-                   int &len, uint64_t limit)
+void UpdateSolutionIndicies()
 {
-    int count = 0;
-    for (const auto &i : allSolutions)
+    currentSolutionIndices.clear();
+    for (size_t i = 0; i < allSolutions.size(); i++)
     {
-        if (wp.GoalTest(i))
+        auto &solution = allSolutions[i];
+        if (witness.GoalTest(solution))
         {
-            len = (int)i.path.size();
-            count++;
+            currentSolutionIndices.emplace_back(i);
         }
-        if (count > limit) break;
     }
-    return count;
-}
-
-int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
-    const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions, std::vector<int> &solutions,
-    const std::vector<int> &forbidden, int &len, uint64_t limit)
-{
-    solutions.resize(0);
-    int count = 0;
-    for (int x : forbidden)
-    {
-        if (w.GoalTest(allSolutions[x])) return 0;
-    }
-    for (int x = 0; x < allSolutions.size(); x++)
-    {
-        if (w.GoalTest(allSolutions[x]))
-        {
-            len = (int)allSolutions[x].path.size();
-            count++;
-            solutions.push_back(x);
-        }
-        if (count > limit) break;
-    }
-    return count;
+    gEntropy = GetCurrentEntropy(witness);
 }

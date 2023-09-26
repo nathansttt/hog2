@@ -5,7 +5,6 @@
 //  Created by Samarium on 2023-06-29.
 //  Copyright © 2023 MovingAI. All rights reserved.
 //
-
 #ifndef THE_WITNESS_EDITOR_INCLUDE_EXAMINE_UTIL_H
 #define THE_WITNESS_EDITOR_INCLUDE_EXAMINE_UTIL_H
 

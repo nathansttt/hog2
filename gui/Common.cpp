@@ -604,9 +604,9 @@ bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, poin
 	{
 		if (mouseCallbacks2[j]->which&mouse) // need to ask for event to call handler
 		{
-			if (x == -1 || y == -1)
-				fprintf(stderr, "Warning: window coordinates not being pased into HandleMouseClick (%s line %d)\n",
-						__FILE__, __LINE__);
+//			if (x == -1 || y == -1)
+//				fprintf(stderr, "Warning: window coordinates not being pased into HandleMouseClick (%s line %d)\n",
+//						__FILE__, __LINE__);
 
 			if (mouseCallbacks2[j]->mC(pContextInfo->windowID, viewport, x, y, where,
 									   button, mouse))

@@ -23,38 +23,24 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         break;
     case 'v':
     {
-        std::vector <WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
-        GetAllSolutions(witness, allSolutions);
-        if (!allSolutions.empty())
+        if (!currentSolutionIndices.empty())
         {
-            iws.ws = allSolutions[0];
+            iws.ws = allSolutions[currentSolutionIndices[0]];
             iws.currState = InteractiveWitnessState<puzzleWidth, puzzleHeight>::kWaitingRestart;
+            solved = true;
         }
-        solved = true;
         break;
     }
     case 's':
     {
-        Graphics::Display d;
-        // d.FillRect({-1, -1, 1, 1}, Colors::darkgray);
-        witness.Draw(d);
-        witness.Draw(d, iws);
-        std::string fname = "/Users/nathanst/Desktop/SVG/witness_";
-        int count = 0;
-        while (FileExists(fname + std::to_string(count) + ".svg"))
-        {
-            count++;
-        }
-        printf("Save to '%s'\n", (fname + std::to_string(count) + ".svg").c_str());
-        MakeSVG(d, (fname + std::to_string(count) + ".svg").c_str(), 400, 400, 0,
-                witness.SaveToHashString().c_str());
-
-        {
-            int wide, high;
-            witness.GetDimensionsFromHashString(witness.SaveToHashString(), wide, high);
-        }
-    }
+        auto ret = std::string(witness);
+//        std::cout << witness.SaveToHashString() << std::endl;
+//        Witness<puzzleWidth, puzzleHeight>().LoadFromHashString(witness.SaveToHashString());
+        std::cout << ret << std::endl;
+//        std::istringstream iss(ret);
+//        Witness<puzzleWidth, puzzleHeight>().Deserialize(iss);
         break;
+    }
     case 'r':
     {
         iws.Reset();
@@ -122,6 +108,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             drawEditor = true;
             iws.Reset();
             solved = false;
+            UpdateSolutionIndicies();
             MoveViewport(windowID, 1, {0.0f, -1.0f, 1.0f, 1.0f});
         }
         else

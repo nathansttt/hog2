@@ -1,20 +1,124 @@
 #include "Driver.h"
 #include "Globals.h"
+#include "SolutionUtil.h"
 
-Graphics::point cursor;
+Graphics::point cursor = Graphics::point{};
 int cursorViewport = 0;
 bool solved = false;
+bool gWithReplacement = false;
+unsigned gSuggestedLocation = std::numeric_limits<unsigned>::max();
 
-static void UpdateSolutionIndicies() {
-    currentSolutionIndices.clear();
-    for (size_t i = 0; i < allSolutions.size(); i++)
+static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
+{
+    double ret = -1.0;
+    if (gWithReplacement)
     {
-        auto &solution = allSolutions[i];
-        if (witness.GoalTest(solution))
+        for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
         {
-            currentSolutionIndices.emplace_back(i);
+            int x = witness.GetRegionFromX(i);
+            int y = witness.GetRegionFromY(i);
+            if (constraint == witness.GetRegionConstraint(x, y))
+            {
+                witness.RemoveRegionConstraint(x, y);
+                double e = GetCurrentEntropy(witness);
+                if (e > ret && e != inf)
+                {
+                    ret = e;
+                    gSuggestedLocation = i;
+                }
+                witness.AddRegionConstraint(x, y, constraint);
+            }
+            else
+            {
+                auto c = WitnessRegionConstraint(editor.GetRegionConstraint(x, y));
+                witness.AddRegionConstraint(x, y, constraint);
+                double e = GetCurrentEntropy(witness);
+                if (e > ret && e != inf)
+                {
+                    ret = e;
+                    gSuggestedLocation = i;
+                }
+                witness.RemoveRegionConstraint(x, y);
+                witness.AddRegionConstraint(x, y, c);
+            }
         }
     }
+    else
+    {
+        for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
+        {
+            int x = witness.GetRegionFromX(i);
+            int y = witness.GetRegionFromY(i);
+            if (witness.GetRegionConstraint(x, y).t == kNoRegionConstraint)
+            {
+                witness.AddRegionConstraint(x, y, constraint);
+                double e = GetCurrentEntropy(witness);
+                if (e > ret && e != inf)
+                {
+                    ret = e;
+                    gSuggestedLocation = i;
+                }
+                witness.RemoveRegionConstraint(x, y);
+            }
+        }
+    }
+    if (ret == -1)
+        gSuggestedLocation = std::numeric_limits<unsigned>::max();
+    return ret;
+}
+
+static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
+{
+    double ret = -1.0;
+    if (gWithReplacement)
+    {
+        for (unsigned i = 1; i < witness.pathConstraintLocations.size() - 1; ++i)
+        {
+            if (constraint == witness.pathConstraints[i])
+            {
+                witness.pathConstraints[i] = kNoPathConstraint;
+                double e = GetCurrentEntropy(editor);
+                if (e > ret && e != inf)
+                {
+                    ret = e;
+                    gSuggestedLocation = i;
+                }
+                witness.pathConstraints[i] = constraint;
+            }
+            else
+            {
+                auto p = witness.pathConstraints[i];
+                witness.pathConstraints[i] = constraint;
+                double e = GetCurrentEntropy(editor);
+                if (e > ret && e != inf)
+                {
+                    ret = e;
+                    gSuggestedLocation = i;
+                }
+                witness.pathConstraints[i] = p;
+            }
+        }
+    }
+    else
+    {
+        for (unsigned i = 1; i < witness.pathConstraintLocations.size() - 1; ++i)
+        {
+            if (witness.pathConstraints[i] == kNoPathConstraint)
+            {
+                witness.pathConstraints[i] = constraint;
+                double e = GetCurrentEntropy(editor);
+                if (e > ret && e != inf)
+                {
+                    ret = e;
+                    gSuggestedLocation = i;
+                }
+                witness.pathConstraints[i] = kNoPathConstraint;
+            }
+        }
+    }
+    if (ret == -1)
+        gSuggestedLocation = std::numeric_limits<unsigned>::max();
+    return ret;
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
@@ -61,13 +165,16 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         {
                             if (PointInRect(p, witness.regionConstraintLocations[i].second))
                             {
-                                unsigned y = i % puzzleWidth;
-                                unsigned x = (i - y) / puzzleWidth;
+                                int x = witness.GetRegionFromX(i);
+                                int y = witness.GetRegionFromY(i);
                                 WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
-                                if (constraint == witness.regionConstraints[x][y])
-                                    witness.regionConstraints[x][y] = {.t = kNoRegionConstraint, .parameter = 0, .c = Colors::white};
+                                if (constraint == witness.GetRegionConstraint(x, y))
+                                    witness.RemoveRegionConstraint(x, y);
                                 else
-                                    witness.regionConstraints[x][y] = constraint;
+                                    witness.AddRegionConstraint(x, y, constraint);
+                                double e = MaximizedEntropy(constraint);
+                                std::cout << "max entropy: "
+                                    << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
                             }
                         }
@@ -84,14 +191,18 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                         gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                                 .constraint;
                                 printf("Selected Constraint: %d\n", constraint);
-                                if (constraint == witness.pathConstraints[i])
+                                if (constraint == editor.pathConstraints[i])
                                     witness.pathConstraints[i] = kNoPathConstraint;
                                 else
                                     witness.pathConstraints[i] = constraint;
+                                double e = MaximizedEntropy(constraint);
+                                std::cout << "max entropy: "
+                                    << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
                             }
                         }
                     }
+                    
                     UpdateSolutionIndicies();
                 }
             }
@@ -116,6 +227,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         selectTetrisPiece = 0;
                     WitnessKeyboardHandler(windowID, kAnyModifier, 'x');
                     selected = true;
+                    double e = MaximizedEntropy(gRegionConstraintItems[i].constraint);
+                    std::cout << "max entropy: "
+                        << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                     break;
                 }
             }
@@ -125,6 +239,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 {
                     gSelectedEditorItem = static_cast<int>(i + gRegionConstraintItems.size());
                     selected = true;
+                    double e = MaximizedEntropy(gPathConstraintItems[i].constraint);
+                    std::cout << "max entropy: "
+                        << ((e == inf) ? "inf" : to_string_with_precision(e, 2))  << std::endl;
                     break;
                 }
             }
@@ -145,10 +262,33 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             {
                 gSelectedEditorItem = -1;
             }
-            printf("Selected Constraint: %d\n", gSelectedEditorItem);
-            if (PointInRect(p, {Graphics::point{0.7, -0.15}, 0.25}))
+            if (PointInRect(p, Graphics::rect{0.49, -0.22, 0.7, -0.14}))
             {
                 witness.Reset();
+            }
+            if (PointInRect(p, Graphics::rect{-0.33, -0.10, -0.225, -0.04}))
+            {
+                gUseRelativeEntropy ^= true;
+                gEntropy = GetCurrentEntropy(witness);
+            }
+            if (PointInRect(p, Graphics::rect{0.26, -0.10, 0.31, -0.03}))
+            {
+                switch (gLookahead) {
+                    case 0:
+                        gLookahead = 1;
+                        break;
+                    case 1:
+                        gLookahead = 2;
+                        break;
+                    default:
+                        gLookahead = 0;
+                        break;
+                }
+                gEntropy = GetCurrentEntropy(witness);
+            }
+            if (PointInRect(p, Graphics::rect{0.7, -0.10, 0.805, -0.03}))
+            {
+                gWithReplacement ^= true;
             }
         }
         break;

@@ -6,6 +6,8 @@
 #include "SolutionUtil.h"
 
 std::mutex lock;
+std::vector<Witness<puzzleWidth, puzzleHeight>> best;
+// std::vector<uint64_t> otherbest;
 
 void Load(uint64_t which)
 {
