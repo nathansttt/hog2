@@ -9,6 +9,7 @@
 #define THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H
 
 #include "Witness.h"
+#include "WitnessInferenceRule.h"
 #include "PuzzleEntropy.h"
 
 constexpr int puzzleWidth = 4;
@@ -72,8 +73,11 @@ extern int selectTetrisPiece;
 extern Graphics::point cursor;
 extern int cursorViewport;
 extern bool gUseRelativeEntropy;
+extern std::vector <std::function<ActionType(
+        const SearchEnvironment<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> &,
+        const WitnessState<puzzleWidth, puzzleHeight> &, const WitnessAction &)>> gInferenceRules;
 
-inline double GetCurrentEntropy(Witness<puzzleWidth, puzzleHeight> &env)
+inline double GetCurrentEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
 {
     return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead).value;
 }

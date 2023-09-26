@@ -11,7 +11,10 @@
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
+#include <utility>
+
 #include "SearchEnvironment.h"
+#include "vectorCache.h"
 
 enum ActionType
 {
@@ -21,13 +24,28 @@ enum ActionType
     INVALID
 };
 
+/**
+ * @see https://stackoverflow.com/a/35920804
+ */
+template<typename T, typename... U>
+size_t GetFunctionAddress(std::function<T(U...)> f) {
+    typedef T(fnType)(U...);
+    fnType ** fnPointer = f.template target<fnType*>();
+    return (size_t) *fnPointer;
+}
+
 template<class State, class Action>
 class PuzzleInferenceRuleSet {
+    using InferenceRule = std::function<ActionType(const SearchEnvironment<State, Action>&, const State&, const Action&)>;
+
 protected:
+    vectorCache<InferenceRule> rulesCache;
+    mutable std::unordered_map<Action, ActionType> logics = {};
+
     virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
                                     std::unordered_map<Action, ActionType> &logics) const
     {
-        std::for_each(rules.begin(), rules.end(), [&](auto &rule) {
+        std::for_each(enabledRules.begin(), enabledRules.end(), [&](auto &rule) {
             std::for_each(logics.begin(), logics.end(), [&](auto &logic) {
                 ActionType t = rule(env, state, logic.first);
                 if (t == UNKNOWN)
@@ -38,13 +56,74 @@ protected:
             });
         });
     }
-    
+
 public:
-    std::vector<std::function<ActionType(const SearchEnvironment<State, Action>&, const State&, const Action&)>> rules;
-    std::unordered_map<Action, ActionType> logics;
-    
+    std::vector<InferenceRule>& disabledRules;
+    std::vector<InferenceRule>& enabledRules;
+
+    PuzzleInferenceRuleSet(): disabledRules(*rulesCache.getItem()), enabledRules(*rulesCache.getItem()) { }
+
+    ~PuzzleInferenceRuleSet()
+    {
+        rulesCache.returnItem(&disabledRules);
+        rulesCache.returnItem(&enabledRules);
+    }
+
+    virtual void SetRules(const std::vector<InferenceRule> &rules)
+    {
+        enabledRules.reserve(rules.size());
+        enabledRules.insert(enabledRules.end(), rules.begin(), rules.end());
+        disabledRules.reserve(rules.size());
+    }
+
+    virtual bool DisableRule(const InferenceRule &rule)
+    {
+        auto it = std::find_if(enabledRules.begin(), enabledRules.end(), [&](const auto &r) {
+            return GetFunctionAddress(r) == GetFunctionAddress(rule);
+        });
+        if (it != enabledRules.end())
+        {
+            disabledRules.push_back(std::move(*it));
+            enabledRules.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    virtual bool EnableRule(const InferenceRule &rule)
+    {
+        auto it = std::find_if(disabledRules.begin(), disabledRules.end(), [&](const auto &r) {
+            return GetFunctionAddress(r) == GetFunctionAddress(rule);
+        });
+        if (it != disabledRules.end())
+        {
+            enabledRules.push_back(std::move(*it));
+            disabledRules.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    virtual void DisableAllRules()
+    {
+        if (!enabledRules.empty())
+        {
+            disabledRules.insert(disabledRules.end(), enabledRules.begin(), enabledRules.end());
+            enabledRules.clear();
+        }
+    }
+
+    virtual void EnableAllRules()
+    {
+        if (!disabledRules.empty())
+        {
+            enabledRules.insert(enabledRules.end(), disabledRules.begin(), disabledRules.end());
+            disabledRules.clear();
+        }
+    }
+
     virtual void FilterActions(const SearchEnvironment<State, Action> &env, const State &state,
-                               std::vector<Action> &actions)
+                               std::vector<Action> &actions) const
     {
         logics.clear();
         std::transform(actions.begin(), actions.end(), std::inserter(logics, logics.end()), [](const Action &action) {

@@ -21,7 +21,7 @@ void GetAllSolutions()
     GetAllSolutions(p7);
 }
 
-void UpdateSolutionIndicies()
+void UpdateSolutionIndices()
 {
     currentSolutionIndices.clear();
     for (size_t i = 0; i < allSolutions.size(); i++)

@@ -4,6 +4,7 @@
 
 Graphics::point cursor = Graphics::point{};
 int cursorViewport = 0;
+int selectTetrisPiece = 0;
 bool solved = false;
 bool gWithReplacement = false;
 unsigned gSuggestedLocation = std::numeric_limits<unsigned>::max();
@@ -202,8 +203,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             }
                         }
                     }
-                    
-                    UpdateSolutionIndicies();
+                    UpdateSolutionIndices();
                 }
             }
         }

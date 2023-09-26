@@ -17,8 +17,6 @@
 
 bool recording = false;
 bool parallel = false;
-bool drawEditor = false;
-int selectTetrisPiece = 0;
 // 2x2 + 5 (interesting)
 // 2x5 + 5 [201/200][149][137/139][82][64][50]
 // 3x4 + 5 [481/471][463!][399!][374! - 373][260][150][146][126]
@@ -28,6 +26,7 @@ Witness<puzzleWidth, puzzleHeight> witness;
 Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+auto gInferenceRules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
@@ -53,11 +52,6 @@ static void InitTetrisPieces()
     }
 }
 
-static void AddInferenceRule()
-{
-    entropy.ruleSet.rules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
-}
-
 static void InitPuzzle()
 {
     k87fxsr();
@@ -73,10 +67,9 @@ static void InitPuzzle()
             entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
     });
     gNumSolutions = currentSolutionIndices.size();
-    AddInferenceRule();
+    entropy.ruleSet.SetRules(gInferenceRules);
     gEntropy = GetCurrentEntropy(witness);
 }
-
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -98,12 +91,17 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Editor", "Open editor", kAnyModifier, 'e');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Selection", "Open Tetris pieces panel", kAnyModifier, 'x');
 
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle All Rules", "Enable/Disable Rules", kAnyModifier, '0');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle SPR", "Enable/Disable SeparationRule", kAnyModifier, '1');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle PCR", "Enable/Disable PathConstraintRule", kAnyModifier, '2');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle TGR", "Enable/Disable TowardsGoalRule", kAnyModifier, '3');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle OTR", "Enable/Disable OneTriangleRule", kAnyModifier, '4');
+
     InstallCommandLineHandler(WitnessCLHandler, "-run", "-run", "Runs pre-set experiments.");
     InstallCommandLineHandler(WitnessCLHandler, "-test", "-test", "Basic test with MD heuristic");
 
     InstallWindowHandler(WitnessWindowHandler);
-    InstallMouseClickHandler(
-        WitnessClickHandler, static_cast<tMouseEventType>(kMouseMove | kMouseUp | kMouseDown | kMouseDrag));
+    InstallMouseClickHandler(WitnessClickHandler, static_cast<tMouseEventType>(kMouseMove | kMouseUp | kMouseDown | kMouseDrag));
 }
 
 int main(int argc, char *argv[])
@@ -112,7 +110,6 @@ int main(int argc, char *argv[])
     GetAllSolutions(allSolutions);
     InitPuzzle();
     InstallHandlers();
-    std::cout << "size: " << sizeof(iws) << std::endl;
     RunHOGGUI(argc, argv, 1280, 640);
     return 0;
 }

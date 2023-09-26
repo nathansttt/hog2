@@ -17,6 +17,7 @@ std::vector<PathConstraintItem> gPathConstraintItems = {
     {kCannotCross, Graphics::point{0.5, -0.5}, 0.075}
 };
 
+bool drawEditor = false;
 int gSelectedEditorItem = -1;
 unsigned gSelectedTetrisItem = 0;
 unsigned gSelectedColor = 0;

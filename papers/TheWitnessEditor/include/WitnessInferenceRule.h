@@ -11,7 +11,7 @@
 #include "PuzzleInferenceRule.h"
 #include "Witness.h"
 
-static bool CompareSC(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
+static inline bool CompareSC(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
 {
     return a.t == kSeparation && b.t == kSeparation && a != b;
 }
@@ -163,13 +163,153 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
 }
 
 template<int width, int height>
+static void GetTriangles(const Witness<width, height> &env, const WitnessState<width, height> &state,
+                         const WitnessAction &action, unsigned num, std::vector<std::pair<int, int>> &pos)
+{
+    int currX = state.path.back().first;
+    int currY = state.path.back().second;
+    switch (action) {
+    case kUp:
+    {
+        if (currX > 0)
+        {
+            auto constraint = env.GetRegionConstraint(currX - 1, currY);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX - 1, currY);
+        }
+        if (currX < width)
+        {
+            auto constraint = env.GetRegionConstraint(currX, currY);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX, currY);
+        }
+        break;
+    }
+    case kRight:
+    {
+        if (currY > 0)
+        {
+            auto constraint = env.GetRegionConstraint(currX, currY - 1);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX, currY - 1);
+        }
+        if (currY < height)
+        {
+            auto constraint = env.GetRegionConstraint(currX, currY);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX, currY);
+        }
+        break;
+    }
+    case kDown:
+    {
+        if (currX > 0)
+        {
+            auto constraint = env.GetRegionConstraint(currX - 1, currY - 1);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX - 1, currY - 1);
+        }
+        if (currX < width)
+        {
+            auto constraint = env.GetRegionConstraint(currX, currY - 1);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX, currY - 1);
+        }
+        break;
+    }
+    case kLeft:
+    {
+        if (currY > 0)
+        {
+            auto constraint = env.GetRegionConstraint(currX - 1, currY - 1);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX - 1, currY - 1);
+        }
+        if (currY < height)
+        {
+            auto constraint = env.GetRegionConstraint(currX - 1, currY);
+            if (constraint.t == kTriangle && constraint.parameter == num)
+                pos.emplace_back(currX - 1, currY);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+template<int width, int height>
+static unsigned CountOccupiedEdges(const WitnessState<width, height> &state, const std::pair<int, int> &pos)
+{
+    unsigned ret = 0;
+    if (state.OccupiedEdge(pos.first, pos.second, pos.first, pos.second + 1))
+        ++ret;
+    if (state.OccupiedEdge(pos.first, pos.second + 1, pos.first + 1, pos.second + 1))
+        ++ret;
+    if (state.OccupiedEdge(pos.first + 1, pos.second + 1, pos.first + 1, pos.second))
+        ++ret;
+    if (state.OccupiedEdge(pos.first + 1, pos.second, pos.first, pos.second))
+        ++ret;
+    return ret;
+}
+
+template<int width, int height>
+ActionType OneTriangleRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
+                           const WitnessState<width, height> &state, const WitnessAction &action)
+{
+    if (state.path.empty())
+        return UNKNOWN;
+    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    std::vector<std::pair<int, int>> pos;
+    GetTriangles(*witness, state, action, 1, pos);
+    WitnessState<width, height> ws = state;
+    witness->ApplyAction(ws, action);
+    for (auto &p: pos)
+    {
+        if (CountOccupiedEdges(ws, p) > 1)
+            return CANNOT_TAKE;
+    }
+    return UNKNOWN;
+}
+
+enum WitnessInferenceRules
+{
+    kSeparationRule,
+    kPathConstraintRule,
+    kTowardsGoalRule,
+    kOneTriangleRule,
+//    kTwoTrianglesRule,
+//    kThreeTrianglesRule,
+    kInferenceRuleCount
+};
+
+inline std::ostream& operator<<(std::ostream &os, WitnessInferenceRules wir)
+{
+    switch (wir) {
+        case kSeparationRule:
+            return os << "SeparationRule";
+        case kPathConstraintRule:
+            return os << "PathConstraintRule";
+        case kTowardsGoalRule:
+            return os << "TowardsGoalRule";
+        case kOneTriangleRule:
+            return os << "OneTriangleRule";
+        default:
+            return os;
+    }
+}
+
+template<int width, int height>
 std::vector<std::function<ActionType(const SearchEnvironment<WitnessState<width, height>, WitnessAction>&,
                                      const WitnessState<width, height>&, const WitnessAction&)>>
 witnessInferenceRules =
 {
     &SeparationRule<width, height>,
     &PathConstraintRule<width, height>,
-    &TowardsGoalRule<width, height>
+    &TowardsGoalRule<width, height>,
+    &OneTriangleRule<width, height>,
+//    &TwoTrianglesRule<width, height>,
+//    &ThreeTrianglesRule<width, height>
 };
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */

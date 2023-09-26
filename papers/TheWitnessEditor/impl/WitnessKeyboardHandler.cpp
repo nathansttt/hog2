@@ -4,10 +4,11 @@
 #include "Globals.h"
 #include "SolutionUtil.h"
 #include "SVGUtil.h"
+#include "WitnessInferenceRule.h"
 
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-    if (drawEditor && (key != 'e') && (key != 'x')) return;
+    if (drawEditor && key != 'e' && key != 'x' && !std::isdigit(key)) return;
     switch (key)
     {
     case 't':
@@ -108,7 +109,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             drawEditor = true;
             iws.Reset();
             solved = false;
-            UpdateSolutionIndicies();
+            UpdateSolutionIndices();
             MoveViewport(windowID, 1, {0.0f, -1.0f, 1.0f, 1.0f});
         }
         else
@@ -133,6 +134,38 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
                 MoveViewport(windowID, 2, {1.0f, 0.0f, 2.0f, 2.0f});
             }
         }
+        break;
+    }
+    case '0':
+    {
+        if (entropy.ruleSet.enabledRules.empty())
+        {
+            entropy.ruleSet.EnableAllRules();
+            std::cout << "All inference rules are enabled." << std::endl;
+        }
+        else
+        {
+            entropy.ruleSet.DisableAllRules();
+            std::cout << "All inference rules are disabled." << std::endl;
+        }
+        gEntropy = GetCurrentEntropy(witness);
+        break;
+    }
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    {
+        int index = std::atoi(&key) - 1;
+        const auto& rule = gInferenceRules[index];
+        std::cout << static_cast<WitnessInferenceRules>(index);
+        if (!entropy.ruleSet.DisableRule(rule))
+        {
+            (void) entropy.ruleSet.EnableRule(rule);
+            std::cout << " enabled" << std::endl;
+        }
+        else std::cout << " disabled" << std::endl;
+        gEntropy = GetCurrentEntropy(witness);
         break;
     }
     default:

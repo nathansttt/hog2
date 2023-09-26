@@ -32,7 +32,7 @@
 		<key>The Witness Editor.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>7</integer>
+			<integer>6</integer>
 		</dict>
 		<key>The Witness.xcscheme_^#shared#^_</key>
 		<dict>
@@ -45,17 +45,17 @@
 		<key>4625C15E2A4BD5B1004A8BBC</key>
 		<dict>
 			<key>primary</key>
-			<true/>
+			<true />
 		</dict>
 		<key>4625C1E72A4BD80B004A8BBC</key>
 		<dict>
 			<key>primary</key>
-			<true/>
+			<true />
 		</dict>
 		<key>C44B90AF26E6A2CE001A3459</key>
 		<dict>
 			<key>primary</key>
-			<true/>
+			<true />
 		</dict>
 	</dict>
 </dict>

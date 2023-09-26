@@ -96,6 +96,6 @@ void GetAllSolutions(std::vector<WitnessState<width, height>> &puzzles)
     GetAllSolutions(w, puzzles);
 }
 
-void UpdateSolutionIndicies();
+void UpdateSolutionIndices();
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_SOLUTION_UTIL_H */
