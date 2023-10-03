@@ -34,12 +34,10 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
     case 's':
     {
-        auto ret = std::string(witness);
-//        std::cout << witness.SaveToHashString() << std::endl;
-//        Witness<puzzleWidth, puzzleHeight>().LoadFromHashString(witness.SaveToHashString());
-        std::cout << ret << std::endl;
-//        std::istringstream iss(ret);
-//        Witness<puzzleWidth, puzzleHeight>().Deserialize(iss);
+        auto path = std::filesystem::temp_directory_path().string() + std::string("editor.svg");
+        Graphics::Display &display = GetContext(windowID)->display;
+        MakeSVG(display, path.c_str(), 600, 600, 0);
+        std::cout << "Saved to " << path << std::endl;
         break;
     }
     case 'r':

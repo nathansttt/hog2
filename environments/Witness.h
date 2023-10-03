@@ -834,7 +834,6 @@ public:
 
     operator std::string() const
     {
-        std::string quote = "\"";
         std::stringstream ss;
         ss << "{\"width\":" << width << ", \"height\":" << height << ", \"start\":[";
         for (const auto &s: start)
