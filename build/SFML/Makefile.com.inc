@@ -26,7 +26,8 @@ AR = ar
 
 ifeq ($(findstring "Darwin", "$(shell uname -s)"), "Darwin")
 COMMON_LNFLAGS += -framework OpenGL
-COMMON_CXXFLAGS += -DOS_MAC
+COMMON_CXXFLAGS += -DOS_MAC -I/opt/homebrew/include
+COMMON_LNFLAGS += -L /opt/homebrew/lib/
 endif
 
 ifeq ("$(OPENGL)", "STUB")
