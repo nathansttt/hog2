@@ -36,13 +36,13 @@ size_t GetFunctionAddress(std::function<T(U...)> f) {
 
 template<class State, class Action>
 class PuzzleInferenceRuleSet {
-    using InferenceRule = std::function<ActionType(const SearchEnvironment<State, Action>&, const State&, const Action&)>;
+    using InferenceRule = std::function<ActionType(const SearchEnvironment<State, Action>&, State&, const Action&)>;
 
 protected:
     vectorCache<InferenceRule> rulesCache;
     mutable std::unordered_map<Action, ActionType> logics = {};
 
-    virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
+    virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env, State &state,
                                     std::unordered_map<Action, ActionType> &logics) const
     {
         std::for_each(enabledRules.begin(), enabledRules.end(), [&](auto &rule) {
@@ -122,7 +122,7 @@ public:
         }
     }
 
-    virtual void FilterActions(const SearchEnvironment<State, Action> &env, const State &state,
+    virtual void FilterActions(const SearchEnvironment<State, Action> &env, State &state,
                                std::vector<Action> &actions) const
     {
         logics.clear();

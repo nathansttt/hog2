@@ -255,20 +255,20 @@ static unsigned CountOccupiedEdges(const WitnessState<width, height> &state, con
 
 template<int width, int height>
 ActionType OneTriangleRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
-                           const WitnessState<width, height> &state, const WitnessAction &action)
+                        WitnessState<width, height> &state, const WitnessAction &action)
 {
     if (state.path.empty())
         return UNKNOWN;
     const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
     std::vector<std::pair<int, int>> pos;
     GetTriangles(*witness, state, action, 1, pos);
-    WitnessState<width, height> ws = state;
-    witness->ApplyAction(ws, action);
+    witness->ApplyAction(state, action);
     for (auto &p: pos)
     {
-        if (CountOccupiedEdges(ws, p) > 1)
+        if (CountOccupiedEdges(state, p) > 1)
             return CANNOT_TAKE;
     }
+    witness->UndoAction(state, action);
     return UNKNOWN;
 }
 
@@ -301,7 +301,7 @@ inline std::ostream& operator<<(std::ostream &os, WitnessInferenceRules wir)
 
 template<int width, int height>
 std::vector<std::function<ActionType(const SearchEnvironment<WitnessState<width, height>, WitnessAction>&,
-                                     const WitnessState<width, height>&, const WitnessAction&)>>
+                                      WitnessState<width, height>&, const WitnessAction&)>>
 witnessInferenceRules =
 {
     &SeparationRule<width, height>,

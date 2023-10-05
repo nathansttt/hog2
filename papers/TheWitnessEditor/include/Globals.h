@@ -75,7 +75,7 @@ extern int cursorViewport;
 extern bool gUseRelativeEntropy;
 extern std::vector <std::function<ActionType(
         const SearchEnvironment<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> &,
-        const WitnessState<puzzleWidth, puzzleHeight> &, const WitnessAction &)>> gInferenceRules;
+        WitnessState<puzzleWidth, puzzleHeight> &, const WitnessAction &)>> gInferenceRules;
 
 inline double GetCurrentEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
 {
