@@ -50,7 +50,7 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
         {
             int x = witness.GetRegionFromX(i);
             int y = witness.GetRegionFromY(i);
-            if (witness.GetRegionConstraint(x, y).t == kNoRegionConstraint)
+            if (witness.GetRegionConstraint(x, y).type == kNoRegionConstraint)
             {
                 witness.AddRegionConstraint(x, y, constraint);
                 double e = GetCurrentEntropy(witness);
@@ -73,12 +73,14 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
     double ret = -1.0;
     if (gWithReplacement)
     {
-        for (unsigned i = 1; i < witness.pathConstraintLocations.size() - 1; ++i)
+        for (unsigned i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
         {
+            if (i == puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
+                continue;
             if (constraint == witness.pathConstraints[i])
             {
                 witness.pathConstraints[i] = kNoPathConstraint;
-                double e = GetCurrentEntropy(editor);
+                double e = GetCurrentEntropy(witness);
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -90,7 +92,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
             {
                 auto p = witness.pathConstraints[i];
                 witness.pathConstraints[i] = constraint;
-                double e = GetCurrentEntropy(editor);
+                double e = GetCurrentEntropy(witness);
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -102,12 +104,14 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
     }
     else
     {
-        for (unsigned i = 1; i < witness.pathConstraintLocations.size() - 1; ++i)
+        for (unsigned i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
         {
+            if (i == puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
+                continue;
             if (witness.pathConstraints[i] == kNoPathConstraint)
             {
                 witness.pathConstraints[i] = constraint;
-                double e = GetCurrentEntropy(editor);
+                double e = GetCurrentEntropy(witness);
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -197,6 +201,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 else
                                     witness.pathConstraints[i] = constraint;
                                 double e = MaximizedEntropy(constraint);
+                                std::cout << "location: " << i << std::endl;
                                 std::cout << "max entropy: "
                                     << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
@@ -211,7 +216,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     }
     case 1:
     {
-        if (e == kMouseDown)
+        if (e == kMouseDown && viewport == cursorViewport)
         {
             bool selected = false;
             for (unsigned i = 0; i < gRegionConstraintItems.size(); i++)
@@ -241,7 +246,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                     selected = true;
                     double e = MaximizedEntropy(gPathConstraintItems[i].constraint);
                     std::cout << "max entropy: "
-                        << ((e == inf) ? "inf" : to_string_with_precision(e, 2))  << std::endl;
+                        << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                     break;
                 }
             }
