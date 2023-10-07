@@ -13,7 +13,7 @@
 
 static inline bool CompareSC(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
 {
-    return a.t == kSeparation && b.t == kSeparation && a != b;
+    return a.type == kSeparation && b.type == kSeparation && a != b;
 }
 
 template<int width, int height>
@@ -174,13 +174,13 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
         if (currX > 0)
         {
             auto constraint = env.GetRegionConstraint(currX - 1, currY);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX - 1, currY);
         }
         if (currX < width)
         {
             auto constraint = env.GetRegionConstraint(currX, currY);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY);
         }
         break;
@@ -190,13 +190,13 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
         if (currY > 0)
         {
             auto constraint = env.GetRegionConstraint(currX, currY - 1);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY - 1);
         }
         if (currY < height)
         {
             auto constraint = env.GetRegionConstraint(currX, currY);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY);
         }
         break;
@@ -206,13 +206,13 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
         if (currX > 0)
         {
             auto constraint = env.GetRegionConstraint(currX - 1, currY - 1);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX - 1, currY - 1);
         }
         if (currX < width)
         {
             auto constraint = env.GetRegionConstraint(currX, currY - 1);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY - 1);
         }
         break;
@@ -222,13 +222,13 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
         if (currY > 0)
         {
             auto constraint = env.GetRegionConstraint(currX - 1, currY - 1);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX - 1, currY - 1);
         }
         if (currY < height)
         {
             auto constraint = env.GetRegionConstraint(currX - 1, currY);
-            if (constraint.t == kTriangle && constraint.parameter == num)
+            if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX - 1, currY);
         }
         break;

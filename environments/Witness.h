@@ -189,23 +189,164 @@ enum WitnessRegionConstraintType {
     kRegionConstraintCount = 7
 };
 
+/**
+ * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.proto#L45
+ */
+static inline std::ostream& operator<<(std::ostream &os, const rgbColor &color)
+{
+    os << std::quoted("color") << ": ";
+    if (color == Colors::black)
+        os << "1";
+    else if (color == Colors::white)
+        os << "2";
+    else if (color == Colors::cyan)
+        os << "3";
+    else if (color == Colors::magenta)
+        os << "4";
+    else if (color == Colors::yellow)
+        os << "5";
+    else if (color == Colors::red)
+        os << "6";
+    else if (color == Colors::green)
+        os << "7";
+    else if (color == Colors::blue)
+        os << "8";
+    else
+        os << "0";
+    return os;
+}
+
 struct WitnessRegionConstraint {
-    WitnessRegionConstraintType t;
+    WitnessRegionConstraintType type;
     int parameter{};
-    rgbColor c;
+    rgbColor color;
 
     bool operator==(const WitnessRegionConstraint &a) const
     {
-        return a.t == this->t && a.parameter == this->parameter && a.c == this->c;
+        return a.type == this->type && a.parameter == this->parameter && a.color == this->color;
     }
     bool operator!=(const WitnessRegionConstraint &a) const
     {
         return !(*this == a);
     }
+
+    /**
+     * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.proto#L3
+     */
     operator std::string() const
     {
         std::stringstream ss;
-        ss << "{\"type\":" << t << ",\"param\":" << parameter << ",\"color\":\"" << c.hex() << "\"}";
+        ss << "{";
+        switch (type) {
+            case kSeparation:
+            {
+                ss << std::quoted("type") << ": 7, " << color;
+                break;
+            }
+            case kStar:
+            {
+                ss << std::quoted("type") << ": 8" << color;
+                break;
+            }
+            case kTetris:
+            case kNegativeTetris:
+            {
+                ss << std::quoted("type") << ": 9, "
+                    << std::quoted("shape") << ": {"
+                    << std::quoted("width") << ": ";
+                switch (parameter)
+                {
+                    case 1:
+                        ss << 1 << ", " << std::quoted("grid") << ": [true]";
+                        break;
+                    case 2:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, true]";
+                        break;
+                    case 3:
+                        ss << 1 << ", " << std::quoted("grid") << ": [true, true]";
+                        break;
+                    case 4:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, true, true, false]";
+                        break;
+                    case 5:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, true, false, true]";
+                        break;
+                    case 6:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, false, true, true]";
+                        break;
+                    case 7:
+                        ss << 2 << ", " << std::quoted("grid") << ": [false, true, true, true]";
+                        break;
+                    case 8:
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, true, true]";
+                        break;
+                    case 9:
+                        ss << 1 << ", " << std::quoted("grid") << ": [true, true, true]";
+                        break;
+                    case 10:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, true, true, true]";
+                        break;
+                    case 11:
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, true, true, true, false, false]";
+                        break;
+                    case 12:
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, false, false, true, true, true]";
+                        break;
+                    case 13:
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, true true, false, false, true]";
+                        break;
+                    case 14:
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, true, true, true, false, false]";
+                        break;
+                    case 15:
+                        ss << 2 << "," << std::quoted("grid") << ": [true, true, true, false, true, false]";
+                        break;
+                    case 16:
+                        ss << 2 << "," << std::quoted("grid") << ": [true, true, false, true, false, true]";
+                        break;
+                    case 17:
+                        ss << 2 << "," << std::quoted("grid") << ": [true, false, true, false, true, true]";
+                        break;
+                    case 18:
+                        ss << 2 << "," << std::quoted("grid") << ": [false, true, false, true, true, true]";
+                        break;
+                    case 19:
+                        ss << 4 << ", " << std::quoted("grid") << ": [true, true, true, true]";
+                        break;
+                    case 20:
+                        ss << 1 << ", " << std::quoted("grid") << ": [true, true, true, true]";
+                        break;
+                    case 21:
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, true, true, false, true, false]";
+                        break;
+                    case 22:
+                        ss << 3 << ", " << std::quoted("grid") << ": [false, true, false, true, true, true]";
+                        break;
+                    case 23:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, false, true, true, true, false]";
+                        break;
+                    case 24:
+                        ss << 2 << ", " << std::quoted("grid") << ": [true, false, true, true, true, false]";
+                        break;
+                    default:
+                        ss << 0;
+                        break;
+                }
+                if (type == kNegativeTetris)
+                    ss << std::quoted("negate") << ": true";
+                ss << "}";
+                break;
+            }
+            case kTriangle:
+            {
+                ss << std::quoted("type") << ": 11, "
+                    << std::quoted("triangle_count") << ": " << parameter;
+                break;
+            }
+            default:
+                break;
+        }
+        ss << "}";
         return ss.str();
     }
 };
@@ -325,7 +466,7 @@ public:
         {
             for (int y = 0; y < height; y++)
             {
-                regionConstraints[x][y].t = kNoRegionConstraint;
+                regionConstraints[x][y].type = kNoRegionConstraint;
                 Graphics::point p1 = GetScreenCoord(x, y);
                 Graphics::point p2 = GetScreenCoord(x + 1, y + 1);
                 Graphics::point p3 = (p1 + p2) * 0.5;
@@ -525,7 +666,7 @@ public:
         {
             for (int y = 0; y < height; y++)
             {
-                regionConstraints[x][y].t = kNoRegionConstraint;
+                regionConstraints[x][y].type = kNoRegionConstraint;
             }
         }
         for (int c = 0; c < kRegionConstraintCount; c++)
@@ -539,10 +680,10 @@ public:
         {
             for (int y = 0; y < height; y++)
             {
-                if (t == regionConstraints[x][y].t)
+                if (t == regionConstraints[x][y].type)
                 {
                     constraintCount[t]--;
-                    regionConstraints[x][y].t = kNoRegionConstraint;
+                    regionConstraints[x][y].type = kNoRegionConstraint;
                     constraintCount[kNoRegionConstraint]++;
                 }
             }
@@ -551,9 +692,9 @@ public:
 
     void RemoveRegionConstraint(int x, int y)
     {
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kNoRegionConstraint]++;
-        regionConstraints[x][y].t = kNoRegionConstraint;
+        regionConstraints[x][y].type = kNoRegionConstraint;
     }
 
     /* Triangles - must cross as many edges as triangles */
@@ -573,11 +714,11 @@ public:
             return;
         }
         assert(count >= 1 && count <= 3);
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kTriangle]++;
-        regionConstraints[x][y].t = kTriangle;
+        regionConstraints[x][y].type = kTriangle;
         regionConstraints[x][y].parameter = count;
-        regionConstraints[x][y].c = triangleColor;
+        regionConstraints[x][y].color = triangleColor;
     }
 
     //	{ triangleCount++; triangleConstraints[y*width+x] = count; }
@@ -596,10 +737,10 @@ public:
     //	constexpr int GetNumSeparationConstraints() const { return width*height; }
     void AddSeparationConstraint(int x, int y, rgbColor c)
     {
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kSeparation]++;
-        regionConstraints[x][y].t = kSeparation;
-        regionConstraints[x][y].c = c;
+        regionConstraints[x][y].type = kSeparation;
+        regionConstraints[x][y].color = c;
     }
 
     //	{ auto &i = separationConstraints[y*width+x]; i.color = c; i.valid = true; separationCount++;}
@@ -619,10 +760,10 @@ public:
 
     void AddEraserConstraint(int x, int y)
     {
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kSeparation]++;
-        regionConstraints[x][y].t = kEraser;
-        regionConstraints[x][y].c = Colors::white;
+        regionConstraints[x][y].type = kEraser;
+        regionConstraints[x][y].color = Colors::white;
     }
 
     //	{ auto &i = separationConstraints[y*width+x]; i.color = c; i.valid = true; separationCount++;}
@@ -699,20 +840,20 @@ public:
     void AddNegativeTetrisConstraint(int x, int y, int which)
     {
         assert(which >= 1);
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kNegativeTetris]++;
-        regionConstraints[x][y].t = kNegativeTetris;
-        regionConstraints[x][y].c = tetrisBlue;
+        regionConstraints[x][y].type = kNegativeTetris;
+        regionConstraints[x][y].color = tetrisBlue;
         regionConstraints[x][y].parameter = which;
     }
 
     void AddTetrisConstraint(int x, int y, int which)
     {
         assert(which >= 1);
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kTetris]++;
-        regionConstraints[x][y].t = kTetris;
-        regionConstraints[x][y].c = tetrisYellow;
+        regionConstraints[x][y].type = kTetris;
+        regionConstraints[x][y].color = tetrisYellow;
         regionConstraints[x][y].parameter = which;
     }
 
@@ -782,10 +923,10 @@ public:
             printf("(%d, %d) out of bounds\n", x, y);
             return;
         }
-        constraintCount[regionConstraints[x][y].t]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kStar]++;
-        regionConstraints[x][y].t = kStar;
-        regionConstraints[x][y].c = c;
+        regionConstraints[x][y].type = kStar;
+        regionConstraints[x][y].color = c;
     }
 
     void AddStarConstraint(int which, rgbColor c)
@@ -795,13 +936,13 @@ public:
 
     void AddRegionConstraint(int x, int y, const WitnessRegionConstraint &constraint)
     {
-        switch (constraint.t)
+        switch (constraint.type)
         {
             case kSeparation:
-                AddSeparationConstraint(x, y, constraint.c);
+                AddSeparationConstraint(x, y, constraint.color);
                 break;
             case kStar:
-                AddStarConstraint(x, y, constraint.c);
+                AddStarConstraint(x, y, constraint.color);
                 break;
             case kTetris:
                 AddTetrisConstraint(x, y, constraint.parameter);
@@ -831,192 +972,119 @@ public:
     // value is hte index in the goal array+1 (0 index means no goal)
     std::array<int, (width + 1) * (height + 1)> goalMap;
     //	const int kStartX = 0, kStartY = 0;
-
+    
+    void BuildLocationMap(std::array<std::pair<unsigned, unsigned>, (GetNumPathConstraints() + width * height)> &map) const
+    {
+        for (auto y = height; y >= 0; --y)
+        {
+            for (auto x = 0; x <= width; ++x)
+            {
+                auto p = width * (height + 1) + (width + 1) * height + (width + 1) * y + x;
+                auto loc = (height - y) * (width * 2 + 1) * 2 + x * 2;
+                map[loc] = std::pair<unsigned, unsigned>(0, p);
+            }
+        }
+        for (auto y = height - 1; y >= 0; --y)
+        {
+            for (auto x = 0; x <= width; ++x)
+            {
+                auto p = width * (height + 1) + x * height + y;
+                auto loc = ((height - y) * 2 - 1) * (width * 2 + 1) + x * 2;
+                map[loc] = std::pair<unsigned, unsigned>(0, p);
+            }
+        }
+        for (auto y = height; y >= 0; --y)
+        {
+            for (auto x = 0; x < width; ++x)
+            {
+                auto p = width * y + x;
+                auto loc = (height - y) * (width * 2 + 1) * 2 + x * 2 + 1;
+                map[loc] = std::pair<unsigned, unsigned>(0, p);
+            }
+        }
+        for (auto y = height - 1; y >= 0; --y)
+        {
+            for (auto x = 0; x < width; ++x)
+            {
+                auto p = width * y + x;
+                auto loc = ((height - y) * 2 - 1) * (width * 2 + 1) + x * 2 + 1;
+                map[loc] = std::pair<unsigned, unsigned>(1, p);
+            }
+        }
+        for (const auto &s: start)
+        {
+            auto p = width * (height + 1) + (width + 1) * height + (width + 1) * s.second + s.first;
+            auto loc = (height - s.second) * (width * 2 + 1) * 2 + s.first * 2;
+            map[loc] = std::pair<unsigned, unsigned>(2, p);
+        }
+        for (const auto &g: goal)
+        {
+            auto x = g.first;
+            auto y = g.second;
+            if (x > width) x = width;
+            if (x < 0) x = 0;
+            if (y > height) y = height;
+            if (y < 0) y = 0;
+            auto p = width * (height + 1) + (width + 1) * height + (width + 1) * y + x;
+            auto loc = (height - y) * (width * 2 + 1) * 2 + x * 2;
+            map[loc] = std::pair<unsigned, unsigned>(3, p);
+        }
+    }
+    
+    /**
+     * Simulate the conversion from the protobuf of The Windmill to JSON
+     * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.js
+     * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.proto
+     */
     operator std::string() const
     {
         std::stringstream ss;
-        ss << "{\"width\":" << width << ", \"height\":" << height << ", \"start\":[";
-        for (const auto &s: start)
+        ss << "{" << std::quoted("width") << ": " << width * 2 + 1 << ", "
+            << std::quoted("symmetry") << ": 0" << ", "
+            << std::quoted("entity") << ": [";
+        std::array<std::pair<unsigned, unsigned>, (GetNumPathConstraints() + width * height)> locationMap;
+        BuildLocationMap(locationMap);
+        for (auto i = 0; i < locationMap.size(); ++i)
         {
-            ss << "{\"x\":" << s.first << ", \"y\":" << s.second << "}";
-            if (&s != &start.back())
-                ss << ",";
-        }
-        ss << "], \"goal\":[";
-        for (const auto &g: goal)
-        {
-            ss << "{\"x\":" << g.first << ", \"y\":" << g.second << "}";
-            if (&g != &goal.back())
-                ss << ",";
-        }
-        ss << "], \"constraints\":{\"regionConstraints\":[";
-        unsigned count = std::accumulate(constraintCount.begin() + 1, constraintCount.end(), 0);
-        for (unsigned x = 0; x < width; ++x)
-        {
-            for (unsigned y = 0; y < height; ++y)
-            {
-                const WitnessRegionConstraint &constraint = regionConstraints[x][y];
-                if (constraint.t != kNoRegionConstraint)
-                {
-                    ss << "{\"x\":" << x << ",\"y\":" << y
-                        << ",\"constraint\":" << std::string(constraint) << "}";
-                    if (count > 1)
-                    {
-                        ss << ",";
-                        --count;
+            const auto &loc = locationMap[i];
+            std::stringstream ess;
+            switch (loc.first) {
+                case 0: // path constraints
+                    switch (pathConstraints[loc.second]) {
+                        case kCannotCross:
+                        {
+                            ess << "{" << std::quoted("type") << ": 5}";
+                            break;
+                        }
+                        case kMustCross:
+                        {
+                            ess << "{" << std::quoted("type") << ": 6}";
+                            break;
+                        }
+                        default:
+                            ess << "{}";
+                            break;
                     }
-                }
+                    break;
+                case 1: // region constrains
+                    ess << std::string(GetRegionConstraint(GetRegionFromX(loc.second),
+                                                       GetRegionFromY(loc.second)));
+                    break;
+                case 2: // start
+                    ess << "{" << std::quoted("type") << ": 3}";
+                    break;
+                case 3: // end
+                    ess << "{" << std::quoted("type") << ": 4}";
+                    break;
+                default:
+                    break;
             }
-        }
-        ss << "], \"pathConstraints\":[";
-        count = std::accumulate(pathConstraints.begin(), pathConstraints.end(), 0, [&](int c, WitnessPathConstraintType t) {
-            if (t != kNoPathConstraint)
-                return c + 1;
-            return c;
-        });
-        for (unsigned i = 0; i < pathConstraints.size(); ++i)
-        {
-            PathLocation p = GetPathLocation(i);
-            if (pathConstraints[i] != 0)
-            {
-                ss << "{\"locationType\":" << p.t << ",\"x\":" << p.x << ",\"y\":" << p.y
-                    << ",\"constraint\":" << pathConstraints[i] << "}";
-                if (count > 1)
-                {
-                    ss << ",";
-                    --count;
-                }
-            }
+            ss << ess.str();
+            if (i < locationMap.size() - 1)
+                ss << ",";
         }
         ss << "]}";
-        ss << "}";
         return ss.str();
-    }
-
-    std::ostream& Serialize(std::ostream &os) const
-    {
-        return os << std::string(*this);
-    }
-
-    std::istream& Deserialize(std::istream &is)
-    {
-        std::string input((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-        std::regex wh("\"width\":\\s*(\\d+),\\s*\"height\":\\s*(\\d+)");
-        std::smatch match;
-        if (!std::regex_search(input, match, wh))
-        {
-            std::cerr << "incorrect string" << std::endl;
-            return is;
-        }
-        int w = std::stoi(match[1].str());
-        int h = std::stoi(match[2].str());
-        if (w != width || h != height)
-        {
-            std::cerr << "unmatched width and height" << std::endl;
-            return is;
-        }
-        std::regex regStart("\"start\":\\s*\\[(\\{\"x\":\\s*\\d+,\\s*\"y\":\\s*\\d+\\})*\\],");
-        if (!std::regex_search(input, match, regStart))
-        {
-            std::cerr << "incorrect string" << std::endl;
-            return is;
-        }
-        std::regex regXy("\"x\":\\s*(\\d+),\\s*\"y\":\\s*(\\d+)");
-        for (size_t i = 1; i < match.size(); ++i)
-        {
-            std::string s = match[i].str();
-            std::smatch nums;
-            std::regex_search(s, nums, regXy);
-            int x = std::stoi(nums[1].str());
-            int y = std::stoi(nums[2].str());
-            if (std::find(start.begin(), start.end(), std::pair<int, int>{x, y}) == start.end())
-                AddStart(x, y);
-        }
-        std::regex regGoal("\"goal\":\\s*\\[(\\{\"x\":\\s*\\d+,\\s*\"y\":\\s*\\d+\\})*\\],");
-        if (!std::regex_search(input, match, regGoal))
-        {
-            std::cerr << "incorrect string" << std::endl;
-            return is;
-        }
-        for (size_t i = 1; i < match.size(); ++i)
-        {
-            std::string s = match[i].str();
-            std::smatch nums;
-            std::regex_search(s, nums, regXy);
-            int x = std::stoi(nums[1].str());
-            int y = std::stoi(nums[2].str());
-            if (std::find(goal.begin(), goal.end(), std::pair<int, int>{x, y}) == goal.end())
-                AddGoal(x, y);
-        }
-        std::regex regConstraints("\"constraints\":\\s*\\{\"regionConstraints\":\\s*\\[(.*)\\],\\s*\"pathConstraints\":\\[(.*)\\]\\}");
-        if (!std::regex_search(input, match, regConstraints))
-        {
-            std::cerr << "incorrect string" << std::endl;
-            return is;
-        }
-        std::string rc = match[1].str();
-        std::string pc = match[2].str();
-        std::regex regRegionConstraint("\\{\"x\":\\s*(\\d+),\\s*\"y\":\\s*(\\d+),\\s*\"constraint\":\\s*\\{\"type\":\\s*(\\d),\\s*\"param\":\\s*(\\d),\\s*\"color\":\\s*\"(#[a-fA-F0-9]{6})\"\\}");
-        auto begin = std::sregex_iterator(input.begin(), input.end(), regRegionConstraint);
-        auto end = std::sregex_iterator();
-        for (auto i = begin; i != end; ++i)
-        {
-            match = *i;
-            int x = std::stoi(match[1]);
-            int y = std::stoi(match[2]);
-            if (x >= width || y >= height)
-            {
-                std::cerr << "incorrect location type" << std::endl;
-                return is;
-            }
-            int type = std::stoi(match[3]);
-            if (type >= kRegionConstraintCount)
-            {
-                std::cerr << "incorrect region constraint type" << std::endl;
-                return is;
-            }
-            int param = std::stoi(match[4]);
-            rgbColor color;
-            color.hex(match[5].str().c_str());
-            WitnessRegionConstraint c;
-            c.t = static_cast<WitnessRegionConstraintType>(type);
-            c.parameter = param;
-            c.c = color;
-            AddRegionConstraint(x, y, c);
-        }
-        std::regex regPathConstraint("\\{\"locationType\":\\s*(\\d),\\s*\"x\":\\s*(\\d),\\s*\"y\":\\s*(\\d),\\s*\"constraint\":\\s*(\\d)\\}");
-        begin = std::sregex_iterator(input.begin(), input.end(), regPathConstraint);
-        for (auto i = begin; i != end; ++i)
-        {
-            match = *i;
-            int locationType = std::stoi(match[1]);
-            if (locationType != 0 && locationType != 1 && locationType != 2)
-            {
-                std::cerr << "incorrect location type" << std::endl;
-                return is;
-            }
-            int x = std::stoi(match[2]);
-            int y = std::stoi(match[3]);
-            if (x > width || y > height)
-            {
-                std::cerr << "incorrect location" << std::endl;
-                return is;
-            }
-            int c = std::stoi(match[4]);
-            if (c >= kPathConstraintCount)
-            {
-                std::cerr << "incorrect path constraint type" << std::endl;
-                return is;
-            }
-            int p = (locationType == 0) ? (x + y * width) :
-                ((locationType == 1) ? (width * (height + 1) + x * height + y) :
-                 (width * (height + 1) + (width + 1) * height + (width + 1) * y + x));
-            if (c == 1)
-                SetMustCrossConstraint(p);
-            if (c == 2)
-                SetCannotCrossConstraint(p);
-        }
-        return is;
     }
 
     std::string SaveToHashString() const
@@ -1821,7 +1889,7 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
         {
             for (int y = 0; y < height; y++)
             {
-                if (regionConstraints[x][y].t == kTriangle) // if (triangleConstraints[y*width+x] > 0)
+                if (regionConstraints[x][y].type == kTriangle) // if (triangleConstraints[y*width+x] > 0)
                 {
                     int count = node.OccupiedEdge(x, y, x, y + 1);
                     count += node.OccupiedEdge(x, y, x + 1, y);
@@ -1857,14 +1925,14 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
                 int y = GetRegionFromY(i); // l/width;
 
                 // if (separationConstraints[i].valid)
-                if (regionConstraints[x][y].t == kSeparation)
+                if (regionConstraints[x][y].type == kSeparation)
                 {
                     if (!found)
                     {
-                        c = regionConstraints[x][y].c; // separationConstraints[i].color;
+                        c = regionConstraints[x][y].color; // separationConstraints[i].color;
                         found = true;
                     }
-                    else if (c != regionConstraints[x][y].c) // separationConstraints[i].color)
+                    else if (c != regionConstraints[x][y].color) // separationConstraints[i].color)
                     {
                         return false;
                     }
@@ -1886,19 +1954,19 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
                 int y = GetRegionFromY(i); // l/width;
                 rgbColor finishedColor(1.0 / 512.0, 1.0 / 512.0, 1.0 / 512.0);
                 // if (separationConstraints[i].valid)
-                if (regionConstraints[x][y].t == kStar)
+                if (regionConstraints[x][y].type == kStar)
                 {
-                    if (regionConstraints[x][y].c == finishedColor) continue;
+                    if (regionConstraints[x][y].color == finishedColor) continue;
 
-                    finishedColor = regionConstraints[x][y].c; // separationConstraints[i].color;
+                    finishedColor = regionConstraints[x][y].color; // separationConstraints[i].color;
                     int count = 0;
                     for (auto &r: *v)
                     {
                         int xx = GetRegionFromX(r); // l%width;
                         int yy = GetRegionFromY(r); // l/width;
 
-                        if (regionConstraints[xx][yy].t != kNoRegionConstraint &&
-                            regionConstraints[x][y].c == regionConstraints[xx][yy].c)
+                        if (regionConstraints[xx][yy].type != kNoRegionConstraint &&
+                            regionConstraints[x][y].color == regionConstraints[xx][yy].color)
                         {
                             count++;
                             if (count > 2) return false;
@@ -1922,13 +1990,13 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
             tetrisBlockCount[x] = 0;
             for (auto l: v) // individual location
             {
-                if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].t == kTetris)
+                if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].type == kTetris)
                 {
                     int whichConstraint = regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].parameter;
                     int numPieces = tetrisSize[whichConstraint];
                     tetrisBlockCount[x] += numPieces;
                 }
-                else if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].t == kNegativeTetris)
+                else if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].type == kNegativeTetris)
                 {
                     int whichConstraint = regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].parameter;
                     int numPieces = tetrisSize[whichConstraint];
@@ -1963,12 +2031,12 @@ bool Witness<width, height>::GoalTest(const WitnessState<width, height> &node) c
                 // need to convert to 8x8 bitmaps space
                 board |= ((1ull << (7 - xx)) << ((7 - yy) * 8));
 
-                if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].t == kTetris)
+                if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].type == kTetris)
                 {
                     int whichConstraint = regionConstraints[xx][yy].parameter; // tetrisConstraints[l];
                     tetrisBlocksInRegion.push_back(whichConstraint);
                 }
-                if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].t == kNegativeTetris)
+                if (regionConstraints[GetRegionFromX(l)][GetRegionFromY(l)].type == kNegativeTetris)
                 {
                     int whichConstraint = regionConstraints[xx][yy].parameter; // tetrisConstraints[l];
                     tetrisBlocksInRegion.push_back(-whichConstraint);
@@ -2680,39 +2748,39 @@ template<int width, int height>
 void Witness<width, height>::DrawRegionConstraint(
         Graphics::Display &display, const WitnessRegionConstraint &constraint, const Graphics::point &p3) const
 {
-    switch (constraint.t)
+    switch (constraint.type)
     {
     case kNoRegionConstraint:
         break;
     case kSeparation:
     {
         Graphics::point delta = Graphics::point{lineWidth, lineWidth};
-        display.FillCircle(p3 + delta, lineWidth, constraint.c);
-        display.FillCircle(p3 - delta, lineWidth, constraint.c);
+        display.FillCircle(p3 + delta, lineWidth, constraint.color);
+        display.FillCircle(p3 - delta, lineWidth, constraint.color);
         delta.x = -delta.x;
-        display.FillCircle(p3 + delta, lineWidth, constraint.c);
-        display.FillCircle(p3 - delta, lineWidth, constraint.c);
+        display.FillCircle(p3 + delta, lineWidth, constraint.color);
+        display.FillCircle(p3 - delta, lineWidth, constraint.color);
         display.FillRect(
                 {p3.x - 1.0f * lineWidth, p3.y - 2.0f * lineWidth, p3.x + 1.0f * lineWidth,
                  p3.y + 2.0f * lineWidth},
-                constraint.c);
+                constraint.color);
         display.FillRect(
                 {p3.x - 2.0f * lineWidth, p3.y - 1.0f * lineWidth, p3.x + 2.0f * lineWidth,
                  p3.y + 1.0f * lineWidth},
-                constraint.c);
+                constraint.color);
         break;
     }
     case kStar:
     {
-        display.FillNGon(p3, gapOffset / 5.0f, 4, 0, constraint.c);
-        display.FillNGon(p3, gapOffset / 5.0f, 4, 45, constraint.c);
+        display.FillNGon(p3, gapOffset / 5.0f, 4, 0, constraint.color);
+        display.FillNGon(p3, gapOffset / 5.0f, 4, 45, constraint.color);
         break;
     }
     case kTetris:
     case kNegativeTetris:
     {
         int whichPiece = abs(constraint.parameter);
-        bool negative = constraint.t == kNegativeTetris; // constraint.parameter<0;
+        bool negative = constraint.type == kNegativeTetris; // constraint.parameter<0;
         if (whichPiece != 0)
         {
             float xOff = 0;
@@ -3133,18 +3201,6 @@ void Witness<width, height>::Draw(Graphics::Display &display, const InteractiveW
         Graphics::point p2 = GetScreenCoord(iws.ws.path.back().first, iws.ws.path.back().second);
         display.FillCircle(p2, lineWidth * 0.5f, lineColor);
     }
-}
-
-template<int width, int height>
-inline std::ostream& operator<<(std::ostream &os, const Witness<width, height> &witness)
-{
-  return witness.Serialize(os);
-}
-
-template<int width, int height>
-inline std::istream& operator>>(std::istream &is, Witness<width, height> &witness)
-{
-    return witness.Deserialize(is);
 }
 
 #endif // HOG2_ENVIRONMENTS_WITNESS_H

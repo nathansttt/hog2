@@ -80,12 +80,11 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Test", "Test constraints", kAnyModifier, 't');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Record", "Record a movie", kAnyModifier, 'r');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Save", "Save current puzzle as svg", kAnyModifier, 's');
-    InstallKeyboardHandler(
-        WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Print", "Print The Windmill Json representations", kAnyModifier, 'w');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Prev Board", "Jump to next found board.", kAnyModifier, '[');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next Board", "Jump to prev found board", kAnyModifier, ']');
-    InstallKeyboardHandler(
-        WitnessKeyboardHandler, "Prev 100 Board", "Jump to next 100 found board.", kAnyModifier, '{');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Prev 100 Board", "Jump to next 100 found board.", kAnyModifier, '{');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next 100 Board", "Jump to prev 100 found board", kAnyModifier, '}');
 
     InstallKeyboardHandler(WitnessKeyboardHandler, "Editor", "Open editor", kAnyModifier, 'e');

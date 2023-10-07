@@ -132,7 +132,7 @@ static void DrawGameViewport(unsigned long windowID)
                     display.DrawText((std::to_string(x) + ", " + std::to_string(y)).c_str(),
                                      Graphics::point{-0.57, 1}, Colors::black, 0.075,
                                      Graphics::textAlignLeft, Graphics::textBaselineBottom);
-                    if (editor.GetRegionConstraint(x, y).t == kNoRegionConstraint)
+                    if (editor.GetRegionConstraint(x, y).type == kNoRegionConstraint)
                         display.FrameRect(editor.regionConstraintLocations[gSuggestedLocation].second, Colors::green, 0.01);
                 }
                 else
@@ -141,7 +141,7 @@ static void DrawGameViewport(unsigned long windowID)
             }
             else
             {
-                for (unsigned i = 0; i < editor.pathConstraintLocations.size(); ++i)
+                for (unsigned i = 0; i < editor.pathConstraintLocations.size() - 1; ++i)
                 {
                     const auto &location = editor.pathConstraintLocations[i];
                     if (PointInRect(cursor, location.second) &&
@@ -293,7 +293,7 @@ static void DrawTetrisPiecesViewport(unsigned long windowID)
     for (const auto &item: gTetrisPieces)
     {
         WitnessRegionConstraintType t = (selectTetrisPiece == 2) ? kNegativeTetris : kTetris;
-        WitnessRegionConstraint constraint = {.t = t, .parameter = item.parameter, .c = Colors::white};
+        WitnessRegionConstraint constraint = {.type = t, .parameter = item.parameter, .color = Colors::white};
         editor.DrawRegionConstraint(display, constraint, item.c);
         if (cursorViewport == 2 && PointInRect(cursor, {item.c, item.radius}))
         {

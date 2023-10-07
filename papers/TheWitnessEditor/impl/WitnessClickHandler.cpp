@@ -178,6 +178,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 else
                                     witness.AddRegionConstraint(x, y, constraint);
                                 double e = MaximizedEntropy(constraint);
+                                std::cout << "location: " << i << std::endl;
                                 std::cout << "max entropy: "
                                     << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
@@ -191,11 +192,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             if (PointInRect(p, witness.pathConstraintLocations[i].second) &&
                                 i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                             {
-                                printf("Selected Location: %d\n", i);
                                 WitnessPathConstraintType constraint =
                                         gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                                 .constraint;
-                                printf("Selected Constraint: %d\n", constraint);
                                 if (constraint == editor.pathConstraints[i])
                                     witness.pathConstraints[i] = kNoPathConstraint;
                                 else
@@ -257,9 +256,8 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 {
                     gSelectedColor = i;
                     selectColor = true;
-                    printf("Selected Color: %d\n", gSelectedColor);
-                    gRegionConstraintItems[0].constraint.c = gProvidedColors[i].color;
-                    gRegionConstraintItems[1].constraint.c = gProvidedColors[i].color;
+                    gRegionConstraintItems[0].constraint.color = gProvidedColors[i].color;
+                    gRegionConstraintItems[1].constraint.color = gProvidedColors[i].color;
                     break;
                 }
             }

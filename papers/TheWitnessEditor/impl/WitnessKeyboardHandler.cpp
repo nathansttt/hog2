@@ -40,6 +40,13 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         std::cout << "Saved to " << path << std::endl;
         break;
     }
+    case 'w':
+    {
+        auto str = std::string(witness);
+        std::cout << str;
+        submitTextToBuffer(str.c_str());
+        break;
+    }
     case 'r':
     {
         iws.Reset();

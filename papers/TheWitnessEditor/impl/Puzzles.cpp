@@ -124,8 +124,8 @@ void k87fxsr()
     witness.AddSeparationConstraint(1, 1, Colors::yellow);
     witness.AddSeparationConstraint(2, 1, Colors::yellow);
 
-    witness.AddSeparationConstraint(1, 2, Colors::lightgray);
-    witness.AddSeparationConstraint(2, 2, Colors::lightgray);
+    witness.AddSeparationConstraint(1, 2, Colors::green);
+    witness.AddSeparationConstraint(2, 2, Colors::green);
 
     witness.AddSeparationConstraint(3, 0, Colors::magenta);
     witness.AddSeparationConstraint(3, 3, Colors::magenta);
