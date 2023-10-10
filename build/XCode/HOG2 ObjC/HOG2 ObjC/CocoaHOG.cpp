@@ -55,6 +55,17 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 }
 
 char *textBuffer = 0;
+bool bufferVisibility = true;
+
+void setTextBufferVisibility(bool visible)
+{
+	bufferVisibility = visible;
+}
+
+bool getTextBufferVisibility()
+{
+	return bufferVisibility;
+}
 
 void submitTextToBuffer(const char *val)
 {

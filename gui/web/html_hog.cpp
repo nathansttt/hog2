@@ -622,6 +622,16 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 
 char *textBuffer = 0;
 
+void setTextBufferVisibility(bool)
+{
+#warning "text buffer visibility flag not implemented"
+}
+
+bool getTextBufferVisibility()
+{
+	return true;
+}
+
 void submitTextToBuffer(const char *val)
 {
 	if (val)

@@ -341,6 +341,8 @@ void SetZoom(int windowID, float amount);
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(const char *);
 const char *getTextBuffer();
+void setTextBufferVisibility(bool);
+bool getTextBufferVisibility();
 pRecContext getCurrentContext();
 pRecContext GetContext(unsigned long windowID);
 void updateModelView(pRecContext pContextInfo, int currPort);
