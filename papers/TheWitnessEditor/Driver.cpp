@@ -105,6 +105,9 @@ void InstallHandlers()
 
 int main(int argc, char *argv[])
 {
+#ifndef __EMSCRIPTEN__
+    setTextBufferVisibility(false);
+#endif
     InitTetrisPieces();
     GetAllSolutions(allSolutions);
     InitPuzzle();

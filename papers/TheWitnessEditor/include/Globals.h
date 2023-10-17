@@ -30,6 +30,7 @@ extern double gEntropy;
 extern unsigned gLookahead;
 extern bool gWithReplacement;
 extern unsigned gSuggestedLocation;
+extern unsigned gSolutionIndex;
 
 struct RegionConstraintItem {
     WitnessRegionConstraint constraint;

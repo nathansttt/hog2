@@ -6,6 +6,8 @@
 #include "SVGUtil.h"
 #include "WitnessInferenceRule.h"
 
+unsigned gSolutionIndex = 0;
+
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
     if (drawEditor && key != 'e' && key != 'x' && !std::isdigit(key)) return;
@@ -26,7 +28,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     {
         if (!currentSolutionIndices.empty())
         {
-            iws.ws = allSolutions[currentSolutionIndices[0]];
+            iws.ws = allSolutions[currentSolutionIndices[(gSolutionIndex++) % currentSolutionIndices.size()]];
             iws.currState = InteractiveWitnessState<puzzleWidth, puzzleHeight>::kWaitingRestart;
             solved = true;
         }
