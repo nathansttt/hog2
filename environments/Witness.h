@@ -972,7 +972,7 @@ public:
     // value is hte index in the goal array+1 (0 index means no goal)
     std::array<int, (width + 1) * (height + 1)> goalMap;
     //	const int kStartX = 0, kStartY = 0;
-    
+
     void BuildLocationMap(std::array<std::pair<unsigned, unsigned>, (GetNumPathConstraints() + width * height)> &map) const
     {
         for (auto y = height; y >= 0; --y)
@@ -1030,7 +1030,7 @@ public:
             map[loc] = std::pair<unsigned, unsigned>(3, p);
         }
     }
-    
+
     /**
      * Simulate the conversion from the protobuf of The Windmill to JSON
      * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.js
@@ -1225,10 +1225,10 @@ public:
                     rgbColor c;
                     c.hex(loc);
 
-                    constraintCount[regionConstraints[x][y].t]--;
-                    regionConstraints[x][y].t = static_cast<WitnessRegionConstraintType>(cType);
-                    constraintCount[regionConstraints[x][y].t]++;
-                    regionConstraints[x][y].c = c;
+                    constraintCount[regionConstraints[x][y].type]--;
+                    regionConstraints[x][y].type = static_cast<WitnessRegionConstraintType>(cType);
+                    constraintCount[regionConstraints[x][y].type]++;
+                    regionConstraints[x][y].color = c;
                     regionConstraints[x][y].parameter = param;
 
                     while (loc[0] != ',')
