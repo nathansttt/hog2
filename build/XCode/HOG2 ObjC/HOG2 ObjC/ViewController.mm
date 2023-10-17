@@ -77,9 +77,10 @@ const float FRAMERATE = 1.0f/30.0f;
 	if (getTextBuffer() != 0)
 	{
 		NSString *tmp = [NSString stringWithUTF8String:getTextBuffer()];
-		if ([tmp length] > 99)
-			tmp = [tmp substringToIndex:99];
+//		if ([tmp length] > 99)
+//			tmp = [tmp substringToIndex:99];
 		[messageField setStringValue:tmp];
+		[messageField setHidden:!getTextBufferVisibility()];
 	}
 }
 

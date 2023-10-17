@@ -786,6 +786,30 @@ void drawCStringGL (char * cstrOut, GLuint fontList)
 
 TextBox *myTextBox = 0;
 
+bool bufferVisibility = true;
+
+void setTextBufferVisibility(bool visible)
+{
+  bufferVisibility = visible;
+  if (bufferVisibility)
+    {
+      if (myTextBox == 0 && pContextInfo->message != 0)
+	{
+	  Graphics::point a(-.95, .95, -.95), b(.95, -.95, .95);
+	  rgbColor rc(1, 1, 1);
+	  myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
+	  myTextBox->setColor(rc);
+	}
+    }
+  else 
+  {
+    delete myTextBox;
+    myTextBox = 0;
+  }
+}
+bool getTextBufferVisibility()
+{ return bufferVisibility; }
+
 void appendTextToBuffer(const char *tempStr)
 {
 	int ind = int(strlen(pContextInfo->message));
@@ -793,20 +817,28 @@ void appendTextToBuffer(const char *tempStr)
 	snprintf(&pContextInfo->message[ind+1], 256-(ind+2), "%s", tempStr);
 
 	delete myTextBox;
+	myTextBox = 0;
 	Graphics::point a(-.95, .95, -.95), b(.95, -.95, .95);
 	rgbColor rc(1, 1, 1);
-	myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
-	myTextBox->setColor(rc);
+	if (bufferVisibility)
+	  {
+	    myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
+	    myTextBox->setColor(rc);
+	  }
 }
 
 void submitTextToBuffer(const char *val)
 {
 	strncpy(pContextInfo->message, val, 255);
 	delete myTextBox;
+	myTextBox = 0;
 	Graphics::point a(-.95, .95, -.95), b(.95, -.95, .95);
 	rgbColor rc(1, 1, 1);
-	myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
-	myTextBox->setColor(rc);
+	if (bufferVisibility)
+	  {
+	    myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
+	    myTextBox->setColor(rc);
+	  }
 }
 
 Graphics::point ViewportToScreen(Graphics::point where, int viewport)
