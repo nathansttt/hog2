@@ -82,6 +82,9 @@ const float FRAMERATE = 1.0f/30.0f;
 		[messageField setStringValue:tmp];
 		[messageField setHidden:!getTextBufferVisibility()];
 	}
+	else {
+		[messageField setHidden:!getTextBufferVisibility()];
+	}
 }
 
 -(tButtonType)getButton:(NSEvent *)event
