@@ -44,10 +44,19 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
     case 'w':
     {
-        auto str = std::string(witness);
-        std::cout << str;
-        submitTextToBuffer(str.c_str());
+        submitTextToBuffer(std::string(witness).c_str());
         break;
+    }
+    case 'l':
+    {
+#ifdef __EMSCRIPTEN__
+        auto str = std::string(getTextBuffer());
+        std::stringstream iss(str);
+        auto w = Witness<puzzleWidth, puzzleHeight>();
+        iss >> w;
+        witness = w;
+        break;
+#endif
     }
     case 'r':
     {

@@ -211,9 +211,107 @@ static inline std::ostream& operator<<(std::ostream &os, const rgbColor &color)
         os << "7";
     else if (color == Colors::blue)
         os << "8";
+    else if (color == Colors::orange)
+        os << "9";
     else
         os << "0";
     return os;
+}
+
+static inline const rgbColor& GetColorFromEnum(int t)
+{
+    switch (t) {
+        case 1:
+            return Colors::black;
+        case 2:
+            return Colors::white;
+        case 3:
+            return Colors::cyan;
+        case 4:
+            return Colors::magenta;
+        case 5:
+            return Colors::yellow;
+        case 6:
+            return Colors::red;
+        case 7:
+            return Colors::green;
+        case 8:
+            return Colors::blue;
+        default:
+            return Colors::orange;
+    }
+}
+
+static inline int GetTetrisParameterFromString(int width, const std::string &grid)
+{
+    switch (width) {
+        case 1:
+        {
+            if (grid == "[true]")
+                return 1;
+            if (grid == "[true,true]")
+                return 3;
+            if (grid == "[true,true,true]")
+                return 9;
+            if (grid == "[true,true,true,true]")
+                return 20;
+            return 0;
+        }
+        case 2:
+        {
+            if (grid == "[true,true]")
+                return 2;
+            if (grid == "[true,true,true,false]")
+                return 4;
+            if (grid == "[true,true,false,true]")
+                return 5;
+            if (grid == "[true,false,true,true]")
+                return 6;
+            if (grid == "[false,true,true,true]")
+                return 7;
+            if (grid == "[true,true,true,true]")
+                return 10;
+            if (grid == "[true,true,true,false,true,false]")
+                return 15;
+            if (grid == "[true,true,false,true,false,true]")
+                return 16;
+            if (grid == "[true,false,true,false,true,true]")
+                return 17;
+            if (grid == "[false,true,false,true,true,true]")
+                return 18;
+            if (grid == "[true,false,true,true,true,false]")
+                return 23;
+            if (grid == "[true,false,true,true,true,false]")
+                return 24;
+            return 0;
+        }
+        case 3:
+        {
+            if (grid == "[true,true,true]")
+                return 8;
+            if (grid == "[true,true,true,true,false,false]")
+                return 11;
+            if (grid == "[true,false,false,true,true,true]")
+                return 12;
+            if (grid == "[true,true,true,false,false,true]")
+                return 13;
+            if (grid == "[true,true,true,true,false,false]")
+                return 14;
+            if (grid == "[true,true,true,false,true,false]")
+                return 21;
+            if (grid == "[false,true,false,true,true,true]")
+                return 22;
+            return 0;
+        }
+        case 4:
+        {
+            if (grid == "[true,true,true,true]")
+                return 19;
+            return 0;
+        }
+        default:
+            return 0;
+    }
 }
 
 struct WitnessRegionConstraint {
@@ -293,7 +391,7 @@ struct WitnessRegionConstraint {
                         ss << 3 << ", " << std::quoted("grid") << ": [true, false, false, true, true, true]";
                         break;
                     case 13:
-                        ss << 3 << ", " << std::quoted("grid") << ": [true, true true, false, false, true]";
+                        ss << 3 << ", " << std::quoted("grid") << ": [true, true, true, false, false, true]";
                         break;
                     case 14:
                         ss << 3 << ", " << std::quoted("grid") << ": [true, true, true, true, false, false]";
@@ -1085,6 +1183,105 @@ public:
         }
         ss << "]}";
         return ss.str();
+    }
+
+    std::ostream& Serialize(std::ostream &os) const
+    {
+        return os << std::string(*this);
+    }
+
+    std::istream& Deserialize(std::istream &is)
+    {
+        std::string input((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+        std::regex w_r("\"width\":\\s*(\\d+)");
+        std::regex e_r("\"entity\":\\s*\\[(.*)\\]");
+        std::regex s_r("\"symmetry\":\\s*(\\d+)");
+        std::smatch w_match, e_match, s_match;
+        if (!(std::regex_search(input, w_match, w_r) &&
+              std::regex_search(input, s_match, s_r) &&
+              std::regex_search(input, e_match, e_r)))
+        {
+            throw std::invalid_argument("incorrect string");
+        }
+        int w = std::stoi(w_match[1].str());
+        if (w != (width * 2 + 1))
+        {
+            throw std::invalid_argument("unsupported size");
+        }
+        int symmetry = std::stoi(s_match[1].str());
+        if (symmetry != 0)
+        {
+            throw std::invalid_argument("unsupported symmetry");
+        }
+        std::regex es_r("\\{\"type\":\\s*(\\d+),\\s*\"color\":\\s*(\\d+),\\s*\"orientation\":\\s*(?:null|\\{\"horizontal\":\\s*\\d,\\s*\"vertical\":\\s*\\d\\}),\\s*\"shape\":\\s*(null|\\{\"width\":\\s*(\\d),\\s*\"grid\":\\s*(\\[(?:(?:true|false)\\s*,\\s*)*(?:true|false)?\\]),\\s*\"free\":\\s*(true|false),\\s*\"negative\":\\s*(true|false)\\}),\\s*\"count\":\\s*(\\d+),\\s*\"triangle_count\":\\s*(\\d+)\\}");
+        auto entities = e_match[1].str();
+        auto begin = std::sregex_iterator(entities.begin(), entities.end(), es_r);
+        auto end = std::sregex_iterator();
+        std::smatch match;
+        std::array<std::pair<unsigned, unsigned>, (GetNumPathConstraints() + width * height)> locationMap;
+        BuildLocationMap(locationMap);
+        unsigned count = 0;
+        for (auto i = begin; i != end; ++i)
+        {
+            match = *i;
+            int type = std::stoi(match[1].str());
+//            for (auto j = 0; j < match.size(); ++j)
+//                std::cout << j << ": " << match[j] << std::endl;
+            switch (type) {
+                case 3:
+                case 4: // only support single start and goal currently
+                {
+                    ++count;
+                    break;
+                }
+                case 5:
+                case 6:
+                {
+                    auto loc = locationMap[count++].second;
+                    (type == 5) ? SetCannotCrossConstraint(loc) : SetMustCrossConstraint(loc);
+                    break;
+                }
+                case 7:
+                {
+                    auto loc = locationMap[count++].second;
+                    AddSeparationConstraint(loc, GetColorFromEnum(std::stoi(match[2].str())));
+                    break;
+                }
+                case 8:
+                {
+                    auto loc = locationMap[count++].second;
+                    AddStarConstraint(loc, GetColorFromEnum(std::stoi(match[2].str())));
+                    break;
+                }
+                case 9:
+                {
+                    auto loc = locationMap[count++].second;
+                    int param = GetTetrisParameterFromString(std::stoi(match[4].str()), match[5].str());
+                    if (param >= 1)
+                        (match[7].str() == "false") ? AddTetrisConstraint(loc, param) : AddNegativeTetrisConstraint(loc, param);
+                    break;
+                }
+                case 11:
+                {
+                    auto loc = locationMap[count++].second;
+                    AddTriangleConstraint(loc, std::stoi(match[9].str()));
+                    break;
+                }
+                case 0:
+                case 1:
+                case 2:
+                case 10:
+                default: // empty
+                {
+                    int c = std::stoi(match[8].str());
+                    if (c == 0)
+                        c = 1;
+                    count += c;
+                    break;
+                }
+            }
+        }
+        return is;
     }
 
     std::string SaveToHashString() const
@@ -2217,8 +2414,7 @@ bool Witness<width, height>::GetMustCrossConstraint(
 }
 
 template<int width, int height>
-void Witness<width, height>::AddMustCrossConstraint(bool horiz, int x,
-                                                    int y) // { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
+void Witness<width, height>::AddMustCrossConstraint(bool horiz, int x, int y) // { mustCrossEdgeConstraints.push_back({horiz, {x, y}});}
 {
     if (horiz)
         SetMustCrossConstraint(y * width + x);
@@ -2259,8 +2455,7 @@ void Witness<width, height>::AddMustCrossConstraint(int which) // { mustCrossCon
 }
 
 template<int width, int height>
-void Witness<width, height>::RemoveMustCrossConstraint(bool horiz, int x,
-                                                       int y) // { mustCrossEdgeConstraints.pop_back();}
+void Witness<width, height>::RemoveMustCrossConstraint(bool horiz, int x, int y) // { mustCrossEdgeConstraints.pop_back();}
 {
     if (horiz)
         RemoveMustCrossConstraint(y * width + x);
@@ -3201,6 +3396,18 @@ void Witness<width, height>::Draw(Graphics::Display &display, const InteractiveW
         Graphics::point p2 = GetScreenCoord(iws.ws.path.back().first, iws.ws.path.back().second);
         display.FillCircle(p2, lineWidth * 0.5f, lineColor);
     }
+}
+
+template<int width, int height>
+inline std::ostream& operator<<(std::ostream &os, const Witness<width, height> &witness)
+{
+  return witness.Serialize(os);
+}
+
+template<int width, int height>
+inline std::istream& operator>>(std::istream &is, Witness<width, height> &witness)
+{
+    return witness.Deserialize(is);
 }
 
 #endif // HOG2_ENVIRONMENTS_WITNESS_H

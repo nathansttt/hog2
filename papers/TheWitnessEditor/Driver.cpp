@@ -80,7 +80,10 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Test", "Test constraints", kAnyModifier, 't');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Record", "Record a movie", kAnyModifier, 'r');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Save", "Save current puzzle as svg", kAnyModifier, 's');
+#ifdef __EMSCRIPTEN__
     InstallKeyboardHandler(WitnessKeyboardHandler, "Print", "Print The Windmill Json representations", kAnyModifier, 'w');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Load", "Load The Windmill Json representations", kAnyModifier, 'l');
+#endif
     InstallKeyboardHandler(WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Prev Board", "Jump to next found board.", kAnyModifier, '[');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next Board", "Jump to prev found board", kAnyModifier, ']');
