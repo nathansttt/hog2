@@ -165,6 +165,21 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
 }
 
 template<int width, int height>
+ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
+                                WitnessState<width, height> &state, const WitnessAction &action)
+{
+    if (state.path.empty())
+        return UNKNOWN;
+    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
+    witness->ApplyAction(state, action);
+    bool regionSatisfied = true;
+    if (state.HitTheWall())
+        regionSatisfied = witness->RegionTest(state);
+    witness->UndoAction(state, action);
+    return regionSatisfied ? UNKNOWN : CANNOT_TAKE;
+}
+
+template<int width, int height>
 static void GetTriangles(const Witness<width, height> &env, const WitnessState<width, height> &state,
                          const WitnessAction &action, unsigned num, std::vector<std::pair<int, int>> &pos)
 {
@@ -279,6 +294,7 @@ enum WitnessInferenceRule {
     kSeparationRule,
     kPathConstraintRule,
     kTowardsGoalRule,
+    kRegionCompletionRule,
     kOneTriangleRule,
 //    kTwoTrianglesRule,
 //    kThreeTrianglesRule,
@@ -295,6 +311,8 @@ inline std::ostream &operator<<(std::ostream &os, WitnessInferenceRule wir)
         return os << "PathConstraintRule";
     case kTowardsGoalRule:
         return os << "TowardsGoalRule";
+    case kRegionCompletionRule:
+        return os << "RegionCompletionRule";
     case kOneTriangleRule:
         return os << "OneTriangleRule";
     default:
@@ -311,6 +329,7 @@ witnessInferenceRules =
     {kSeparationRule,       std::function(SeparationRule<width, height>) },
     {kPathConstraintRule,   std::function(PathConstraintRule<width, height>) },
     {kTowardsGoalRule,      std::function(TowardsGoalRule<width, height>) },
+    {kRegionCompletionRule, std::function(RegionCompletionRule<width, height>) },
     {kOneTriangleRule,      std::function(OneTriangleRule<width, height>) },
 };
 

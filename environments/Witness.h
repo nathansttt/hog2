@@ -84,7 +84,7 @@ public:
         // AddCannotCrossConstraint(x, y);
     }
 
-    bool isAlongTheWall() const
+    bool IsAlongTheWall() const
     {
         if (path.size() < 2)
             return false;
@@ -94,7 +94,7 @@ public:
             ((currPos.second == 0 || currPos.second == height) && currPos.second == prevPos.second);
     }
 
-    bool hitTheWall() const
+    bool HitTheWall() const
     {
         if (path.size() <= 1)
             return false;
@@ -128,6 +128,16 @@ public:
     {
         return path.back().first < 0 || path.back().first > width ||
             path.back().second < 0 || path.back().second > height;
+    }
+
+    bool ShareThePath(const WitnessState<width, height> &state)
+    {
+        for (size_t i = 0; i < (path.size() < state.path.size() ? path.size() : state.path.size()); ++i)
+        {
+            if (path[i] != state.path[i])
+                return false;
+        }
+        return true;
     }
 };
 
@@ -331,7 +341,7 @@ struct WitnessRegionConstraint {
     /**
      * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.proto#L3
      */
-    operator std::string() const
+    explicit operator std::string() const
     {
         std::stringstream ss;
         ss << "{";
@@ -645,6 +655,8 @@ public:
     bool GoalTest(const WitnessState<width, height> &node, const WitnessState<width, height> &goal) const;
 
     bool GoalTest(const WitnessState<width, height> &node) const;
+
+    bool RegionTest(const WitnessState<width, height> &node) const;
 
     uint64_t GetMaxHash() const;
 
@@ -1071,7 +1083,8 @@ public:
     std::array<int, (width + 1) * (height + 1)> goalMap;
     //	const int kStartX = 0, kStartY = 0;
 
-    void BuildLocationMap(std::array<std::pair<unsigned, unsigned>, (GetNumPathConstraints() + width * height)> &map) const
+    void BuildLocationMap(std::array<std::pair<unsigned, unsigned>,
+            (GetNumPathConstraints() + width * height)> &map) const
     {
         for (auto y = height; y >= 0; --y)
         {
@@ -1193,9 +1206,9 @@ public:
     std::istream& Deserialize(std::istream &is)
     {
         std::string input((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-        std::regex w_r("\"width\":\\s*(\\d+)");
-        std::regex e_r("\"entity\":\\s*\\[(.*)\\]");
-        std::regex s_r("\"symmetry\":\\s*(\\d+)");
+        std::regex w_r(R"("width":\s*(\d+))");
+        std::regex e_r(R"("entity":\s*\[(.*)\])");
+        std::regex s_r(R"("symmetry":\s*(\d+))");
         std::smatch w_match, e_match, s_match;
         if (!(std::regex_search(input, w_match, w_r) &&
               std::regex_search(input, s_match, s_r) &&
@@ -1213,7 +1226,11 @@ public:
         {
             throw std::invalid_argument("unsupported symmetry");
         }
-        std::regex es_r("\\{\"type\":\\s*(\\d+),\\s*\"color\":\\s*(\\d+),\\s*\"orientation\":\\s*(?:null|\\{\"horizontal\":\\s*\\d,\\s*\"vertical\":\\s*\\d\\}),\\s*\"shape\":\\s*(null|\\{\"width\":\\s*(\\d),\\s*\"grid\":\\s*(\\[(?:(?:true|false)\\s*,\\s*)*(?:true|false)?\\]),\\s*\"free\":\\s*(true|false),\\s*\"negative\":\\s*(true|false)\\}),\\s*\"count\":\\s*(\\d+),\\s*\"triangle_count\":\\s*(\\d+)\\}");
+        std::regex es_r(R"(\{"type":\s*(\d+),\s*"color":\s*(\d+),
+            \s*"orientation":\s*(?:null|\{"horizontal":\s*\d,\s*"vertical":\s*\d\}),
+            \s*"shape":\s*(null|\{"width":\s*(\d),\s*"grid":\s*(\[(?:(?:true|false)\s*,\s*)*(?:true|false)?\]),
+            \s*"free":\s*(true|false),\s*"negative":\s*(true|false)\}),
+            \s*"count":\s*(\d+),\s*"triangle_count":\s*(\d+)\})");
         auto entities = e_match[1].str();
         auto begin = std::sregex_iterator(entities.begin(), entities.end(), es_r);
         auto end = std::sregex_iterator();
@@ -1225,8 +1242,6 @@ public:
         {
             match = *i;
             int type = std::stoi(match[1].str());
-//            for (auto j = 0; j < match.size(); ++j)
-//                std::cout << j << ": " << match[j] << std::endl;
             switch (type) {
                 case 3:
                 case 4: // only support single start and goal currently
@@ -1258,7 +1273,8 @@ public:
                     auto loc = locationMap[count++].second;
                     int param = GetTetrisParameterFromString(std::stoi(match[4].str()), match[5].str());
                     if (param >= 1)
-                        (match[7].str() == "false") ? AddTetrisConstraint(loc, param) : AddNegativeTetrisConstraint(loc, param);
+                        (match[7].str() == "false") ? AddTetrisConstraint(loc, param) :
+                        AddNegativeTetrisConstraint(loc, param);
                     break;
                 }
                 case 11:
@@ -1488,12 +1504,57 @@ public:
     mutable std::array<int, width * height> regions;
     // for each region, this is a list of the cells in the region
     // the size of the vector tells us the size of the region
-    mutable std::vector<std::vector < int> *>
-    regionList;
+    mutable std::vector<std::vector<int> *> regionList;
     mutable vectorCache<int> regionCache;
 
     mutable std::vector<int> tetrisBlockCount;
     mutable std::vector<int> tetrisBlocksInRegion;
+
+    bool CheckPathConstraintsForRegion(int region, const WitnessState<width, height> &state) const
+    {
+        int x = GetRegionFromX(region);
+        int y = GetRegionFromY(region);
+
+        // vertices
+        if (GetMustCrossConstraint(x, y) && (!state.Occupied(x, y)))
+            return false;
+        if (GetCannotCrossConstraint(x, y) && (state.Occupied(x, y)))
+            return false;
+        if (GetMustCrossConstraint(x + 1, y) && (!state.Occupied(x + 1, y)))
+            return false;
+        if (GetCannotCrossConstraint(x + 1, y) && (state.Occupied(x + 1, y)))
+            return false;
+        if (GetMustCrossConstraint(x, y + 1) && (!state.Occupied(x, y + 1)))
+            return false;
+        if (GetCannotCrossConstraint(x, y + 1) && (state.Occupied(x, y + 1)))
+            return false;
+        if (GetMustCrossConstraint(x + 1, y + 1) && (!state.Occupied(x + 1, y + 1)))
+            return false;
+        if (GetCannotCrossConstraint(x + 1, y + 1) && (state.Occupied(x + 1, y + 1)))
+            return false;
+
+        // horizontal edges
+        if (GetMustCrossConstraint(true, x, y) && !state.OccupiedEdge(x, y, x + 1, y))
+            return false;
+        if (GetCannotCrossConstraint(true, x, y) && state.OccupiedEdge(x, y, x + 1, y))
+            return false;
+        if (GetMustCrossConstraint(true, x, y + 1) && !state.OccupiedEdge(x, y + 1, x + 1, y + 1))
+            return false;
+        if (GetCannotCrossConstraint(true, x, y + 1) && state.OccupiedEdge(x, y + 1, x + 1, y + 1))
+            return false;
+
+        // vertical edges
+        if (GetMustCrossConstraint(false, x, y) && !state.OccupiedEdge(x, y, x, y + 1))
+            return false;
+        if (GetCannotCrossConstraint(false, x, y) && state.OccupiedEdge(x, y, x, y + 1))
+            return false;
+        if (GetMustCrossConstraint(false, x + 1, y) && !state.OccupiedEdge(x + 1, y, x + 1, y + 1))
+            return false;
+        if (GetCannotCrossConstraint(false, x + 1, y) && state.OccupiedEdge(x + 1, y, x + 1, y + 1))
+            return false;
+
+        return true;
+    }
 
     bool RecursivelyPlacePieces(
             int curr, uint64_t board, uint64_t oob, uint64_t posFootprint, uint64_t negFootprint) const;
@@ -2001,6 +2062,133 @@ bool Witness<width, height>::GoalTest(
 {
     // Check constraints
     return GoalTest(node);
+}
+
+template<int width, int height>
+bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node) const
+{
+    LabelRegions(node);
+    for (auto i = 0; i < regionList.size(); ++i)
+    {
+        const auto &region = *regionList[i];
+        if (region.empty())
+            continue;
+        if (std::find(region.begin(), region.end(), width * height - 1) != region.end()) // skip the goal
+            continue;
+        bool found = false;
+        rgbColor c;
+        tetrisBlockCount.resize(regionList.size());
+        tetrisBlockCount[i] = 0;
+        for (const auto &r: region)
+        {
+            if (!CheckPathConstraintsForRegion(r, node))
+                return false;
+
+            int x = GetRegionFromX(r);
+            int y = GetRegionFromY(r);
+            rgbColor finishedColor(1.0 / 512.0, 1.0 / 512.0, 1.0 / 512.0);
+            const auto &constraint = regionConstraints[x][y];
+            switch (constraint.type) {
+                case kTriangle:
+                {
+                    int count = node.OccupiedEdge(x, y, x, y + 1);
+                    count += node.OccupiedEdge(x, y, x + 1, y);
+                    count += node.OccupiedEdge(x + 1, y, x + 1, y + 1);
+                    count += node.OccupiedEdge(x, y + 1, x + 1, y + 1);
+                    if (count != constraint.parameter)
+                        return false;
+                    break;
+                }
+                case kSeparation:
+                {
+                    if (!found)
+                    {
+                        c = constraint.color;
+                        found = true;
+                    }
+                    else if (c != constraint.color)
+                        return false;
+                    break;
+                }
+                case kStar:
+                {
+                    if (constraint.color == finishedColor)
+                        continue;
+                    finishedColor = constraint.color;
+                    int count = 0;
+                    for (const auto &rr: regions)
+                    {
+                        int xx = GetRegionFromX(rr);
+                        int yy = GetRegionFromY(rr);
+
+                        if (regionConstraints[xx][yy].type != kNoRegionConstraint &&
+                            constraint.color == regionConstraints[xx][yy].color)
+                        {
+                            count++;
+                            if (count > 2)
+                                return false;
+                        }
+                    }
+                    if (count != 2)
+                        return false;
+                }
+                case kTetris:
+                {
+                    tetrisBlockCount[i] += tetrisSize[constraint.parameter];
+                    break;
+                }
+                case kNegativeTetris:
+                {
+                    tetrisBlockCount[i] -= tetrisSize[constraint.parameter];
+                    break;
+                }
+                default:
+                    break;
+            }
+            if (tetrisBlockCount[i] > 0 && tetrisBlockCount[i] != regions.size())
+                return false;
+        }
+    }
+    if (constraintCount[kTetris] > 0)
+    {
+        for (const auto &region: regionList)
+        {
+            if (region->empty())
+                continue;
+            if (std::find(region->begin(), region->end(), width * height - 1) != region->end())
+                continue;
+            bool hasNegations = false;
+            tetrisBlocksInRegion.resize(0);
+            uint64_t board = 0;
+            for (const auto &r: regions)
+            {
+                uint64_t x = GetRegionFromX(r);
+                uint64_t y = GetRegionFromY(r);
+
+                board |= ((1ull << (7 - x)) << ((7 - y) * 8));
+
+                const auto &constraint = regionConstraints[x][y];
+                if (constraint.type == kTetris)
+                    tetrisBlocksInRegion.push_back(constraint.parameter);
+                if (constraint.type == kNegativeTetris)
+                {
+                    tetrisBlocksInRegion.push_back(-constraint.parameter);
+                    hasNegations = true;
+                }
+            }
+
+            if (tetrisBlocksInRegion.empty())
+                continue;
+
+            uint64_t oob = ~board;
+            if (hasNegations)
+                oob = 0;
+
+            if (!RecursivelyPlacePieces(0, board, oob, 0, 0))
+                return false;
+        }
+    }
+    return true;
 }
 
 template<int width, int height>

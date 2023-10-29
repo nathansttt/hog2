@@ -13,7 +13,6 @@
 #include "Globals.h"
 #include "Puzzles.h"
 #include "SolutionUtil.h"
-#include "WitnessInferenceRule.h"
 
 bool recording = false;
 bool parallel = false;
@@ -97,7 +96,8 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle SPR", "Enable/Disable SeparationRule", kAnyModifier, '1');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle PCR", "Enable/Disable PathConstraintRule", kAnyModifier, '2');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle TGR", "Enable/Disable TowardsGoalRule", kAnyModifier, '3');
-    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle OTR", "Enable/Disable OneTriangleRule", kAnyModifier, '4');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle RCR", "Enable/Disable RegionCompletionRule", kAnyModifier, '4');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle OTR", "Enable/Disable OneTriangleRule", kAnyModifier, '5');
 
     InstallCommandLineHandler(WitnessCLHandler, "-run", "-run", "Runs pre-set experiments.");
     InstallCommandLineHandler(WitnessCLHandler, "-test", "-test", "Basic test with MD heuristic");
