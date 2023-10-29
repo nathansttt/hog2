@@ -131,6 +131,7 @@ public:
             entropyInfo = { min_childEntropyInfo.value + ImmediateEntropy(allActions, childEntropy),
                             min_childEntropyInfo.depth + 1 };
         }
+        entropyInfoCache.returnItem(&childEntropyInfo);
         actCache.returnItem(&allActions);
         return entropyInfo;
     }
