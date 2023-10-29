@@ -74,9 +74,9 @@ extern int selectTetrisPiece;
 extern Graphics::point cursor;
 extern int cursorViewport;
 extern bool gUseRelativeEntropy;
-extern std::vector <std::function<ActionType(
-        const SearchEnvironment<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> &,
-        WitnessState<puzzleWidth, puzzleHeight> &, const WitnessAction &)>> gInferenceRules;
+extern std::unordered_map<int,
+        std::function<ActionType(const SearchEnvironment<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> &,
+                                 WitnessState<puzzleWidth, puzzleHeight> &, const WitnessAction &)>> gInferenceRules;
 
 inline double GetCurrentEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
 {

@@ -55,7 +55,7 @@ static void InitTetrisPieces()
 static void InitPuzzle()
 {
     k87fxsr();
-    for (size_t i = 0; i < allSolutions.size(); i++)
+    for (size_t i = 0; i < allSolutions.size(); ++i)
     {
         auto &solution = allSolutions[i];
         if (witness.GoalTest(solution)) {

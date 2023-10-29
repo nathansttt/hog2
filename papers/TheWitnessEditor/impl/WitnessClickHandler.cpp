@@ -127,7 +127,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
 }
 
 bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*y*/, point3d p, tButtonType,
-                         tMouseEventType e)
+                         tMouseEventType event)
 {
     switch (viewport)
     {
@@ -135,7 +135,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     {
         if (!drawEditor)
         {
-            if (e == kMouseUp)
+            if (event == kMouseUp)
             {
                 if (witness.Click(p, iws))
                 {
@@ -151,7 +151,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                     }
                 }
             }
-            if (e == kMouseMove)
+            if (event == kMouseMove)
             {
                 witness.Move(p, iws);
                 //		if (iws.ws.path.size() > 0)
@@ -160,7 +160,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
         }
         else
         {
-            if (e == kMouseDown)
+            if (event == kMouseDown)
             {
                 if (gSelectedEditorItem != -1 && viewport == cursorViewport)
                 {
@@ -215,7 +215,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     }
     case 1:
     {
-        if (e == kMouseDown && viewport == cursorViewport)
+        if (event == kMouseDown && viewport == cursorViewport)
         {
             bool selected = false;
             for (unsigned i = 0; i < gRegionConstraintItems.size(); i++)
@@ -298,7 +298,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     }
     case 2:
     {
-        if (e == kMouseDown)
+        if (event == kMouseDown)
         {
             for (unsigned i = 0; i < gTetrisPieces.size(); ++i)
             {
@@ -321,7 +321,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     }
     cursor = p;
     cursorViewport = viewport;
-    if (e == kMouseDrag) // ignore movement with mouse button down
+    if (event == kMouseDrag) // ignore movement with mouse button down
         return false;
 
     // Don't need any other mouse support

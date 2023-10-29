@@ -22,7 +22,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
 
 int WitnessCLHandler(char *argument[], int maxNumArgs);
 
-bool WitnessClickHandler(unsigned long windowID, int viewport, int x, int y, point3d p, tButtonType, tMouseEventType e);
+bool WitnessClickHandler(unsigned long windowID, int viewport, int x, int y, point3d p, tButtonType, tMouseEventType event);
 
 void InstallHandlers();
 

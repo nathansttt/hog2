@@ -22,96 +22,98 @@ ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, W
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
     int currX = state.path.back().first;
     int currY = state.path.back().second;
-    switch (action) {
-        case kUp:
-        {
-            if (currX > 0 && currX < width
-                && CompareSC(witness->GetRegionConstraint(currX - 1, currY),
-                             witness->GetRegionConstraint(currX, currY)))
-                return MUST_TAKE;
-            break;
-        }
-        case kRight:
-        {
-            if (currY > 0 && currY < height
-                && CompareSC(witness->GetRegionConstraint(currX, currY),
-                             witness->GetRegionConstraint(currX, currY - 1)))
-                return MUST_TAKE;
-            break;
-        }
-        case kDown:
-        {
-            if (currX > 0 && currX < width
-                && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
-                             witness->GetRegionConstraint(currX, currY - 1)))
-                return MUST_TAKE;
-            break;
-        }
-        case kLeft:
-        {
-            if (currY > 0 && currY < height
-                && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
-                             witness->GetRegionConstraint(currX - 1, currY)))
-                return MUST_TAKE;
-            break;
-        }
-        default:
-            break;
+    switch (action)
+    {
+    case kUp:
+    {
+        if (currX > 0 && currX < width
+            && CompareSC(witness->GetRegionConstraint(currX - 1, currY),
+                         witness->GetRegionConstraint(currX, currY)))
+            return MUST_TAKE;
+        break;
+    }
+    case kRight:
+    {
+        if (currY > 0 && currY < height
+            && CompareSC(witness->GetRegionConstraint(currX, currY),
+                         witness->GetRegionConstraint(currX, currY - 1)))
+            return MUST_TAKE;
+        break;
+    }
+    case kDown:
+    {
+        if (currX > 0 && currX < width
+            && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
+                         witness->GetRegionConstraint(currX, currY - 1)))
+            return MUST_TAKE;
+        break;
+    }
+    case kLeft:
+    {
+        if (currY > 0 && currY < height
+            && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
+                         witness->GetRegionConstraint(currX - 1, currY)))
+            return MUST_TAKE;
+        break;
+    }
+    default:
+        break;
     }
     return UNKNOWN;
 }
 
-template <int width, int height>
+template<int width, int height>
 ActionType PathConstraintRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
                               const WitnessState<width, height> &state, const WitnessAction &action)
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
     int currX = state.path.back().first;
     int currY = state.path.back().second;
-    switch (action) {
-        case kUp:
-        {
-            if (witness->GetMustCrossConstraint(false, currX, currY))
-                return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(false, currX, currY))
-                return CANNOT_TAKE;
-            break;
-        }
-        case kRight:
-        {
-            if (witness->GetMustCrossConstraint(true, currX, currY))
-                return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(true, currX, currY))
-                return CANNOT_TAKE;
-            break;
-        }
-        case kDown:
-        {
-            if (witness->GetMustCrossConstraint(false, currX, currY - 1))
-                return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(false, currX, currY - 1))
-                return CANNOT_TAKE;
-            break;
-        }
-        case kLeft:
-        {
-            if (witness->GetMustCrossConstraint(true, currX - 1, currY))
-                return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(true, currX - 1, currY))
-                return CANNOT_TAKE;
-        }
-        default:
-            break;
+    switch (action)
+    {
+    case kUp:
+    {
+        if (witness->GetMustCrossConstraint(false, currX, currY))
+            return MUST_TAKE;
+        if (witness->GetCannotCrossConstraint(false, currX, currY))
+            return CANNOT_TAKE;
+        break;
+    }
+    case kRight:
+    {
+        if (witness->GetMustCrossConstraint(true, currX, currY))
+            return MUST_TAKE;
+        if (witness->GetCannotCrossConstraint(true, currX, currY))
+            return CANNOT_TAKE;
+        break;
+    }
+    case kDown:
+    {
+        if (witness->GetMustCrossConstraint(false, currX, currY - 1))
+            return MUST_TAKE;
+        if (witness->GetCannotCrossConstraint(false, currX, currY - 1))
+            return CANNOT_TAKE;
+        break;
+    }
+    case kLeft:
+    {
+        if (witness->GetMustCrossConstraint(true, currX - 1, currY))
+            return MUST_TAKE;
+        if (witness->GetCannotCrossConstraint(true, currX - 1, currY))
+            return CANNOT_TAKE;
+    }
+    default:
+        break;
     }
     return UNKNOWN;
 }
 
-template <int width, int height>
+template<int width, int height>
 ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
                            const WitnessState<width, height> &state, const WitnessAction &action)
 {
@@ -119,9 +121,9 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
         return UNKNOWN;
     if (action == kEnd)
         return MUST_TAKE;
-    if (!state.hitTheWall() || state.isAlongTheWall())
+    if (!state.HitTheWall() || state.IsAlongTheWall())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
     if (witness->start.size() > 1 || witness->goal.size() > 1)
         return UNKNOWN;
     std::pair<int, int> start = witness->start[0];
@@ -168,7 +170,8 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
 {
     int currX = state.path.back().first;
     int currY = state.path.back().second;
-    switch (action) {
+    switch (action)
+    {
     case kUp:
     {
         if (currX > 0)
@@ -255,11 +258,11 @@ static unsigned CountOccupiedEdges(const WitnessState<width, height> &state, con
 
 template<int width, int height>
 ActionType OneTriangleRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
-                        WitnessState<width, height> &state, const WitnessAction &action)
+                           WitnessState<width, height> &state, const WitnessAction &action)
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height>*>(&env);
+    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
     std::vector<std::pair<int, int>> pos;
     GetTriangles(*witness, state, action, 1, pos);
     witness->ApplyAction(state, action);
@@ -272,8 +275,7 @@ ActionType OneTriangleRule(const SearchEnvironment<WitnessState<width, height>, 
     return UNKNOWN;
 }
 
-enum WitnessInferenceRules
-{
+enum WitnessInferenceRule {
     kSeparationRule,
     kPathConstraintRule,
     kTowardsGoalRule,
@@ -283,33 +285,33 @@ enum WitnessInferenceRules
     kInferenceRuleCount
 };
 
-inline std::ostream& operator<<(std::ostream &os, WitnessInferenceRules wir)
+inline std::ostream &operator<<(std::ostream &os, WitnessInferenceRule wir)
 {
-    switch (wir) {
-        case kSeparationRule:
-            return os << "SeparationRule";
-        case kPathConstraintRule:
-            return os << "PathConstraintRule";
-        case kTowardsGoalRule:
-            return os << "TowardsGoalRule";
-        case kOneTriangleRule:
-            return os << "OneTriangleRule";
-        default:
-            return os;
+    switch (wir)
+    {
+    case kSeparationRule:
+        return os << "SeparationRule";
+    case kPathConstraintRule:
+        return os << "PathConstraintRule";
+    case kTowardsGoalRule:
+        return os << "TowardsGoalRule";
+    case kOneTriangleRule:
+        return os << "OneTriangleRule";
+    default:
+        return os;
     }
 }
 
 template<int width, int height>
-std::vector<std::function<ActionType(const SearchEnvironment<WitnessState<width, height>, WitnessAction>&,
-                                      WitnessState<width, height>&, const WitnessAction&)>>
+std::unordered_map<int,
+        std::function<ActionType(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &,
+                                 WitnessState<width, height> &, const WitnessAction &)>>
 witnessInferenceRules =
 {
-    &SeparationRule<width, height>,
-    &PathConstraintRule<width, height>,
-    &TowardsGoalRule<width, height>,
-    &OneTriangleRule<width, height>,
-//    &TwoTrianglesRule<width, height>,
-//    &ThreeTrianglesRule<width, height>
+    {kSeparationRule,       std::function(SeparationRule<width, height>) },
+    {kPathConstraintRule,   std::function(PathConstraintRule<width, height>) },
+    {kTowardsGoalRule,      std::function(TowardsGoalRule<width, height>) },
+    {kOneTriangleRule,      std::function(OneTriangleRule<width, height>) },
 };
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */
