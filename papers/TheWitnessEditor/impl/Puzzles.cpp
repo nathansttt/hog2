@@ -129,6 +129,24 @@ void k87fxsr()
 
     witness.AddSeparationConstraint(3, 0, Colors::magenta);
     witness.AddSeparationConstraint(3, 3, Colors::magenta);
-//    witness.SetMustCrossConstraint(1);
+}
 
+void _27sck7g()
+{
+    for (int x = 0; x <= puzzleWidth; ++x)
+    {
+        for (int y = 0; y <= puzzleHeight; ++y)
+        {
+            if ((x == 0 && y == 0) || (x == puzzleWidth && y == puzzleHeight))
+                continue;
+            witness.AddMustCrossConstraint(x, y);
+        }
+    }
+    
+    witness.AddSeparationConstraint(0, 3, Colors::gray);
+    
+    witness.AddSeparationConstraint(3, 0, Colors::black);
+    witness.AddSeparationConstraint(3, 1, Colors::gray);
+    witness.AddSeparationConstraint(3, 2, Colors::gray);
+    witness.AddSeparationConstraint(3, 3, Colors::black);
 }

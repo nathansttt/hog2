@@ -53,7 +53,7 @@ static void InitTetrisPieces()
 
 static void InitPuzzle()
 {
-    k87fxsr();
+    _27sck7g();
     for (size_t i = 0; i < allSolutions.size(); ++i)
     {
         auto &solution = allSolutions[i];
