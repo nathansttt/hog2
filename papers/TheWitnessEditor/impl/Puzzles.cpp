@@ -145,8 +145,8 @@ void _27sck7g()
     
     witness.AddSeparationConstraint(0, 3, Colors::gray);
     
-    witness.AddSeparationConstraint(3, 0, Colors::black);
-    witness.AddSeparationConstraint(3, 1, Colors::gray);
-    witness.AddSeparationConstraint(3, 2, Colors::gray);
-    witness.AddSeparationConstraint(3, 3, Colors::black);
+    witness.AddSeparationConstraint(3, 0, Colors::gray);
+    witness.AddSeparationConstraint(3, 1, Colors::black);
+    witness.AddSeparationConstraint(3, 2, Colors::black);
+    witness.AddSeparationConstraint(3, 3, Colors::gray);
 }

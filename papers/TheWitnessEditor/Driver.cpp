@@ -56,8 +56,7 @@ static void InitPuzzle()
     _27sck7g();
     for (size_t i = 0; i < allSolutions.size(); ++i)
     {
-        auto &solution = allSolutions[i];
-        if (witness.GoalTest(solution)) {
+        if (witness.GoalTest(allSolutions[i])) {
             currentSolutionIndices.emplace_back(i);
         }
     }

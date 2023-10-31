@@ -54,8 +54,8 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         auto w = Witness<puzzleWidth, puzzleHeight>();
         iss >> w;
         witness = w;
-        break;
 #endif
+        break;
     }
     case 'r':
     {

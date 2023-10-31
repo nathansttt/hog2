@@ -1122,20 +1122,22 @@ public:
                 map[loc] = std::pair<unsigned, unsigned>(1, p);
             }
         }
-        for (const auto &s: start)
+        for (auto [x, y]: start)
         {
-            auto p = width * (height + 1) + (width + 1) * height + (width + 1) * s.second + s.first;
-            auto loc = (height - s.second) * (width * 2 + 1) * 2 + s.first * 2;
+            auto p = width * (height + 1) + (width + 1) * height + (width + 1) * y + x;
+            auto loc = (height - y) * (width * 2 + 1) * 2 + x * 2;
             map[loc] = std::pair<unsigned, unsigned>(2, p);
         }
-        for (const auto &g: goal)
+        for (auto [x, y]: goal)
         {
-            auto x = g.first;
-            auto y = g.second;
-            if (x > width) x = width;
-            if (x < 0) x = 0;
-            if (y > height) y = height;
-            if (y < 0) y = 0;
+            if (x > width)
+                x = width;
+            if (x < 0)
+                x = 0;
+            if (y > height)
+                y = height;
+            if (y < 0)
+                y = 0;
             auto p = width * (height + 1) + (width + 1) * height + (width + 1) * y + x;
             auto loc = (height - y) * (width * 2 + 1) * 2 + x * 2;
             map[loc] = std::pair<unsigned, unsigned>(3, p);
@@ -1147,7 +1149,7 @@ public:
      * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.js
      * @see https://github.com/thefifthmatt/windmill-client/blob/master/src/grid.proto
      */
-    operator std::string() const
+    explicit operator std::string() const
     {
         std::stringstream ss;
         ss << "{" << std::quoted("width") << ": " << width * 2 + 1 << ", "
@@ -1157,11 +1159,11 @@ public:
         BuildLocationMap(locationMap);
         for (auto i = 0; i < locationMap.size(); ++i)
         {
-            const auto &loc = locationMap[i];
+            auto [type, location] = locationMap[i];
             std::stringstream ess;
-            switch (loc.first) {
+            switch (type) {
                 case 0: // path constraints
-                    switch (pathConstraints[loc.second]) {
+                    switch (pathConstraints[location]) {
                         case kCannotCross:
                         {
                             ess << "{" << std::quoted("type") << ": 5}";
@@ -1178,8 +1180,8 @@ public:
                     }
                     break;
                 case 1: // region constrains
-                    ess << std::string(GetRegionConstraint(GetRegionFromX(loc.second),
-                                                       GetRegionFromY(loc.second)));
+                    ess << std::string(GetRegionConstraint(GetRegionFromX(location),
+                                                       GetRegionFromY(location)));
                     break;
                 case 2: // start
                     ess << "{" << std::quoted("type") << ": 3}";
@@ -1213,34 +1215,27 @@ public:
         if (!(std::regex_search(input, w_match, w_r) &&
               std::regex_search(input, s_match, s_r) &&
               std::regex_search(input, e_match, e_r)))
-        {
             throw std::invalid_argument("incorrect string");
-        }
-        int w = std::stoi(w_match[1].str());
-        if (w != (width * 2 + 1))
-        {
+
+        if (std::stoi(w_match[1].str()) != (width * 2 + 1))
             throw std::invalid_argument("unsupported size");
-        }
-        int symmetry = std::stoi(s_match[1].str());
-        if (symmetry != 0)
-        {
+
+        if (std::stoi(s_match[1].str()) != 0)
             throw std::invalid_argument("unsupported symmetry");
-        }
-        std::regex es_r(R"(\{"type":\s*(\d+),\s*"color":\s*(\d+),
-            \s*"orientation":\s*(?:null|\{"horizontal":\s*\d,\s*"vertical":\s*\d\}),
-            \s*"shape":\s*(null|\{"width":\s*(\d),\s*"grid":\s*(\[(?:(?:true|false)\s*,\s*)*(?:true|false)?\]),
-            \s*"free":\s*(true|false),\s*"negative":\s*(true|false)\}),
-            \s*"count":\s*(\d+),\s*"triangle_count":\s*(\d+)\})");
-        auto entities = e_match[1].str();
-        auto begin = std::sregex_iterator(entities.begin(), entities.end(), es_r);
-        auto end = std::sregex_iterator();
-        std::smatch match;
+
         std::array<std::pair<unsigned, unsigned>, (GetNumPathConstraints() + width * height)> locationMap;
         BuildLocationMap(locationMap);
+        auto es = std::string(R"(\{"type":\s*(\d+),\s*"color":\s*(\d+),\s*)") +
+                  std::string(R"("orientation":\s*(?:null|\{"horizontal":\s*\d,\s*"vertical":\s*\d\}),\s*)") +
+                  std::string(R"("shape":\s*(null|\{"width":\s*(\d),\s*)") +
+                  std::string(R"("grid":\s*(\[(?:(?:true|false)\s*,\s*)*(?:true|false)?\]),\s*free":\s*(true|false),\s*)") +
+                  std::string(R"("negative":\s*(true|false)\}),\s*"count":\s*(\d+),\s*"triangle_count":\s*(\d+)\})");
+        std::regex es_r(es);
+        auto entities = e_match[1].str();
         unsigned count = 0;
-        for (auto i = begin; i != end; ++i)
+        for (auto i = std::sregex_iterator(entities.begin(), entities.end(), es_r); i != std::sregex_iterator(); ++i)
         {
-            match = *i;
+            const auto& match = *i;
             int type = std::stoi(match[1].str());
             switch (type) {
                 case 3:
@@ -2079,7 +2074,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
         rgbColor c;
         tetrisBlockCount.resize(regionList.size());
         tetrisBlockCount[i] = 0;
-        for (const auto &r: region)
+        for (auto r: region)
         {
             if (!CheckPathConstraintsForRegion(r, node))
                 return false;
@@ -2091,11 +2086,11 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
             switch (constraint.type) {
                 case kTriangle:
                 {
-                    int count = node.OccupiedEdge(x, y, x, y + 1);
-                    count += node.OccupiedEdge(x, y, x + 1, y);
-                    count += node.OccupiedEdge(x + 1, y, x + 1, y + 1);
-                    count += node.OccupiedEdge(x, y + 1, x + 1, y + 1);
-                    if (count != constraint.parameter)
+                    if (node.OccupiedEdge(x, y, x, y + 1) +
+                        node.OccupiedEdge(x, y, x + 1, y) +
+                        node.OccupiedEdge(x + 1, y, x + 1, y + 1) +
+                        node.OccupiedEdge(x, y + 1, x + 1, y + 1)
+                        != constraint.parameter)
                         return false;
                     break;
                 }
@@ -2151,7 +2146,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
     }
     if (constraintCount[kTetris] > 0)
     {
-        for (const auto &region: regionList)
+        for (auto region: regionList)
         {
             if (region->empty())
                 continue;
@@ -2160,7 +2155,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
             bool hasNegations = false;
             tetrisBlocksInRegion.resize(0);
             uint64_t board = 0;
-            for (const auto &r: regions)
+            for (auto r: regions)
             {
                 uint64_t x = GetRegionFromX(r);
                 uint64_t y = GetRegionFromY(r);
@@ -3589,7 +3584,7 @@ void Witness<width, height>::Draw(Graphics::Display &display, const InteractiveW
 template<int width, int height>
 inline std::ostream& operator<<(std::ostream &os, const Witness<width, height> &witness)
 {
-  return witness.Serialize(os);
+    return witness.Serialize(os);
 }
 
 template<int width, int height>
