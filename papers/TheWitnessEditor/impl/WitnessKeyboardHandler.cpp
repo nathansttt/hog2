@@ -9,7 +9,8 @@ unsigned gSolutionIndex = 0;
 
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-    if (drawEditor && key != 'e' && key != 'x' && !std::isdigit(key)) return;
+    if (drawEditor && key != 'e' && key != 'w' && key != 'x' && !std::isdigit(key))
+        return;
     switch (key)
     {
     case 't':
