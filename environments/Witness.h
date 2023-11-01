@@ -1254,13 +1254,15 @@ public:
                 case 7:
                 {
                     auto loc = locationMap[count++].second;
-                    AddSeparationConstraint(loc, GetColorFromEnum(std::stoi(match[2].str())));
+                    auto color = GetColorFromEnum(std::stoi(match[2].str()));
+                    AddSeparationConstraint(loc, (color == Colors::white) ? Colors::lightgray : color);
                     break;
                 }
                 case 8:
                 {
                     auto loc = locationMap[count++].second;
-                    AddStarConstraint(loc, GetColorFromEnum(std::stoi(match[2].str())));
+                    auto color = GetColorFromEnum(std::stoi(match[2].str()));
+                    AddStarConstraint(loc, (color == Colors::white) ? Colors::lightgray : color);
                     break;
                 }
                 case 9:
@@ -1269,7 +1271,7 @@ public:
                     int param = GetTetrisParameterFromString(std::stoi(match[4].str()), match[5].str());
                     if (param >= 1)
                         (match[7].str() == "false") ? AddTetrisConstraint(loc, param) :
-                        AddNegativeTetrisConstraint(loc, param);
+                            AddNegativeTetrisConstraint(loc, param);
                     break;
                 }
                 case 11:
