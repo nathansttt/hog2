@@ -353,7 +353,7 @@ struct WitnessRegionConstraint {
             }
             case kStar:
             {
-                ss << std::quoted("type") << ": 8" << color;
+                ss << std::quoted("type") << ": 8, " << color;
                 break;
             }
             case kTetris:
