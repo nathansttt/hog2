@@ -2111,7 +2111,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
                         continue;
                     finishedColor = constraint.color;
                     int count = 0;
-                    for (const auto &rr: regions)
+                    for (auto rr: region)
                     {
                         int xx = GetRegionFromX(rr);
                         int yy = GetRegionFromY(rr);
@@ -2140,7 +2140,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
                 default:
                     break;
             }
-            if (tetrisBlockCount[i] > 0 && tetrisBlockCount[i] != regions.size())
+            if (tetrisBlockCount[i] > 0 && tetrisBlockCount[i] != region.size())
                 return false;
         }
     }
@@ -2155,7 +2155,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
             bool hasNegations = false;
             tetrisBlocksInRegion.resize(0);
             uint64_t board = 0;
-            for (auto r: regions)
+            for (auto r: *region)
             {
                 uint64_t x = GetRegionFromX(r);
                 uint64_t y = GetRegionFromY(r);

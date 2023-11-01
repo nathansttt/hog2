@@ -173,7 +173,7 @@ ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, heig
     const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
     witness->ApplyAction(state, action);
     bool regionSatisfied = true;
-    if (state.HitTheWall())
+    if (state.HitTheWall() && !state.IsAlongTheWall())
         regionSatisfied = witness->RegionTest(state);
     witness->UndoAction(state, action);
     return regionSatisfied ? UNKNOWN : CANNOT_TAKE;
