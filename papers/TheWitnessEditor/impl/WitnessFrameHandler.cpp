@@ -29,14 +29,14 @@ bool gUseRelativeEntropy = true;
 unsigned gLookahead = 0;
 
 std::vector<ColorItem> gProvidedColors = {
-    {Colors::red, Graphics::point{-0.75, -0.2}, 0.1},
-    {Colors::orange, Graphics::point{-0.6, -0.2}, 0.1},
-    {{0.862745098f, 0.6549019608f, 0.0f}, Graphics::point{-0.45, -0.2}, 0.1},
-    {Colors::blue, Graphics::point{-0.3, -0.2}, 0.1},
-    {Colors::cyan, Graphics::point{-0.15, -0.2}, 0.1},
-    {Colors::magenta, Graphics::point{0.0, -0.2}, 0.1},
-    {Colors::pink, Graphics::point{0.15, -0.2}, 0.1},
-    {Colors::black, Graphics::point{0.3, -0.2}, 0.1},
+    {Colors::black, Graphics::point{-0.75, -0.2}, 0.1},
+    {Colors::cyan, Graphics::point{-0.6, -0.2}, 0.1},
+    {Colors::magenta, Graphics::point{-0.45, -0.2}, 0.1},
+    {Colors::yellow, Graphics::point{-0.3, -0.2}, 0.1},
+    {Colors::red, Graphics::point{-0.15, -0.2}, 0.1},
+    {Colors::green, Graphics::point{0.0, -0.2}, 0.1},
+    {Colors::blue, Graphics::point{0.15, -0.2}, 0.1},
+    {Colors::orange, Graphics::point{0.3, -0.2}, 0.1},
 };
 
 Witness<puzzleWidth, puzzleHeight> editor;
