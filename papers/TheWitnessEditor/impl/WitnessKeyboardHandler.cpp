@@ -55,6 +55,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         auto w = Witness<puzzleWidth, puzzleHeight>();
         iss >> w;
         witness = w;
+        UpdateSolutionIndices();
 #endif
         break;
     }
