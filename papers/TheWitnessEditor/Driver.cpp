@@ -65,7 +65,7 @@ static void InitPuzzle()
             entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
     });
     gNumSolutions = currentSolutionIndices.size();
-    entropy.ruleSet.SetRules(gInferenceRules);
+    entropy.SetShift(0.15).ruleSet.SetRules(gInferenceRules);
     gEntropy = GetCurrentEntropy(witness);
 }
 

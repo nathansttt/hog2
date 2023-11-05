@@ -55,32 +55,54 @@ protected:
     }
 
     double ImmediateEntropy(const std::vector<Action> &actions,
-                            const std::vector<double> &childEntropy)
+                            const std::vector<double> &childEntropy,
+                            std::optional<Action> prevAction)
     {
-        auto size = static_cast<double>(actions.size());
+        auto size = actions.size();
         if (!isRelative)
-            return std::log2(size);
-        std::vector<double> &dist = *doubleCache.getItem();
-        Softmin(childEntropy, dist);
-        std::vector<double> &uniform = *doubleCache.getItem();
-        uniform.resize(actions.size());
-        std::generate(uniform.begin(), uniform.end(), [&]() { return 1 / size; });
-        auto kl = KlDivergence(dist, uniform);
-        doubleCache.returnItem(&dist);
-        doubleCache.returnItem(&uniform);
+            return std::log2(static_cast<double>(size));
+        std::vector<double> &childDist = *doubleCache.getItem();
+        Softmin(childEntropy, childDist);
+        std::vector<double> &expectedDist = *doubleCache.getItem();
+        expectedDist.resize(size);
+        std::generate(expectedDist.begin(), expectedDist.end(), [
+            size = static_cast<double>(size)
+        ]() { return 1 / size; });
+        if (size > 1 && prevAction.has_value() &&
+            std::find(actions.begin(), actions.end(), prevAction.value()) != actions.end())
+        {
+            for (auto i = 0; i < size; ++i)
+            {
+                if (actions[i] == prevAction.value())
+                    expectedDist[i] += probShift;
+                else
+                    expectedDist[i] -= probShift / (size - 1);
+            }
+        }
+        auto kl = KlDivergence(childDist, expectedDist);
+        doubleCache.returnItem(&childDist);
+        doubleCache.returnItem(&expectedDist);
         return kl;
     }
 
 public:
     PuzzleInferenceRuleSet<State, Action> ruleSet;
+    double probShift = 0.0;
 
     auto& SetRelative(bool val)
     {
         this->isRelative = val;
         return *this;
     }
+    
+    auto& SetShift(double val)
+    {
+        this->probShift = val;
+        return *this;
+    }
 
-    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookahead)
+    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookahead, 
+                                  std::optional<Action> prevAction = {})
     {
         if (env.GoalTest(state))
             return { 0.0, 0 };
@@ -93,10 +115,10 @@ public:
             return { inf, 0 };
         }
         std::vector<EntropyInfo> &childEntropyInfo = *entropyInfoCache.getItem();
-        for (auto &action: allActions)
+        for (const auto &action: allActions)
         {
             env.ApplyAction(state, action);
-            childEntropyInfo.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0));
+            childEntropyInfo.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0, action));
             env.UndoAction(state, action);
         }
         for (auto it = childEntropyInfo.begin(); it != childEntropyInfo.end(); )
@@ -128,7 +150,7 @@ public:
             childEntropy.reserve(childEntropyInfo.size());
             std::transform(childEntropyInfo.begin(), childEntropyInfo.end(), std::back_inserter(childEntropy),
                            [](EntropyInfo &info){ return info.value; });
-            entropyInfo = { min_childEntropyInfo.value + ImmediateEntropy(allActions, childEntropy),
+            entropyInfo = { min_childEntropyInfo.value + ImmediateEntropy(allActions, childEntropy, prevAction),
                             min_childEntropyInfo.depth + 1 };
         }
         entropyInfoCache.returnItem(&childEntropyInfo);
