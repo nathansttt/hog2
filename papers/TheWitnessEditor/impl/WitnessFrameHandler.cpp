@@ -40,26 +40,12 @@ std::vector<ColorItem> gProvidedColors = {
 
 Witness<puzzleWidth, puzzleHeight> editor;
 
-static size_t GetNumValidSolutions(bool isAdding)
+static inline size_t GetNumSolutions()
 {
-    size_t ret = 0;
-    if (isAdding)
-    {
-        for (const size_t &i: currentSolutionIndices)
-        {
-            if (editor.GoalTest(allSolutions[i]))
-                ++ret;
-        }
-    }
-    else
-    {
-        for (const auto &solution: allSolutions)
-        {
-            if (editor.GoalTest(solution))
-                ++ret;
-        }
-    }
-    return ret;
+    return std::accumulate(allSolutions.begin(), allSolutions.end(), 0,
+                           [&](const size_t &sum, const auto &solution){
+        return sum + static_cast<size_t>(editor.GoalTest(solution));
+    });
 }
 
 static void DrawGameViewport(unsigned long windowID)
@@ -100,18 +86,10 @@ static void DrawGameViewport(unsigned long windowID)
                         int y = editor.GetRegionFromY(i);
                         if (position != gLastPosition)
                         {
-                            bool isAdding;
-                            if (constraint == editor.GetRegionConstraint(x, y))
-                            {
-                                editor.RemoveRegionConstraint(x, y);
-                                isAdding = false;
-                            }
-                            else
-                            {
+                            (constraint == editor.GetRegionConstraint(x, y)) ?
+                                editor.RemoveRegionConstraint(x, y) :
                                 editor.AddRegionConstraint(x, y, constraint);
-                                isAdding = true;
-                            }
-                            gNumSolutions = GetNumValidSolutions(isAdding);
+                            gNumSolutions = GetNumSolutions();
                             gEntropy = GetCurrentEntropy(editor);
                         }
                         display.FrameRect(rect, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
@@ -150,16 +128,9 @@ static void DrawGameViewport(unsigned long windowID)
                                 gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                         .constraint;
                         if (position != gLastPosition) {
-                            bool isAdding = false;
-                            if (constraint == editor.pathConstraints[i])
-                                editor.pathConstraints[i] = kNoPathConstraint;
-                            else
-                            {
-                                editor.pathConstraints[i] = constraint;
-                                if (constraint != kNoPathConstraint)
-                                    isAdding = true;
-                            }
-                            gNumSolutions = GetNumValidSolutions(isAdding);
+                            editor.pathConstraints[i] = (constraint == editor.pathConstraints[i]) ?
+                                    kNoPathConstraint : constraint;
+                            gNumSolutions = GetNumSolutions();
                             gEntropy = GetCurrentEntropy(editor);
                         }
                         display.FrameRect(rect, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
