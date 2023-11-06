@@ -31,22 +31,23 @@ std::vector<TetrisItem> gTetrisPieces = {};
 
 static void InitTetrisPieces()
 {
-    for (unsigned i = 1; i <= 24; ++i)
+    for (auto i = 1; i <= 24; ++i)
     {
+        auto f = static_cast<float>(i);
         if (i <= 9)
         {
-            Graphics::point p = {(float)(-1.0f + i * 0.2), -0.75f};
-            gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
+            Graphics::point p = {-1.0f + f * 0.2f, -0.75f};
+            gTetrisPieces.push_back({i, p, 0.1f});
         }
         else if (i <= 18)
         {
-            Graphics::point p = {(float)(-1.0f + (i - 9) * 0.2), -0.55f};
-            gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
+            Graphics::point p = {-1.0f + (f - 9) * 0.2f, -0.55f};
+            gTetrisPieces.push_back({i, p, 0.1f});
         }
         else
         {
-            Graphics::point p = {(float)(-1.0f + (i - 18) * 0.2), -0.35f};
-            gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
+            Graphics::point p = {-1.0f + (f - 18) * 0.2f, -0.35f};
+            gTetrisPieces.push_back({i, p, 0.1f});
         }
     }
 }
@@ -54,7 +55,7 @@ static void InitTetrisPieces()
 static void InitPuzzle()
 {
     _27sck7g();
-    for (size_t i = 0; i < allSolutions.size(); ++i)
+    for (auto i = 0; i < allSolutions.size(); ++i)
     {
         if (witness.GoalTest(allSolutions[i])) {
             currentSolutionIndices.emplace_back(i);
@@ -65,7 +66,7 @@ static void InitPuzzle()
             entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
     });
     gNumSolutions = currentSolutionIndices.size();
-    entropy.SetShift(0.15).ruleSet.SetRules(gInferenceRules);
+    entropy.ruleSet.SetRules(gInferenceRules);
     gEntropy = GetCurrentEntropy(witness);
 }
 

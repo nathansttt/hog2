@@ -66,7 +66,6 @@ extern std::vector<ColorItem> gProvidedColors;
 
 extern int gSelectedEditorItem;
 extern unsigned gSelectedTetrisItem;
-extern unsigned gSelectedColor;
 extern bool recording;
 extern bool parallel;
 extern bool drawEditor;

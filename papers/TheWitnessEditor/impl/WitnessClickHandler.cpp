@@ -14,7 +14,7 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
     double ret = -1.0;
     if (gWithReplacement)
     {
-        for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
+        for (auto i = 0; i < witness.regionConstraintLocations.size(); ++i)
         {
             int x = witness.GetRegionFromX(i);
             int y = witness.GetRegionFromY(i);
@@ -46,7 +46,7 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
     }
     else
     {
-        for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
+        for (auto i = 0; i < witness.regionConstraintLocations.size(); ++i)
         {
             int x = witness.GetRegionFromX(i);
             int y = witness.GetRegionFromY(i);
@@ -73,7 +73,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
     double ret = -1.0;
     if (gWithReplacement)
     {
-        for (unsigned i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
+        for (auto i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
         {
             if (i == puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                 continue;
@@ -104,7 +104,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
     }
     else
     {
-        for (unsigned i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
+        for (auto i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
         {
             if (i == puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                 continue;
@@ -166,7 +166,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 {
                     if (gSelectedEditorItem < gRegionConstraintItems.size())
                     {
-                        for (unsigned i = 0; i < witness.regionConstraintLocations.size(); ++i)
+                        for (auto i = 0; i < witness.regionConstraintLocations.size(); ++i)
                         {
                             if (PointInRect(p, witness.regionConstraintLocations[i].second))
                             {
@@ -187,7 +187,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                     }
                     else
                     {
-                        for (unsigned i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
+                        for (auto i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
                         {
                             if (PointInRect(p, witness.pathConstraintLocations[i].second) &&
                                 i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
@@ -218,9 +218,10 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
         if (event == kMouseDown && viewport == cursorViewport)
         {
             bool selected = false;
-            for (unsigned i = 0; i < gRegionConstraintItems.size(); i++)
+            for (auto i = 0; i < gRegionConstraintItems.size(); ++i)
             {
-                if (PointInRect(p, {gRegionConstraintItems[i].c, gRegionConstraintItems[i].radius}))
+                const auto &[constraint, c, radius] = gRegionConstraintItems[i];
+                if (PointInRect(p, {c, radius}))
                 {
                     gSelectedEditorItem = static_cast<int>(i);
                     if (gSelectedEditorItem == 2)
@@ -231,33 +232,33 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         selectTetrisPiece = 0;
                     WitnessKeyboardHandler(windowID, kAnyModifier, 'x');
                     selected = true;
-                    double e = MaximizedEntropy(gRegionConstraintItems[i].constraint);
+                    double e = MaximizedEntropy(constraint);
                     std::cout << "max entropy: "
                         << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                     break;
                 }
             }
-            for (unsigned i = 0; i < gPathConstraintItems.size(); ++i)
+            for (auto i = 0; i < gPathConstraintItems.size(); ++i)
             {
-                if (PointInRect(p, {gPathConstraintItems[i].c, gPathConstraintItems[i].radius}))
+                const auto &[constraint, c, radius] = gPathConstraintItems[i];
+                if (PointInRect(p, {c, radius}))
                 {
                     gSelectedEditorItem = static_cast<int>(i + gRegionConstraintItems.size());
                     selected = true;
-                    double e = MaximizedEntropy(gPathConstraintItems[i].constraint);
+                    double e = MaximizedEntropy(constraint);
                     std::cout << "max entropy: "
                         << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                     break;
                 }
             }
             bool selectColor = false;
-            for (unsigned i = 0; i < gProvidedColors.size(); ++i)
+            for (const auto &[color, c, radius]: gProvidedColors)
             {
-                if (PointInRect(p, {gProvidedColors[i].c, gProvidedColors[i].radius}))
+                if (PointInRect(p, {c, radius}))
                 {
-                    gSelectedColor = i;
                     selectColor = true;
-                    gRegionConstraintItems[0].constraint.color = gProvidedColors[i].color;
-                    gRegionConstraintItems[1].constraint.color = gProvidedColors[i].color;
+                    gRegionConstraintItems[0].constraint.color = color;
+                    gRegionConstraintItems[1].constraint.color = color;
                     break;
                 }
             }
@@ -268,6 +269,8 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             if (PointInRect(p, Graphics::rect{0.49, -0.22, 0.7, -0.14}))
             {
                 witness.Reset();
+                UpdateSolutionIndices();
+                gEntropy = GetCurrentEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{-0.33, -0.10, -0.225, -0.04}))
             {
@@ -300,16 +303,16 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     {
         if (event == kMouseDown)
         {
-            for (unsigned i = 0; i < gTetrisPieces.size(); ++i)
+            for (const auto &[parameter, c, radius]: gTetrisPieces)
             {
-                if (PointInRect(p, {gTetrisPieces[i].c, gTetrisPieces[i].radius}))
+                if (PointInRect(p, {c, radius}))
                 {
-                    gSelectedTetrisItem = i + 1;
+                    gSelectedTetrisItem = parameter;
                     printf("Selected Tetris: %d\n", gSelectedTetrisItem);
                     if (selectTetrisPiece == 1)
-                        gRegionConstraintItems[2].constraint.parameter = static_cast<int>(gSelectedTetrisItem);
+                        gRegionConstraintItems[2].constraint.parameter = parameter;
                     else
-                        gRegionConstraintItems[3].constraint.parameter = static_cast<int>(gSelectedTetrisItem);
+                        gRegionConstraintItems[3].constraint.parameter = parameter;
                     selectTetrisPiece = 0;
                     WitnessKeyboardHandler(windowID, kAnyModifier, 'x');
                 }

@@ -23,8 +23,7 @@ ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, W
     if (state.path.empty())
         return UNKNOWN;
     const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
-    int currX = state.path.back().first;
-    int currY = state.path.back().second;
+    const auto &[currX, currY] = state.path.back();
     switch (action)
     {
     case kUp:
@@ -72,8 +71,7 @@ ActionType PathConstraintRule(const SearchEnvironment<WitnessState<width, height
     if (state.path.empty())
         return UNKNOWN;
     const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
-    int currX = state.path.back().first;
-    int currY = state.path.back().second;
+    const auto &[currX, currY] = state.path.back();
     switch (action)
     {
     case kUp:
@@ -106,6 +104,7 @@ ActionType PathConstraintRule(const SearchEnvironment<WitnessState<width, height
             return MUST_TAKE;
         if (witness->GetCannotCrossConstraint(true, currX - 1, currY))
             return CANNOT_TAKE;
+        break;
     }
     default:
         break;
@@ -130,8 +129,7 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
     if (start.first != 0 && start.second != 0)
         return UNKNOWN;
     std::pair<int, int> goal = witness->goal[0];
-    int currX = state.path.back().first;
-    int currY = state.path.back().second;
+    const auto &[currX, currY] = state.path.back();
     if (currX == 0 || currX == width) // vertical wall
     {
         if (currY < goal.second) // should choose kUP
@@ -183,21 +181,20 @@ template<int width, int height>
 static void GetTriangles(const Witness<width, height> &env, const WitnessState<width, height> &state,
                          const WitnessAction &action, unsigned num, std::vector<std::pair<int, int>> &pos)
 {
-    int currX = state.path.back().first;
-    int currY = state.path.back().second;
+    const auto &[currX, currY] = state.path.back();
     switch (action)
     {
     case kUp:
     {
         if (currX > 0)
         {
-            auto constraint = env.GetRegionConstraint(currX - 1, currY);
+            const auto &constraint = env.GetRegionConstraint(currX - 1, currY);
             if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX - 1, currY);
         }
         if (currX < width)
         {
-            auto constraint = env.GetRegionConstraint(currX, currY);
+            const auto &constraint = env.GetRegionConstraint(currX, currY);
             if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY);
         }
@@ -207,13 +204,13 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
     {
         if (currY > 0)
         {
-            auto constraint = env.GetRegionConstraint(currX, currY - 1);
+            const auto &constraint = env.GetRegionConstraint(currX, currY - 1);
             if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY - 1);
         }
         if (currY < height)
         {
-            auto constraint = env.GetRegionConstraint(currX, currY);
+            const auto &constraint = env.GetRegionConstraint(currX, currY);
             if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY);
         }
@@ -223,13 +220,13 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
     {
         if (currX > 0)
         {
-            auto constraint = env.GetRegionConstraint(currX - 1, currY - 1);
+            const auto &constraint = env.GetRegionConstraint(currX - 1, currY - 1);
             if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX - 1, currY - 1);
         }
         if (currX < width)
         {
-            auto constraint = env.GetRegionConstraint(currX, currY - 1);
+            const auto &constraint = env.GetRegionConstraint(currX, currY - 1);
             if (constraint.type == kTriangle && constraint.parameter == num)
                 pos.emplace_back(currX, currY - 1);
         }
@@ -259,16 +256,10 @@ static void GetTriangles(const Witness<width, height> &env, const WitnessState<w
 template<int width, int height>
 static unsigned CountOccupiedEdges(const WitnessState<width, height> &state, const std::pair<int, int> &pos)
 {
-    unsigned ret = 0;
-    if (state.OccupiedEdge(pos.first, pos.second, pos.first, pos.second + 1))
-        ++ret;
-    if (state.OccupiedEdge(pos.first, pos.second + 1, pos.first + 1, pos.second + 1))
-        ++ret;
-    if (state.OccupiedEdge(pos.first + 1, pos.second + 1, pos.first + 1, pos.second))
-        ++ret;
-    if (state.OccupiedEdge(pos.first + 1, pos.second, pos.first, pos.second))
-        ++ret;
-    return ret;
+    return static_cast<unsigned>(state.OccupiedEdge(pos.first, pos.second, pos.first, pos.second + 1)) +
+        static_cast<unsigned>(state.OccupiedEdge(pos.first, pos.second + 1, pos.first + 1, pos.second + 1)) +
+        static_cast<unsigned>(state.OccupiedEdge(pos.first + 1, pos.second + 1, pos.first + 1, pos.second)) +
+        static_cast<unsigned>(state.OccupiedEdge(pos.first + 1, pos.second, pos.first, pos.second));
 }
 
 template<int width, int height>
@@ -326,11 +317,11 @@ std::unordered_map<int,
                                  WitnessState<width, height> &, const WitnessAction &)>>
 witnessInferenceRules =
 {
-    {kSeparationRule,       std::function(SeparationRule<width, height>) },
-    {kPathConstraintRule,   std::function(PathConstraintRule<width, height>) },
-    {kTowardsGoalRule,      std::function(TowardsGoalRule<width, height>) },
+    {kSeparationRule, std::function(SeparationRule<width, height>) },
+    {kPathConstraintRule, std::function(PathConstraintRule<width, height>) },
+    {kTowardsGoalRule, std::function(TowardsGoalRule<width, height>) },
     {kRegionCompletionRule, std::function(RegionCompletionRule<width, height>) },
-    {kOneTriangleRule,      std::function(OneTriangleRule<width, height>) },
+    {kOneTriangleRule, std::function(OneTriangleRule<width, height>) },
 };
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */

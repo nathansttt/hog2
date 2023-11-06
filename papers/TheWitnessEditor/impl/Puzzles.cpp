@@ -133,9 +133,9 @@ void k87fxsr()
 
 void _27sck7g()
 {
-    for (int x = 0; x <= puzzleWidth; ++x)
+    for (auto x = 0; x <= puzzleWidth; ++x)
     {
-        for (int y = 0; y <= puzzleHeight; ++y)
+        for (auto y = 0; y <= puzzleHeight; ++y)
         {
             if ((x == 0 && y == 0) || (x == puzzleWidth && y == puzzleHeight))
                 continue;

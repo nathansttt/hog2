@@ -131,7 +131,7 @@ action SearchEnvironment<state,action>::GetAction(const state &s1, const state &
 		}
 	}
 	fprintf(stderr, "No legal move found.");
-	action act;
+	action act{};
 	return act;
 }
 
