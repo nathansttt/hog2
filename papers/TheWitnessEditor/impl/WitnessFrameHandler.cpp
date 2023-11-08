@@ -161,7 +161,6 @@ static void DrawGameViewport(unsigned long windowID)
             gLastPosition = Graphics::point{-1, -1};
             display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
-            gEntropy = GetCurrentEntropy(witness);
         }
         display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
                          Graphics::point{0.9, 1}, Colors::black, 0.075,

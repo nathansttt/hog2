@@ -54,19 +54,14 @@ static void InitTetrisPieces()
 
 static void InitPuzzle()
 {
+    entropy.ruleSet.SetRules(gInferenceRules);
     _27sck7g();
-    for (auto i = 0; i < allSolutions.size(); ++i)
-    {
-        if (witness.GoalTest(allSolutions[i])) {
-            currentSolutionIndices.emplace_back(i);
-        }
-    }
+    UpdateSolutionIndices();
     std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
         return entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[a], gLookahead).value >
-            entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
+               entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
     });
     gNumSolutions = currentSolutionIndices.size();
-    entropy.ruleSet.SetRules(gInferenceRules);
     gEntropy = GetCurrentEntropy(witness);
 }
 
