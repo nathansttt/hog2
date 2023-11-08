@@ -46,7 +46,7 @@ protected:
         if (p.size() != q.size())
             throw std::invalid_argument("Input vectors must be of the same size.");
         double divergence = 0.0;
-        for (size_t i = 0; i < p.size(); ++i)
+        for (auto i = 0; i < p.size(); ++i)
         {
             if (p[i] != 0.0 && q[i] != 0.0)
                 divergence += p[i] * std::log2(p[i] / q[i]);
@@ -94,14 +94,14 @@ public:
         this->isRelative = val;
         return *this;
     }
-    
+
     auto& SetShift(double val)
     {
         this->probShift = val;
         return *this;
     }
 
-    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookahead, 
+    virtual EntropyInfo Calculate(const SearchEnvironment<State, Action> &env, State &state, unsigned lookahead,
                                   std::optional<Action> prevAction = {})
     {
         if (env.GoalTest(state))
@@ -114,46 +114,46 @@ public:
             actCache.returnItem(&allActions);
             return { inf, 0 };
         }
-        std::vector<EntropyInfo> &childEntropyInfo = *entropyInfoCache.getItem();
+        std::vector<EntropyInfo> &children = *entropyInfoCache.getItem();
         for (const auto &action: allActions)
         {
             env.ApplyAction(state, action);
-            childEntropyInfo.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0, action));
+            children.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0, action));
             env.UndoAction(state, action);
         }
-        for (auto it = childEntropyInfo.begin(); it != childEntropyInfo.end(); )
+        for (auto it = children.begin(); it != children.end(); )
         {
             auto &info = *it;
             if (info.value == 0 && info.depth < lookahead)
                 return { 0.0, info.depth + 1 };
             if (info.value == inf && info.depth < lookahead)
-                it = childEntropyInfo.erase(it);
+                it = children.erase(it);
             else
                 ++it;
         }
-        EntropyInfo entropyInfo;
-        if (std::all_of(childEntropyInfo.begin(), childEntropyInfo.end(), [](EntropyInfo &info) {
+        EntropyInfo entropyInfo{};
+        if (std::all_of(children.begin(), children.end(), [](EntropyInfo &info) {
             return info.value == 0;
         }))
-            entropyInfo = { 0.0, childEntropyInfo[0].depth + 1 };
-        else if (std::all_of(childEntropyInfo.begin(), childEntropyInfo.end(), [](EntropyInfo &info) {
+            entropyInfo = { 0.0, children[0].depth + 1 };
+        else if (std::all_of(children.begin(), children.end(), [](EntropyInfo &info) {
             return info.value == inf;
         }))
-            entropyInfo = { inf, childEntropyInfo[0].depth + 1 };
+            entropyInfo = { inf, children[0].depth + 1 };
         else
         {
-            auto &min_childEntropyInfo = *std::min_element(childEntropyInfo.begin(), childEntropyInfo.end(),
-                                       [](EntropyInfo &info1, EntropyInfo &info2){
+            auto &minChild = *std::min_element(children.begin(), children.end(),
+                                               [](EntropyInfo &info1, EntropyInfo &info2) {
                 return info1.value < info2.value;
             });
             auto childEntropy = std::vector<double>();
-            childEntropy.reserve(childEntropyInfo.size());
-            std::transform(childEntropyInfo.begin(), childEntropyInfo.end(), std::back_inserter(childEntropy),
+            childEntropy.reserve(children.size());
+            std::transform(children.begin(), children.end(), std::back_inserter(childEntropy),
                            [](EntropyInfo &info){ return info.value; });
-            entropyInfo = { min_childEntropyInfo.value + ImmediateEntropy(allActions, childEntropy, prevAction),
-                            min_childEntropyInfo.depth + 1 };
+            entropyInfo = { minChild.value + ImmediateEntropy(allActions, childEntropy, prevAction),
+                            minChild.depth + 1 };
         }
-        entropyInfoCache.returnItem(&childEntropyInfo);
+        entropyInfoCache.returnItem(&children);
         actCache.returnItem(&allActions);
         return entropyInfo;
     }
