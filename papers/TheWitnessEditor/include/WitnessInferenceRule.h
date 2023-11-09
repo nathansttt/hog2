@@ -317,11 +317,11 @@ std::unordered_map<int,
                                  WitnessState<width, height> &, const WitnessAction &)>>
 witnessInferenceRules =
 {
-    {kSeparationRule, std::function(SeparationRule<width, height>) },
-    {kPathConstraintRule, std::function(PathConstraintRule<width, height>) },
-    {kTowardsGoalRule, std::function(TowardsGoalRule<width, height>) },
-    {kRegionCompletionRule, std::function(RegionCompletionRule<width, height>) },
-    {kOneTriangleRule, std::function(OneTriangleRule<width, height>) },
+    { kSeparationRule, std::function(SeparationRule<width, height>) },
+    { kPathConstraintRule, std::function(PathConstraintRule<width, height>) },
+    { kTowardsGoalRule, std::function(TowardsGoalRule<width, height>) },
+    { kRegionCompletionRule, std::function(RegionCompletionRule<width, height>) },
+    { kOneTriangleRule, std::function(OneTriangleRule<width, height>) },
 };
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */

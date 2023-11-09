@@ -2085,7 +2085,8 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
             int y = GetRegionFromY(r);
             rgbColor finishedColor(1.0 / 512.0, 1.0 / 512.0, 1.0 / 512.0);
             const auto &constraint = regionConstraints[x][y];
-            switch (constraint.type) {
+            switch (constraint.type) 
+            {
                 case kTriangle:
                 {
                     if (node.OccupiedEdge(x, y, x, y + 1) +
@@ -2142,13 +2143,13 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
                 default:
                     break;
             }
-            if (tetrisBlockCount[i] > 0 && tetrisBlockCount[i] != region.size())
-                return false;
         }
+        if (tetrisBlockCount[i] > 0 && tetrisBlockCount[i] != region.size())
+            return false;
     }
     if (constraintCount[kTetris] > 0)
     {
-        for (auto region: regionList)
+        for (const auto &region: regionList)
         {
             if (region->empty())
                 continue;
