@@ -1228,7 +1228,7 @@ public:
         auto es = std::string(R"(\{"type":\s*(\d+),\s*"color":\s*(\d+),\s*)") +
                   std::string(R"("orientation":\s*(?:null|\{"horizontal":\s*\d,\s*"vertical":\s*\d\}),\s*)") +
                   std::string(R"("shape":\s*(null|\{"width":\s*(\d),\s*)") +
-                  std::string(R"("grid":\s*(\[(?:(?:true|false)\s*,\s*)*(?:true|false)?\]),\s*free":\s*(true|false),\s*)") +
+                  std::string(R"("grid":\s*(\[(?:(?:true|false)\s*,\s*)*(?:true|false)?\]),\s*"free":\s*(true|false),\s*)") +
                   std::string(R"("negative":\s*(true|false)\}),\s*"count":\s*(\d+),\s*"triangle_count":\s*(\d+)\})");
         std::regex es_r(es);
         auto entities = e_match[1].str();
