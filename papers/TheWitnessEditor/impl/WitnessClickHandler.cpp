@@ -141,12 +141,12 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 {
                     if (witness.GoalTest(iws.ws))
                     {
-                        printf("Solved!\n");
+                        std::cout << "Solved!" << std::endl;
                         solved = true;
                     }
                     else
                     {
-                        printf("Invalid solution\n");
+                        std::cout << "Invalid solution" << std::endl;
                         iws.Reset();
                     }
                 }
@@ -154,8 +154,6 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             if (event == kMouseMove)
             {
                 witness.Move(p, iws);
-                //		if (iws.ws.path.size() > 0)
-                //			std::cout << iws.ws.path.back().first << ", " << iws.ws.path.back().second << "\n";
             }
         }
         else
@@ -207,6 +205,9 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             }
                         }
                     }
+                    double e = entropy.CalculateDeadEnd(witness, iws.ws, gLookahead).value;
+                    std::cout << "dead-end entropy: "
+                        << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                     UpdateSolutionIndices();
                 }
             }
@@ -308,7 +309,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 if (PointInRect(p, {c, radius}))
                 {
                     gSelectedTetrisItem = parameter;
-                    printf("Selected Tetris: %d\n", gSelectedTetrisItem);
+                    std::cout << "Selected Tetris: " << gSelectedTetrisItem << std::endl;
                     if (selectTetrisPiece == 1)
                         gRegionConstraintItems[2].constraint.parameter = parameter;
                     else
