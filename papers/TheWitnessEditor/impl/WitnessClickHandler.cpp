@@ -168,9 +168,8 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         {
                             if (PointInRect(p, witness.regionConstraintLocations[i].second))
                             {
-                                int x = witness.GetRegionFromX(i);
-                                int y = witness.GetRegionFromY(i);
-                                WitnessRegionConstraint constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
+                                auto [x, y] = witness.GetRegionXYFromIndex(i);
+                                const auto &constraint = gRegionConstraintItems[gSelectedEditorItem].constraint;
                                 if (constraint == witness.GetRegionConstraint(x, y))
                                     witness.RemoveRegionConstraint(x, y);
                                 else

@@ -82,8 +82,7 @@ static void DrawGameViewport(unsigned long windowID)
                     const auto &[position, rect] = editor.regionConstraintLocations[i];
                     if (PointInRect(cursor, rect))
                     {
-                        int x = editor.GetRegionFromX(i);
-                        int y = editor.GetRegionFromY(i);
+                        auto [x, y] = editor.GetRegionXYFromIndex(i);
                         if (position != gLastPosition)
                         {
                             (constraint == editor.GetRegionConstraint(x, y)) ?
@@ -103,8 +102,7 @@ static void DrawGameViewport(unsigned long windowID)
                     editor.DrawRegionConstraint(display, constraint, cursor);
                 if (gSuggestedLocation != std::numeric_limits<unsigned>::max())
                 {
-                    int x = editor.GetRegionFromX(static_cast<int>(gSuggestedLocation));
-                    int y = editor.GetRegionFromY(static_cast<int>(gSuggestedLocation));
+                    auto [x, y] = editor.GetRegionXYFromIndex(static_cast<int>(gSuggestedLocation));
                     display.DrawText((std::to_string(x) + ", " + std::to_string(y)).c_str(),
                                      Graphics::point{-0.57, 1}, Colors::black, 0.075,
                                      Graphics::textAlignLeft, Graphics::textBaselineBottom);

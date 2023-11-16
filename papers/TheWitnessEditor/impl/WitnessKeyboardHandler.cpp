@@ -173,6 +173,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     case '3':
     case '4':
     case '5':
+    case '6':
     {
         int index = std::stoi(&key) - 1;
         std::cout << static_cast<WitnessInferenceRule>(index);

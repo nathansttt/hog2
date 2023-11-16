@@ -18,6 +18,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include "SearchEnvironment.h"
 #include "vectorCache.h"
@@ -44,6 +45,8 @@ public:
     std::vector<std::pair<int, int>> path;
     std::bitset<(width + 1) * (height + 1)> occupiedCorners;
     std::bitset<(width + 1) * (height) + (width) * (height + 1)> occupiedEdges;
+    std::unordered_set<int> lhs; // left-hand-side regions
+    std::unordered_set<int> rhs; // right-hand-side regions
 
     WitnessState() { Reset(); }
 
@@ -59,6 +62,8 @@ public:
         path.resize(0);
         occupiedCorners.reset();
         occupiedEdges.reset();
+        lhs.clear();
+        rhs.clear();
     }
 
     bool Occupied(int which)
@@ -88,28 +93,52 @@ public:
     {
         if (path.size() < 2)
             return false;
-        auto &prevPos = path[path.size() - 2];
-        auto &currPos = path.back();
-        return ((currPos.first == 0 || currPos.first == width) && currPos.first == prevPos.first) ||
-            ((currPos.second == 0 || currPos.second == height) && currPos.second == prevPos.second);
+        const auto [x0, y0] = path[path.size() - 2];
+        const auto [x, y] = path.back();
+        return ((x == 0 || x == width) && x == x0) ||
+            ((y == 0 || y == height) && y == y0);
     }
 
     bool HitTheWall() const
     {
         if (path.size() <= 1)
             return false;
-        auto &p = path.back();
-        return (p.first == 0 || p.first == width) ||
-            (p.second == 0 || p.second == height);
+        const auto [x, y] = path.back();
+        return (x == 0 || x == width) || (y == 0 || y == height);
     }
 
-    bool Occupied(int x, int y) const { return occupiedCorners[y * (width + 1) + x]; }
+    bool Occupied(int x, int y) const
+    {
+        return occupiedCorners[y * (width + 1) + x];
+    }
 
-    void Occupy(int x, int y) { occupiedCorners.set(y * (width + 1) + x, true); }
+    bool Occupied(const std::pair<int, int> &p) const
+    {
+        const auto [x, y] = p;
+        return Occupied(x, y);
+    }
+
+    void Occupy(int x, int y)
+    {
+        occupiedCorners.set(y * (width + 1) + x, true);
+    }
+
+    void Occupy(const std::pair<int, int> &p)
+    {
+        const auto [x, y] = p;
+        Occupy(x, y);
+    }
 
     void Unoccupy(int x, int y)
     {
-        if (x >= 0 && x <= width && y >= 0 && y <= height) occupiedCorners.set(y * (width + 1) + x, false);
+        if (x >= 0 && x <= width && y >= 0 && y <= height)
+            occupiedCorners.set(y * (width + 1) + x, false);
+    }
+
+    void Unoccupy(const std::pair<int, int> &p)
+    {
+        const auto [x, y] = p;
+        Unoccupy(x, y);
     }
 
     bool OccupiedEdge(int x1, int y1, int x2, int y2) const
@@ -117,27 +146,41 @@ public:
         return occupiedEdges[GetEdgeHash<width, height>(x1, y1, x2, y2)];
     }
 
-    void OccupyEdge(int x1, int y1, int x2, int y2) { occupiedEdges.set(GetEdgeHash<width, height>(x1, y1, x2, y2)); }
+    bool OccupiedEdge(const std::pair<int, int> &p1, const std::pair<int, int> &p2) const
+    {
+        const auto [x1, y1] = p1;
+        const auto [x2, y2] = p2;
+        return OccupiedEdge(x1, y1, x2, y2);
+    }
+
+    void OccupyEdge(int x1, int y1, int x2, int y2)
+    {
+        occupiedEdges.set(GetEdgeHash<width, height>(x1, y1, x2, y2));
+    }
+
+    void OccupyEdge(const std::pair<int, int> &p1, const std::pair<int, int> &p2)
+    {
+        const auto [x1, y1] = p1;
+        const auto [x2, y2] = p2;
+        OccupyEdge(x1, y1, x2, y2);
+    }
 
     void UnoccupyEdge(int x1, int y1, int x2, int y2)
     {
         occupiedEdges.set(GetEdgeHash<width, height>(x1, y1, x2, y2), false);
     }
 
-    bool InGoal() const
+    void UnoccupyEdge(const std::pair<int, int> &p1, const std::pair<int, int> &p2)
     {
-        return path.back().first < 0 || path.back().first > width ||
-            path.back().second < 0 || path.back().second > height;
+        const auto [x1, y1] = p1;
+        const auto [x2, y2] = p2;
+        UnoccupyEdge(x1, y1, x2, y2);
     }
 
-    bool ShareThePath(const WitnessState<width, height> &state)
+    bool InGoal() const
     {
-        for (size_t i = 0; i < (path.size() < state.path.size() ? path.size() : state.path.size()); ++i)
-        {
-            if (path[i] != state.path[i])
-                return false;
-        }
-        return true;
+        const auto [x, y] = path.back();
+        return x < 0 || x > width || y < 0 || y > height;
     }
 };
 
@@ -657,6 +700,8 @@ public:
     bool GoalTest(const WitnessState<width, height> &node) const;
 
     bool RegionTest(const WitnessState<width, height> &node) const;
+
+    bool PathTest(const WitnessState<width, height> &node) const;
 
     uint64_t GetMaxHash() const;
 
@@ -1494,6 +1539,10 @@ public:
 
     int GetRegionFromY(int index) const { return index / width; }
 
+    std::pair<int, int> GetRegionXYFromIndex(int index) const {
+        return { GetRegionFromX(index), GetRegionFromY(index) };
+    }
+
     void LabelRegions(const WitnessState<width, height> &s) const;
 
     // this is mapped to a 2d map which has the region number for any x/y location
@@ -1744,114 +1793,158 @@ void Witness<width, height>::GetMouseActions(
 template<int width, int height>
 void Witness<width, height>::ApplyAction(std::pair<int, int> &s, WitnessAction a) const
 {
+    auto &[x, y] = s;
     switch (a)
     {
-    case kEnd:
-    {
-        int whichGoal = goalMap[GetPathIndex(s.first, s.second)];
-        assert(whichGoal != 0);
-        s = goal[whichGoal - 1];
-    }
-        //			//s.first++;
-        //			if (s.first == width)
-        //				s.first++;
-        //			else if (s.first == 0)
-        //				s.first--;
-        //			if (s.second == height)
-        //				s.second++;
-        //			else if (s.second == 0)
-        //				s.second--;
-        break;
-    case kStart:
-        break;
-    case kLeft:
-        s.first--;
-        break;
-    case kRight:
-        s.first++;
-        break;
-    case kUp:
-        s.second++;
-        break;
-    case kDown:
-        s.second--;
-        break;
+        case kEnd:
+        {
+            int whichGoal = goalMap[GetPathIndex(x, y)];
+            assert(whichGoal != 0);
+            s = goal[whichGoal - 1];
+            break;
+        }
+        case kStart:
+            break;
+        case kLeft:
+            --x;
+            break;
+        case kRight:
+            ++x;
+            break;
+        case kUp:
+            ++y;
+            break;
+        case kDown:
+            --y;
+            break;
     }
 }
 
 template<int width, int height>
 void Witness<width, height>::ApplyAction(WitnessState<width, height> &s, WitnessAction a) const
 {
-    auto len = s.path.size() + 1;
     switch (a)
     {
-    case kEnd:
-    {
-        int whichGoal = goalMap[GetPathIndex(s.path.back().first, s.path.back().second)];
-        assert(whichGoal != 0);
-        s.path.push_back(goal[whichGoal - 1]);
+        case kEnd:
+        {
+            const auto [x, y] = s.path.back();
+            int whichGoal = goalMap[GetPathIndex(x, y)];
+            assert(whichGoal != 0);
+            s.path.push_back(goal[whichGoal - 1]);
+            break; // don't occupy on end action
+        }
+        case kStart:
+        {
+            s.Reset();
+            s.path.push_back(start[0]);
+            s.Occupy(start[0]);
+            break;
+        }
+        case kUp:
+        {
+            auto p = s.path.back();
+            auto &[x, y] = p;
+            if (x > 0)
+                s.lhs.emplace(GetRegionIndex(x - 1, y));
+            if (x < width)
+                s.rhs.emplace(GetRegionIndex(x, y));
+            ++y;
+            s.Occupy(p);
+            s.OccupyEdge(p, s.path.back());
+            s.path.push_back(p);
+            break;
+        }
+        case kRight:
+        {
+            auto p = s.path.back();
+            auto &[x, y] = p;
+            if (y < height)
+                s.lhs.emplace(GetRegionIndex(x, y));
+            if (y > 0)
+                s.rhs.emplace(GetRegionIndex(x, y - 1));
+            ++x;
+            s.Occupy(p);
+            s.OccupyEdge(p, s.path.back());
+            s.path.push_back(p);
+            break;
+        }
+        case kDown:
+        {
+            auto p = s.path.back();
+            auto &[x, y] = p;
+            if (x < width)
+                s.lhs.emplace(GetRegionIndex(x, y - 1));
+            if (x > 0)
+                s.rhs.emplace(GetRegionIndex(x - 1, y - 1));
+            --p.second;
+            s.Occupy(p);
+            s.OccupyEdge(p, s.path.back());
+            s.path.push_back(p);
+            break;
+        }
+        case kLeft:
+        {
+            auto p = s.path.back();
+            auto &[x, y] = p;
+            if (y > 0)
+                s.lhs.emplace(GetRegionIndex(x - 1, y - 1));
+            if (y < height)
+                s.rhs.emplace(GetRegionIndex(x - 1, y));
+            --x;
+            s.Occupy(p);
+            s.OccupyEdge(p, s.path.back());
+            s.path.push_back(p);
+            break;
+        }
     }
-        //			if (s.path.back().first >= width)
-        //				s.path.push_back({width+1, s.path.back().second});
-        ////				s.first++;
-        //			else if (s.path.back().first <= 0)
-        //				s.path.push_back({-1, s.path.back().second});
-        //			//			s.first--;
-        //			else if (s.path.back().second >= height)
-        //				s.path.push_back({s.path.back().first, height+1});
-        ////				s.second++;
-        //			else if (s.path.back().second <= 0)
-        //				s.path.push_back({s.path.back().first, -1});
-        ////				s.second--;
-        //			else {
-        //				assert(false);
-        //				//s.path.push_back({width, height+1});
-        //			}
-        return; // don't occupy on end action
-    case kStart:
-        s.Reset();
-        s.path.push_back(start[0]);
-        s.Occupy(s.path.back().first, s.path.back().second);
-        break;
-    case kLeft:
-        s.path.push_back(s.path.back());
-        s.path.back().first--;
-        s.Occupy(s.path.back().first, s.path.back().second);
-        s.OccupyEdge(s.path[len - 1].first, s.path[len - 1].second, s.path[len - 2].first, s.path[len - 2].second);
-        break;
-    case kRight:
-        s.path.push_back(s.path.back());
-        s.path.back().first++;
-        s.Occupy(s.path.back().first, s.path.back().second);
-        s.OccupyEdge(s.path[len - 1].first, s.path[len - 1].second, s.path[len - 2].first, s.path[len - 2].second);
-        break;
-    case kUp:
-        s.path.push_back(s.path.back());
-        s.path.back().second++;
-        s.Occupy(s.path.back().first, s.path.back().second);
-        s.OccupyEdge(s.path[len - 1].first, s.path[len - 1].second, s.path[len - 2].first, s.path[len - 2].second);
-        break;
-    case kDown:
-        s.path.push_back(s.path.back());
-        s.path.back().second--;
-        s.Occupy(s.path.back().first, s.path.back().second);
-        s.OccupyEdge(s.path[len - 1].first, s.path[len - 1].second, s.path[len - 2].first, s.path[len - 2].second);
-        break;
-    }
-
-    // s.occupiedCorners.set(s.path.back().second*width+s.path.back().first); // y*width+x;
 }
 
 template<int width, int height>
 void Witness<width, height>::UndoAction(WitnessState<width, height> &s, WitnessAction a) const
 {
-    auto len = s.path.size();
-    if (s.path[len - 1].first <= width && s.path[len - 1].second <= height)
+    const auto &p = s.path.back();
+    if (p.first <= width && p.second <= height)
     {
-        if (len > 1)
-            s.UnoccupyEdge(
-                    s.path[len - 1].first, s.path[len - 1].second, s.path[len - 2].first, s.path[len - 2].second);
-        s.Unoccupy(s.path.back().first, s.path.back().second);
+        s.Unoccupy(p);
+        if (s.path.size() > 1)
+        {
+            const auto &p0 = s.path[s.path.size() - 2];
+            auto [x, y] = p0;
+            switch (a) {
+                case kUp:
+                {
+                    if (x > 0)
+                        s.lhs.erase(GetRegionIndex(x - 1, y));
+                    if (x < width)
+                        s.rhs.erase(GetRegionIndex(x, y));
+                    break;
+                }
+                case kRight:
+                {
+                    if (y < height)
+                        s.lhs.erase(GetRegionIndex(x, y));
+                    if (y > 0)
+                        s.rhs.erase(GetRegionIndex(x, y - 1));
+                }
+                case kDown:
+                {
+                    if (x < width)
+                        s.lhs.erase(GetRegionIndex(x, y - 1));
+                    if (x > 0)
+                        s.rhs.erase(GetRegionIndex(x - 1, y - 1));
+                }
+                case kLeft:
+                {
+                    if (y > 0)
+                        s.lhs.erase(GetRegionIndex(x - 1, y - 1));
+                    if (y < height)
+                        s.rhs.erase(GetRegionIndex(x - 1, y));
+                }
+                default:
+                    break;
+            }
+            s.UnoccupyEdge(p, p0);
+        }
     }
     s.path.pop_back();
 }
@@ -2064,16 +2157,26 @@ bool Witness<width, height>::GoalTest(
 template<int width, int height>
 bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node) const
 {
+    const auto &head = node.path.back();
+    if (std::find(goal.cbegin(), goal.cend(), head) != goal.cend())
+        return true;
     LabelRegions(node);
     for (auto i = 0; i < regionList.size(); ++i)
     {
         const auto &region = *regionList[i];
         if (region.empty())
             continue;
-        if (std::find(region.begin(), region.end(), width * height - 1) != region.end()) // skip the goal
+        if (std::find_if(region.cbegin(), region.cend(), [&](auto r) {
+            auto [x, y] = GetRegionXYFromIndex(r);
+            return goalMap[GetPathIndex(x, y)] != 0 ||
+                goalMap[GetPathIndex(x + 1, y)] != 0 ||
+                goalMap[GetPathIndex(x, y + 1)] != 0 ||
+                goalMap[GetPathIndex(x + 1, y + 1)] != 0;
+        }) != region.cend() &&
+            goalMap[GetPathIndex(head.first, head.second)] == 0)
             continue;
         bool found = false;
-        rgbColor c;
+        rgbColor c{};
         tetrisBlockCount.resize(regionList.size());
         tetrisBlockCount[i] = 0;
         for (auto r: region)
@@ -2085,7 +2188,7 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
             int y = GetRegionFromY(r);
             rgbColor finishedColor(1.0 / 512.0, 1.0 / 512.0, 1.0 / 512.0);
             const auto &constraint = regionConstraints[x][y];
-            switch (constraint.type) 
+            switch (constraint.type)
             {
                 case kTriangle:
                 {
@@ -2116,14 +2219,11 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
                     int count = 0;
                     for (auto rr: region)
                     {
-                        int xx = GetRegionFromX(rr);
-                        int yy = GetRegionFromY(rr);
-
-                        if (regionConstraints[xx][yy].type != kNoRegionConstraint &&
-                            constraint.color == regionConstraints[xx][yy].color)
+                        auto [xx, yy] = GetRegionXYFromIndex(rr);
+                        const auto &[type, _, color] = regionConstraints[xx][yy];
+                        if (type != kNoRegionConstraint && constraint.color == color)
                         {
-                            count++;
-                            if (count > 2)
+                            if (++count > 2)
                                 return false;
                         }
                     }
@@ -2153,15 +2253,21 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
         {
             if (region->empty())
                 continue;
-            if (std::find(region->begin(), region->end(), width * height - 1) != region->end())
+            if (std::find_if(region->cbegin(), region->cend(), [&](auto r) {
+                auto [x, y] = GetRegionXYFromIndex(r);
+                return goalMap[GetPathIndex(x, y)] != 0 ||
+                    goalMap[GetPathIndex(x + 1, y)] != 0 ||
+                    goalMap[GetPathIndex(x, y + 1)] != 0 ||
+                    goalMap[GetPathIndex(x + 1, y + 1)] != 0;
+            }) != region->cend() &&
+                goalMap[GetPathIndex(head.first, head.second)] == 0)
                 continue;
             bool hasNegations = false;
             tetrisBlocksInRegion.resize(0);
             uint64_t board = 0;
             for (auto r: *region)
             {
-                uint64_t x = GetRegionFromX(r);
-                uint64_t y = GetRegionFromY(r);
+                auto [x, y] = static_cast<std::pair<uint64_t, uint64_t>>(GetRegionXYFromIndex(r));
 
                 board |= ((1ull << (7 - x)) << ((7 - y) * 8));
 
@@ -2186,6 +2292,131 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
                 return false;
         }
     }
+    return true;
+}
+
+template<int width, int height>
+bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) const
+{
+    const auto &head = node.path.back();
+    if (std::find(goal.cbegin(), goal.cend(), head) != goal.cend() ||
+        goalMap[GetPathIndex(head.first, head.second)] != 0)
+        return true;
+    LabelRegions(node);
+    auto &rgs = *regionCache.getItem();
+    std::for_each(regionList.cbegin(), regionList.cend(), [&](const auto &region) {
+        if (std::find_if(region->cbegin(), region->cend(), [&](auto r) {
+            auto [x, y] = GetRegionXYFromIndex(r);
+            return goalMap[GetPathIndex(x, y)] != 0 ||
+                goalMap[GetPathIndex(x + 1, y)] != 0 ||
+                goalMap[GetPathIndex(x, y + 1)] != 0 ||
+                goalMap[GetPathIndex(x + 1, y + 1)] != 0;
+        }) != region->cend()) // only check incomplete regions
+            rgs.insert(rgs.end(), region->cbegin(), region->cend());
+    });
+    int found = 0;
+    rgbColor c{};
+    for (auto r: node.lhs)
+    {
+        if (std::find(rgs.cbegin(), rgs.cend(), r) == rgs.cend())
+            continue;
+        auto [x, y] = GetRegionXYFromIndex(r);
+        const auto &constraint = regionConstraints[x][y];
+        rgbColor finishedColor(1.0 / 512.0, 1.0 / 512.0, 1.0 / 512.0);
+        switch (constraint.type) {
+            case kSeparation:
+            {
+                if (found == 0)
+                {
+                    c = constraint.color;
+                    found = r;
+                }
+                else if (c != constraint.color)
+                {
+                    regionCache.returnItem(&rgs);
+                    return false;
+                }
+                break;
+            }
+            case kStar:
+            {
+                if (constraint.color == finishedColor)
+                    continue;
+                finishedColor = constraint.color;
+                unsigned count = 0;
+                for (auto rr: node.lhs)
+                {
+                    if (std::find(rgs.cbegin(), rgs.cend(), rr) == rgs.cend())
+                        continue;
+                    auto [xx, yy] = GetRegionXYFromIndex(rr);
+                    const auto &[type, _, color] = regionConstraints[xx][yy];
+                    if (type != kNoRegionConstraint && constraint.color == color)
+                    {
+                        if (++count > 2)
+                        {
+                            regionCache.returnItem(&rgs);
+                            return false;
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    found = 0;
+    c = rgbColor{};
+    for (auto r: node.rhs)
+    {
+        if (std::find(rgs.cbegin(), rgs.cend(), r) == rgs.cend())
+            continue;
+        auto [x, y] = GetRegionXYFromIndex(r);
+        const auto &constraint = regionConstraints[x][y];
+        rgbColor finishedColor(1.0 / 512.0, 1.0 / 512.0, 1.0 / 512.0);
+        switch (constraint.type) {
+            case kSeparation:
+            {
+                if (found == 0)
+                {
+                    c = constraint.color;
+                    found = r;
+                }
+                else if (c != constraint.color)
+                {
+                    regionCache.returnItem(&rgs);
+                    return false;
+                }
+                break;
+            }
+            case kStar:
+            {
+                if (constraint.color == finishedColor)
+                    continue;
+                finishedColor = constraint.color;
+                int count = 0;
+                for (auto rr: node.rhs)
+                {
+                    if (std::find(rgs.cbegin(), rgs.cend(), rr) == rgs.cend())
+                        continue;
+                    auto [xx, yy] = GetRegionXYFromIndex(rr);
+                    const auto &[type, _, color] = regionConstraints[xx][yy];
+                    if (type != kNoRegionConstraint && constraint.color == color)
+                    {
+                        if (++count > 2)
+                        {
+                            regionCache.returnItem(&rgs);
+                            return false;
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    regionCache.returnItem(&rgs);
     return true;
 }
 

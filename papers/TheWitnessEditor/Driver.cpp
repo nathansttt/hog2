@@ -92,7 +92,8 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle PCR", "Enable/Disable PathConstraintRule", kAnyModifier, '2');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle TGR", "Enable/Disable TowardsGoalRule", kAnyModifier, '3');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle RCR", "Enable/Disable RegionCompletionRule", kAnyModifier, '4');
-    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle OTR", "Enable/Disable OneTriangleRule", kAnyModifier, '5');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle APR", "Enable/Disable AlongThePathRule", kAnyModifier, '5');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle OTR", "Enable/Disable OneTriangleRule", kAnyModifier, '6');
 
     InstallCommandLineHandler(WitnessCLHandler, "-run", "-run", "Runs pre-set experiments.");
     InstallCommandLineHandler(WitnessCLHandler, "-test", "-test", "Basic test with MD heuristic");
