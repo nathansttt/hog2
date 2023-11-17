@@ -28,7 +28,7 @@ class PuzzleInferenceRuleSet {
     using InferenceRule = std::function<ActionType(const SearchEnvironment<State, Action>&,
             State&, const Action&)>;
 
-protected:
+public:
     mutable std::unordered_map<Action, ActionType> logics = {};
 
     virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env,
@@ -51,7 +51,6 @@ protected:
         });
     }
 
-public:
     std::unordered_map<int, InferenceRule> inferenceRules;
     std::vector<int> disabled;
 

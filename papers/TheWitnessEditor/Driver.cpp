@@ -22,7 +22,7 @@ bool parallel = false;
 unsigned long currBoard = 0;
 
 Witness<puzzleWidth, puzzleHeight> witness;
-Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
+WitnessPuzzleEntropy<puzzleWidth, puzzleHeight> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 auto gInferenceRules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
@@ -52,14 +52,33 @@ static void InitTetrisPieces()
     }
 }
 
+static void temp()
+{
+    witness.AddSeparationConstraint(0, 2, Colors::orange);
+    witness.AddSeparationConstraint(2, 3, Colors::orange);
+    witness.AddStarConstraint(1, 1, Colors::purple);
+    witness.AddStarConstraint(3, 1, Colors::purple);
+    witness.AddSeparationConstraint(3, 0, Colors::yellow);
+    witness.AddSeparationConstraint(1, 3, Colors::yellow);
+    witness.AddMustCrossConstraint(true, 0, 4);
+    witness.AddMustCrossConstraint(false, 2, 0);
+    witness.AddMustCrossConstraint(false, 3, 1);
+}
+
 static void InitPuzzle()
 {
     entropy.ruleSet.SetRules(gInferenceRules);
-    _27sck7g();
+//    _27sck7g();
+    temp();
     UpdateSolutionIndices();
     std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
-        return entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[a], gLookahead).value >
-               entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
+        return entropy
+            .SetRelative(gUseRelativeEntropy)
+            .Calculate(witness, allSolutions[a], gLookahead, std::nullopt)
+            .value >
+               entropy
+               .SetRelative(gUseRelativeEntropy)
+               .Calculate(witness, allSolutions[b], gLookahead, std::nullopt).value;
     });
     gNumSolutions = currentSolutionIndices.size();
     gEntropy = GetCurrentEntropy(witness);
@@ -86,6 +105,7 @@ void InstallHandlers()
 
     InstallKeyboardHandler(WitnessKeyboardHandler, "Editor", "Open editor", kAnyModifier, 'e');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Selection", "Open Tetris pieces panel", kAnyModifier, 'x');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Calculate", "Calculate entropy", kAnyModifier, 'c');
 
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle All Rules", "Enable/Disable Rules", kAnyModifier, '0');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle SPR", "Enable/Disable SeparationRule", kAnyModifier, '1');

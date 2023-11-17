@@ -182,13 +182,10 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             }
                         }
                     }
-                    else
-                    {
-                        for (auto i = 0; i < witness.pathConstraintLocations.size() - 1; ++i)
-                        {
+                    else {
+                        for (auto i = 0; i < witness.pathConstraintLocations.size() - 1; ++i) {
                             if (PointInRect(p, witness.pathConstraintLocations[i].second) &&
-                                i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
-                            {
+                                i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight) {
                                 WitnessPathConstraintType constraint =
                                         gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                                 .constraint;
@@ -199,14 +196,11 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                                 double e = MaximizedEntropy(constraint);
                                 std::cout << "location: " << i << std::endl;
                                 std::cout << "max entropy: "
-                                    << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
+                                          << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                                 break;
                             }
                         }
                     }
-                    double e = entropy.CalculateDeadEnd(witness, iws.ws, gLookahead).value;
-                    std::cout << "dead-end entropy: "
-                        << ((e == inf) ? "inf" : to_string_with_precision(e, 2)) << std::endl;
                     UpdateSolutionIndices();
                 }
             }

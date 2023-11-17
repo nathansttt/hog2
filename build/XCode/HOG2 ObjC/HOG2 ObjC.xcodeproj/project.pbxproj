@@ -857,6 +857,7 @@
 		4625C2662A4BD80B004A8BBC /* The Witness Editor copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "The Witness Editor copy-Info.plist"; path = "/Users/samarium/Documents/hog2/build/XCode/HOG2 ObjC/The Witness Editor copy-Info.plist"; sourceTree = "<absolute>"; };
 		462A615E2A8BE50200DBB8B3 /* Puzzles.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Puzzles.cpp; sourceTree = "<group>"; };
 		462A615F2A8BE50200DBB8B3 /* Puzzles.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Puzzles.h; sourceTree = "<group>"; };
+		46365EDF2B07171500F3861C /* WitnessPuzzleEntropy.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; path = WitnessPuzzleEntropy.h; sourceTree = "<group>"; };
 		4646C3EE2A6C8E0900E43949 /* PuzzleEntropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleEntropy.h; sourceTree = "<group>"; };
 		464726612A4DE836007A147D /* SolutionUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SolutionUtil.h; sourceTree = "<group>"; };
 		464726622A4DE8FE007A147D /* ExamineUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExamineUtil.h; sourceTree = "<group>"; };
@@ -1302,6 +1303,7 @@
 				462A615F2A8BE50200DBB8B3 /* Puzzles.h */,
 				464726612A4DE836007A147D /* SolutionUtil.h */,
 				4680D3F82A7824AA00593FD0 /* WitnessInferenceRule.h */,
+				46365EDF2B07171500F3861C /* WitnessPuzzleEntropy.h */,
 			);
 			path = include;
 			sourceTree = "<group>";

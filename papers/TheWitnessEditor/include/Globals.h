@@ -10,6 +10,7 @@
 
 #include "Witness.h"
 #include "WitnessInferenceRule.h"
+#include "WitnessPuzzleEntropy.h"
 #include "PuzzleEntropy.h"
 
 constexpr int puzzleWidth = 4;
@@ -18,7 +19,7 @@ const int minSolutions = 5000;
 constexpr double inf = std::numeric_limits<double>::max();
 extern unsigned long currBoard;
 extern Witness<puzzleWidth, puzzleHeight> witness;
-extern Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
+extern WitnessPuzzleEntropy<puzzleWidth, puzzleHeight> entropy;
 extern Witness<puzzleWidth, puzzleHeight> editor;
 extern InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 extern std::vector<Witness<puzzleWidth, puzzleHeight>> best;
@@ -79,7 +80,7 @@ extern std::unordered_map<int,
 
 inline double GetCurrentEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
 {
-    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead).value;
+    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead, std::nullopt).value;
 }
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H */

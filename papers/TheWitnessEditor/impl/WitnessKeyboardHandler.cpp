@@ -153,6 +153,16 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         }
         break;
     }
+    case 'c':
+    {
+        auto e = entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, iws.ws, gLookahead, std::nullopt);
+        std::cout << "Entropy of the current state: (" << ((e.value == inf) ? "inf" : to_string_with_precision(e.value)) 
+            << ", " << e.depth << ")" << std::endl;
+        e = entropy.CalculateDeadEndEntropy(witness, iws.ws, gLookahead);
+        std::cout << "Dead-end Entropy of the current state: (" << ((e.value == inf) ? "inf" : to_string_with_precision(e.value))
+            << ", " << e.depth << ")" << std::endl;
+        break;
+    }
     case '0':
     {
         if (entropy.ruleSet.disabled.empty())
