@@ -45,8 +45,6 @@ public:
     std::vector<std::pair<int, int>> path;
     std::bitset<(width + 1) * (height + 1)> occupiedCorners;
     std::bitset<(width + 1) * (height) + (width) * (height + 1)> occupiedEdges;
-    std::unordered_set<int> lhs; // left-hand-side regions
-    std::unordered_set<int> rhs; // right-hand-side regions
 
     WitnessState() { Reset(); }
 
@@ -62,8 +60,6 @@ public:
         path.resize(0);
         occupiedCorners.reset();
         occupiedEdges.reset();
-        lhs.clear();
-        rhs.clear();
     }
 
     bool Occupied(int which)
@@ -1843,12 +1839,7 @@ void Witness<width, height>::ApplyAction(WitnessState<width, height> &s, Witness
         case kUp:
         {
             auto p = s.path.back();
-            auto &[x, y] = p;
-            if (x > 0)
-                s.lhs.emplace(GetRegionIndex(x - 1, y));
-            if (x < width)
-                s.rhs.emplace(GetRegionIndex(x, y));
-            ++y;
+            ++p.second;
             s.Occupy(p);
             s.OccupyEdge(p, s.path.back());
             s.path.push_back(p);
@@ -1857,12 +1848,7 @@ void Witness<width, height>::ApplyAction(WitnessState<width, height> &s, Witness
         case kRight:
         {
             auto p = s.path.back();
-            auto &[x, y] = p;
-            if (y < height)
-                s.lhs.emplace(GetRegionIndex(x, y));
-            if (y > 0)
-                s.rhs.emplace(GetRegionIndex(x, y - 1));
-            ++x;
+            ++p.first;
             s.Occupy(p);
             s.OccupyEdge(p, s.path.back());
             s.path.push_back(p);
@@ -1871,11 +1857,6 @@ void Witness<width, height>::ApplyAction(WitnessState<width, height> &s, Witness
         case kDown:
         {
             auto p = s.path.back();
-            auto &[x, y] = p;
-            if (x < width)
-                s.lhs.emplace(GetRegionIndex(x, y - 1));
-            if (x > 0)
-                s.rhs.emplace(GetRegionIndex(x - 1, y - 1));
             --p.second;
             s.Occupy(p);
             s.OccupyEdge(p, s.path.back());
@@ -1885,12 +1866,7 @@ void Witness<width, height>::ApplyAction(WitnessState<width, height> &s, Witness
         case kLeft:
         {
             auto p = s.path.back();
-            auto &[x, y] = p;
-            if (y > 0)
-                s.lhs.emplace(GetRegionIndex(x - 1, y - 1));
-            if (y < height)
-                s.rhs.emplace(GetRegionIndex(x - 1, y));
-            --x;
+            --p.first;
             s.Occupy(p);
             s.OccupyEdge(p, s.path.back());
             s.path.push_back(p);
@@ -1907,44 +1883,7 @@ void Witness<width, height>::UndoAction(WitnessState<width, height> &s, WitnessA
     {
         s.Unoccupy(p);
         if (s.path.size() > 1)
-        {
-            const auto &p0 = s.path[s.path.size() - 2];
-            auto [x, y] = p0;
-            switch (a) {
-                case kUp:
-                {
-                    if (x > 0)
-                        s.lhs.erase(GetRegionIndex(x - 1, y));
-                    if (x < width)
-                        s.rhs.erase(GetRegionIndex(x, y));
-                    break;
-                }
-                case kRight:
-                {
-                    if (y < height)
-                        s.lhs.erase(GetRegionIndex(x, y));
-                    if (y > 0)
-                        s.rhs.erase(GetRegionIndex(x, y - 1));
-                }
-                case kDown:
-                {
-                    if (x < width)
-                        s.lhs.erase(GetRegionIndex(x, y - 1));
-                    if (x > 0)
-                        s.rhs.erase(GetRegionIndex(x - 1, y - 1));
-                }
-                case kLeft:
-                {
-                    if (y > 0)
-                        s.lhs.erase(GetRegionIndex(x - 1, y - 1));
-                    if (y < height)
-                        s.rhs.erase(GetRegionIndex(x - 1, y));
-                }
-                default:
-                    break;
-            }
-            s.UnoccupyEdge(p, p0);
-        }
+            s.UnoccupyEdge(p, s.path[s.path.size() - 2]);
     }
     s.path.pop_back();
 }
@@ -2298,6 +2237,8 @@ bool Witness<width, height>::RegionTest(const WitnessState<width, height> &node)
 template<int width, int height>
 bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) const
 {
+    if (node.path.size() <= 1)
+        return true;
     const auto &head = node.path.back();
     if (std::find(goal.cbegin(), goal.cend(), head) != goal.cend() ||
         goalMap[GetPathIndex(head.first, head.second)] != 0)
@@ -2316,7 +2257,45 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
     });
     int found = 0;
     rgbColor c{};
-    for (auto r: node.lhs)
+    auto lhs = std::unordered_set<int>{};
+    auto rhs = std::unordered_set<int>{};
+    auto [x0, y0] = node.path[0];
+    for (auto i = 1; i < node.path.size(); ++i)
+    {
+        auto [x1, y1] = node.path[i];
+        assert(!(x1 == x0 + 1 && y1 == y0 + 1));
+        if (x1 == x0 + 1) // right
+        {
+            if (y0 < height)
+                lhs.emplace(GetRegionIndex(x0, y0));
+            if (y0 > 0)
+                rhs.emplace(GetRegionIndex(x0, y0 - 1));
+        }
+        if (x1 == x0 - 1) // left
+        {
+            if (y0 > 0)
+                lhs.emplace(GetRegionIndex(x0 - 1, y0 - 1));
+            if (y0 < height)
+                rhs.emplace(GetRegionIndex(x0 - 1, y0));
+        }
+        if (y1 == y0 + 1) // up
+        {
+            if (x0 > 0)
+                lhs.emplace(GetRegionIndex(x0 - 1, y0));
+            if (x0 < width)
+                rhs.emplace(GetRegionIndex(x0, y0));
+        }
+        if (y1 == y0 - 1) // down
+        {
+            if (x0 < width)
+                lhs.emplace(GetRegionIndex(x0, y0 - 1));
+            if (x0 > 0)
+                rhs.emplace(GetRegionIndex(x0 - 1, y0 - 1));
+        }
+        x0 = x1;
+        y0 = y1;
+    }
+    for (auto r: lhs)
     {
         if (std::find(rgs.cbegin(), rgs.cend(), r) == rgs.cend())
             continue;
@@ -2344,7 +2323,7 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
                     continue;
                 finishedColor = constraint.color;
                 unsigned count = 0;
-                for (auto rr: node.lhs)
+                for (auto rr: lhs)
                 {
                     if (std::find(rgs.cbegin(), rgs.cend(), rr) == rgs.cend())
                         continue;
@@ -2367,7 +2346,7 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
     }
     found = 0;
     c = rgbColor{};
-    for (auto r: node.rhs)
+    for (auto r: rhs)
     {
         if (std::find(rgs.cbegin(), rgs.cend(), r) == rgs.cend())
             continue;
@@ -2395,7 +2374,7 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
                     continue;
                 finishedColor = constraint.color;
                 int count = 0;
-                for (auto rr: node.rhs)
+                for (auto rr: rhs)
                 {
                     if (std::find(rgs.cbegin(), rgs.cend(), rr) == rgs.cend())
                         continue;

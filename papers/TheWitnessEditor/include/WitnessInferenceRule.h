@@ -171,7 +171,9 @@ ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, heig
     const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
     witness->ApplyAction(state, action);
     bool regionSatisfied = true;
-    if (state.HitTheWall() && !state.IsAlongTheWall())
+    auto [x, y] = state.path.back();
+    if ((state.HitTheWall() && !state.IsAlongTheWall()) ||
+        witness->goalMap[witness->GetPathIndex(x, y)] != 0)
         regionSatisfied = witness->RegionTest(state);
     witness->UndoAction(state, action);
     return regionSatisfied ? UNKNOWN : CANNOT_TAKE;
@@ -303,7 +305,7 @@ enum WitnessInferenceRule {
     kOneTriangleRule,
 //    kTwoTrianglesRule,
 //    kThreeTrianglesRule,
-    kInferenceRuleCount
+    kInferenceRuleCount [[maybe_unused]]
 };
 
 inline std::ostream &operator<<(std::ostream &os, WitnessInferenceRule wir)
