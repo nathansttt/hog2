@@ -22,39 +22,39 @@ ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, W
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
     const auto &[currX, currY] = state.path.back();
     switch (action)
     {
         case kUp:
         {
             if (currX > 0 && currX < width
-                && CompareSC(witness->GetRegionConstraint(currX - 1, currY),
-                             witness->GetRegionConstraint(currX, currY)))
+                && CompareSC(witness.GetRegionConstraint(currX - 1, currY),
+                             witness.GetRegionConstraint(currX, currY)))
                 return MUST_TAKE;
             break;
         }
         case kRight:
         {
             if (currY > 0 && currY < height
-                && CompareSC(witness->GetRegionConstraint(currX, currY),
-                             witness->GetRegionConstraint(currX, currY - 1)))
+                && CompareSC(witness.GetRegionConstraint(currX, currY),
+                             witness.GetRegionConstraint(currX, currY - 1)))
                 return MUST_TAKE;
             break;
         }
         case kDown:
         {
             if (currX > 0 && currX < width
-                && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
-                             witness->GetRegionConstraint(currX, currY - 1)))
+                && CompareSC(witness.GetRegionConstraint(currX - 1, currY - 1),
+                             witness.GetRegionConstraint(currX, currY - 1)))
                 return MUST_TAKE;
             break;
         }
         case kLeft:
         {
             if (currY > 0 && currY < height
-                && CompareSC(witness->GetRegionConstraint(currX - 1, currY - 1),
-                             witness->GetRegionConstraint(currX - 1, currY)))
+                && CompareSC(witness.GetRegionConstraint(currX - 1, currY - 1),
+                             witness.GetRegionConstraint(currX - 1, currY)))
                 return MUST_TAKE;
             break;
         }
@@ -70,39 +70,39 @@ ActionType PathConstraintRule(const SearchEnvironment<WitnessState<width, height
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
     const auto &[currX, currY] = state.path.back();
     switch (action)
     {
         case kUp:
         {
-            if (witness->GetMustCrossConstraint(false, currX, currY))
+            if (witness.GetMustCrossConstraint(false, currX, currY))
                 return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(false, currX, currY))
+            if (witness.GetCannotCrossConstraint(false, currX, currY))
                 return CANNOT_TAKE;
             break;
         }
         case kRight:
         {
-            if (witness->GetMustCrossConstraint(true, currX, currY))
+            if (witness.GetMustCrossConstraint(true, currX, currY))
                 return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(true, currX, currY))
+            if (witness.GetCannotCrossConstraint(true, currX, currY))
                 return CANNOT_TAKE;
             break;
         }
         case kDown:
         {
-            if (witness->GetMustCrossConstraint(false, currX, currY - 1))
+            if (witness.GetMustCrossConstraint(false, currX, currY - 1))
                 return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(false, currX, currY - 1))
+            if (witness.GetCannotCrossConstraint(false, currX, currY - 1))
                 return CANNOT_TAKE;
             break;
         }
         case kLeft:
         {
-            if (witness->GetMustCrossConstraint(true, currX - 1, currY))
+            if (witness.GetMustCrossConstraint(true, currX - 1, currY))
                 return MUST_TAKE;
-            if (witness->GetCannotCrossConstraint(true, currX - 1, currY))
+            if (witness.GetCannotCrossConstraint(true, currX - 1, currY))
                 return CANNOT_TAKE;
             break;
         }
@@ -122,13 +122,13 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
         return MUST_TAKE;
     if (!state.HitTheWall() || state.IsAlongTheWall())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
-    if (witness->start.size() > 1 || witness->goal.size() > 1)
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
+    if (witness.start.size() > 1 || witness.goal.size() > 1)
         return UNKNOWN;
-    std::pair<int, int> start = witness->start[0];
+    std::pair<int, int> start = witness.start[0];
     if (start.first != 0 && start.second != 0)
         return UNKNOWN;
-    std::pair<int, int> goal = witness->goal[0];
+    std::pair<int, int> goal = witness.goal[0];
     const auto &[currX, currY] = state.path.back();
     if (currX == 0 || currX == width) // vertical wall
     {
@@ -168,14 +168,14 @@ ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, heig
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
-    witness->ApplyAction(state, action);
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
+    witness.ApplyAction(state, action);
     bool regionSatisfied = true;
     auto [x, y] = state.path.back();
     if ((state.HitTheWall() && !state.IsAlongTheWall()) ||
-        witness->goalMap[witness->GetPathIndex(x, y)] != 0)
-        regionSatisfied = witness->RegionTest(state);
-    witness->UndoAction(state, action);
+        witness.goalMap[witness.GetPathIndex(x, y)] != 0)
+        regionSatisfied = witness.RegionTest(state);
+    witness.UndoAction(state, action);
     return regionSatisfied ? UNKNOWN : CANNOT_TAKE;
 }
 
@@ -185,10 +185,10 @@ ActionType AloneThePathRule(const SearchEnvironment<WitnessState<width, height>,
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
-    witness->ApplyAction(state, action);
-    bool satisfied = witness->PathTest(state);
-    witness->UndoAction(state, action);
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
+    witness.ApplyAction(state, action);
+    bool satisfied = witness.PathTest(state);
+    witness.UndoAction(state, action);
     return satisfied ? UNKNOWN : CANNOT_TAKE;
 }
 
@@ -283,16 +283,16 @@ ActionType OneTriangleRule(const SearchEnvironment<WitnessState<width, height>, 
 {
     if (state.path.empty())
         return UNKNOWN;
-    const auto witness = dynamic_cast<const Witness<width, height> *>(&env);
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
     std::vector<std::pair<int, int>> pos;
-    GetTriangles(*witness, state, action, 1, pos);
-    witness->ApplyAction(state, action);
+    GetTriangles(witness, state, action, 1, pos);
+    witness.ApplyAction(state, action);
     for (auto &p: pos)
     {
         if (CountOccupiedEdges(state, p) > 1)
             return CANNOT_TAKE;
     }
-    witness->UndoAction(state, action);
+    witness.UndoAction(state, action);
     return UNKNOWN;
 }
 

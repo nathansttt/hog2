@@ -19,25 +19,26 @@ class WitnessPuzzleEntropy : public Entropy<WitnessState<width, height>, Witness
     using H = Entropy<WitnessState<width, height>, WitnessAction>;
 public:
     
-    EntropyInfo CalculateDeadEndEntropy(const Witness<width, height> &env,
+    EntropyInfo CalculateDeadEndEntropy(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
                                         WitnessState<width, height> &state,
-                                        unsigned lookahead)
+                                        unsigned lookahead) override
     {
+        const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
         const auto &head = state.path.back();
-        if (env.GoalTest(state))
+        if (witness.GoalTest(state))
             return { H::inf, 0 };
         else if (!state.path.empty() && (
-                 std::find(env.goal.cbegin(), env.goal.cend(), head) != env.goal.cend() ||
-            env.goalMap[env.GetPathIndex(head.first, head.second)] != 0))
+                 std::find(witness.goal.cbegin(), witness.goal.cend(), head) != witness.goal.cend() ||
+                     witness.goalMap[witness.GetPathIndex(head.first, head.second)] != 0))
             return { 0.0, 0 };
         std::vector<WitnessAction> &allActions = *H::actCache.getItem();
-        env.GetActions(state, allActions);
+        witness.GetActions(state, allActions);
         if (allActions.empty())
         {
             H::actCache.returnItem(&allActions);
             return { 0.0, 0 };
         }
-        H::ruleSet.UpdateActionLogics(env, state, allActions);
+        H::ruleSet.UpdateActionLogics(witness, state, allActions);
         auto &logics = H::ruleSet.logics;
         if (std::count_if(logics.begin(), logics.end(), [](const auto &logic) {
             return logic.second == MUST_TAKE;
@@ -51,10 +52,10 @@ public:
         std::vector<EntropyInfo> &children = *H::entropyInfoCache.getItem();
         for (const auto &action: allActions)
         {
-            env.ApplyAction(state, action);
+            witness.ApplyAction(state, action);
             children.emplace_back(logics[action] == CANNOT_TAKE ? EntropyInfo{ 0.0, 0 } :
                     CalculateDeadEndEntropy(env, state, (lookahead > 0) ? lookahead - 1 : 0));
-            env.UndoAction(state, action);
+            witness.UndoAction(state, action);
         }
         EntropyInfo entropyInfo{};
         if (std::all_of(children.begin(), children.end(), [](EntropyInfo &info) {

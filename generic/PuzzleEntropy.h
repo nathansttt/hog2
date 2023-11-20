@@ -158,6 +158,12 @@ public:
         actCache.returnItem(&allActions);
         return entropyInfo;
     }
+    
+    virtual EntropyInfo CalculateDeadEndEntropy(const SearchEnvironment<State, Action> &env, State &state,
+                                                unsigned lookahead)
+    {
+        return { 0.0, 0 };
+    }
 };
 
 #endif /* HOG2_GENERIC_PUZZLE_ENTROPY_H */
