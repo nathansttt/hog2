@@ -27,7 +27,8 @@ extern std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
 extern std::vector<size_t> currentSolutionIndices;
 extern size_t gNumSolutions;
 extern bool solved;
-extern double gEntropy;
+extern EntropyInfo gEntropy;
+extern AdversaryEntropyInfo gAdvEntropy;
 extern unsigned gLookahead;
 extern bool gWithReplacement;
 extern unsigned gSuggestedLocation;
@@ -78,9 +79,16 @@ extern std::unordered_map<int,
         std::function<ActionType(const SearchEnvironment<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> &,
                                  WitnessState<puzzleWidth, puzzleHeight> &, const WitnessAction &)>> gInferenceRules;
 
-inline double GetCurrentEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
+inline auto GetCurrentEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
 {
-    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead, std::nullopt).value;
+    return entropy.SetRelative(gUseRelativeEntropy).Calculate(env, iws.ws, gLookahead, std::nullopt);
+}
+
+inline auto GetCurrentAdvEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
+{
+    return iws.ws.path.empty() ?
+        entropy.CalculateAdversaryEntropy(env, iws.ws, gLookahead) :
+        entropy.CalculatePartialAdversaryEntropy(env, iws.ws, gLookahead);
 }
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H */

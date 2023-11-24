@@ -21,10 +21,11 @@ void GetAllSolutions()
 void UpdateSolutionIndices()
 {
     currentSolutionIndices.clear();
-    for (auto i = 0; i < allSolutions.size(); i++)
+    for (auto i = 0; i < allSolutions.size(); ++i)
     {
         if (witness.GoalTest(allSolutions[i]))
             currentSolutionIndices.emplace_back(i);
     }
     gEntropy = GetCurrentEntropy(witness);
+    gAdvEntropy = GetCurrentAdvEntropy(witness);
 }

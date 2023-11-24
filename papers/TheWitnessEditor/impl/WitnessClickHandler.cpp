@@ -21,7 +21,7 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
             if (constraint == witness.GetRegionConstraint(x, y))
             {
                 witness.RemoveRegionConstraint(x, y);
-                double e = GetCurrentEntropy(witness);
+                double e = GetCurrentEntropy(witness).value;
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -33,7 +33,7 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
             {
                 auto c = WitnessRegionConstraint(editor.GetRegionConstraint(x, y));
                 witness.AddRegionConstraint(x, y, constraint);
-                double e = GetCurrentEntropy(witness);
+                double e = GetCurrentEntropy(witness).value;
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -53,7 +53,7 @@ static double MaximizedEntropy(const WitnessRegionConstraint &constraint)
             if (witness.GetRegionConstraint(x, y).type == kNoRegionConstraint)
             {
                 witness.AddRegionConstraint(x, y, constraint);
-                double e = GetCurrentEntropy(witness);
+                double e = GetCurrentEntropy(witness).value;
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -80,7 +80,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
             if (constraint == witness.pathConstraints[i])
             {
                 witness.pathConstraints[i] = kNoPathConstraint;
-                double e = GetCurrentEntropy(witness);
+                double e = GetCurrentEntropy(witness).value;
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -92,7 +92,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
             {
                 auto p = witness.pathConstraints[i];
                 witness.pathConstraints[i] = constraint;
-                double e = GetCurrentEntropy(witness);
+                double e = GetCurrentEntropy(witness).value;
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -111,7 +111,7 @@ static double MaximizedEntropy(const WitnessPathConstraintType &constraint)
             if (witness.pathConstraints[i] == kNoPathConstraint)
             {
                 witness.pathConstraints[i] = constraint;
-                double e = GetCurrentEntropy(witness);
+                double e = GetCurrentEntropy(witness).value;
                 if (e > ret && e != inf)
                 {
                     ret = e;
@@ -265,11 +265,13 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 witness.Reset();
                 UpdateSolutionIndices();
                 gEntropy = GetCurrentEntropy(witness);
+                gAdvEntropy = GetCurrentAdvEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{-0.33, -0.10, -0.225, -0.04}))
             {
                 gUseRelativeEntropy ^= true;
                 gEntropy = GetCurrentEntropy(witness);
+                gAdvEntropy = GetCurrentAdvEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{0.26, -0.10, 0.31, -0.03}))
             {
@@ -285,11 +287,18 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         break;
                 }
                 gEntropy = GetCurrentEntropy(witness);
+                gAdvEntropy = GetCurrentAdvEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{0.7, -0.10, 0.805, -0.03}))
             {
                 gWithReplacement ^= true;
             }
+            std::cout << "Entropy: ("
+                << ((gEntropy.value == inf) ? "inf" : to_string_with_precision(gEntropy.value, 2))
+                << ", " << gEntropy.depth << ")" << std::endl;
+            std::cout << "Adv Entropy: ("
+                << ((gAdvEntropy.value == inf) ? "inf" : to_string_with_precision(gAdvEntropy.value, 2))
+                << ", " << gAdvEntropy.depth << ")" << std::endl;
         }
         break;
     }

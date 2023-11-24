@@ -155,12 +155,14 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
     case 'c':
     {
-        auto e = entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, iws.ws, gLookahead, std::nullopt);
-        std::cout << "Entropy of the current state: (" << ((e.value == inf) ? "inf" : to_string_with_precision(e.value)) 
+        auto e = GetCurrentEntropy(witness);
+        std::cout << "Entropy of the current state: ("
+            << ((e.value == inf) ? "inf" :to_string_with_precision(e.value, 2))
             << ", " << e.depth << ")" << std::endl;
-        e = entropy.CalculateDeadEndEntropy(witness, iws.ws, gLookahead);
-        std::cout << "Dead-end Entropy of the current state: (" << ((e.value == inf) ? "inf" : to_string_with_precision(e.value))
-            << ", " << e.depth << ")" << std::endl;
+        auto ae = GetCurrentAdvEntropy(witness);
+        std::cout << "Dead-end Entropy of the current state: ("
+            << ((ae.value == inf) ? "inf" : to_string_with_precision(ae.value, 2))
+            << ", " << ae.depth << ")" << std::endl;
         break;
     }
     case '0':
@@ -176,6 +178,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             std::cout << "All inference rules are enabled." << std::endl;
         }
         gEntropy = GetCurrentEntropy(witness);
+        gAdvEntropy = GetCurrentAdvEntropy(witness);
         break;
     }
     case '1':
@@ -194,6 +197,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         }
         else std::cout << " disabled" << std::endl;
         gEntropy = GetCurrentEntropy(witness);
+        gAdvEntropy = GetCurrentAdvEntropy(witness);
         break;
     }
     default:

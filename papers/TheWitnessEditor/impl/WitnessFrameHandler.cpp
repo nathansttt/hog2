@@ -23,7 +23,8 @@ unsigned gSelectedTetrisItem = 0;
 static Graphics::point gLastPosition = Graphics::point{-1, -1};
 std::vector<size_t> currentSolutionIndices = {};
 size_t gNumSolutions = 0;
-double gEntropy = 0.0;
+EntropyInfo gEntropy{};
+AdversaryEntropyInfo gAdvEntropy{};
 bool gUseRelativeEntropy = true;
 unsigned gLookahead = 0;
 
@@ -65,9 +66,13 @@ static void DrawGameViewport(unsigned long windowID)
     else
     {
         editor.Draw(display);
-        display.DrawText("# of solutions: ", Graphics::point{0.75, 0.9}, Colors::black, 0.075,
+        display.DrawText("# of solutions: ", Graphics::point{0.75, -0.95}, Colors::black, 0.075,
+                         Graphics::textAlignRight, Graphics::textBaselineTop);
+        display.DrawText((gUseRelativeEntropy ? "ReMUSE: " : "MUSE: "),
+                         Graphics::point{0.7, 0.9}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
-        display.DrawText("Entropy: ", Graphics::point{0.7, 1}, Colors::black, 0.07,
+        display.DrawText("MUAE: ",
+                         Graphics::point{0.7, 1}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
         display.DrawText("Suggestion: ", Graphics::point{-1, 1}, Colors::black, 0.075,
                          Graphics::textAlignLeft, Graphics::textBaselineBottom);
@@ -90,6 +95,7 @@ static void DrawGameViewport(unsigned long windowID)
                                 editor.AddRegionConstraint(x, y, constraint);
                             gNumSolutions = GetNumSolutions();
                             gEntropy = GetCurrentEntropy(editor);
+                            gAdvEntropy = GetCurrentAdvEntropy(editor);
                         }
                         display.FrameRect(rect, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         editor.DrawRegionConstraint(display, constraint, position);
@@ -130,6 +136,7 @@ static void DrawGameViewport(unsigned long windowID)
                                     kNoPathConstraint : constraint;
                             gNumSolutions = GetNumSolutions();
                             gEntropy = GetCurrentEntropy(editor);
+                            gAdvEntropy = GetCurrentAdvEntropy(editor);
                         }
                         display.FrameRect(rect, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         gLastPosition = position;
@@ -151,16 +158,19 @@ static void DrawGameViewport(unsigned long windowID)
                     display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
                                      Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
-            display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.9, 0.9}, Colors::black, 0.075,
-                             Graphics::textAlignRight, Graphics::textBaselineBottom);
+            display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.915, -0.95},
+                             Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineTop);
         }
         else
         {
             gLastPosition = Graphics::point{-1, -1};
-            display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.9, 0.9},
-                             Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineBottom);
+            display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.915, -0.95},
+                             Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineTop);
         }
-        display.DrawText((gEntropy != inf) ? to_string_with_precision(gEntropy, 2).c_str() : "inf",
+        display.DrawText((gEntropy.value != inf) ? to_string_with_precision(gEntropy.value, 2).c_str() : "inf",
+                         Graphics::point{0.9, 0.9}, Colors::black, 0.075,
+                         Graphics::textAlignRight, Graphics::textBaselineBottom);
+        display.DrawText((gAdvEntropy.value != inf) ? to_string_with_precision(gAdvEntropy.value, 2).c_str() : "inf",
                          Graphics::point{0.9, 1}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
     }

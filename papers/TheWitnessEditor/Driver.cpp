@@ -82,6 +82,7 @@ static void InitPuzzle()
     });
     gNumSolutions = currentSolutionIndices.size();
     gEntropy = GetCurrentEntropy(witness);
+    gAdvEntropy = GetCurrentAdvEntropy(witness);
 }
 
 /**

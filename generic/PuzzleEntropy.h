@@ -32,11 +32,11 @@ protected:
 
     static void Softmin(const std::vector<double> &vars, std::vector<double> &ret)
     {
-        double sum = std::accumulate(vars.begin(), vars.end(), 0.0, [](double r, double i) {
+        double sum = std::accumulate(vars.cbegin(), vars.cend(), 0.0, [](double r, double i) {
             return r + std::exp(-i);
         });
         ret.reserve(vars.size());
-        std::transform(vars.begin(), vars.end(), std::back_inserter(ret), [&](double i) {
+        std::transform(vars.cbegin(), vars.cend(), std::back_inserter(ret), [&](double i) {
             return std::exp(-i) / sum;
         });
     }
@@ -61,15 +61,15 @@ protected:
         auto size = actions.size();
         if (!isRelative)
             return std::log2(static_cast<double>(size));
-        std::vector<double> &childDist = *doubleCache.getItem();
+        auto &childDist = *doubleCache.getItem();
         Softmin(childEntropy, childDist);
-        std::vector<double> &expectedDist = *doubleCache.getItem();
+        auto &expectedDist = *doubleCache.getItem();
         expectedDist.resize(size);
         std::generate(expectedDist.begin(), expectedDist.end(), [
             size = static_cast<double>(size)
         ]() { return 1 / size; });
         if (size > 1 && prevAction.has_value() &&
-            std::find(actions.begin(), actions.end(), prevAction.value()) != actions.end())
+            std::find(actions.cbegin(), actions.cend(), prevAction.value()) != actions.cend())
         {
             for (auto i = 0; i < size; ++i)
             {
@@ -106,24 +106,24 @@ public:
     {
         if (env.GoalTest(state))
             return { 0.0, 0 };
-        std::vector<Action> &allActions = *actCache.getItem();
-        env.GetActions(state, allActions);
-        ruleSet.FilterActions(env, state, allActions);
-        if (allActions.empty())
+        auto &actions = *actCache.getItem();
+        env.GetActions(state, actions);
+        ruleSet.FilterActions(env, state, actions);
+        if (actions.empty())
         {
-            actCache.returnItem(&allActions);
+            actCache.returnItem(&actions);
             return { inf, 0 };
         }
-        std::vector<EntropyInfo> &children = *entropyInfoCache.getItem();
-        for (const auto &action: allActions)
+        auto &children = *entropyInfoCache.getItem();
+        for (const auto &action: actions)
         {
             env.ApplyAction(state, action);
             children.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0, action));
             env.UndoAction(state, action);
         }
-        for (auto it = children.begin(); it != children.end(); )
+        for (auto it = children.cbegin(); it != children.cend(); )
         {
-            auto &info = *it;
+            const auto &info = *it;
             if (info.value == 0 && info.depth < lookahead)
                 return { 0.0, info.depth + 1 };
             if (info.value == inf && info.depth < lookahead)
@@ -132,37 +132,31 @@ public:
                 ++it;
         }
         EntropyInfo entropyInfo{};
-        if (std::all_of(children.begin(), children.end(), [](EntropyInfo &info) {
+        if (std::all_of(children.begin(), children.end(), [](const auto &info) {
             return info.value == 0;
         }))
             entropyInfo = { 0.0, children[0].depth + 1 };
-        else if (std::all_of(children.begin(), children.end(), [](EntropyInfo &info) {
+        else if (std::all_of(children.begin(), children.end(), [](const auto &info) {
             return info.value == inf;
         }))
             entropyInfo = { inf, children[0].depth + 1 };
         else
         {
             auto &minChild = *std::min_element(children.begin(), children.end(),
-                                               [](EntropyInfo &info1, EntropyInfo &info2) {
+                                               [](const auto &info1, const auto &info2) {
                 return info1.value < info2.value;
             });
             auto &childrenEntropy = *doubleCache.getItem();
             childrenEntropy.reserve(children.size());
-            std::transform(children.begin(), children.end(), std::back_inserter(childrenEntropy),
-                           [](EntropyInfo &info){ return info.value; });
-            entropyInfo = { minChild.value + ImmediateEntropy(allActions, childrenEntropy, prevAction),
+            std::transform(children.cbegin(), children.cend(), std::back_inserter(childrenEntropy),
+                           [](const auto &info) { return info.value; });
+            entropyInfo = { minChild.value + ImmediateEntropy(actions, childrenEntropy, prevAction),
                             minChild.depth + 1 };
             doubleCache.returnItem(&childrenEntropy);
         }
         entropyInfoCache.returnItem(&children);
-        actCache.returnItem(&allActions);
+        actCache.returnItem(&actions);
         return entropyInfo;
-    }
-    
-    virtual EntropyInfo CalculateDeadEndEntropy(const SearchEnvironment<State, Action> &env, State &state,
-                                                unsigned lookahead)
-    {
-        return { 0.0, 0 };
     }
 };
 

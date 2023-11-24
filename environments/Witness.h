@@ -1504,6 +1504,11 @@ public:
     float yGap = -(((width > height) ? (width) : (height)) - height) * gapOffset / 2.0f;
 
     int GetPathIndex(int x, int y) const { return y * (width + 1) + x; }
+    int GetPathIndex(const std::pair<int, int>& p) const
+    {
+        const auto [x, y] = p;
+        return GetPathIndex(x, y);
+    }
 
     struct PathLocation
     {
