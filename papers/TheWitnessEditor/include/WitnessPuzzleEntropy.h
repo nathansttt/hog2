@@ -139,6 +139,7 @@ public:
             x0 = x1;
             y0 = y1;
         }
+        H::actCache.returnItem(&actions);
         return CalculateAdversaryEntropy(env, state, lookahead);
     }
 };
