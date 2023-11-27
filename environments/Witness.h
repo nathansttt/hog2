@@ -2345,6 +2345,19 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
                 }
                 break;
             }
+            case kTriangle:
+            {
+                auto e = static_cast<unsigned>(node.OccupiedEdge(x, y, x, y + 1)) +
+                        static_cast<unsigned>(node.OccupiedEdge(x, y + 1, x + 1, y + 1)) +
+                        static_cast<unsigned>(node.OccupiedEdge(x + 1, y + 1, x + 1, y)) +
+                        static_cast<unsigned>(node.OccupiedEdge(x + 1, y, x, y));
+                if (e > constraint.parameter)
+                {
+                    regionCache.returnItem(&rgs);
+                    return false;
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -2393,6 +2406,19 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
                             return false;
                         }
                     }
+                }
+                break;
+            }
+            case kTriangle:
+            {
+                auto e = static_cast<unsigned>(node.OccupiedEdge(x, y, x, y + 1)) +
+                        static_cast<unsigned>(node.OccupiedEdge(x, y + 1, x + 1, y + 1)) +
+                        static_cast<unsigned>(node.OccupiedEdge(x + 1, y + 1, x + 1, y)) +
+                        static_cast<unsigned>(node.OccupiedEdge(x + 1, y, x, y));
+                if (e > constraint.parameter)
+                {
+                    regionCache.returnItem(&rgs);
+                    return false;
                 }
                 break;
             }
