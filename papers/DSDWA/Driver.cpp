@@ -19,7 +19,7 @@
 #include "MapGenerators.h"
 
 int stepsPerFrame = 1;
-float bound = 5;
+float bound = 2;
 float testScale = 1.0;
 void GetNextWeightRange(float &minWeight, float &maxWeight, point3d currPoint, float nextSlope);
 float GetPriority(float h, float g);
@@ -82,11 +82,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		dsd.policy = kWA;
 		start = {1,1};
 		goal = {198, 198};
-		dsd.SetWeight(1.8);
+		dsd.SetWeight(bound);
 		dsd.InitializeSearch(me, start, goal, solution);
 		searchRunning = true;
 	}
-
 }
 //#include "Plot2D.h"
 struct DSDdata {
