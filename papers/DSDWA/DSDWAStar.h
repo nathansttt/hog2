@@ -262,6 +262,20 @@ public:
 	 *
 	 * \param minWeight (returned) The minimum weight that can be used without going under the lower limit
 	 * \param maxWeight (returned) The maximum weight that can be used without going over the upper limit
+	 **/
+	void GetNextWeightRange(float &minWeight, float &maxWeight, float nextSlope)
+	{
+		if (data.size() > 0)
+			GetNextWeightRange(minWeight, maxWeight, data.back().crossPoint, nextSlope);
+		else
+			GetNextWeightRange(minWeight, maxWeight, {1, 0}, nextSlope);
+	}
+
+	/**
+	 * Given the slope of the next bounding line, give the possbile range of weights that can be used in the priority function
+	 *
+	 * \param minWeight (returned) The minimum weight that can be used without going under the lower limit
+	 * \param maxWeight (returned) The maximum weight that can be used without going over the upper limit
 	 * \param currPoint The point on the previous bounding line with priorirty 1.0
 	 * \param nextSlope The slope of the next bounding line
 	 **/
