@@ -69,6 +69,7 @@ static void InitPuzzle()
 {
     entropy.ruleSet.SetRules(gInferenceRules);
 //    _27sck7g();
+    GetAllSolutions(allSolutions);
     temp();
     UpdateSolutionIndices();
     std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
@@ -128,7 +129,6 @@ int main(int argc, char *argv[])
     setTextBufferVisibility(false);
 #endif
     InitTetrisPieces();
-    GetAllSolutions(allSolutions);
     InitPuzzle();
     InstallHandlers();
     RunHOGGUI(argc, argv, 1280, 640);

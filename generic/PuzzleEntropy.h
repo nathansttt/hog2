@@ -118,13 +118,13 @@ public:
         for (const auto &action: actions)
         {
             env.ApplyAction(state, action);
-            children.emplace_back(Calculate(env, state, (lookahead > 0) ? lookahead - 1 : 0, action));
+            children.emplace_back(Calculate(env, state, lookahead, action));
             env.UndoAction(state, action);
         }
         for (auto it = children.cbegin(); it != children.cend(); )
         {
             const auto &info = *it;
-            if (info.value == 0 && info.depth < lookahead)
+            if (info.value == 0.0 && info.depth < lookahead)
                 return { 0.0, info.depth + 1 };
             if (info.value == inf && info.depth < lookahead)
                 it = children.erase(it);

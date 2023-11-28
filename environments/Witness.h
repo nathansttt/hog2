@@ -1282,27 +1282,26 @@ public:
                 case 3:
                 case 4: // only support single start and goal currently
                 {
-                    [[ maybe_unused ]] auto loc = locationMap[count++].second;
-                    // uncomment following lines to allow setting different starts and goals
-//                    for (auto y = height; y >= 0; --y)
-//                        for (auto x = 0; x <= width; ++x)
-//                            if (loc == width * (height + 1) + (width + 1) * height + (width + 1) * y + x)
-//                            {
-//                                if (type == 3)
-//                                    SetStart(x, y);
-//                                else
-//                                {
-//                                    if (x == 0)
-//                                        SetGoal(--x, y);
-//                                    else if (x == width)
-//                                        SetGoal(++x, y);
-//                                    else if (y == 0)
-//                                        SetGoal(x, --y);
-//                                    else if (y == height)
-//                                        SetGoal(x, ++y);
-//                                }
-//                                break;
-//                            }
+                    auto loc = locationMap[count++].second;
+                    for (auto y = height; y >= 0; --y)
+                        for (auto x = 0; x <= width; ++x)
+                            if (loc == width * (height + 1) + (width + 1) * height + (width + 1) * y + x)
+                            {
+                                if (type == 3)
+                                    SetStart(x, y);
+                                else
+                                {
+                                    if (x == 0)
+                                        SetGoal(--x, y);
+                                    else if (x == width)
+                                        SetGoal(++x, y);
+                                    else if (y == 0)
+                                        SetGoal(x, --y);
+                                    else if (y == height)
+                                        SetGoal(x, ++y);
+                                }
+                                break;
+                            }
                     break;
                 }
                 case 5:

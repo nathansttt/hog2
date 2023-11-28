@@ -263,6 +263,8 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
             if (PointInRect(p, Graphics::rect{0.49, -0.22, 0.7, -0.14}))
             {
                 witness.Reset();
+                allSolutions.clear();
+                GetAllSolutions(witness, allSolutions);
                 UpdateSolutionIndices();
                 gEntropy = GetCurrentEntropy(witness);
                 gAdvEntropy = GetCurrentAdvEntropy(witness);
