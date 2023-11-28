@@ -121,16 +121,6 @@ public:
             children.emplace_back(Calculate(env, state, lookahead, action));
             env.UndoAction(state, action);
         }
-        for (auto it = children.cbegin(); it != children.cend(); )
-        {
-            const auto &info = *it;
-            if (info.value == 0.0 && info.depth < lookahead)
-                return { 0.0, info.depth + 1 };
-            if (info.value == inf && info.depth < lookahead)
-                it = children.erase(it);
-            else
-                ++it;
-        }
         EntropyInfo entropyInfo{};
         if (std::all_of(children.begin(), children.end(), [](const auto &info) {
             return info.value == 0;

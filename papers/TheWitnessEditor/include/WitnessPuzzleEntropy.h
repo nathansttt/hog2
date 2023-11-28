@@ -59,7 +59,7 @@ public:
         }); it != actions.cend())
         {
             witness.ApplyAction(state, *it);
-            children.emplace_back(CalculateAdversaryEntropy(env, state, (lookahead > 0) ? lookahead - 1 : 0));
+            children.emplace_back(CalculateAdversaryEntropy(env, state, lookahead));
             witness.UndoAction(state, *it);
         }
         else
@@ -112,7 +112,7 @@ public:
         auto s = WitnessState<width, height>();
         witness.ApplyAction(s, kStart);
         auto [x0, y0] = s.path[0];
-        auto actions = *H::actCache.getItem();
+        auto &actions = *H::actCache.getItem();
         for (auto i = 1; i < state.path.size(); ++i)
         {
             witness.GetActions(s, actions);

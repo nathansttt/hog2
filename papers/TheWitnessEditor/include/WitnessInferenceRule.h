@@ -171,9 +171,10 @@ ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, heig
     const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
     witness.ApplyAction(state, action);
     bool regionSatisfied = true;
-    auto [x, y] = state.path.back();
+    const auto &head = state.path.back();
     if ((state.HitTheWall() && !state.IsAlongTheWall()) ||
-        witness.goalMap[witness.GetPathIndex(x, y)] != 0)
+        (std::find(witness.goal.cbegin(), witness.goal.cend(), head) == witness.goal.cend() &&
+         witness.goalMap[witness.GetPathIndex(head)] != 0))
         regionSatisfied = witness.RegionTest(state);
     witness.UndoAction(state, action);
     return regionSatisfied ? UNKNOWN : CANNOT_TAKE;
