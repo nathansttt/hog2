@@ -1379,16 +1379,16 @@ public:
                 {
                     if (x != 0 || y != 0) hash += ",";
                     hash += quote;
-                    hash += std::to_string(regionConstraints[x][y].t) + ";";
+                    hash += std::to_string(regionConstraints[x][y].type) + ";";
                     // no point writing garbage
-                    if (regionConstraints[x][y].t == kNoRegionConstraint)
+                    if (regionConstraints[x][y].type == kNoRegionConstraint)
                         hash += "0;";
                     else
                         hash += std::to_string(regionConstraints[x][y].parameter) + ";";
-					if (regionConstraints[x][y].t == kNoRegionConstraint)
+					if (regionConstraints[x][y].type == kNoRegionConstraint)
 						hash += "#DADFAD";
 					else
-						hash += regionConstraints[x][y].c.hex();
+						hash += regionConstraints[x][y].color.hex();
                     hash += quote;
                 }
             }
