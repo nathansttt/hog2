@@ -91,4 +91,10 @@ inline auto GetCurrentAdvEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
         entropy.CalculatePartialAdversaryEntropy(env, iws.ws, gLookahead);
 }
 
+inline void UpdateEntropy(const Witness<puzzleWidth, puzzleHeight> &env)
+{
+    gEntropy = GetCurrentEntropy(env);
+    gAdvEntropy = GetCurrentAdvEntropy(env);
+}
+
 #endif /* THE_WITNESS_EDITOR_INCLUDE_GLOBALS_H */

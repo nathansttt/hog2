@@ -135,26 +135,21 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
     {
         if (!drawEditor)
         {
-            if (event == kMouseUp)
+            if (event == kMouseUp && witness.Click(p, iws))
             {
-                if (witness.Click(p, iws))
+                if (witness.GoalTest(iws.ws))
                 {
-                    if (witness.GoalTest(iws.ws))
-                    {
-                        std::cout << "Solved!" << std::endl;
-                        solved = true;
-                    }
-                    else
-                    {
-                        std::cout << "Invalid solution" << std::endl;
-                        iws.Reset();
-                    }
+                    std::cout << "Solved!" << std::endl;
+                    solved = true;
+                }
+                else
+                {
+                    std::cout << "Invalid solution" << std::endl;
+                    iws.Reset();
                 }
             }
             if (event == kMouseMove)
-            {
                 witness.Move(p, iws);
-            }
         }
         else
         {
@@ -182,7 +177,8 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                             }
                         }
                     }
-                    else {
+                    else 
+                    {
                         for (auto i = 0; i < witness.pathConstraintLocations.size() - 1; ++i) {
                             if (PointInRect(p, witness.pathConstraintLocations[i].second) &&
                                 i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight) {
@@ -266,14 +262,12 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                 allSolutions.clear();
                 GetAllSolutions(witness, allSolutions);
                 UpdateSolutionIndices();
-                gEntropy = GetCurrentEntropy(witness);
-                gAdvEntropy = GetCurrentAdvEntropy(witness);
+                UpdateEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{-0.33, -0.10, -0.225, -0.04}))
             {
                 gUseRelativeEntropy ^= true;
-                gEntropy = GetCurrentEntropy(witness);
-                gAdvEntropy = GetCurrentAdvEntropy(witness);
+                UpdateEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{0.26, -0.10, 0.31, -0.03}))
             {
@@ -288,8 +282,7 @@ bool WitnessClickHandler(unsigned long windowID, int viewport, int /*x*/, int /*
                         gLookahead = 0;
                         break;
                 }
-                gEntropy = GetCurrentEntropy(witness);
-                gAdvEntropy = GetCurrentAdvEntropy(witness);
+                UpdateEntropy(witness);
             }
             if (PointInRect(p, Graphics::rect{0.7, -0.10, 0.805, -0.03}))
             {

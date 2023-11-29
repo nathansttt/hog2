@@ -26,6 +26,5 @@ void UpdateSolutionIndices()
         if (witness.GoalTest(allSolutions[i]))
             currentSolutionIndices.emplace_back(i);
     }
-    gEntropy = GetCurrentEntropy(witness);
-    gAdvEntropy = GetCurrentAdvEntropy(witness);
+    UpdateEntropy(witness);
 }

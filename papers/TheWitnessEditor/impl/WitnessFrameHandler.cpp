@@ -58,14 +58,13 @@ static void DrawGameViewport(unsigned long windowID)
         iws.IncrementTime();
         witness.Draw(display, iws);
         if (solved)
-        {
             display.DrawText("Solved!", Graphics::point{1, 1}, Colors::black, 0.075,
                              Graphics::textAlignRight, Graphics::textBaselineBottom);
-        }
     }
     else
     {
         editor.Draw(display);
+        editor.Draw(display, iws.ws);
         display.DrawText("# of solutions: ", Graphics::point{0.75, -0.95}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineTop);
         display.DrawText((gUseRelativeEntropy ? "ReMUSE: " : "MUSE: "),
@@ -94,8 +93,7 @@ static void DrawGameViewport(unsigned long windowID)
                                 editor.RemoveRegionConstraint(x, y) :
                                 editor.AddRegionConstraint(x, y, constraint);
                             gNumSolutions = GetNumSolutions();
-                            gEntropy = GetCurrentEntropy(editor);
-                            gAdvEntropy = GetCurrentAdvEntropy(editor);
+                            UpdateEntropy(editor);
                         }
                         display.FrameRect(rect, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         editor.DrawRegionConstraint(display, constraint, position);
@@ -116,9 +114,8 @@ static void DrawGameViewport(unsigned long windowID)
                         display.FrameRect(editor.regionConstraintLocations[gSuggestedLocation].second,
                                           Colors::green, 0.01);
                 }
-                else
-                    display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
-                                     Graphics::textAlignLeft, Graphics::textBaselineBottom);
+                else display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                      Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
             else
             {
@@ -128,15 +125,14 @@ static void DrawGameViewport(unsigned long windowID)
                     if (PointInRect(cursor, rect) &&
                         i != puzzleWidth * (puzzleHeight + 1) + (puzzleWidth + 1) * puzzleHeight)
                     {
-                        const auto& constraint =
+                        const auto &constraint =
                                 gPathConstraintItems[gSelectedEditorItem - gRegionConstraintItems.size()]
                                         .constraint;
                         if (position != gLastPosition) {
                             editor.pathConstraints[i] = (constraint == editor.pathConstraints[i]) ?
-                                    kNoPathConstraint : constraint;
+                                                        kNoPathConstraint : constraint;
                             gNumSolutions = GetNumSolutions();
-                            gEntropy = GetCurrentEntropy(editor);
-                            gAdvEntropy = GetCurrentAdvEntropy(editor);
+                            UpdateEntropy(editor);
                         }
                         display.FrameRect(rect, (gNumSolutions > 0) ? Colors::gray : Colors::red, 0.01);
                         gLastPosition = position;
@@ -154,9 +150,8 @@ static void DrawGameViewport(unsigned long windowID)
                     display.FrameRect(editor.pathConstraintLocations[gSuggestedLocation].second,
                                       Colors::green, 0.01);
                 }
-                else
-                    display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
-                                     Graphics::textAlignLeft, Graphics::textBaselineBottom);
+                else display.DrawText("None", Graphics::point{-0.57, 1}, Colors::black, 0.075,
+                                      Graphics::textAlignLeft, Graphics::textBaselineBottom);
             }
             display.DrawText(std::to_string(gNumSolutions).c_str(), Graphics::point{0.915, -0.95},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineTop);
@@ -167,6 +162,8 @@ static void DrawGameViewport(unsigned long windowID)
             display.DrawText(std::to_string(currentSolutionIndices.size()).c_str(), Graphics::point{0.915, -0.95},
                              Colors::black, 0.075, Graphics::textAlignRight, Graphics::textBaselineTop);
         }
+        if ((currentSolutionIndices.empty() || gNumSolutions == 0) && gEntropy.value != inf)
+            UpdateEntropy(witness);
         display.DrawText((gEntropy.value != inf) ? to_string_with_precision(gEntropy.value, 2).c_str() : "inf",
                          Graphics::point{0.9, 0.9}, Colors::black, 0.075,
                          Graphics::textAlignRight, Graphics::textBaselineBottom);
@@ -214,10 +211,9 @@ static void DrawEditorViewport(unsigned long windowID)
                 FrameLightgrayRect(display, 1, {c, radius + 0.01f});
             else if (i == gRegionConstraintItems.size() - 2)
                 FrameLightgrayRect(display, 1, {c.x - radius - 0.03f, c.y - radius - 0.01f,
-                    c.x + radius + 0.03f, c.y + radius + 0.01f});
-            else
-                FrameLightgrayRect(display, 1, {c.x - radius - 0.06f, c.y - radius - 0.01f,
-                    c.x + radius + 0.06f, c.y + radius + 0.01f});
+                                                c.x + radius + 0.03f, c.y + radius + 0.01f});
+            else FrameLightgrayRect(display, 1, {c.x - radius - 0.06f, c.y - radius - 0.01f,
+                                                 c.x + radius + 0.06f, c.y + radius + 0.01f});
         }
     }
     for (auto i = 0; i < gPathConstraintItems.size(); ++i)

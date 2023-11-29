@@ -7,9 +7,12 @@
 
 unsigned gSolutionIndex = 0;
 
+static auto editorAvailable = std::array{ 'e', 'w', 'x', 'v' };
+
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-    if (drawEditor && key != 'e' && key != 'w' && key != 'x' && !std::isdigit(key))
+    if (drawEditor && !std::isdigit(key) &&
+        std::find(editorAvailable.cbegin(), editorAvailable.cend(), key) == editorAvailable.cend())
         return;
     switch (key)
     {
@@ -133,6 +136,8 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         }
         else
         {
+            iws.Reset();
+            solved = false;
             MoveViewport(windowID, 1, {1.0f, -1.0f, 2.0f, 1.0f});
             MoveViewport(windowID, 2, {1.0f, 0.0f, 2.0f, 2.0f});
             drawEditor = false;
@@ -142,17 +147,9 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
     case 'x':
     {
-        if (drawEditor)
-        {
-            if (selectTetrisPiece != 0)
-            {
-                MoveViewport(windowID, 2, {0.0f, 0.0f, 1.0f, 2.0f});
-            }
-            else
-            {
+        if (drawEditor) 
+            (selectTetrisPiece != 0) ? MoveViewport(windowID, 2, {0.0f, 0.0f, 1.0f, 2.0f}) :
                 MoveViewport(windowID, 2, {1.0f, 0.0f, 2.0f, 2.0f});
-            }
-        }
         break;
     }
     case 'c':
@@ -179,8 +176,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             entropy.ruleSet.EnableAllRules();
             std::cout << "All inference rules are enabled." << std::endl;
         }
-        gEntropy = GetCurrentEntropy(witness);
-        gAdvEntropy = GetCurrentAdvEntropy(witness);
+        UpdateEntropy(witness);
         break;
     }
     case '1':
@@ -197,8 +193,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             std::cout << " enabled" << std::endl;
         }
         else std::cout << " disabled" << std::endl;
-        gEntropy = GetCurrentEntropy(witness);
-        gAdvEntropy = GetCurrentAdvEntropy(witness);
+        UpdateEntropy(witness);
         break;
     }
     default:

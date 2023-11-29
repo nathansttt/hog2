@@ -82,8 +82,7 @@ static void InitPuzzle()
                .Calculate(witness, allSolutions[b], gLookahead, std::nullopt).value;
     });
     gNumSolutions = currentSolutionIndices.size();
-    gEntropy = GetCurrentEntropy(witness);
-    gAdvEntropy = GetCurrentAdvEntropy(witness);
+    UpdateEntropy(witness);
 }
 
 /**
