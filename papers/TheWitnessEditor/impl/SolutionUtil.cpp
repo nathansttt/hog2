@@ -26,5 +26,15 @@ void UpdateSolutionIndices()
         if (witness.GoalTest(allSolutions[i]))
             currentSolutionIndices.emplace_back(i);
     }
+    if (solved)
+    {
+        if (currentSolutionIndices.empty())
+            iws.Reset();
+        else
+        {
+            gSolutionIndex = 0;
+            iws.ws = allSolutions[currentSolutionIndices[0]];
+        }
+    }
     UpdateEntropy(witness);
 }

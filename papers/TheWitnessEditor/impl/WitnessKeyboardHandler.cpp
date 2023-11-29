@@ -7,7 +7,7 @@
 
 unsigned gSolutionIndex = 0;
 
-static auto editorAvailable = std::array{ 'e', 'w', 'x', 'v' };
+static auto editorAvailable = std::array{ 'e', 'w', 'x', 'v', 'r' };
 
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
@@ -147,7 +147,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
     case 'x':
     {
-        if (drawEditor) 
+        if (drawEditor)
             (selectTetrisPiece != 0) ? MoveViewport(windowID, 2, {0.0f, 0.0f, 1.0f, 2.0f}) :
                 MoveViewport(windowID, 2, {1.0f, 0.0f, 2.0f, 2.0f});
         break;

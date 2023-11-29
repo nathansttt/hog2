@@ -178,6 +178,11 @@ public:
         const auto [x, y] = path.back();
         return x < 0 || x > width || y < 0 || y > height;
     }
+
+    bool empty() const
+    {
+        return path.empty();
+    }
 };
 
 enum WitnessAction {

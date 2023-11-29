@@ -56,8 +56,8 @@ static void temp()
 {
     witness.AddSeparationConstraint(0, 2, Colors::orange);
     witness.AddSeparationConstraint(2, 3, Colors::orange);
-    witness.AddStarConstraint(1, 1, Colors::purple);
-    witness.AddStarConstraint(3, 1, Colors::purple);
+    witness.AddStarConstraint(1, 1, Colors::magenta);
+    witness.AddStarConstraint(3, 1, Colors::magenta);
     witness.AddSeparationConstraint(3, 0, Colors::yellow);
     witness.AddSeparationConstraint(1, 3, Colors::yellow);
     witness.AddMustCrossConstraint(true, 0, 4);
