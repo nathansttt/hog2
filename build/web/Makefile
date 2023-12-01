@@ -45,7 +45,8 @@ PROJECTS = \
   demos/inconsistency-graph \
   demos/racetrack \
   demos/multi-target \
-  papers/DWA\
+  demos/ACA \
+  papers/DWA \
   papers/TheWitnessEditor
 
 
@@ -99,6 +100,7 @@ PROJECTS_ALL = \
   demos/astar \
   demos/idastar \
   demos/multi-target \
+  papers/ACA \
   papers/DWA \
   papers/TheWitnessEditor
 
