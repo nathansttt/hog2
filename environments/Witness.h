@@ -45,6 +45,8 @@ public:
     std::vector<std::pair<int, int>> path;
     std::bitset<(width + 1) * (height + 1)> occupiedCorners;
     std::bitset<(width + 1) * (height) + (width) * (height + 1)> occupiedEdges;
+    mutable std::unordered_set<int> lhs;
+    mutable std::unordered_set<int> rhs;
 
     WitnessState() { Reset(); }
 
@@ -60,6 +62,8 @@ public:
         path.resize(0);
         occupiedCorners.reset();
         occupiedEdges.reset();
+        lhs.reserve(width * height - 1);
+        rhs.reserve(width * height - 1);
     }
 
     bool Occupied(int which)
@@ -2286,8 +2290,10 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
     });
     int found = 0;
     rgbColor c{};
-    auto lhs = std::unordered_set<int>{};
-    auto rhs = std::unordered_set<int>{};
+    auto &lhs = node.lhs;
+    auto &rhs = node.rhs;
+    lhs.clear();
+    rhs.clear();
     auto [x0, y0] = node.path[0];
     for (auto i = 1; i < node.path.size(); ++i)
     {
