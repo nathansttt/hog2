@@ -181,7 +181,7 @@ ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, heig
 }
 
 template<int width, int height>
-ActionType AloneThePathRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
+ActionType AlongThePathRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
                             WitnessState<width, height> &state, const WitnessAction &action)
 {
     if (state.path.empty())
@@ -198,7 +198,7 @@ enum WitnessInferenceRule {
     kPathConstraintRule,
     kTowardsGoalRule,
     kRegionCompletionRule,
-    kAloneThePathRule,
+    kAlongThePathRule,
     kInferenceRuleCount [[maybe_unused]]
 };
 
@@ -214,8 +214,8 @@ inline std::ostream &operator<<(std::ostream &os, WitnessInferenceRule wir)
             return os << "TowardsGoalRule";
         case kRegionCompletionRule:
             return os << "RegionCompletionRule";
-        case kAloneThePathRule:
-            return os << "AloneThePathRule";
+        case kAlongThePathRule:
+            return os << "AlongThePathRule";
         default:
             return os;
     }
@@ -231,7 +231,7 @@ witnessInferenceRules =
     { kPathConstraintRule, std::function(PathConstraintRule<width, height>) },
     { kTowardsGoalRule, std::function(TowardsGoalRule<width, height>) },
     { kRegionCompletionRule, std::function(RegionCompletionRule<width, height>) },
-    { kAloneThePathRule, std::function(AloneThePathRule<width, height>) },
+    { kAlongThePathRule, std::function(AlongThePathRule<width, height>) },
 };
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_WITNESS_INFERENCE_RULE_H */
