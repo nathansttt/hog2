@@ -195,8 +195,37 @@ enum WitnessAction {
     kLeft,
     kRight,
     kStart,
-    kEnd
+    kEnd,
+    kWitnessActionCount
 };
+
+inline std::ostream& operator<<(std::ostream &os, const WitnessAction &action)
+{
+    switch (action) {
+        case kUp:
+            os << "Up";
+            break;
+        case kDown:
+            os << "Down";
+            break;
+        case kLeft:
+            os << "Left";
+            break;
+        case kRight:
+            os << "Right";
+            break;
+        case kStart:
+            os << "Start";
+            break;
+        case kEnd:
+            os << "End";
+            break;
+        default:
+            os << "Unknown";
+            break;
+    }
+    return os;
+}
 
 template<int width, int height>
 static bool operator==(const WitnessState<width, height> &a, const WitnessState<width, height> &b)
@@ -680,6 +709,10 @@ public:
             const WitnessState<width, height> &nodeID, std::vector <WitnessState<width, height>> &neighbors) const;
 
     void GetActions(const WitnessState<width, height> &nodeID, std::vector <WitnessAction> &actions) const;
+    
+    void GetLeftRightRegions(const WitnessState<width, height> &state) const;
+    
+    void GetActionSequence(const WitnessState<width, height> &state, std::vector<WitnessAction> &actions) const;
 
     void ApplyAction(WitnessState<width, height> &s, WitnessAction a) const;
 
@@ -1710,6 +1743,8 @@ public:
             std::cout << std::endl;
         }
     }
+    
+    mutable vectorCache<WitnessAction> actionCache;
 };
 
 template<int width, int height>
@@ -1754,6 +1789,85 @@ void Witness<width, height>::GetActions(
     if (currX < width && !nodeID.Occupied(currX + 1, currY)) actions.push_back(kRight);
     if (currY > 0 && !nodeID.Occupied(currX, currY - 1)) actions.push_back(kDown);
     if (currY < height && !nodeID.Occupied(currX, currY + 1)) actions.push_back(kUp);
+}
+
+template<int width, int height>
+void Witness<width, height>::GetLeftRightRegions(const WitnessState<width, height> &state) const
+{
+    const auto &path = state.path;
+    auto &lhs = state.lhs;
+    auto &rhs = state.rhs;
+    lhs.clear();
+    rhs.clear();
+    auto [x0, y0] = path[0];
+    for (auto i = 1; i < path.size(); ++i)
+    {
+        auto [x1, y1] = path[i];
+        assert(!(x1 == x0 + 1 && y1 == y0 + 1));
+        if (x1 == x0 + 1) // right
+        {
+            if (y0 < height)
+                lhs.emplace(GetRegionIndex(x0, y0));
+            if (y0 > 0)
+                rhs.emplace(GetRegionIndex(x0, y0 - 1));
+        }
+        if (x1 == x0 - 1) // left
+        {
+            if (y0 > 0)
+                lhs.emplace(GetRegionIndex(x0 - 1, y0 - 1));
+            if (y0 < height)
+                rhs.emplace(GetRegionIndex(x0 - 1, y0));
+        }
+        if (y1 == y0 + 1) // up
+        {
+            if (x0 > 0)
+                lhs.emplace(GetRegionIndex(x0 - 1, y0));
+            if (x0 < width)
+                rhs.emplace(GetRegionIndex(x0, y0));
+        }
+        if (y1 == y0 - 1) // down
+        {
+            if (x0 < width)
+                lhs.emplace(GetRegionIndex(x0, y0 - 1));
+            if (x0 > 0)
+                rhs.emplace(GetRegionIndex(x0 - 1, y0 - 1));
+        }
+        x0 = x1;
+        y0 = y1;
+    }
+}
+
+template<int width, int height>
+void Witness<width, height>::GetActionSequence(const WitnessState<width, height> &state,
+                                               std::vector<WitnessAction> &actions) const
+{
+    const auto &path = state.path;
+    if (path.empty())
+        return;
+    auto [x0, y0] = path[0];
+    actions.clear();
+    actions.emplace_back(kStart);
+    for (auto i = 1; i < path.size(); ++i)
+    {
+        auto [x1, y1] = path[i];
+        assert(!(x1 == x0 + 1 && y1 == y0 + 1));
+        if (std::find(goal.begin(), goal.end(), std::pair<int, int>{x1, y1}) != goal.end())
+        {
+            actions.emplace_back(kEnd);
+            break;
+        }
+        if (x1 == x0 + 1)
+            actions.emplace_back(kRight);
+        if (x1 == x0 - 1)
+            actions.emplace_back(kLeft);
+        if (y1 == y0 + 1)
+            actions.emplace_back(kUp);
+        if (y1 == y0 - 1)
+            actions.emplace_back(kDown);
+        x0 = x1;
+        y0 = y1;
+    }
+    
 }
 
 template<int width, int height>
@@ -1832,8 +1946,6 @@ void Witness<width, height>::ApplyAction(std::pair<int, int> &s, WitnessAction a
             s = goal[whichGoal - 1];
             break;
         }
-        case kStart:
-            break;
         case kLeft:
             --x;
             break;
@@ -1845,6 +1957,8 @@ void Witness<width, height>::ApplyAction(std::pair<int, int> &s, WitnessAction a
             break;
         case kDown:
             --y;
+            break;
+        default:
             break;
     }
 }
@@ -1905,6 +2019,8 @@ void Witness<width, height>::ApplyAction(WitnessState<width, height> &s, Witness
             s.path.push_back(p);
             break;
         }
+        default:
+            break;
     }
 }
 
@@ -2035,6 +2151,8 @@ bool Witness<width, height>::Legal(WitnessState<width, height> &s, WitnessAction
         }
         l = kLegal;
         return true;
+    default:
+        return false;
     }
     return false;
 }
@@ -2068,8 +2186,9 @@ bool Witness<width, height>::Legal(WitnessState<width, height> &s, WitnessAction
         return (currY > 0 && !s.Occupied(currX, currY - 1) && !GetCannotCrossConstraint(false, currX, currY - 1));
     case kUp:
         return (currY < height && !s.Occupied(currX, currY + 1) && !GetCannotCrossConstraint(false, currX, currY));
+    default:
+        return false;
     }
-    return false;
 }
 
 template<int width, int height>
@@ -2077,10 +2196,6 @@ bool Witness<width, height>::InvertAction(WitnessAction &a) const
 {
     switch (a)
     {
-    case kStart:
-        return false;
-    case kEnd:
-        return false;
     case kUp:
         a = kDown;
         break;
@@ -2093,6 +2208,8 @@ bool Witness<width, height>::InvertAction(WitnessAction &a) const
     case kRight:
         a = kLeft;
         break;
+    default:
+        return false;
     }
     return true;
 }
@@ -2290,47 +2407,8 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
     });
     int found = 0;
     rgbColor c{};
-    auto &lhs = node.lhs;
-    auto &rhs = node.rhs;
-    lhs.clear();
-    rhs.clear();
-    auto [x0, y0] = node.path[0];
-    for (auto i = 1; i < node.path.size(); ++i)
-    {
-        auto [x1, y1] = node.path[i];
-        assert(!(x1 == x0 + 1 && y1 == y0 + 1));
-        if (x1 == x0 + 1) // right
-        {
-            if (y0 < height)
-                lhs.emplace(GetRegionIndex(x0, y0));
-            if (y0 > 0)
-                rhs.emplace(GetRegionIndex(x0, y0 - 1));
-        }
-        if (x1 == x0 - 1) // left
-        {
-            if (y0 > 0)
-                lhs.emplace(GetRegionIndex(x0 - 1, y0 - 1));
-            if (y0 < height)
-                rhs.emplace(GetRegionIndex(x0 - 1, y0));
-        }
-        if (y1 == y0 + 1) // up
-        {
-            if (x0 > 0)
-                lhs.emplace(GetRegionIndex(x0 - 1, y0));
-            if (x0 < width)
-                rhs.emplace(GetRegionIndex(x0, y0));
-        }
-        if (y1 == y0 - 1) // down
-        {
-            if (x0 < width)
-                lhs.emplace(GetRegionIndex(x0, y0 - 1));
-            if (x0 > 0)
-                rhs.emplace(GetRegionIndex(x0 - 1, y0 - 1));
-        }
-        x0 = x1;
-        y0 = y1;
-    }
-    for (auto r: lhs)
+    GetLeftRightRegions(node);
+    for (auto r: node.lhs)
     {
         if (std::find(rgs.cbegin(), rgs.cend(), r) == rgs.cend())
             continue;
@@ -2358,7 +2436,7 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
                     continue;
                 finishedColor = constraint.color;
                 unsigned count = 0;
-                for (auto rr: lhs)
+                for (auto rr: node.lhs)
                 {
                     if (std::find(rgs.cbegin(), rgs.cend(), rr) == rgs.cend())
                         continue;
@@ -2394,7 +2472,7 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
     }
     found = 0;
     c = rgbColor{};
-    for (auto r: rhs)
+    for (auto r: node.rhs)
     {
         if (std::find(rgs.cbegin(), rgs.cend(), r) == rgs.cend())
             continue;
@@ -2422,7 +2500,7 @@ bool Witness<width, height>::PathTest(const WitnessState<width, height> &node) c
                     continue;
                 finishedColor = constraint.color;
                 int count = 0;
-                for (auto rr: rhs)
+                for (auto rr: node.rhs)
                 {
                     if (std::find(rgs.cbegin(), rgs.cend(), rr) == rgs.cend())
                         continue;

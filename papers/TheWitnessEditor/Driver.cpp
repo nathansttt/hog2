@@ -25,6 +25,7 @@ Witness<puzzleWidth, puzzleHeight> witness;
 WitnessPuzzleEntropy<puzzleWidth, puzzleHeight> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+std::vector<SolutionTreeNode> solutionTree;
 auto gInferenceRules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
 
 std::vector<TetrisItem> gTetrisPieces = {};
@@ -68,9 +69,11 @@ static void temp()
 static void InitPuzzle()
 {
     entropy.ruleSet.SetRules(gInferenceRules);
+    GetAllSolutions(witness, allSolutions);
 //    _27sck7g();
-    GetAllSolutions(allSolutions);
     temp();
+    BuildTree(witness, allSolutions, solutionTree);
+//    PrintTree(solutionTree);
     UpdateSolutionIndices();
     std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
         return entropy
@@ -111,7 +114,7 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle All Rules", "Enable/Disable Rules", kAnyModifier, '0');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle SPR", "Enable/Disable SeparationRule", kAnyModifier, '1');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle PCR", "Enable/Disable PathConstraintRule", kAnyModifier, '2');
-    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle TGR", "Enable/Disable TowardsGoalRule", kAnyModifier, '3');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle ISTR", "Enable/Disable InsideSolutionTreeRule", kAnyModifier, '3');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle RCR", "Enable/Disable RegionCompletionRule", kAnyModifier, '4');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle APR", "Enable/Disable AlongThePathRule", kAnyModifier, '5');
 

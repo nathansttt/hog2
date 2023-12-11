@@ -11,6 +11,74 @@
 #include "PuzzleInferenceRule.h"
 #include "Witness.h"
 
+struct SolutionTreeNode {
+    WitnessAction action = kStart;
+    std::array<int, kWitnessActionCount> children{};
+    explicit SolutionTreeNode(WitnessAction action): action(action)
+    {
+        children.fill(-1);
+    }
+};
+
+extern std::vector<SolutionTreeNode> solutionTree;
+
+inline int InsertNode(std::vector<SolutionTreeNode> &tree, int parentIndex, WitnessAction action)
+{
+    auto index = static_cast<int>(tree.size());
+    tree.emplace_back(action);
+    if (parentIndex != -1)
+        tree[parentIndex].children[static_cast<unsigned>(action)] = index;
+    return index;
+}
+
+inline void PrintTree(const std::vector<SolutionTreeNode> &tree)
+{
+    for (auto i = 0; i < tree.size(); ++i)
+    {
+        std::cout << "Node " << i << ": Action = " << tree[i].action << ", Children = ";
+        for (auto childIndex: tree[i].children)
+        {
+            if (childIndex != -1)
+                std::cout << childIndex << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+template<int width, int height>
+void BuildTree(const Witness<width, height> &puzzle,
+               const std::vector<WitnessState<width, height>> solutions,
+               std::vector<SolutionTreeNode> &tree)
+{
+    tree.reserve(std::numeric_limits<uint16_t>::max());
+    Witness<width, height> w;
+    w.pathConstraints = puzzle.pathConstraints;
+//    std::for_each(w.pathConstraints.begin(), w.pathConstraints.end(), [](auto &contraint) {
+//        if (contraint == kMustCross)
+//            contraint = kNoPathConstraint;
+//    });
+    auto &actions = *w.actionCache.getItem();
+    InsertNode(tree, -1, kStart);
+    for (const auto &solution: solutions)
+    {
+        if (!w.GoalTest(solution))
+            continue;
+        int index = 0;
+        w.GetActionSequence(solution, actions);
+        for (auto i = 1; i < actions.size(); ++i)
+        {
+            const auto &action = actions[i];
+            if (int child = tree[index].children[static_cast<int>(action)];
+                child == -1)
+                index = InsertNode(tree, index, action);
+            else
+                index = child;
+        }
+        actions.clear();
+    }
+    w.actionCache.returnItem(&actions);
+}
+
 static inline bool CompareSC(const WitnessRegionConstraint &a, const WitnessRegionConstraint &b)
 {
     return a.type == kSeparation && b.type == kSeparation && a != b;
@@ -163,6 +231,33 @@ ActionType TowardsGoalRule(const SearchEnvironment<WitnessState<width, height>, 
 }
 
 template<int width, int height>
+ActionType InsideSolutionTreeRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
+                                  const WitnessState<width, height> &state, const WitnessAction &action)
+{
+    if (action == kStart || action == kEnd)
+        return MUST_TAKE;
+    if (solutionTree.empty())
+        return UNKNOWN;
+    const auto &witness = dynamic_cast<const Witness<width, height> &>(env);
+    auto &actions = *witness.actionCache.getItem();
+    actions.clear();
+    witness.GetActionSequence(state, actions);
+    actions.emplace_back(action);
+    int index = 0;
+    for(auto i = 1; i < actions.size(); ++i)
+    {
+        index = solutionTree[index].children[static_cast<unsigned>(actions[i])];
+        if (index == -1)
+        {
+            witness.actionCache.returnItem(&actions);
+            return CANNOT_TAKE;
+        }
+    }
+    witness.actionCache.returnItem(&actions);
+    return UNKNOWN;
+}
+
+template<int width, int height>
 ActionType RegionCompletionRule(const SearchEnvironment<WitnessState<width, height>, WitnessAction> &env,
                                 WitnessState<width, height> &state, const WitnessAction &action)
 {
@@ -196,7 +291,7 @@ ActionType AlongThePathRule(const SearchEnvironment<WitnessState<width, height>,
 enum WitnessInferenceRule {
     kSeparationRule,
     kPathConstraintRule,
-    kTowardsGoalRule,
+    kInsideSolutionTreeRule,
     kRegionCompletionRule,
     kAlongThePathRule,
     kInferenceRuleCount [[maybe_unused]]
@@ -210,8 +305,8 @@ inline std::ostream &operator<<(std::ostream &os, WitnessInferenceRule wir)
             return os << "SeparationRule";
         case kPathConstraintRule:
             return os << "PathConstraintRule";
-        case kTowardsGoalRule:
-            return os << "TowardsGoalRule";
+        case kInsideSolutionTreeRule:
+            return os << "InsideSolutionTreeRule";
         case kRegionCompletionRule:
             return os << "RegionCompletionRule";
         case kAlongThePathRule:
@@ -229,7 +324,7 @@ witnessInferenceRules =
 {
     { kSeparationRule, std::function(SeparationRule<width, height>) },
     { kPathConstraintRule, std::function(PathConstraintRule<width, height>) },
-    { kTowardsGoalRule, std::function(TowardsGoalRule<width, height>) },
+    { kInsideSolutionTreeRule, std::function(InsideSolutionTreeRule<width, height>) },
     { kRegionCompletionRule, std::function(RegionCompletionRule<width, height>) },
     { kAlongThePathRule, std::function(AlongThePathRule<width, height>) },
 };

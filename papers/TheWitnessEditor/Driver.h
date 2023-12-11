@@ -8,7 +8,6 @@
  * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
  */
-
 #ifndef THE_WITNESS_EDITOR_DRIVER_H
 #define THE_WITNESS_EDITOR_DRIVER_H
 

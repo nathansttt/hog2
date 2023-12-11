@@ -62,8 +62,8 @@ public:
 
     virtual bool EnableRule(int which)
     {
-        auto it = std::find(disabled.begin(), disabled.end(), which);
-        if (it != disabled.end())
+        if (auto it = std::find(disabled.begin(), disabled.end(), which);
+            it != disabled.end())
         {
             disabled.erase(it);
             return true;

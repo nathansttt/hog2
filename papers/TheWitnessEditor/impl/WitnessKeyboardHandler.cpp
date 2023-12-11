@@ -162,6 +162,24 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
         std::cout << "Dead-end Entropy of the current state: ("
             << ((ae.value == inf) ? "inf" : to_string_with_precision(ae.value, 2))
             << ", " << ae.depth << ")" << std::endl;
+        if (!solutionTree.empty())
+        {
+            auto &actions = *witness.actionCache.getItem();
+            witness.GetActionSequence(iws.ws, actions);
+            int index = 0;
+            for(auto i = 1; i < actions.size(); ++i)
+            {
+                const auto &action = actions[i];
+                index = solutionTree[index].children[static_cast<unsigned>(action)];
+                std::cout << action << ", " << index << std::endl;
+                if (index == -1)
+                {
+                    std::cout << "not in the tree" << std::endl;
+                    break;
+                }
+            }
+            witness.actionCache.returnItem(&actions);
+        }
         break;
     }
     case '0':
