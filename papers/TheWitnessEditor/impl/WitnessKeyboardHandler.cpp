@@ -53,13 +53,13 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     case 'l':
     {
 #ifdef __EMSCRIPTEN__
-        auto str = std::string(getTextBuffer());
-        std::stringstream iss(str);
+        std::stringstream ss(getTextBuffer());
         auto w = Witness<puzzleWidth, puzzleHeight>();
-        iss >> w;
+        ss >> w;
         witness = w;
         allSolutions.clear();
         GetAllSolutions(witness, allSolutions);
+        BuildTree(witness, allSolutions, solutionTree);
         UpdateSolutionIndices();
 #endif
         break;
