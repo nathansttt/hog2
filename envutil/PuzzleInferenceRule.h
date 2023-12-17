@@ -9,9 +9,11 @@
 #define HOG2_ENV_UTIL_PUZZLE_INFERENCE_RULE_H
 
 #include <algorithm>
+#include <functional>
+#include <iterator>
 #include <unordered_map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "SearchEnvironment.h"
 

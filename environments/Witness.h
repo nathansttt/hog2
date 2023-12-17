@@ -590,6 +590,7 @@ public:
     std::array<std::array<WitnessRegionConstraint, height>, width> regionConstraints;
     //	constraint constraints[width][height];
     std::array<int, (int)kRegionConstraintCount> constraintCount;
+    mutable std::unordered_map<rgbColor, std::vector<int>> colorMap;
 
     // TODO: merge these
     //	std::vector<separationObject> separationConstraints;
@@ -777,6 +778,12 @@ public:
 
     const WitnessRegionConstraint& GetRegionConstraint(int x, int y) const
     {
+        return regionConstraints[x][y];
+    }
+    
+    const WitnessRegionConstraint& GetRegionConstraint(int r) const
+    {
+        auto [x, y] = GetRegionXYFromIndex(r);
         return regionConstraints[x][y];
     }
 
@@ -1157,6 +1164,19 @@ public:
     void AddRegionConstraint(int which, const WitnessRegionConstraint &constraint)
     {
         AddRegionConstraint(GetRegionFromX(which), GetRegionFromY(which), constraint);
+    }
+    
+    void CountColors() const
+    {
+        for (auto i = 0; i < width; ++i)
+        {
+            for (auto j = 0; j < height; ++j)
+            {
+                const auto &constraint = regionConstraints[i][j];
+                if (constraint.type == kSeparation || constraint.type == kStar)
+                    colorMap[constraint.color].emplace_back(GetRegionIndex(i, j));
+            }
+        }
     }
 
     std::vector<std::pair<int, int>> start;

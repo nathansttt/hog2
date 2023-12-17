@@ -64,6 +64,7 @@ static void temp()
     witness.AddMustCrossConstraint(true, 0, 4);
     witness.AddMustCrossConstraint(false, 2, 0);
     witness.AddMustCrossConstraint(false, 3, 1);
+    witness.CountColors();
 }
 
 static void InitPuzzle()

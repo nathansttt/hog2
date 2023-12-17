@@ -8,6 +8,7 @@
 #ifndef HOG2_GENERIC_PUZZLE_ENTROPY_H
 #define HOG2_GENERIC_PUZZLE_ENTROPY_H
 
+#include <iterator>
 #include <numeric>
 #include <vector>
 #include "PuzzleInferenceRule.h"
@@ -121,6 +122,7 @@ public:
             children.emplace_back(Calculate(env, state, lookahead, action));
             env.UndoAction(state, action);
         }
+        // TODO: apply look ahead
         EntropyInfo entropyInfo{};
         if (std::all_of(children.begin(), children.end(), [](const auto &info) {
             return info.value == 0;

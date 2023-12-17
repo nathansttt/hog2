@@ -129,6 +129,26 @@ ActionType SeparationRule(const SearchEnvironment<WitnessState<width, height>, W
         default:
             break;
     }
+    if (witness.constraintCount[kStar] > 0)
+    {
+        witness.GetLeftRightRegions(state);
+        for (const auto &[color, regions]: witness.colorMap)
+        {
+            if (regions.size() == 2)
+            {
+                int r1 = regions[0];
+                int r2 = regions[1];
+                auto &rc1 = witness.GetRegionConstraint(r1);
+                auto &rc2 = witness.GetRegionConstraint(r2);
+                if ((rc1.type == kStar || rc2.type == kStar) &&
+                    ((std::find(state.lhs.begin(), state.lhs.end(), r1) != state.lhs.end() &&
+                     std::find(state.rhs.begin(), state.rhs.end(), r2) != state.rhs.end()) ||
+                    (std::find(state.lhs.begin(), state.lhs.end(), r2) != state.lhs.end() &&
+                     std::find(state.rhs.begin(), state.rhs.end(), r1) != state.rhs.end())))
+                    return CANNOT_TAKE;
+            }
+        }
+    }
     return UNKNOWN;
 }
 
