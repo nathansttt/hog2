@@ -49,7 +49,7 @@ bool recording = false;
 bool running = false;
 bool mapChange = true;
 
-int stepsPerFrame = 0;
+int stepsPerFrame = 1;
 
 int main(int argc, char* argv[])
 {
@@ -238,6 +238,19 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	return 2;
 }
 
+void InitializeSearches()
+{
+	astar.InitializeSearch(me, start, goal, astarPath);
+	if (m == kCanonicalAStar)
+		jps->SetJumpLimit(0);
+	else if (m == kBoundedJPS)
+		jps->SetJumpLimit(4);
+	else if (m == kJPS)
+		jps->SetJumpLimit(-1);
+	jps->InitializeSearch(me, start, goal, jpsPath);
+	canDijkstra.InitializeSearch(me, start, goal, dijPath);
+}
+
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
@@ -269,37 +282,62 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '1':
 			m = kCanonicalAStar;
 			submitTextToBuffer("Running Canonical A*");
-			running = false;
 			jpsPath.resize(0);
-			start = {0,0};
+			if (running)
+			{
+				InitializeSearches();
+			}
+			else {
+				start = {0,0};
+			}
 			break;
 		case '2':
 			m = kBoundedJPS;
 			submitTextToBuffer("Running Bounded JPS(4)");
-			running = false;
 			jpsPath.resize(0);
-			start = {0,0};
+			if (running)
+			{
+				InitializeSearches();
+			}
+			else {
+				start = {0,0};
+			}
 			break;
 		case '3':
 			m = kJPS;
 			submitTextToBuffer("Running JPS");
-			running = false;
 			jpsPath.resize(0);
-			start = {0,0};
+			if (running)
+			{
+				InitializeSearches();
+			}
+			else {
+				start = {0,0};
+			}
 			break;
 		case '4':
 			m = kCanonicalDijkstra;
 			submitTextToBuffer("Running Canonical Dijkstra");
-			running = false;
 			dijPath.resize(0);
-			start = {0,0};
+			if (running)
+			{
+				InitializeSearches();
+			}
+			else {
+				start = {0,0};
+			}
 			break;
 		case '5':
 			m = kAStar;
 			submitTextToBuffer("Running (classic) A*");
-			running = false;
 			astarPath.resize(0);
-			start = {0,0};
+			if (running)
+			{
+				InitializeSearches();
+			}
+			else {
+				start = {0,0};
+			}
 			break;
 		case 'o':
 			if (m == kCanonicalDijkstra) { // canonical dijkstra
@@ -347,15 +385,7 @@ void GetPathHandler(tMouseEventType mType, point3d loc)
 		case kMouseUp:
 		{
 			goal = tmp;
-			astar.InitializeSearch(me, start, goal, astarPath);
-			if (m == kCanonicalAStar)
-				jps->SetJumpLimit(0);
-			else if (m == kBoundedJPS)
-				jps->SetJumpLimit(4);
-			else if (m == kJPS)
-				jps->SetJumpLimit(-1);
-			jps->InitializeSearch(me, start, goal, jpsPath);
-			canDijkstra.InitializeSearch(me, start, goal, dijPath);
+			InitializeSearches();
 			running = true;
 		}
 	}
