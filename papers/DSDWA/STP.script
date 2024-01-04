@@ -1,12 +1,11 @@
 #!/bin/tcsh
 
-foreach problem (`seq 83 99`)
 
-foreach alg (`seq 0 3`)
-
-foreach weight ( 1.2 1.5 2.0 5.0 10.0 )
-
-./bin/release/DSDWA -stp $problem $alg $weight >> results.txt
+foreach problem (`seq 0 99`)
+foreach alg ( 0 1 2 6 ) # (`seq 0 3`)
+foreach weight ( 1.5 ) # 2.0 20.0 ) #( 1.2 1.5 2.0 5.0 10.0 )
+echo $problem " " $alg " " $weight
+../../bin/release/DSDWA -stp $problem $alg $weight >> stp-results.txt
 
 end
 
