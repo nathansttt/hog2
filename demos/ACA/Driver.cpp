@@ -15,6 +15,7 @@
 #include <string>
 #include <random>
 #include <cassert>
+#include <algorithm>
 
 bool recording = false;
 bool running = false;
