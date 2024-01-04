@@ -77,6 +77,9 @@ struct point {
 			x = 0; y = 0; z = 0;
 		}
 	}
+	static float Dot(point a, point b)
+	{ return a.x * b.x + a.y*b.y + a.z*b.z; }
+	// cross product
 	point operator*(const point &val) const
 	{
 		point result;
