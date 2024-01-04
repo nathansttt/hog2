@@ -7,7 +7,6 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/Makefile,v $
 # $Id: Makefile,v 1.5 2006/11/01 23:34:14 nathanst Exp $
 #-----------------------------------------------------------------------------
-
 ROOT = ../..
 BINDIR = $(ROOT)/bin/release/
 prefix = /usr/local/bin
@@ -46,6 +45,7 @@ PROJECTS = \
   apps/roads \
   apps/canonicalGrids \
   apps/delta \
+  demos/ACA \
   demos/BOA \
   demos/DFID \
   demos/dijkstra \
@@ -110,6 +110,7 @@ PROJECTS_ALL = \
   apps/delta \
   apps/pancake \
   apps/multiagent \
+  demos/ACA \
   demos/BOA \
   demos/DFID \
   demos/dijkstra \

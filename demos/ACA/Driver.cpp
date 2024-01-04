@@ -179,17 +179,35 @@ void RotateAgent(int which, float radians)
 void DrawAgent(Graphics::Display &display, ACAAgent &a)
 {
 	Graphics::point worldWidth = {worldSize, 0, 0};
+	Graphics::point worldHeight = {0, worldSize, 0};
 	float lw = HOGFromWorld(1)*0.05f;
 //	display.FrameCircle(HOGFromWorld(a.position), HOGFromWorld(a.radius), a.color, lw);
 	for (int x = 0; x < a.numCircles; x++)
 	{
-		display.FillCircle(HOGFromWorld(a.position+a.circle[x].start), HOGFromWorld(a.circle[x].radius), a.color);
-		display.FrameCircle(HOGFromWorld(a.position+a.circle[x].start), HOGFromWorld(a.circle[x].radius), Colors::black, lw);
-//		if (a.position.x+a.circle[x].start.x - a.circle[x].start.radius < 0)
-//		{
-//			display.FillCircle(HOGFromWorld(a.position+a.circle[x].start), HOGFromWorld(a.circle[x].radius), a.color);
-//			display.FrameCircle(HOGFromWorld(a.position+a.circle[x].start), HOGFromWorld(a.circle[x].radius), Colors::black, lw);
-//		}
+		agentCircle &c = a.circle[x];
+		display.FillCircle(HOGFromWorld(a.position+c.start), HOGFromWorld(c.radius), a.color);
+		display.FrameCircle(HOGFromWorld(a.position+c.start), HOGFromWorld(c.radius), Colors::black, lw);
+		// Draw wrapping
+		if (a.position.x+c.start.x + c.radius > worldSize)
+		{
+			display.FillCircle(HOGFromWorld(a.position+c.start-worldWidth), HOGFromWorld(c.radius), a.color);
+			display.FrameCircle(HOGFromWorld(a.position+c.start-worldWidth), HOGFromWorld(c.radius), Colors::black, lw);
+		}
+		if (a.position.x+c.start.x - c.radius < 0)
+		{
+			display.FillCircle(HOGFromWorld(a.position+c.start+worldWidth), HOGFromWorld(c.radius), a.color);
+			display.FrameCircle(HOGFromWorld(a.position+c.start+worldWidth), HOGFromWorld(c.radius), Colors::black, lw);
+		}
+		if (a.position.y+c.start.y + c.radius > worldSize)
+		{
+			display.FillCircle(HOGFromWorld(a.position+c.start-worldHeight), HOGFromWorld(c.radius), a.color);
+			display.FrameCircle(HOGFromWorld(a.position+c.start-worldHeight), HOGFromWorld(c.radius), Colors::black, lw);
+		}
+		if (a.position.y+c.start.y - c.radius < 0)
+		{
+			display.FillCircle(HOGFromWorld(a.position+c.start+worldHeight), HOGFromWorld(c.radius), a.color);
+			display.FrameCircle(HOGFromWorld(a.position+c.start+worldHeight), HOGFromWorld(c.radius), Colors::black, lw);
+		}
 	}
 	for (int x = 0; x < a.numLines; x++)
 	{
