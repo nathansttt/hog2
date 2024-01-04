@@ -303,7 +303,7 @@ void GridEmbedding::GetConnectedComponents()
 		// Increment Region
 		numConnectedComponents++;
 	}
-	printf("Map has %d connected components\n", numConnectedComponents);
+	//printf("Map has %d connected components\n", numConnectedComponents);
 }
 
 
