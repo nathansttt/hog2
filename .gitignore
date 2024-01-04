@@ -5,3 +5,7 @@ objs_html/
 .DS_Store
 build/.DS_Store
 .idea/
+papers/FMDH/results/
+*~
+
+
