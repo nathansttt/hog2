@@ -79,7 +79,7 @@ void InstallHandlers()
     InstallKeyboardHandler(MyDisplayHandler, "Load", "Load map", kAnyModifier, '0', '8');
     InstallKeyboardHandler(MyDisplayHandler, "Lerp", "restart lerp", kAnyModifier, 'l');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save a screen shot", kAnyModifier, 's');
-	//InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
     //InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
     //InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear DH", kAnyModifier, '|');
     InstallKeyboardHandler(MyDisplayHandler, "Speed Up", "Increase speed of A* search", kAnyModifier, ']');
@@ -277,6 +277,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (path.size() == 0)
 				astar.DoSingleSearchStep(path);
 		astar.Draw(display);
+//		std::string s = std::to_string(astar.GetNodesExpanded())+" expanded";
+//		submitTextToBuffer(s.c_str());
 	}
 	if (embeddingChanged == true && viewport == 1)
     {
@@ -323,8 +325,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
     if (viewport ==1 && recording)
     {
-//        SaveSVG();
-        recording=false;
+		SaveSVG(display, 1);
+//		SaveSVG();
+//        recording=false;
     }
 }
 
@@ -768,7 +771,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			SaveSVG(d, 1);
 		}
         case 'r':
-            recording=true;
+            recording=!recording;
             break;
     }
 }
