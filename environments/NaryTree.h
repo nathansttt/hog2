@@ -72,6 +72,7 @@ public:
 	NaryState GetClosestNode(float x, float y);
 private:
 	int GetDepth(const NaryState s) const;
+	float GetDepthRadius(int depth) const;
 	uint64_t GetOffset(const NaryState s) const;
 	void GetLocation(const NaryState &s, float &x, float &y) const;
 	int b, d;

@@ -1,9 +1,9 @@
 #!/bin/tcsh
 
-echo "1.20 & 1.50 & 2.00 & 5.00"
-foreach ALG ( `seq 0 3` )
-foreach weight ( 1.20 1.50 2.00 5.00 )
-grep ALG results.txt | grep "weight $weight" | grep "ALG $ALG" | awk 'BEGIN {} { sum += $8; cnt++ } END { printf("%'"'"'d\t&\t", sum/cnt) }'
+#echo "1.20 & 1.50 & 2.00 & 5.00"
+foreach ALG ( 0 1 2 6 ) # ( `seq 0 3` )
+foreach weight ( 1.5 2.0 20.0 ) #( 1.20 1.50 2.00 5.00 )
+grep ALG stp-results.txt | grep "weight $weight" | grep "ALG $ALG" | awk 'BEGIN {} { sum += $8; cnt++ } END { printf("%'"'"'d\t&\t", sum/cnt) }'
 
 end
 echo ""

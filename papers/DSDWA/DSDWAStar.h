@@ -18,7 +18,8 @@ enum tExpansionPriority {
 	kHalfEdgeDrop=3,
 	kGreedy=4,
 	kFullEdgeDrop=5,
-	kDSDPolicyCount=6
+	kPathSuboptDouble=6,
+	kDSDPolicyCount=7,
 };
 
 template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompareWithF<state>, AStarOpenClosedDataWithF<state>> >
@@ -256,6 +257,20 @@ public:
 		}
 	}
 	
+	/**
+	 * Given the slope of the next bounding line, give the possbile range of weights that can be used in the priority function
+	 *
+	 * \param minWeight (returned) The minimum weight that can be used without going under the lower limit
+	 * \param maxWeight (returned) The maximum weight that can be used without going over the upper limit
+	 **/
+	void GetNextWeightRange(float &minWeight, float &maxWeight, float nextSlope)
+	{
+		if (data.size() > 0)
+			GetNextWeightRange(minWeight, maxWeight, data.back().crossPoint, nextSlope);
+		else
+			GetNextWeightRange(minWeight, maxWeight, {1, 0}, nextSlope);
+	}
+
 	/**
 	 * Given the slope of the next bounding line, give the possbile range of weights that can be used in the priority function
 	 *
@@ -568,6 +583,13 @@ bool DSDWAStar<state,action,environment,openList>::DoSingleSearchStep(std::vecto
 			}
 			else if (policy == kFullEdgeDrop) {
 				SetNextPriority(maxSlopeH, maxSlopeG, openClosedList.Lookup(openClosedList.Peek()).f-edgeCosts[which]*(1-weight));
+			}
+			else if (policy == kPathSuboptDouble)
+			{
+				// Estimated cost to here: theHeuristic->HCost(start, neighbors[which]);
+				// Actual cost to here: maxSlopeG
+				float soFar = maxSlopeG/theHeuristic->HCost(start, neighbors[which]);
+				SetNextWeight(maxSlopeH, maxSlopeG, (soFar+weight)-1); // const Graphics::point &loc
 			}
 			else {
 				// last argument will be ignored

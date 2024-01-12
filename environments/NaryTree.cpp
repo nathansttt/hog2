@@ -23,10 +23,10 @@ NaryTree::NaryTree(int branchingFactor, int depth) :b(branchingFactor), d(depth)
 		tot*=b;
 		sum += tot;
 	}
-	for (size_t x = 0; x < nodesAtDepth.size(); x++)
-	{
-		printf("%d %" PRId64 " %" PRId64 "\n", x, nodesAtDepth[x], totalNodesAtDepth[x]);
-	}
+//	for (size_t x = 0; x < nodesAtDepth.size(); x++)
+//	{
+//		printf("%d %" PRId64 " %" PRId64 "\n", x, nodesAtDepth[x], totalNodesAtDepth[x]);
+//	}
 }
 
 void NaryTree::GetSuccessors(const NaryState &nodeID, std::vector<NaryState> &neighbors) const
@@ -213,43 +213,71 @@ void NaryTree::Draw(Graphics::Display &display) const
 	rgbColor color = GetColor();
 	std::vector<NaryState> succ;
 	float x1, y1, x2, y2;
+	float r1, r2;
 	// loop through the total number of nodes in the whole tree
 	for (uint64_t t = 0; t < totalNodesAtDepth.back(); t++)
 	{
 		GetLocation(t, x1, y1);
 		GetSuccessors(t, succ);
+		int depth = GetDepth(t);
+		r1 = GetDepthRadius(depth);
 		for (uint64_t s : succ)
 		{
 			GetLocation(s, x2, y2);
+			r2 = GetDepthRadius(depth+1);
+
+			float theta = atan2(x1-x2, y1-y2);
+			float stheta = -sin(theta);
+			float ctheta = cos(theta);
 //			display.DrawLine({x1, y1}, {x2, y2}, 2.0-1.8*(((y1+y2)/2.0+1.0)/2.0), color);
-			float r1 = 1.0/nodesAtDepth[GetDepth(s)];
-			float r2 = 0.1/d;
-			float r = std::min(r1, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, r, color);
+//			float r1 = 1.0/nodesAtDepth[GetDepth(s)];
+//			float r2 = 0.1/d;
+//			float r = std::min(r1, r2);
+//			display.DrawLine({x1, y1}, {x2, y2}, r, color);
+			
+			display.FillTriangle({x1-r1*ctheta, y1-r1*stheta}, {x2-r2*ctheta, y2-r2*stheta}, {x1+r1*ctheta, y1+r1*stheta}, color);
+			display.FillTriangle({x1+r1*ctheta, y1+r1*stheta}, {x2-r2*ctheta, y2-r2*stheta}, {x2+r2*ctheta, y2+r2*stheta}, color);
 		}
+		display.FillCircle({x1-r1, y1-r1, x1+r1, y1+r1}, Colors::gray);
 	}
+}
+
+float NaryTree::GetDepthRadius(int depth) const
+{
+	float r1 = 0.33333/nodesAtDepth[depth];
+	float r2 = 0.008;
+	float r = std::min(r1, r2);
+	return r;
 }
 
 void NaryTree::Draw(Graphics::Display &display, const NaryState &s) const
 {
 	float x1, y1;
 	GetLocation(s, x1, y1);
-	float r1 = 2.0/nodesAtDepth[GetDepth(s)];
-	float r2 = 0.1/d;
-	float r = std::min(r1, r2);
+//	float r1 = 2.0/nodesAtDepth[GetDepth(s)];
+//	float r2 = 0.1/d;
+	float r = std::max(0.01f, 3.0f*GetDepthRadius(GetDepth(s)));//std::min(r1, r2));
 	display.FillCircle({x1-r, y1-r, x1+r, y1+r}, color);
 }
 
 void NaryTree::DrawLine(Graphics::Display &display, const NaryState &f, const NaryState &t, float width) const
 {
-	float x1, y1;
+	float x1, y1, x2, y2;
 	GetLocation(f, x1, y1);
-	float x2, y2;
+	int depth = GetDepth(f);
+	float r1 = GetDepthRadius(depth)*width;
+
 	GetLocation(t, x2, y2);
-	float r1 = std::min(1.0/nodesAtDepth[GetDepth(f)], 1.0/nodesAtDepth[GetDepth(t)]);
-	float r2 = 0.1/d;
-	float r = std::min(r1, r2);
-	display.DrawLine({x1, y1}, {x2, y2}, width*r, color);
+	float r2 = GetDepthRadius(depth+1)*width;
+
+	float theta = atan2(x1-x2, y1-y2);
+	float stheta = -sin(theta);
+	float ctheta = cos(theta);
+
+	display.FillCircle({x1, y1}, r1, color);
+	display.FillCircle({x2, y2}, r2, color);
+	display.FillTriangle({x1-r1*ctheta, y1-r1*stheta}, {x2-r2*ctheta, y2-r2*stheta}, {x1+r1*ctheta, y1+r1*stheta}, color);
+	display.FillTriangle({x1+r1*ctheta, y1+r1*stheta}, {x2-r2*ctheta, y2-r2*stheta}, {x2+r2*ctheta, y2+r2*stheta}, color);
 }
 
 

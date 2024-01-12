@@ -45,7 +45,8 @@ PROJECTS = \
   demos/inconsistency-graph \
   demos/racetrack \
   demos/multi-target \
-  papers/DWA\
+  demos/ACA \
+  papers/DWA \
   papers/TheWitnessEditor
 
 # Include projects with broken compilation
@@ -97,6 +98,7 @@ PROJECTS_ALL = \
   demos/astar \
   demos/idastar \
   demos/multi-target \
+  papers/ACA \
   papers/DWA \
   papers/TheWitnessEditor
 

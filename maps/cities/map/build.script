@@ -1,9 +1,0 @@
-#!/bin/tcsh
-
-foreach x ( *.map )
-
-echo $x
-~/hog2/bin/release/mapUtils -buildProblemSet $x >> output.txt
-
-end
-

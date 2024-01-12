@@ -17,9 +17,10 @@
 #include "SVGUtil.h"
 #include "DSDWAStar.h"
 #include "MapGenerators.h"
+#include "GridHeuristics.h"
 
 int stepsPerFrame = 1;
-float bound = 5;
+float bound = 2;
 float testScale = 1.0;
 void GetNextWeightRange(float &minWeight, float &maxWeight, point3d currPoint, float nextSlope);
 float GetPriority(float h, float g);
@@ -30,6 +31,7 @@ std::vector<xyLoc> solution;
 bool searchRunning = false;
 MapEnvironment *me = 0;
 xyLoc start, goal;
+GridEmbedding *ge;
 
 int main(int argc, char* argv[])
 {
@@ -82,11 +84,17 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		dsd.policy = kWA;
 		start = {1,1};
 		goal = {198, 198};
-		dsd.SetWeight(1.8);
+		
+		const int numDimensions = 5;
+		ge = new GridEmbedding(me, numDimensions, kLINF);
+		for (int x = 0; x < numDimensions; x++)
+			ge->AddDimension(kDifferential, kFurthest);
+
+		dsd.SetHeuristic(ge);
+		dsd.SetWeight(bound);
 		dsd.InitializeSearch(me, start, goal, solution);
 		searchRunning = true;
 	}
-
 }
 //#include "Plot2D.h"
 struct DSDdata {
