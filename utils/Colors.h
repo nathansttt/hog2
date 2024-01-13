@@ -31,7 +31,7 @@ public:
 	static rgbColor hsl(float h, float s, float l)
 	{
 		float r, g, b;
-		
+
 		if (s == 0)
 		{
 			r = g = b = l; // achromatic
@@ -71,11 +71,11 @@ public:
 		g = (unhexdigit(str[3])*16+unhexdigit(str[4]))/255.0;
 		b = (unhexdigit(str[5])*16+unhexdigit(str[6]))/255.0;
 	}
-    static std::size_t hash()
+    std::size_t hash() const
     {
-        return (static_cast<std::size_t>(255) << 16) |
-            (static_cast<std::size_t>(255) << 8) |
-            static_cast<std::size_t>(255);
+        return (static_cast<std::size_t>(r) << 16) |
+            (static_cast<std::size_t>(g) << 8) |
+            static_cast<std::size_t>(b);
     }
     bool operator==(const rgbColor &other) const
     {
@@ -138,7 +138,7 @@ namespace Colors
 	 */
 	rgbColor GetColor(float v, float vmin, float vmax, int type);
 
-	
+
 	const rgbColor black  = {0.0,0.0,0.0};
 	const rgbColor white  = {1.0,1.0,1.0};
 	const rgbColor gray   = {0.5,0.5,0.5};
@@ -161,7 +161,7 @@ namespace Colors
 
 	const rgbColor bluegreen   = {0.0f,0.65f,0.5f}; // blue
 
-	
+
 	const rgbColor blue   = {0.0,0.0,1.0}; // blue
 	const rgbColor darkblue   = {0.0,0.0,0.5}; // blue
 	const rgbColor lightblue   = {0.5,0.5,1.0}; // blue
@@ -174,7 +174,7 @@ namespace Colors
 	const rgbColor purple = {0.5,0.0,1.0}; // purple
 	const rgbColor darkpurple = {0.25,0.0,0.5}; //
 	const rgbColor cyan   = {0.0,1.0,1.0}; // cyan
-	
+
 	const rgbColor orange = {1.0,0.5,0.0}; // orange
 	const rgbColor pink   = {1.0,0.0,0.5}; // pink
 
