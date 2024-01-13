@@ -274,7 +274,8 @@ enum WitnessRegionConstraintType {
     kNegativeTetris = 4,
     kTriangle = 5,
     kEraser = 6,
-    kRegionConstraintCount = 7
+    kUnknownRegionConstraint = 7,
+    kRegionConstraintCount = 8
 };
 
 /**
@@ -711,9 +712,9 @@ public:
             const WitnessState<width, height> &nodeID, std::vector <WitnessState<width, height>> &neighbors) const;
 
     void GetActions(const WitnessState<width, height> &nodeID, std::vector <WitnessAction> &actions) const;
-    
+
     void GetLeftRightRegions(const WitnessState<width, height> &state) const;
-    
+
     void GetActionSequence(const WitnessState<width, height> &state, std::vector<WitnessAction> &actions) const;
 
     void ApplyAction(WitnessState<width, height> &s, WitnessAction a) const;
@@ -781,7 +782,7 @@ public:
     {
         return regionConstraints[x][y];
     }
-    
+
     const WitnessRegionConstraint& GetRegionConstraint(int r) const
     {
         auto [x, y] = GetRegionXYFromIndex(r);
@@ -974,6 +975,20 @@ public:
         AddEraserConstraint(GetRegionFromX(which), GetRegionFromY(which));
     }
 
+    void AddUnknownRegionConstraint(int x, int y)
+    {
+        constraintCount[regionConstraints[x][y].type]--;
+        constraintCount[kUnknownRegionConstraint]++;
+        regionConstraints[x][y].type = kUnknownRegionConstraint;
+    }
+
+    void AddUnknownRegionConstraint(int which)
+    {
+        AddUnknownRegionConstraint(GetRegionFromX(which), GetRegionFromY(which));
+    }
+
+    int GetNumUnknownRegionConstraints() const { return constraintCount[kUnknownRegionConstraint]; }
+
     // TODO: Not yet complete - don't handle tilted
     /* Tetris constraints - must solve packing problem to validate these */
     /* We allow most constraints with 1...4 blocks -- 14 total */
@@ -1157,6 +1172,9 @@ public:
             case kEraser:
                 AddEraserConstraint(x, y);
                 break;
+            case kUnknownRegionConstraint:
+                AddUnknownRegionConstraint(x, y);
+                break;
             default: // kNoRegionConstraint, kRegionConstraintCount
                 break;
         }
@@ -1166,7 +1184,7 @@ public:
     {
         AddRegionConstraint(GetRegionFromX(which), GetRegionFromY(which), constraint);
     }
-    
+
     void CountColors() const
     {
         for (auto i = 0; i < width; ++i)
@@ -1764,7 +1782,7 @@ public:
             std::cout << std::endl;
         }
     }
-    
+
     mutable vectorCache<WitnessAction> actionCache;
 };
 
@@ -1888,7 +1906,7 @@ void Witness<width, height>::GetActionSequence(const WitnessState<width, height>
         x0 = x1;
         y0 = y1;
     }
-    
+
 }
 
 template<int width, int height>
@@ -3656,6 +3674,13 @@ void Witness<width, height>::DrawRegionConstraint(
     }
     case kEraser:
         break;
+    case kUnknownRegionConstraint:
+    {
+        Graphics::point p = p3;
+        display.DrawText("?", p, Colors::black, lineWidth * 4,
+                         Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+        break;
+    }
     case kRegionConstraintCount:
         break;
     }
