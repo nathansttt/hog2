@@ -542,7 +542,8 @@ enum WitnessPathConstraintType {
     kNoPathConstraint = 0,
     kMustCross = 1,
     kCannotCross = 2,
-    kPathConstraintCount = 3
+    kUnknownPathConstraint = 3,
+    kPathConstraintCount = 4
 };
 
 template<int width, int height>
@@ -861,6 +862,19 @@ public:
     void AddCannotCrossConstraint(int);  // { cannotCrossConstraints.push_back({x, y});}
     void RemoveCannotCrossConstraint(bool horiz, int x, int y);  // { cannotCrossEdgeConstraints.pop_back();}
     void RemoveCannotCrossConstraint(int x, int y);  // { cannotCrossConstraints.pop_back();}
+
+    bool GetUnknownPathConstraint(int) const;
+    bool GetUnknownPathConstraint(int x, int y) const;
+    bool GetUnknownPathConstraint(bool horiz, int x, int y) const;
+
+    void AddUnknownPathConstraint(int);
+    void AddUnknownPathConstraint(int x, int y);
+    void AddUnknownPathConstraint(bool horiz, int x, int y);
+
+    void RemoveUnknownPathConstraint(int);
+    void RemoveUnknownPathConstraint(int x, int y);
+    void RemoveUnknownPathConstraint(bool horiz, int x, int y);
+
 
     void ClearInnerConstraints()
     {
@@ -3213,6 +3227,69 @@ void Witness<width, height>::RemoveCannotCrossConstraint(int x, int y) // { cann
     RemoveCannotCrossConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
 }
 
+template<int width, int height>
+bool Witness<width, height>::GetUnknownPathConstraint(int which) const
+{
+    return pathConstraints[which] == kUnknownPathConstraint;
+}
+
+template<int width, int height>
+bool Witness<width, height>::GetUnknownPathConstraint(int x, int y) const
+{
+    return GetUnknownPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+}
+
+template<int width, int height>
+bool Witness<width, height>::GetUnknownPathConstraint(bool horiz, int x, int y) const
+{
+    if (horiz)
+        return GetUnknownPathConstraint(y * width + x);
+    else
+        return GetUnknownPathConstraint(width * (height + 1) + x * height + y);
+}
+
+template<int width, int height>
+void Witness<width, height>::AddUnknownPathConstraint(int which)
+{
+    pathConstraints[which] = kUnknownPathConstraint;
+}
+
+template<int width, int height>
+void Witness<width, height>::AddUnknownPathConstraint(int x, int y)
+{
+    AddUnknownPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+}
+
+template<int width, int height>
+void Witness<width, height>::AddUnknownPathConstraint(bool horiz, int x, int y)
+{
+    if (horiz)
+        AddUnknownPathConstraint(y * width + x);
+    else
+        AddUnknownPathConstraint(width * (height + 1) + x * height + y);
+}
+
+template<int width, int height>
+void Witness<width, height>::RemoveUnknownPathConstraint(int which)
+{
+    pathConstraints[which] = kNoPathConstraint;
+}
+
+template<int width, int height>
+void Witness<width, height>::RemoveUnknownPathConstraint(int x, int y) // { cannotCrossConstraints.pop_back();}
+{
+    RemoveUnknownPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+}
+
+template<int width, int height>
+void Witness<width, height>::RemoveUnknownPathConstraint(bool horiz, int x, int y)
+{
+    if (horiz)
+        RemoveCannotCrossConstraint(y * width + x);
+    else
+        RemoveCannotCrossConstraint(width * (height + 1) + x * height + y);
+}
+
 #pragma mark -
 #pragma mark Solver Helper Functions
 #pragma mark -
@@ -3750,14 +3827,11 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
     {
         for (int y = 0; y < height + 1; y++)
         {
+            Graphics::point pt = GetScreenCoord(x, y);
             if (GetMustCrossConstraint(x, y))
-            {
-                Graphics::point pt = GetScreenCoord(x, y);
                 display.FillNGon(pt, lineWidth * 0.9f, 6, 30, Colors::black);
-            }
             else if (GetCannotCrossConstraint(x, y))
             {
-                Graphics::point pt = GetScreenCoord(x, y);
                 Graphics::rect r(pt, lineWidth);
                 display.FillSquare(pt, lineWidth, backColor);
                 if (x > 0)
@@ -3797,47 +3871,42 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
                     r2 |= r;
                     display.FillRect(r2, backColor);
                 }
-            }
+            } else if (GetUnknownPathConstraint(x, y))
+                display.DrawText("?", pt, Colors::black, lineWidth * 2,
+                                 Graphics::textAlignCenter, Graphics::textBaselineMiddle);
         }
     }
     for (int x = 0; x < width; x++)
     {
         for (int y = 0; y <= height; y++)
         {
+            Graphics::point p1 = GetScreenCoord(x, y);
+            Graphics::point p2 = GetScreenCoord(x + 1, y);
+            Graphics::point pt = (p1 + p2) * 0.5;
             if (GetMustCrossConstraint(true, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x + 1, y);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillNGon(pt, lineWidth * 0.9f, 6, 30, Colors::black);
-            }
             else if (GetCannotCrossConstraint(true, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x + 1, y);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillSquare(pt, lineWidth, backColor);
-            }
+            else if (GetUnknownPathConstraint(true, x, y))
+                display.DrawText("?", pt, Colors::black, lineWidth * 2,
+                                 Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+
         }
     }
     for (int x = 0; x <= width; x++)
     {
         for (int y = 0; y < height; y++)
         {
+            Graphics::point p1 = GetScreenCoord(x, y);
+            Graphics::point p2 = GetScreenCoord(x, y + 1);
+            Graphics::point pt = (p1 + p2) * 0.5;
             if (GetMustCrossConstraint(false, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x, y + 1);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillNGon(pt, lineWidth * 0.9f, 6, 30, Colors::black);
-            }
             else if (GetCannotCrossConstraint(false, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x, y + 1);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillSquare(pt, lineWidth, backColor);
-            }
+            else if (GetUnknownPathConstraint(false, x, y))
+                display.DrawText("?", pt, Colors::black, lineWidth * 2,
+                                 Graphics::textAlignCenter, Graphics::textBaselineMiddle);
         }
     }
 
