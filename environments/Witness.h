@@ -593,6 +593,7 @@ public:
     std::array<std::array<WitnessRegionConstraint, height>, width> regionConstraints;
     //	constraint constraints[width][height];
     std::array<int, (int)kRegionConstraintCount> constraintCount;
+    unsigned numUnknownPathConstraints = 0;
     mutable std::unordered_map<rgbColor, std::vector<int>> colorMap;
 
     // TODO: merge these
@@ -639,6 +640,7 @@ public:
         //		cannotCrossConstraints = w.cannotCrossConstraints;
         regionConstraints = w.regionConstraints;
         constraintCount = w.constraintCount;
+        numUnknownPathConstraints = w.numUnknownPathConstraints;
         start = w.start;
         goal = w.goal;
         goalMap = w.goalMap;
@@ -863,18 +865,54 @@ public:
     void RemoveCannotCrossConstraint(bool horiz, int x, int y);  // { cannotCrossEdgeConstraints.pop_back();}
     void RemoveCannotCrossConstraint(int x, int y);  // { cannotCrossConstraints.pop_back();}
 
-    bool GetUnknownPathConstraint(int) const;
+    bool GetUnknownPathConstraint(int which) const;
     bool GetUnknownPathConstraint(int x, int y) const;
     bool GetUnknownPathConstraint(bool horiz, int x, int y) const;
 
-    void AddUnknownPathConstraint(int);
+    void AddUnknownPathConstraint(int which);
     void AddUnknownPathConstraint(int x, int y);
     void AddUnknownPathConstraint(bool horiz, int x, int y);
 
-    void RemoveUnknownPathConstraint(int);
+    void RemoveUnknownPathConstraint(int which);
     void RemoveUnknownPathConstraint(int x, int y);
     void RemoveUnknownPathConstraint(bool horiz, int x, int y);
 
+    void AddPathConstraint(int which, WitnessPathConstraintType t)
+    {
+        if (t == kUnknownPathConstraint &&
+            pathConstraints[which] != kUnknownPathConstraint)
+            ++numUnknownPathConstraints;
+        pathConstraints[which] = t;
+    }
+    void AddPathConstraint(int x, int y, WitnessPathConstraintType t)
+    {
+        AddPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x, t);
+    }
+    void AddPathConstraint(bool horiz, int x, int y, WitnessPathConstraintType t)
+    {
+        if (horiz)
+            AddPathConstraint(y * width + x, t);
+        else
+            AddPathConstraint(width * (height + 1) + x * height + y, t);
+    }
+
+    void RemovePathConstraint(int which)
+    {
+        if (pathConstraints[which] == kUnknownPathConstraint)
+            --numUnknownPathConstraints;
+        pathConstraints[which] = kNoPathConstraint;
+    }
+    void RemovePathConstraint(int x, int y)
+    {
+        RemovePathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+    }
+    void RemovePathConstraint(bool horiz, int x, int y)
+    {
+        if (horiz)
+            RemovePathConstraint(y * width + x);
+        else
+            RemovePathConstraint(width * (height + 1) + x * height + y);
+    }
 
     void ClearInnerConstraints()
     {
@@ -1002,6 +1040,9 @@ public:
     }
 
     int GetNumUnknownRegionConstraints() const { return constraintCount[kUnknownRegionConstraint]; }
+    unsigned GetNumUnknownPathConstraints() const { return numUnknownPathConstraints; }
+    unsigned GetNumUnknownConstraints() const { return static_cast<unsigned>(GetNumUnknownRegionConstraints())
+                                                       + GetNumUnknownPathConstraints(); }
 
     // TODO: Not yet complete - don't handle tilted
     /* Tetris constraints - must solve packing problem to validate these */
@@ -3252,6 +3293,7 @@ template<int width, int height>
 void Witness<width, height>::AddUnknownPathConstraint(int which)
 {
     pathConstraints[which] = kUnknownPathConstraint;
+    ++numUnknownPathConstraints;
 }
 
 template<int width, int height>
@@ -3273,6 +3315,7 @@ template<int width, int height>
 void Witness<width, height>::RemoveUnknownPathConstraint(int which)
 {
     pathConstraints[which] = kNoPathConstraint;
+    --numUnknownPathConstraints;
 }
 
 template<int width, int height>
