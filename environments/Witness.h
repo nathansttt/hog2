@@ -1039,10 +1039,15 @@ public:
         AddUnknownRegionConstraint(GetRegionFromX(which), GetRegionFromY(which));
     }
 
-    int GetNumUnknownRegionConstraints() const { return constraintCount[kUnknownRegionConstraint]; }
+    unsigned GetNumUnknownRegionConstraints() const
+    {
+        return static_cast<unsigned>(constraintCount[kUnknownRegionConstraint]);
+    }
     unsigned GetNumUnknownPathConstraints() const { return numUnknownPathConstraints; }
-    unsigned GetNumUnknownConstraints() const { return static_cast<unsigned>(GetNumUnknownRegionConstraints())
-                                                       + GetNumUnknownPathConstraints(); }
+    unsigned GetNumUnknownConstraints() const
+    {
+        return GetNumUnknownRegionConstraints() + GetNumUnknownPathConstraints();
+    }
 
     // TODO: Not yet complete - don't handle tilted
     /* Tetris constraints - must solve packing problem to validate these */
@@ -1242,15 +1247,12 @@ public:
 
     void CountColors() const
     {
+        colorMap.clear();
         for (auto i = 0; i < width; ++i)
-        {
             for (auto j = 0; j < height; ++j)
-            {
-                const auto &constraint = regionConstraints[i][j];
-                if (constraint.type == kSeparation || constraint.type == kStar)
+                if (const auto &constraint = regionConstraints[i][j];
+                    constraint.type == kSeparation || constraint.type == kStar)
                     colorMap[constraint.color].emplace_back(GetRegionIndex(i, j));
-            }
-        }
     }
 
     std::vector<std::pair<int, int>> start;
