@@ -1056,6 +1056,30 @@ public:
         return GetNumUnknownRegionConstraints() + GetNumUnknownPathConstraints();
     }
 
+    void RemoveUnknownConstraints(const std::vector<unsigned> &rc,
+                                  const std::vector<unsigned> &pc,
+                                  const std::vector<rgbColor> &colors) {
+        for (auto i = 0; i < rc.size(); ++i)
+            switch (rc[i])
+            {
+                case 0:
+                case 1:
+                case 2:
+                    AddRegionConstraint(
+                        unknownRegionConstraints[i],
+                        WitnessRegionConstraint{kTriangle, static_cast<int>(rc[i] + 1)});
+                    break;
+                default:
+                    AddRegionConstraint(
+                        unknownRegionConstraints[i],
+                        WitnessRegionConstraint{(rc[i] - 3) % 2 == 0 ? kSeparation : kStar, 0,
+                                                colors[static_cast<std::size_t>((rc[i] - 3) / 2)]});
+            }
+        for (auto i = 0; i < pc.size(); ++i)
+            AddPathConstraint(unknownPathConstraints[i],
+                              static_cast<WitnessPathConstraintType>(pc[i]));
+    }
+
     // TODO: Not yet complete - don't handle tilted
     /* Tetris constraints - must solve packing problem to validate these */
     /* We allow most constraints with 1...4 blocks -- 14 total */
