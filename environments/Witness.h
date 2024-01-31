@@ -881,6 +881,8 @@ public:
 
     void AddPathConstraint(int which, WitnessPathConstraintType t)
     {
+        if (GetUnknownPathConstraint(which) && t != kUnknownPathConstraint)
+            RemoveUnknownPathConstraint(which);
         if (t == kUnknownPathConstraint &&
             pathConstraints[which] != kUnknownPathConstraint)
             unknownPathConstraints.push_back(which);
@@ -901,10 +903,9 @@ public:
     void RemovePathConstraint(int which)
     {
         if (pathConstraints[which] == kUnknownPathConstraint)
-            unknownPathConstraints.erase(
-                std::find(unknownPathConstraints.begin(), unknownPathConstraints.end(), which)
-                );
-        pathConstraints[which] = kNoPathConstraint;
+            RemoveUnknownPathConstraint(which);
+        else
+            pathConstraints[which] = kNoPathConstraint;
     }
     void RemovePathConstraint(int x, int y)
     {
@@ -1243,6 +1244,9 @@ public:
 
     void AddRegionConstraint(int x, int y, const WitnessRegionConstraint &constraint)
     {
+        if (GetRegionConstraint(x, y).type == kUnknownRegionConstraint &&
+            constraint.type != kUnknownRegionConstraint)
+            RemoveRegionConstraint(x, y);
         switch (constraint.type)
         {
             case kSeparation:
@@ -3363,9 +3367,9 @@ template<int width, int height>
 void Witness<width, height>::RemoveUnknownPathConstraint(bool horiz, int x, int y)
 {
     if (horiz)
-        RemoveCannotCrossConstraint(y * width + x);
+        RemoveUnknownPathConstraint(y * width + x);
     else
-        RemoveCannotCrossConstraint(width * (height + 1) + x * height + y);
+        RemoveUnknownPathConstraint(width * (height + 1) + x * height + y);
 }
 
 #pragma mark -
