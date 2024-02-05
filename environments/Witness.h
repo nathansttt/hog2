@@ -1450,8 +1450,8 @@ public:
         for (auto i = std::sregex_iterator(entities.begin(), entities.end(), es_r); i != std::sregex_iterator(); ++i)
         {
             const auto& match = *i;
-            int type = std::stoi(match[1].str());
-            switch (type) {
+            switch (const int type = std::stoi(match[1].str());
+                type) {
                 case 3:
                 case 4: // only support single start and goal currently
                 {
@@ -1465,13 +1465,13 @@ public:
                                 else
                                 {
                                     if (x == 0)
-                                        SetGoal(--x, y);
+                                        SetGoal(x - 1, y);
                                     else if (x == width)
-                                        SetGoal(++x, y);
+                                        SetGoal(x + 1, y);
                                     else if (y == 0)
-                                        SetGoal(x, --y);
+                                        SetGoal(x, y - 1);
                                     else if (y == height)
-                                        SetGoal(x, ++y);
+                                        SetGoal(x, y + 1);
                                 }
                                 break;
                             }
