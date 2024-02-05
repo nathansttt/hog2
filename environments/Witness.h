@@ -649,7 +649,7 @@ public:
         return *this;
     }
 
-    void Reset()
+    void Clear()
     {
         for (int c = 0; c < kRegionConstraintCount; c++)
             constraintCount[c] = 0;
@@ -699,18 +699,14 @@ public:
                         std::make_pair(p, Graphics::rect{p, 0.05});
             }
         }
+    }
 
-        //		mustCrossConstraints.clear();
-        //		mustCrossEdgeConstraints.clear();
-        //		cannotCrossConstraints.clear();
-        //		cannotCrossEdgeConstraints.clear();
+    void Reset()
+    {
+        Clear();
         start.clear();
         start.emplace_back(0, 0);
         SetGoal(width, height + 1);
-        //		goal.clear();
-        //		goal.push_back({width,height});
-        //		goal.push_back({width-1,height});
-        //		goal.push_back({width,height-1});
     }
 
     void GetSuccessors(
