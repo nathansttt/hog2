@@ -1891,10 +1891,9 @@ void Witness<width, height>::GetActions(
         return;
     }
 
-    int currX = nodeID.path.back().first;
-    int currY = nodeID.path.back().second;
+    const auto [currX, currY] = nodeID.path.back();
 
-    if (currX > width || currY > height) return;
+    if (currX < 0 || currX > width || currY < 0 || currY > height) return;
 
     // TODO: Only works with one exit going from lower left to upper right
     if (goalMap[GetPathIndex(currX, currY)] != 0) actions.push_back(kEnd);
