@@ -10,6 +10,7 @@
 
 #include <iterator>
 #include <numeric>
+#include <optional>
 #include <vector>
 #include "PuzzleInferenceRule.h"
 #include "SearchEnvironment.h"
@@ -33,12 +34,14 @@ protected:
 
     static void Softmin(const std::vector<double> &vars, std::vector<double> &ret)
     {
-        double sum = std::accumulate(vars.cbegin(), vars.cend(), 0.0, [](double r, double i) {
-            return r + std::exp(-i);
+        const double sum = std::accumulate(vars.cbegin(), vars.cend(), 0.0,
+            [](const double r, const double i) {
+                return r + std::exp(-i);
         });
         ret.reserve(vars.size());
-        std::transform(vars.cbegin(), vars.cend(), std::back_inserter(ret), [&](double i) {
-            return std::exp(-i) / sum;
+        std::transform(vars.cbegin(), vars.cend(), std::back_inserter(ret),
+            [&sum](const double i) {
+                return std::exp(-i) / sum;
         });
     }
 
@@ -59,7 +62,7 @@ protected:
                             const std::vector<double> &childEntropy,
                             std::optional<Action> prevAction)
     {
-        auto size = actions.size();
+        const auto size = actions.size();
         if (!isRelative)
             return std::log2(static_cast<double>(size));
         auto &childDist = *doubleCache.getItem();
@@ -80,7 +83,7 @@ protected:
                     expectedDist[i] -= probShift / (size - 1);
             }
         }
-        auto kl = KlDivergence(childDist, expectedDist);
+        const auto kl = KlDivergence(childDist, expectedDist);
         doubleCache.returnItem(&childDist);
         doubleCache.returnItem(&expectedDist);
         return kl;
@@ -89,6 +92,8 @@ protected:
 public:
     PuzzleInferenceRuleSet<State, Action> ruleSet;
     double probShift = 0.0;
+
+    virtual ~Entropy() = default;
 
     auto& SetRelative(bool val)
     {
