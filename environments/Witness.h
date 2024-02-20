@@ -641,8 +641,6 @@ public:
         //		cannotCrossConstraints = w.cannotCrossConstraints;
         regionConstraints = w.regionConstraints;
         constraintCount = w.constraintCount;
-        unknownRegionConstraints = w.unknownRegionConstraints;
-        unknownPathConstraints = w.unknownPathConstraints;
         start = w.start;
         goal = w.goal;
         goalMap = w.goalMap;
@@ -877,11 +875,6 @@ public:
 
     void AddPathConstraint(int which, WitnessPathConstraintType t)
     {
-        if (GetUnknownPathConstraint(which) && t != kUnknownPathConstraint)
-            RemoveUnknownPathConstraint(which);
-        if (t == kUnknownPathConstraint &&
-            pathConstraints[which] != kUnknownPathConstraint)
-            unknownPathConstraints.push_back(which);
         pathConstraints[which] = t;
     }
     void AddPathConstraint(int x, int y, WitnessPathConstraintType t)
@@ -947,12 +940,7 @@ public:
 
     void RemoveRegionConstraint(int x, int y)
     {
-        const auto &type = regionConstraints[x][y].type;
-        if (type == kUnknownRegionConstraint)
-            unknownRegionConstraints.erase(
-                std::find(unknownRegionConstraints.begin(), unknownRegionConstraints.end(), GetRegionIndex(x, y))
-                );
-        constraintCount[type]--;
+        constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kNoRegionConstraint]++;
         regionConstraints[x][y].type = kNoRegionConstraint;
     }
@@ -1038,7 +1026,6 @@ public:
         constraintCount[regionConstraints[x][y].type]--;
         constraintCount[kUnknownRegionConstraint]++;
         regionConstraints[x][y].type = kUnknownRegionConstraint;
-        unknownRegionConstraints.push_back(GetRegionIndex(x, y));
     }
 
     void AddUnknownRegionConstraint(int which)
@@ -1046,16 +1033,37 @@ public:
         AddUnknownRegionConstraint(GetRegionFromX(which), GetRegionFromY(which));
     }
 
+    void UpdateUnknownConstraints()
+    {
+        unknownRegionConstraints.clear();
+        for (int x = 0; x < width; ++x)
+        {
+            for (int y = 0; y < height; ++y)
+            {
+                if (regionConstraints[x][y].type == kUnknownRegionConstraint)
+                    unknownRegionConstraints.push_back(GetRegionIndex(x, y));
+            }
+        }
+        unknownPathConstraints.clear();
+        for (int i = 0; i < pathConstraints.size(); ++i)
+        {
+            if (pathConstraints[i] == kUnknownPathConstraint)
+                unknownPathConstraints.push_back(i);
+        }
+    }
+
     auto GetNumUnknownRegionConstraints() const { return unknownRegionConstraints.size(); }
     auto GetNumUnknownPathConstraints() const { return unknownPathConstraints.size(); }
-    auto GetNumUnknownConstraints() const
+    auto GetNumUnknownConstraints()
     {
+        UpdateUnknownConstraints();
         return GetNumUnknownRegionConstraints() + GetNumUnknownPathConstraints();
     }
 
     void RemoveUnknownConstraints(const std::vector<unsigned> &rc,
                                   const std::vector<unsigned> &pc,
                                   const std::vector<rgbColor> &colors) {
+        UpdateUnknownConstraints();
         for (auto i = 0; i < rc.size(); ++i)
             switch (rc[i])
             {
@@ -1240,9 +1248,6 @@ public:
 
     void AddRegionConstraint(int x, int y, const WitnessRegionConstraint &constraint)
     {
-        if (GetRegionConstraint(x, y).type == kUnknownRegionConstraint &&
-            constraint.type != kUnknownRegionConstraint)
-            RemoveRegionConstraint(x, y);
         switch (constraint.type)
         {
             case kSeparation:
@@ -3325,7 +3330,6 @@ template<int width, int height>
 void Witness<width, height>::AddUnknownPathConstraint(int which)
 {
     pathConstraints[which] = kUnknownPathConstraint;
-    unknownPathConstraints.push_back(which);
 }
 
 template<int width, int height>
@@ -3347,9 +3351,6 @@ template<int width, int height>
 void Witness<width, height>::RemoveUnknownPathConstraint(int which)
 {
     pathConstraints[which] = kNoPathConstraint;
-    unknownPathConstraints.erase(
-        std::find(unknownPathConstraints.begin(), unknownPathConstraints.end(), which)
-        );
 }
 
 template<int width, int height>
