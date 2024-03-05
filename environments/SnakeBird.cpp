@@ -1529,7 +1529,7 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 				}
 			}
 			else {
-				std::cout << +world[loc-height] << std::endl;
+				//std::cout << +world[loc-height] << std::endl;
 				assert(kCanEnterMask == (world[loc-height]&kCanEnterMask));
 				a.direction = kLeft;
 				actions.push_back(a);
