@@ -29,7 +29,7 @@
 
 #include "MinimalSectorAbstraction.h"
 #include <queue>
-#include "GenericAStar.h"
+//#include "GenericAStar.h"
 #include "Map2DEnvironment.h"
 
 //int sectorSize = 11;
