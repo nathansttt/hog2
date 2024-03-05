@@ -18,6 +18,7 @@
 #include <string>
 #include <sstream>
 #include "MapGenerators.h"
+#include "SVGUtil.h"
 
 enum mode {
 	kAddDH = 0,
@@ -25,6 +26,11 @@ enum mode {
 	kIdentifyHighHeuristic = 2,
 	kFindPath = 3,
 	kMeasureHeuristic = 4
+};
+
+enum embedding {
+	kDH,
+	kFastMap
 };
 
 enum mapType {
@@ -46,19 +52,21 @@ GraphEnvironment *ge=0, *basege=0;
 Graph *g=0, *base=0;
 MapEnvironment *me = 0;
 Map *map=0;
+std::vector<std::pair<graphState, graphState>> pivots;
 
 void LoadMap(Map *m);
-void DoOneDimension(int label);
+void DoOneDimension(int label, embedding e = kFastMap);
 void NormalizeGraph();
+void DoAnimation();
 
 bool recording = false;
 bool running = false;
 bool mapChange = true;
 bool graphChanged = true;
 
-const float lerpspeed = 0.001;
+const float lerpspeed = 0.003;
 float lerp = -lerpspeed;
-bool doLerp = false;
+bool doLerp = true;
 
 int main(int argc, char* argv[])
 {
@@ -90,6 +98,26 @@ void InstallHandlers()
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
+}
+
+#include <sys/stat.h>
+bool fileExists(const char *name)
+{
+	struct stat buffer;
+	return (stat(name, &buffer) == 0);
+}
+
+void SaveSVG(Graphics::Display &d, int port = 1)
+{
+	const std::string baseFileName = "/Users/nathanst/Pictures/hog2/FastMap_";
+	static int count = 0;
+	std::string fname;
+	do {
+		fname = baseFileName+std::to_string(count)+".svg";
+		count++;
+	} while (fileExists(fname.c_str()));
+	printf("Save to '%s'\n", fname.c_str());
+	MakeSVG(d, fname.c_str(), 1024, 1024, port);
 }
 
 void CreateMap(mapType which)
@@ -143,14 +171,13 @@ void CreateMap(mapType which)
 	{
 		base = GraphSearchConstants::GetUndirectedGraph(map);
 		basege = new GraphEnvironment(base);
-		ge->SetDirected(false);
 	}
 	g = GraphSearchConstants::GetUndirectedGraph(map);
 	ge = new GraphEnvironment(g);
 	ge->SetDirected(false);
 	
-	DoOneDimension(GraphSearchConstants::kXCoordinate);
-	DoOneDimension(GraphSearchConstants::kYCoordinate);
+	DoOneDimension(GraphSearchConstants::kXCoordinate, kDH);
+	DoOneDimension(GraphSearchConstants::kYCoordinate, kDH);
 	NormalizeGraph();
 	
 	
@@ -163,10 +190,17 @@ void CreateMap(mapType which)
 	}
 	mapChange = true;
 	graphChanged = true;
+	
+//	DoAnimation(); exit(0);
 }
 
-void DoOneDimension(int label)
+void DoOneDimension(int label, embedding e)
 {
+	bool first = false;
+	if (pivots.size() == 0)
+		first = true;
+	graphState pivot1, pivot2;
+	srandom(20230104);
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astarf;
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astarb;
 	std::vector<graphState> p;
@@ -177,18 +211,29 @@ void DoOneDimension(int label)
 	{
 		t = astarf.GetOpenItem(0).data;
 		astarf.DoSingleSearchStep(p);
+		pivot2 = t;
 	}
 	astarb.InitializeSearch(ge, t, 0, p);
 	while (astarb.GetNumOpenItems() > 0)
 	{
 		s = astarb.GetOpenItem(0).data;
 		astarb.DoSingleSearchStep(p);
+		pivot1 = s;
 	}
 	astarf.InitializeSearch(ge, s, 0, p);
 	while (astarf.GetNumOpenItems() > 0)
 	{
 		astarf.DoSingleSearchStep(p);
 	}
+	if (e == kDH)
+	{
+		if (first)
+			pivots.push_back({pivot1,pivot1});
+		else
+			pivots.push_back({pivot2,pivot2});
+	}
+	else if (e == kFastMap)
+		pivots.push_back({pivot1, pivot2});
 	// assign first coordinates
 	//(dai + dab − dib)/2
 	double dab, dai, dib;
@@ -198,14 +243,26 @@ void DoOneDimension(int label)
 		node *n = g->GetNode(x);
 		astarf.GetClosedListGCost(x, dai);
 		astarb.GetClosedListGCost(x, dib);
-		n->SetLabelF(label, (dai+dab-dib)/2);
+		if (e == kFastMap)
+			n->SetLabelF(label, (dai+dab-dib)/2);
+		else if (e == kDH)
+		{
+			if (first)
+				n->SetLabelF(label, dai);
+			else
+				n->SetLabelF(label, dib);
+		}
 //		n->SetLabelF(label, dab*(dai/(dai+dib)));
 	}
-	for (int x = 0; x < g->GetNumEdges(); x++)
+	// update residuals
+	if (e == kFastMap)
 	{
-		edge *e = g->GetEdge(x);
-		double w = fabs(g->GetNode(e->getFrom())->GetLabelF(label)-g->GetNode(e->getTo())->GetLabelF(label));
-		e->setWeight(e->GetWeight()-w);
+		for (int x = 0; x < g->GetNumEdges(); x++)
+		{
+			edge *e = g->GetEdge(x);
+			double w = fabs(g->GetNode(e->getFrom())->GetLabelF(label)-g->GetNode(e->getTo())->GetLabelF(label));
+			e->setWeight(e->GetWeight()-w);
+		}
 	}
 }
 
@@ -243,7 +300,6 @@ void NormalizeGraph()
 
 }
 
-#include "SVGUtil.h"
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
 	if (eType == kWindowDestroyed)
@@ -259,7 +315,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		ReinitViewports(windowID, {-1.0f, -1.f, 0.f, 1.f}, kScaleToSquare);
 		AddViewport(windowID, {0.f, -1.f, 1.f, 1.f}, kScaleToSquare); // kTextView
 
-		CreateMap(kRoomMap8);
+//		CreateMap(kRoomMap8);
+		CreateMap(kMazeMap1);
 	}
 }
 
@@ -275,7 +332,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			lerp = 1;
 		graphChanged = true;
 	}
-	else { lerp = 1; }
+	//else { lerp = 1; }
 	
 	if ((mapChange||graphChanged) == true && viewport == 0)
 	{
@@ -289,20 +346,27 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	if (graphChanged == true && viewport == 1)
 	{
+		graphChanged = false;
 		display.StartBackground();
 		display.FillRect({-1, -1, 1, 1}, Colors::black);
 
 		ge->SetDrawEdgeCosts(false);
 		ge->SetColor(Colors::white);
 		if (doLerp) {
+			ge->SetColor(Colors::lightred);
+			ge->SetNodeScale(200);
+			ge->Draw(display, pivots[0].first);
+			ge->Draw(display, pivots[0].second);
+			ge->SetNodeScale(1);
+			ge->SetColor(Colors::white);
 			ge->DrawLERP(display, base, g, lerp);
+			graphChanged = true;
 		}
 		else {
 			ge->SetNodeScale(g->GetNumNodes()/20);
 			ge->Draw(display);
 		}
 		display.EndBackground();
-		graphChanged = false;
 	}
 	if (viewport == 0 && nodeToDraw != -1)
 	{
@@ -321,7 +385,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	if (viewport == 1 && recording)
 	{
-		std::string fname = "/Users/nathanst/Movies/tmp/FastMap_";
+		std::string fname = "/Users/nathanst/Pictures/hog2/FastMap_";
 		static int count = 0;
 		printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
 		MakeSVG(GetContext(windowID)->display, (fname+std::to_string((count/1000)%10)+std::to_string((count/100)%10)+std::to_string((count/10)%10)+std::to_string(count%10)+".svg").c_str(), 600, 600, 1);
@@ -457,7 +521,109 @@ bool MyClickHandler(unsigned long , int viewport, int windowX, int windowY, poin
 	return true;
 }
 
+void DoAnimation()
+{
+	basege->SetDrawEdgeCosts(false);
+	basege->SetColor(Colors::black);
+	Graphics::Display display;
+	// 1. Choose pivot & draw on map
+//	DoOneDimension(GraphSearchConstants::kXCoordinate);
+//	DoOneDimension(GraphSearchConstants::kYCoordinate);
+//	NormalizeGraph();
+	
+	// basic map
+	display.StartFrame();
+	display.FillRect({-1, -1, 1, 1}, Colors::white);
+	basege->SetNodeScale(1);
+	basege->SetColor(Colors::black);
+	basege->DrawLERP(display, base, base, 0);
+	//basege->Draw(display);
+	display.EndFrame();
+	SaveSVG(display, 0);
 
+	auto smooth = [](float a, float b, float mix)
+	{ float tmp1 = mix*mix*mix; float tmp2 = (1-mix)*(1-mix)*(1-mix);
+		mix = (1-mix)*tmp1+mix*(1-tmp2); return (1-mix)*a+mix*b;
+	};
+	
+	// 2. Animate first dimension
+	for (float x = 0; x <= 1; x += 0.005f)
+	{
+		display.StartFrame();
+		display.FillRect({-1, -1, 1, 1}, Colors::white);
+		ge->SetColor(Colors::black);
+		ge->DrawLERP(display, base, g, x,
+					 smooth,
+					 [&smooth](float a, float b, float mix) { return smooth(a, 0, mix); });
+		ge->SetColor(Colors::red);
+		ge->DrawLERP(display, base, g, pivots[0].first, pivots[0].first,
+					 x,
+					 smooth,
+					 [&smooth](float a, float b, float mix) { return smooth(a, 0, mix); });
+		ge->DrawLERP(display, base, g, pivots[0].second, pivots[0].second,
+					 x,
+					 smooth,
+					 [&smooth](float a, float b, float mix) { return smooth(a, 0, mix); });
+
+//					 [](float a, float b, float mix) { mix = mix*mix; return (1-mix)*a+mix*0;});
+//					 [](float a, float b, float mix) { mix = (mix-a)/(b-a); return mix*mix*(3 - 2 * mix);}); // lerp y to 0
+//					 [](float a, float b, float mix) { if (mix<0.5) return a; mix = (mix-0.5f)*2; return (1-mix)*a+mix*0;}); // lerp y to 0
+		SaveSVG(display, 0);
+	}
+
+	// in-between animation
+	display.StartFrame();
+	display.FillRect({-1, -1, 1, 1}, Colors::white);
+	ge->SetColor(Colors::black);
+	ge->DrawLERP(display, base, g, 1,
+				 smooth,
+				 [&smooth](float a, float b, float mix) { return smooth(a, 0, mix); });
+	SaveSVG(display, 0);
+
+	
+	// 3. Choose new pivot - start over because of normalization
+//	delete g;
+//	g = GraphSearchConstants::GetUndirectedGraph(map);
+//	delete ge;
+//	ge = new GraphEnvironment(g);
+//	ge->SetDirected(false);
+//	DoOneDimension(GraphSearchConstants::kXCoordinate, kFastMap);
+//	DoOneDimension(GraphSearchConstants::kYCoordinate, kFastMap);
+//	NormalizeGraph();
+	
+	// 4. Animate next dimension
+	for (float x = 0; x < 1; x += 0.005f)
+	{
+		display.StartFrame();
+		ge->SetColor(Colors::black);
+		display.FillRect({-1, -1, 1, 1}, Colors::white);
+//		ge->DrawLERP(display, base, g, x);
+		ge->DrawLERP(display, g, g, x,
+					 smooth,
+					 [&smooth](float a, float b, float mix) { return smooth(0, b, mix); });
+//					 [](float a, float b, float mix) { return (1-mix)*a+mix*b;},
+//					 [](float a, float b, float mix) { return mix*b;}); // lerp y from 0
+
+		ge->SetColor(Colors::red);
+		ge->DrawLERP(display, g, g, pivots[1].first, pivots[1].first,
+					 x,
+					 smooth,
+					 [&smooth](float a, float b, float mix) { return smooth(0, b, mix); });
+		ge->DrawLERP(display, g, g, pivots[1].second, pivots[1].second,
+					 x,
+					 smooth,
+					 [&smooth](float a, float b, float mix) { return smooth(0, b, mix); });
+
+		SaveSVG(display, 0);
+	}
+	display.StartFrame();
+	ge->SetColor(Colors::black);
+	display.FillRect({-1, -1, 1, 1}, Colors::white);
+	ge->DrawLERP(display, g, g, 1,
+				 smooth,
+				 [&smooth](float a, float b, float mix) { return smooth(0, b, mix); });
+	SaveSVG(display, 0);
+}
 
 void LoadMap(Map *m)
 {
