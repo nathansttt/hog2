@@ -240,12 +240,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '8': edgeCost = 8.0; te.AddLine("Adding edges; New edges cost 8"); m = kAddEdges; break;
 		case '9': edgeCost = 9.0; te.AddLine("Adding edges; New edges cost 9"); m = kAddEdges; break;
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				//SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p':
 			//running = !running;

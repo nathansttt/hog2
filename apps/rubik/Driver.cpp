@@ -159,15 +159,15 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			pdb1 = new RubikPDB(&c, s, edges, corners);
 			//recording = true;
 			SetNumPorts(windowID, 1);
-			SetZoom(windowID, 6);
+			//SetZoom(windowID, 6);
 		}
 		else if (animateActions.size() > 0)
 		{
 			SetNumPorts(windowID, 1);
-			SetZoom(windowID, 6);
+			//SetZoom(windowID, 6);
 		}
 		else {
-			SetNumPorts(windowID, 4);
+		  //SetNumPorts(windowID, 4);
 		}
 		//GetSuperFlip(s);
 	}
@@ -228,7 +228,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/Rubik-%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
 	}
@@ -410,17 +410,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p':
 		{
 			SetNumPorts(windowID, 1);
-			SetZoom(windowID, 6);
+			//SetZoom(windowID, 6);
 			s.Reset();
 			animateActions.push_back(0);
 			animateActions.push_back(3);

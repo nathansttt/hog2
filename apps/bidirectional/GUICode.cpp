@@ -435,7 +435,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/BI-%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
 	}

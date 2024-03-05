@@ -250,12 +250,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				printf("Showing regular reach\n");
 				submitTextToBuffer("Regular Reach");
 			}
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p':
 			//running = !running;
