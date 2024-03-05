@@ -14,6 +14,12 @@
 #include "GLUtil.h" // TODO: needs to be renamed, if data structures are to be more widely re-used
 #include "FPUtil.h"
 
+// TODO: move back into namespace - but lots of code has to be updated; task for later
+enum viewportType {
+	kScaleToSquare,
+	kScaleToFill
+};
+
 namespace Graphics {
 struct  point;
 enum textAlign {
@@ -135,6 +141,13 @@ inline std::ostream &operator<<(std::ostream &o, const point&r)
 
 //bool PointInRect(const point3d &p, const rect &r);
 bool PointInRect(const point &p, const rect &r);
+
+struct viewport {
+	Graphics::rect bounds;
+	Graphics::rect finalBound;
+	viewportType type;
+	bool active; // Is this viewport valid
+};
 
 /*
  * This class represents an abstract display.
@@ -274,10 +287,35 @@ public:
 	std::vector<segments> backgroundLineSegments;
 	uint64_t backgroundFrame;
 	uint64_t foregroundFrame;
-private:
-	uint8_t viewport;
+
+	/* Removes all active viewports and adds this one as the first.
+	 * rect coordinates are in HOG coordinates.
+	 */
+	void ReinitViewports(const Graphics::rect &r, viewportType v);
+	/* Adds a new viewport to the existing viewports and
+	 * returns the new viewport numbers
+	 */
+	int AddViewport(const Graphics::rect &r, viewportType v);
+	int AddViewport(const Graphics::rect &initial, const Graphics::rect &fin, viewportType v);
+	void MoveViewport(int viewport, const Graphics::rect &newLocation);
+
+	Graphics::point ViewportToGlobalHOG(Graphics::point where, int viewport);
+	Graphics::rect  ViewportToGlobalHOG(const Graphics::rect &loc, int viewport);
+	Graphics::point ViewportToGlobalHOG(const viewport &v, Graphics::point where);
+	float ViewportToGlobalHOGX(float x, int v);
+	Graphics::point GlobalHOGToViewport(const viewport &v, Graphics::point where);
+	Graphics::point GlobalHOGToViewport(Graphics::point where, int viewport);
+	Graphics::rect GlobalHOGToViewport(const Graphics::rect &loc, int viewport);
+	float GlobalHOGToViewportX(float x, int v);
+	
+	uint8_t currViewport;
 	uint8_t numViewports;
+	std::vector<viewport> viewports;
+	int windowWidth, windowHeight; // Ratio is needed for scaling viewports
+private:
 	bool drawingBackground;
+
+//	int numPorts, currPort;
 };
 
 }
