@@ -59,6 +59,7 @@ void Build4ArmDH();
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
+int stepsPerFrame = 100;
 
 std::vector<std::vector<bool> > configSpace;
 void BuildConfigSpace();
@@ -72,6 +73,7 @@ int main(int argc, char* argv[])
 	InstallHandlers();
 	setvbuf(stdout, NULL, _IONBF, 0);
 	RunHOGGUI(argc, argv, 1024, 512);
+	return 0;
 }
 
 
@@ -131,11 +133,11 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Increase search speed", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Decrease search speed", kAnyModifier, '[');
 	
 	InstallKeyboardHandler(MyKeyHandler, "Config", "Build Configuration Space", kNoModifier, 'c');
-	InstallKeyboardHandler(MyKeyHandler, "Clear", "Clear Configuration Space", kShiftDown, 'c');
+	InstallKeyboardHandler(MyKeyHandler, "Clear", "Clear Configuration Space", kNoModifier, '|');
 	InstallKeyboardHandler(MyKeyHandler, "Record", "Start recording frames to a file", kNoModifier, 'r');
 	InstallKeyboardHandler(MyKeyHandler, "0-9", "select segment", kNoModifier, '0', '9');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CW", kNoModifier, 'a');
@@ -163,29 +165,36 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
-		SetNumPorts(windowID, 2);
+		ReinitViewports(windowID, {-1, -1, 0, 1}, kScaleToSquare);
+		AddViewport(windowID, {0, -1, 1, 1}, kScaleToSquare);
 	}
 }
 
 void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 {
+	Graphics::Display &display = GetContext(id)->display;
 	if (viewport == 0)
 	{
 		static int currFrame = 0;
 		currFrame++;
 
-		r->OpenGLDraw();
+		r->Draw(display);
 		if (!validSearch)
 		{
 			if (ourPath.size() == 0)
-				r->OpenGLDraw(config);
-			else
-				r->OpenGLDraw(ourPath[(pathLoc++)%ourPath.size()]);
+			{
+				//r->OpenGLDraw(config);
+				r->Draw(display, config);
+			}
+			else {
+				r->Draw(display,ourPath[(pathLoc++)%ourPath.size()]);
+				//r->OpenGLDraw(ourPath[(pathLoc++)%ourPath.size()]);
+			}
 		}
 		else {
 			Timer t;
 			t.StartTimer();
-			for (int x = 0; x < 100; x++)
+			for (int x = 0; x < stepsPerFrame; x++)
 			{
 				if (astar.DoSingleSearchStep(ourPath))
 				{
@@ -211,93 +220,103 @@ void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 			if (validSearch)
 			{
 				armAngles next = astar.CheckNextNode();
-				r->OpenGLDraw(next);
-				r->OpenGLDraw(goal);
+				r->Draw(display, next);
+				r->Draw(display, goal);
+//				r->OpenGLDraw(next);
+//				r->OpenGLDraw(goal);
 			}
 			//astar.GetPath(r, config, goal, ourPath);
 		}
 	}
 	if (viewport == 1)
 	{
+		rgbColor c;
 		float ratio = 2.0/512.0;
 		float size = 2.0/512.0;
 		if (configSpace.size() == 512)
 		{
 			for (int x = 0; x < 512; x++)
 			{
-				glBegin(GL_QUADS);
+//				glBegin(GL_QUADS);
 				for (int y = 0; y < 512; y++)
 				{
 					bool draw = false;
 					bool big = false;
 					if (!validSearch && ourPath.size() == 0 && config.GetAngle(0) == x*2 && config.GetAngle(1) == y*2)
 					{
-						glColor3f(1, 1, 1);
+						c = Colors::white;
+//						glColor3f(1, 1, 1);
 						draw = true;
 						big = true;
 					}
 					if (!validSearch && ourPath.size() != 0 && ourPath[(pathLoc)%ourPath.size()].GetAngle(0) == x*2 && ourPath[(pathLoc)%ourPath.size()].GetAngle(1) == y*2)
 					{
-						glColor3f(1, 1, 1);
+						c = Colors::white;
+//						glColor3f(1, 1, 1);
 						draw = true;
 						big = true;
 					}
 					if (validSearch && astar.CheckNextNode().GetAngle(0) == x*2 && astar.CheckNextNode().GetAngle(1) == y*2)
 					{
-						glColor3f(0, 1, 0);
+						c = Colors::green;
+//						glColor3f(0, 1, 0);
 						draw = true;
 						big = true;
 					}
 					else if (!configSpace[x][y])
 					{
-						glColor3f(1, 0, 0);
+						c = Colors::red;
+//						glColor3f(1, 0, 0);
 						draw = true;
 					}
 					if (draw)
 					{
 						float currSize = size;
 						if (big) currSize*=4;
-						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio, big?-0.01:0);
-						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio, big?-0.01:0);
-						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio+currSize, big?-0.01:0);
-						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio+currSize, big?-0.01:0);
+						
+						display.FillRect(Graphics::rect({-1+float(x)*ratio, -1+float(y)*ratio}, currSize), c);
+//						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio, big?-0.01:0);
+//						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio, big?-0.01:0);
+//						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio+currSize, big?-0.01:0);
+//						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio+currSize, big?-0.01:0);
 					}
 				}
-				glEnd();
+//				glEnd();
 			}
 			
 			char txt[16];
-			glColor3f(1.0, 1.0, 1.0);
+//			glColor3f(1.0, 1.0, 1.0);
 			for (double x = 0; x <= 1024; x+=1024.0/(2.0*4))
 			{
 				if (x != 512)
 				{
-					sprintf(txt, "%d", int(360.0*x/1024.0));
-					DrawTextCentered(2.0*x/1024.0-1, -1.05, 0, .1, txt);
+//					sprintf(txt, "%d", int(360.0*x/1024.0));
+//					DrawTextCentered(2.0*x/1024.0-1, -1.05, 0, .1, txt);
 				}
 			}
 			for (double y = 0; y <= 1024; y+=1024.0/(2.0*4))
 			{
 				if (y != 512)
 				{
-					sprintf(txt, "%d", int(360.0*y/1024.0));
-					DrawTextCentered(-1.05, 2.0*y/1024.0-1, 0, .1, txt);
+//					sprintf(txt, "%d", int(360.0*y/1024.0));
+//					DrawTextCentered(-1.05, 2.0*y/1024.0-1, 0, .1, txt);
 				}
 			}
-			glColor3f(0.0, 1.0, 1.0);
-			DrawTextCentered(0, -1.05, 0, .15, "A1");
-			DrawTextCentered(-1.05, 0, 0, .15, "A2");
+//			glColor3f(0.0, 1.0, 1.0);
+//			DrawTextCentered(0, -1.05, 0, .15, "A1");
+//			DrawTextCentered(-1.05, 0, 0, .15, "A2");
 		}
 	}
-	if (recording && viewport == GetNumPorts((int)id)-1)
-	{
-		static int index = 0;
-		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/robot-%d%d%d%d", index/1000, (index/100)%10, (index/10)%10, index%10);
-		SaveScreenshot((int)id, fname);
-		printf("%s\n", fname);
-		index++;
-	}
+//	if (recording && viewport == GetNumPorts((int)id)-1)
+//	{
+//		static int index = 0;
+//		char fname[255];
+//		sprintf(fname, "/Users/nathanst/Movies/tmp/robot-%d%d%d%d", index/1000, (index/100)%10, (index/10)%10, index%10);
+//		
+//		//SaveScreenshot((int)id, fname);
+//		printf("%s\n", fname);
+//		index++;
+//	}
 
 }
 
@@ -315,13 +334,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
-			break;
+//			if (mod != kShiftDown)
+//				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+//			else
+//			{
+//				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+//			}
+//			break;
 		case 'p': //unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 //			if (unitSims[windowID]->GetPaused())
@@ -331,8 +350,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //				unitSims[windowID]->SetPaused(true);
 //			}
 			break;
-		case ']': absType = (absType+1)%3; break;
-		case '[': absType = (absType+4)%3; break;
+		case ']': stepsPerFrame *= 2;//absType = (absType+1)%3; break;
+		case '[': if (stepsPerFrame > 50) stepsPerFrame /= 2;//absType = (absType+4)%3; break;
 			//		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 			//		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
@@ -410,12 +429,12 @@ void MyKeyHandler(unsigned long wid, tKeyboardModifier mod, char key)
 		which = key-'0';
 		return;
 	}
-	if (key == 'c' && mod == kNoModifier)
+	if (key == 'c')
 	{
 		SetNumPorts((int)wid, 2);
 		BuildConfigSpace();
 	}
-	if (key == 'c' && mod == kShiftDown)
+	if (key == '|')
 	{
 		r->PopObstacle();
 		//		SetNumPorts((int)wid, 2);
@@ -492,9 +511,12 @@ void MyKeyHandler(unsigned long wid, tKeyboardModifier mod, char key)
 bool drag = false;
 recVec s, e;
 
-bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType whichButton, tMouseEventType mouseEvent)
+bool MyClickHandler(unsigned long , int viewport, int x, int y, point3d loc, tButtonType whichButton, tMouseEventType mouseEvent)
 {
-	printf("Hit %d/%d (%f, %f)\n", x, y, loc.x, loc.y);
+	if (viewport != 0)
+	{
+		return false;
+	}
 	if ((mouseEvent == kMouseDown) && (whichButton == kLeftButton))
 	{
 		validSearch = false;
