@@ -28,8 +28,8 @@ void EMSCRIPTEN_KEEPALIVE SetCanvasSize(int x, int y)
 	canvasHeight = y;
 	
 	pRecContext pContextInfo = getCurrentContext();
-	pContextInfo->windowHeight = canvasHeight;
-	pContextInfo->windowWidth = canvasWidth;
+	pContextInfo->display.windowHeight = canvasHeight;
+	pContextInfo->display.windowWidth = canvasWidth;
 	
 	canvasScale = std::min(canvasWidth, canvasHeight);
 	canvasXOffset = (canvasWidth>canvasHeight)?(canvasWidth-canvasHeight):0;
@@ -71,9 +71,9 @@ const char *HOGDoFrame()
 {
 	pRecContext pContextInfo = getCurrentContext();
 	pContextInfo->display.StartFrame();
-	for (int x = 0; x < pContextInfo->numPorts; x++)
+	for (int x = 0; x < pContextInfo->display.numViewports; x++)
 	{
-		setViewport(pContextInfo, x);
+		pContextInfo->display.SetViewport(x);
 		HandleFrame(pContextInfo, x);
 	}
 	//	if (getTextBuffer() != 0)
@@ -96,8 +96,8 @@ float WidthToCanvas(float p, int viewport)
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input1(p, 0.f, 0.f);
 	point3d input2(0, 0.f, 0.f);
-	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input1);
-	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input2);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[viewport], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[viewport], input2);
 	//	if (v == 1)
 	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result1.x+1.0)*canvasWidth)/2.0-((result2.x+1.0)*canvasWidth)/2.0;
@@ -107,7 +107,7 @@ float PointXToCanvas(float p, int viewport)
 {
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input(p, 0.f, 0.f);
-	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input);
+	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[viewport], input);
 	//	if (v == 1)
 	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result.x+1.0)*canvasWidth)/2.0;
@@ -120,7 +120,7 @@ float PointYToCanvas(float p, int viewport)
 {
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input(0.f, p, 0.f);
-	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input);
+	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[viewport], input);
 	return ((result.y+1.0)*canvasHeight)/2.0;
 	
 	// old code
@@ -522,8 +522,8 @@ void DrawToCanvas(const Graphics::Display &disp)
 void HOGDoMouse(int x, int y, bool up, bool down, bool drag)
 {
 	pRecContext pContextInfo = getCurrentContext();
-	pContextInfo->windowHeight = canvasHeight;
-	pContextInfo->windowWidth = canvasWidth;
+	pContextInfo->display.windowHeight = canvasHeight;
+	pContextInfo->display.windowWidth = canvasWidth;
 	
 	tMouseEventType t = kMouseDown;
 	
@@ -598,9 +598,8 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	
 }
 
-GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
-
-pRecContext gTrackingContextInfo = NULL;
+//GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
+//pRecContext gTrackingContextInfo = NULL;
 
 void renderScene()
 {
