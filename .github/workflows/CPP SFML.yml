@@ -1,0 +1,20 @@
+name: C/C++ SFML Build
+
+on:
+  push:
+    branches: [ "PDB-refactor" ]
+  pull_request:
+    branches: [ "PDB-refactor" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make
+      working-directory: ./build/SFML/
+      run: |
+           sudo apt-get install libsfml-dev
+           make

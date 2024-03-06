@@ -63,9 +63,10 @@ const float FRAMERATE = 1.0f/30.0f;
 -(void)onTick:(NSTimer *)timer {
 	pRecContext pContextInfo = getCurrentContext();
 	pContextInfo->display.StartFrame();
-	for (int x = 0; x < pContextInfo->numPorts; x++)
+	for (int x = 0; x < pContextInfo->display.numViewports; x++)
 	{
-		setViewport(pContextInfo, x);
+		pContextInfo->display.SetViewport(x);
+		//setViewport(pContextInfo, x);
 		//if (pContextInfo->drawing)
 		{
 			// set projection

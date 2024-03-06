@@ -1,7 +1,7 @@
 /**
  * @file TemplateAStar.h
  * @package hog2
- * @brief A templated version of the original HOG's genericAstar.h
+ * @brief A templated version of A*. This code assumes all states have unique hashes to reduce storage.
  * @author Nathan Sturtevant
  * SearchEnvironment
  * @date 3/22/06, modified 06/13/2007
@@ -75,6 +75,7 @@ public:
 	TemplateAStar() {
 		ResetNodeCount(); env = 0; useBPMX = 0; stopAfterGoal = true; weight=1; reopenNodes = false; theHeuristic = 0; directed = false;
 		theConstraint = 0;
+		heuristicSet = false;
 		phi = [](double h, double g){ return g+h; };
 	}
 	virtual ~TemplateAStar() {}
@@ -128,7 +129,7 @@ public:
 	// Only necessary for BPMX computation
 	void SetDirected(bool d) { directed = d; }
 	
-	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; }
+	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; if (h) heuristicSet = true; else heuristicSet = false; }
 	void SetConstraint(Constraint<state> *c) { theConstraint = c; }
 
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
@@ -141,7 +142,6 @@ public:
 	
 	void FullBPMX(uint64_t nodeID, int distance);
 	
-	void OpenGLDraw() const;
 	void Draw(Graphics::Display &disp) const;
 	std::string SVGDraw() const;
 	std::string SVGDrawDetailed() const;
@@ -180,6 +180,7 @@ private:
 	uint64_t uniqueNodesExpanded;
 	environment *radEnv;
 	Heuristic<state> *theHeuristic;
+	bool heuristicSet; // used to know if it should be cleared / reset
 	Constraint<state> *theConstraint;
 };
 
@@ -256,7 +257,7 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
 template <class state, class action, class environment, class openList>
 bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
-	if (theHeuristic == 0)
+	if (theHeuristic == 0 || !heuristicSet)
 		theHeuristic = _env;
 	thePath.resize(0);
 	env = _env;
@@ -681,76 +682,6 @@ bool TemplateAStar<state, action,environment,openList>::GetClosedItem(const stat
 	}
 	return false;
 
-}
-
-
-/**
- * Draw the open/closed list
- * @author Nathan Sturtevant
- * @date 03/12/09
- * 
- */
-template <class state, class action, class environment, class openList>
-void TemplateAStar<state, action,environment,openList>::OpenGLDraw() const
-{
-	double transparency = 1.0;
-	if (openClosedList.size() == 0)
-		return;
-	uint64_t top = -1;
-//	double minf = 1e9, maxf = 0;
-	if (openClosedList.OpenSize() > 0)
-	{
-		top = openClosedList.Peek();
-	}
-//	for (unsigned int x = 0; x < openClosedList.size(); x++)
-//	{
-//		const AStarOpenClosedData<state> &data = openClosedList.Lookat(x);
-//		double f = data.g+data.h;
-//		if (f > maxf)
-//			maxf = f;
-//		if (f < minf)
-//			minf = f;
-//	}
-	for (unsigned int x = 0; x < openClosedList.size(); x++)
-	{
-		const auto &data = openClosedList.Lookat(x);
-		if (x == top)
-		{
-			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		if ((data.where == kOpenList) && (data.reopened))
-		{
-			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		else if (data.where == kOpenList) 
-		{
-			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		else if ((data.where == kClosedList) && (data.reopened))
-		{
-			env->SetColor(0.5, 0.0, 0.5, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		else if (data.where == kClosedList)
-		{
-//			if (top != -1)
-//			{
-//				env->SetColor((data.g+data.h-minf)/(maxf-minf), 0.0, 0.0, transparency);
-//			}
-//			else {
-			if (data.parentID == x)
-				env->SetColor(1.0, 0.5, 0.5, transparency);
-			else
-				env->SetColor(1.0, 0.0, 0.0, transparency);
-//			}
-			env->OpenGLDraw(data.data);
-		}
-	}
-	env->SetColor(1.0, 0.5, 1.0, 0.5);
-	env->OpenGLDraw(goal);
 }
 
 /**

@@ -299,10 +299,9 @@ double RoboticArm::HCost(const armAngles &node1, const armAngles &node2) const
 	double movementAmount = (node1.GetNumArms()*armLength*sin(TWOPI*4.0/1024.0));
 
 	{
-		TemplateAStar<recVec, line2d, ConfigEnvironment> astar;
 		recVec g(x, y, 0);
 		ce->StoreGoal(g);
-		astar.GetPath(ce, a, g, states);
+		localAStar.GetPath(ce, a, g, states);
 		actDistance = max(actDistance, ce->GetPathLength(states));
 	}
 	
@@ -399,6 +398,58 @@ void RoboticArm::GetStateFromHash(uint64_t hash, armAngles &a) const
 uint64_t RoboticArm::GetActionHash(armRotations act) const
 {
 	return act.rotations;
+}
+
+void RoboticArm::Draw(Graphics::Display &display) const
+{
+	display.FillRect({-1, -1, 1, 1}, Colors::darkgray);
+	
+	for (unsigned int x = 0; x < obstacles.size(); x++)
+	{
+		display.DrawLine(point3d(obstacles[x].start.x, obstacles[x].start.y),
+						 point3d(obstacles[x].end.x, obstacles[x].end.y),
+						 0.01f, Colors::red);
+//		DrawLine(obstacles[x]);
+	}
+}
+
+void RoboticArm::Draw(Graphics::Display &display, const armAngles &a) const
+{
+	recVec e;
+	if (a.IsGoalState())
+	{
+		e.z = 0;
+		a.GetGoal(e.x, e.y);
+	}
+	else {
+		GenerateLineSegments(a, armSegments);
+		
+		for (unsigned int x = 0; x < armSegments.size(); x++)
+		{
+			display.DrawLine(point3d(armSegments[x].start.x, armSegments[x].start.y),
+							 point3d(armSegments[x].end.x, armSegments[x].end.y),
+							 0.01f, Colors::white);
+//			glColor3f(1, 1, 1);
+//			//printf("Drawing line segment %d of %d\n", x, armSegments.size());
+//			DrawLine(armSegments[x]);
+		}
+		e = armSegments.back().end;
+	}
+
+	display.FrameCircle(point3d(e.x, e.y), tolerance, Colors::green, 0.01f);
+//	glBegin(GL_LINE_LOOP);
+//	glColor3f(0, 1.0, 0);
+//	glVertex3f(e.x+tolerance, e.y+tolerance, 0);
+//	glVertex3f(e.x-tolerance, e.y+tolerance, 0);
+//	glVertex3f(e.x-tolerance, e.y-tolerance, 0);
+//	glVertex3f(e.x+tolerance, e.y-tolerance, 0);
+//	glEnd();
+	
+}
+
+void RoboticArm::Draw(Graphics::Display &display, const armAngles &, const armRotations &) const
+{
+	
 }
 
 void RoboticArm::OpenGLDraw() const

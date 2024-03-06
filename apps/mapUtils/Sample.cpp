@@ -224,10 +224,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+  Graphics::Display &display = getCurrentContext()->display;
 	if (ge)
 	{
-		ge->OpenGLDraw();
-		return;
+	  ge->Draw(display);
+	  return;
 	}
 	if (viewport == 0)
 	{
@@ -267,8 +268,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	if (screenShot)
 	{
-		SaveScreenshot(windowID, gDefaultMap);
-		exit(0);
+	  //SaveScreenshot(windowID, gDefaultMap);
+	  exit(0);
 	}
 //	glTranslatef(0, 0, -0.1);
 //	glLineWidth(6.0);
@@ -297,23 +298,23 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	if ((ma1) && (viewport == 0)) // only do this once...
 	{
-		ma1->SetColor(0.0, 0.5, 0.0, 0.75);
-		if (runningSearch1 && !unitSims[windowID]->GetPaused())
+	  ma1->SetColor(0.0, 0.5, 0.0, 0.75);
+	  if (runningSearch1 && !unitSims[windowID]->GetPaused())
+	    {
+	      ma1->SetColor(0.0, 0.0, 1.0, 0.75);
+	      for (int x = 0; x < gStepsPerFrame; x++)
 		{
-			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
-			for (int x = 0; x < gStepsPerFrame; x++)
-			{
-				if (a1.DoSingleSearchStep(path))
-				{
-					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
-						   (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded(),
-						   a1.GetNumOpenItems());
-					runningSearch1 = false;
-					break;
-				}
-			}
+		  if (a1.DoSingleSearchStep(path))
+		    {
+		      printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+			     (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded(),
+			     a1.GetNumOpenItems());
+		      runningSearch1 = false;
+		      break;
+		    }
 		}
-		a1.OpenGLDraw();
+	    }
+	  a1.Draw(display);
 	}
 	if ((ma2) && viewport == 1)
 	{
@@ -332,7 +333,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				}
 			}
 		}
-		a2.OpenGLDraw();
+		//a2.OpenGLDraw();
+		a2.Draw(display);
 	}
 
 	
@@ -385,7 +387,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
 	}
@@ -1246,7 +1248,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '|': resetCamera(); break;
+	case '|': //resetCamera(); break;
 		case 'r': recording = !recording; break;
 		case '0':
 		case '1':
@@ -1287,12 +1289,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				((GraphMapInconsistentHeuristic*)gdh)->IncreaseDisplayHeuristic();
 			break;
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':

@@ -33,9 +33,8 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	
 }
 
-GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
-
-pRecContext gTrackingContextInfo = NULL;
+//GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
+//pRecContext gTrackingContextInfo = NULL;
 
 void renderScene()
 {
@@ -50,13 +49,24 @@ void RunHOGGUI(int argc, char* argv[], int windowDimension)
 void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 {
 	ProcessCommandLineArgs(argc, argv);
-	context.windowWidth = xDimension;
-	context.windowHeight = yDimension;
+	context.display.windowWidth = xDimension;
+	context.display.windowHeight = yDimension;
 //	initialConditions(pContextInfo);
 //	HandleWindowEvent(pContextInfo, kWindowCreated);
 }
 
 char *textBuffer = 0;
+bool bufferVisibility = true;
+
+void setTextBufferVisibility(bool visible)
+{
+	bufferVisibility = visible;
+}
+
+bool getTextBufferVisibility()
+{
+	return bufferVisibility;
+}
 
 void submitTextToBuffer(const char *val)
 {

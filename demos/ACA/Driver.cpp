@@ -19,7 +19,7 @@
 
 bool recording = false;
 bool running = false;
-bool debug = true;
+bool debug = false;
 
 int frame = 0;
 float timePerFrame = 1.0f/30.0f;
@@ -27,6 +27,7 @@ float timePerFrame = 1.0f/30.0f;
 const float maxF = 10.0f;
 const float worldSize = 20.0f;
 int numAgents = 2;
+bool accurateAgents = true;
 
 struct agentLine {
 	Graphics::point start, end;
@@ -57,8 +58,9 @@ struct ACAAgent {
 	Graphics::point lastForce;
 	// location of agent - all forces applied to this point as a rigid body
 	Graphics::point position;
-	int numLines;
-	agentLine line[3];
+//	int numLines;
+//	agentLine line[3];
+	std::vector<agentLine> bounds;
 	int numCircles;
 	agentCircle circle[3];
 	rgbColor color;
@@ -85,7 +87,8 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Add", "Add agent", kAnyModifier, 'a');
+	InstallKeyboardHandler(MyDisplayHandler, "Add", "Add accurate agent", kAnyModifier, 'a');
+	InstallKeyboardHandler(MyDisplayHandler, "Add", "Add inaccurate agent", kAnyModifier, 'b');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset to start state", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Step", "Step animation", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause", "Pause animation", kAnyModifier, 'p');
@@ -175,6 +178,16 @@ void RotateAgent(int which, float radians)
 			agents[which].circle[x].start.x*c - agents[which].circle[x].start.y*s,
 			agents[which].circle[x].start.x*s + agents[which].circle[x].start.y*c};
 	}
+	
+	for (int x = 0; x < agents[which].bounds.size(); x++)
+	{
+		agents[which].bounds[x].start = {
+			agents[which].bounds[x].start.x*c - agents[which].bounds[x].start.y*s,
+			agents[which].bounds[x].start.x*s + agents[which].bounds[x].start.y*c};
+		agents[which].bounds[x].end = {
+			agents[which].bounds[x].end.x*c - agents[which].bounds[x].end.y*s,
+			agents[which].bounds[x].end.x*s + agents[which].bounds[x].end.y*c};
+	}
 }
 
 void DrawAgent(Graphics::Display &display, ACAAgent &a)
@@ -186,35 +199,88 @@ void DrawAgent(Graphics::Display &display, ACAAgent &a)
 	for (int x = 0; x < a.numCircles; x++)
 	{
 		agentCircle &c = a.circle[x];
-		display.FillCircle(HOGFromWorld(a.position+c.start), HOGFromWorld(c.radius), a.color);
-		display.FrameCircle(HOGFromWorld(a.position+c.start), HOGFromWorld(c.radius), Colors::black, lw);
-		// Draw wrapping
-		if (a.position.x+c.start.x + c.radius > worldSize)
+
+		if (!debug)
 		{
-			display.FillCircle(HOGFromWorld(a.position+c.start-worldWidth), HOGFromWorld(c.radius), a.color);
-			display.FrameCircle(HOGFromWorld(a.position+c.start-worldWidth), HOGFromWorld(c.radius), Colors::black, lw);
+			int cnt = 0;
+			Graphics::point center;
+			for (auto &l : a.bounds)
+			{
+				center += l.start;
+				center += l.end;
+				cnt++;
+			}
+			center /= cnt;
+			for (auto &l : a.bounds)
+			{
+				display.FillTriangle(HOGFromWorld(a.position+l.start), HOGFromWorld(a.position+l.end), HOGFromWorld(a.position+center), a.color);
+				display.DrawLine(HOGFromWorld(a.position+l.start),
+								 HOGFromWorld(a.position+l.end),
+								 lw, Colors::black);
+				
+			}
 		}
-		if (a.position.x+c.start.x - c.radius < 0)
+//		if (x != 0)
+//		{
+//			// draw bounding box around circle 0 and all other circles
+//			Graphics::point vec = a.circle[x].start-a.circle[0].start;
+//			Graphics::point vecNorm = vec;
+//			vecNorm.normalise();
+//			float r = std::max(a.circle[0].radius, a.circle[x].radius);
+//			vecNorm *= r;
+//
+//			Graphics::point perp1(-vecNorm.y, vecNorm.x);
+//			Graphics::point perp2(vecNorm.y, -vecNorm.x);
+//			perp1.normalise();
+//			perp2.normalise();
+//			perp1 *= r;
+//			perp2 *= r;
+//			display.DrawLine(HOGFromWorld(a.position+a.circle[0].start-perp1-vecNorm),
+//							 HOGFromWorld(a.position+a.circle[0].start-perp2-vecNorm),
+//							 lw, Colors::black);
+//			display.DrawLine(HOGFromWorld(a.position+a.circle[x].start+perp1+vecNorm),
+//							 HOGFromWorld(a.position+a.circle[x].start+perp2+vecNorm),
+//							 lw, Colors::black);
+//			display.DrawLine(HOGFromWorld(a.position+a.circle[0].start-perp1-vecNorm),
+//							 HOGFromWorld(a.position+a.circle[x].start+perp2+vecNorm),
+//							 lw, Colors::black);
+//			display.DrawLine(HOGFromWorld(a.position+a.circle[x].start+perp1+vecNorm),
+//							 HOGFromWorld(a.position+a.circle[0].start-perp2-vecNorm),
+//							 lw, Colors::black);
+//		}
+
+		if (debug)
 		{
-			display.FillCircle(HOGFromWorld(a.position+c.start+worldWidth), HOGFromWorld(c.radius), a.color);
-			display.FrameCircle(HOGFromWorld(a.position+c.start+worldWidth), HOGFromWorld(c.radius), Colors::black, lw);
-		}
-		if (a.position.y+c.start.y + c.radius > worldSize)
-		{
-			display.FillCircle(HOGFromWorld(a.position+c.start-worldHeight), HOGFromWorld(c.radius), a.color);
-			display.FrameCircle(HOGFromWorld(a.position+c.start-worldHeight), HOGFromWorld(c.radius), Colors::black, lw);
-		}
-		if (a.position.y+c.start.y - c.radius < 0)
-		{
-			display.FillCircle(HOGFromWorld(a.position+c.start+worldHeight), HOGFromWorld(c.radius), a.color);
-			display.FrameCircle(HOGFromWorld(a.position+c.start+worldHeight), HOGFromWorld(c.radius), Colors::black, lw);
+			display.FillCircle(HOGFromWorld(a.position+c.start), HOGFromWorld(c.radius), a.color);
+			display.FrameCircle(HOGFromWorld(a.position+c.start), HOGFromWorld(c.radius), Colors::black, lw);
+			// Draw wrapping
+			if (a.position.x+c.start.x + c.radius > worldSize)
+			{
+				display.FillCircle(HOGFromWorld(a.position+c.start-worldWidth), HOGFromWorld(c.radius), a.color);
+				display.FrameCircle(HOGFromWorld(a.position+c.start-worldWidth), HOGFromWorld(c.radius), Colors::black, lw);
+			}
+			if (a.position.x+c.start.x - c.radius < 0)
+			{
+				display.FillCircle(HOGFromWorld(a.position+c.start+worldWidth), HOGFromWorld(c.radius), a.color);
+				display.FrameCircle(HOGFromWorld(a.position+c.start+worldWidth), HOGFromWorld(c.radius), Colors::black, lw);
+			}
+			if (a.position.y+c.start.y + c.radius > worldSize)
+			{
+				display.FillCircle(HOGFromWorld(a.position+c.start-worldHeight), HOGFromWorld(c.radius), a.color);
+				display.FrameCircle(HOGFromWorld(a.position+c.start-worldHeight), HOGFromWorld(c.radius), Colors::black, lw);
+			}
+			if (a.position.y+c.start.y - c.radius < 0)
+			{
+				display.FillCircle(HOGFromWorld(a.position+c.start+worldHeight), HOGFromWorld(c.radius), a.color);
+				display.FrameCircle(HOGFromWorld(a.position+c.start+worldHeight), HOGFromWorld(c.radius), Colors::black, lw);
+			}
 		}
 	}
-	for (int x = 0; x < a.numLines; x++)
-	{
-		display.DrawLine(HOGFromWorld(a.position+a.line[x].start),
-						 HOGFromWorld(a.position+a.line[x].end), lw, a.color);
-	}
+//	for (int x = 0; x < a.numLines; x++)
+//	{
+//		display.DrawLine(HOGFromWorld(a.position+a.line[x].start),
+//						 HOGFromWorld(a.position+a.line[x].end), lw, a.color);
+//	}
 
 	display.DrawLine(HOGFromWorld(a.position), HOGFromWorld(a.position+a.velocity), lw, Colors::red);
 	if (debug)
@@ -253,7 +319,7 @@ std::random_device rd;
 std::mt19937 mt(rd());
 std::uniform_real_distribution<float> rand01(0.0, 1.0);
 
-void AddAgent()
+void AddAgent(bool accurate)
 {
 	ACAAgent a;
 	// Note: Not uniformly distributed.
@@ -269,11 +335,11 @@ void AddAgent()
 	a.rotationSpeed = (rand01(mt)-0.5f)*0.02f;
 	a.timeHorizon = 2.0f;
 
-	// Not implemented fully yet
-	a.numLines = 0;
-	// fixed relative to position
-	a.line[0].start = {0,0};
-	a.line[0].end = {2.0f,0};
+//	// Not implemented fully yet
+//	a.numLines = 0;
+//	// fixed relative to position
+//	a.line[0].start = {0,0};
+//	a.line[0].end = {2.0f,0};
 
 	// main circle
 	a.numCircles = 1;
@@ -283,10 +349,33 @@ void AddAgent()
 	// shaped creatures
 	a.numCircles = 3;
 	a.circle[1].start = a.goalVelocity*-1;
-	a.circle[1].radius = 0.9f;
+	a.circle[1].radius = 0.8f;
 	a.circle[2].start = a.goalVelocity*-1.5;
-	a.circle[2].radius = 0.9f;
+	a.circle[2].radius = 0.6f;
 
+	// build bounding box
+	{
+		Graphics::point vec = a.circle[2].start-a.circle[0].start;
+		Graphics::point vecNorm = vec;
+		vecNorm.normalise();
+		//float r = std::max(a.circle[0].radius, a.circle[2].radius);
+		float r1 = a.circle[0].radius;
+		float r2 = a.circle[2].radius;
+
+		Graphics::point perp1(-vecNorm.y, vecNorm.x);
+		Graphics::point perp2(vecNorm.y, -vecNorm.x);
+		perp1.normalise();
+		perp2.normalise();
+//		perp1 *= a.circle[0].radius;
+//		perp2 *= a.circle[2].radius;
+		
+		a.bounds.push_back({a.circle[0].start-perp1*r1-vecNorm*r1, a.circle[0].start-perp2*r1-vecNorm*r1});
+		a.bounds.push_back({a.circle[2].start+perp1*r2+vecNorm*r2, a.circle[2].start+perp2*r2+vecNorm*r2});
+		a.bounds.push_back({a.circle[0].start-perp1*r1-vecNorm*r1, a.circle[2].start+perp2*r2+vecNorm*r2});
+		a.bounds.push_back({a.circle[2].start+perp1*r2+vecNorm*r2, a.circle[0].start-perp2*r1-vecNorm*r1});
+	}
+	if (!accurate)
+		a.numCircles = 1;
 	// Random creatures
 //	a.numCircles = 1+random()%3;
 //	for (int x = 1; x < 3; x++)
@@ -307,7 +396,7 @@ void ResetAgents()
 	agents.resize(0);
 	for (int x = 0; x < numAgents; x++)
 	{
-		AddAgent();
+		AddAgent(accurateAgents);
 	}
 }
 
@@ -410,6 +499,7 @@ void UpdateAgents()
 		if (fabs(agents[x].rotationSpeed) < 0.001)
 		{
 			agents[x].rotationSpeed = (rand01(mt)-0.5f)*0.04f;
+			agents[x].speed = 1.0f+rand01(mt);
 			//printf("%d New rotation: %f\n", x, agents[x].rotationSpeed);
 		}
 		agents[x].rotationSpeed *= 0.95f;
@@ -490,7 +580,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			break;
 		case kLeftArrow:
 		case 'a':
-			AddAgent();
+			accurateAgents = true;
+			AddAgent(true);
+			break;
+		case 'b':
+			accurateAgents = false;
+			AddAgent(false);
 			break;
 		case kRightArrow:
 		case '|':

@@ -1487,30 +1487,30 @@ std::vector<slideDir> MNPuzzle<width, height>::Get_Op_Order_From_Hash(int order_
 	bool left_act = false;
 	bool right_act = false;
 
-	printf("Op order: ");
+//	printf("Op order: ");
 	for (unsigned i = 0; i < 4; i++)
 	{
 		if (op_nums[i] == 0)
 		{
-			printf("Up ");
+//			printf("Up ");
 			ops.push_back(kUp);
 			up_act = true;
 		}
 		else if (op_nums[i] == 1)
 		{
-			printf("Left ");
+//			printf("Left ");
 			ops.push_back(kLeft);
 			left_act = true;
 		}
 		else if (op_nums[i] == 2)
 		{
-			printf("Right ");
+//			printf("Right ");
 			ops.push_back(kRight);
 			right_act = true;
 		}
 		else if (op_nums[i] == 3)
 		{
-			printf("Down ");
+//			printf("Down ");
 			ops.push_back(kDown);
 			down_act = true;
 		}

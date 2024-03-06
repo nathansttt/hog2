@@ -133,7 +133,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '|': resetCamera(); break;
+	case '|': break; //resetCamera(); break;
 		case 'r': recording = !recording; break;
 		case ' ':
 		{
@@ -142,56 +142,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 'a':
 		{
-			pRecContext pContextInfo = getCurrentContext();
-			pContextInfo->camera[pContextInfo->currPort].thirdPerson = false;
-			recVec v = GetHeading(windowID, pContextInfo->currPort);
-			recVec up = {0, 1, 0};
-			recVec result = v*up;
-			//cameraOffset(result.x, result.y, result.z);
-			std::cout << result << "\n";
-			velocity += result;
-			if (velocity.length() > 1.0)
-				velocity.normalise();
 			break;
 		}
 		case 'd':
 		{
-			pRecContext pContextInfo = getCurrentContext();
-			pContextInfo->camera[pContextInfo->currPort].thirdPerson = false;
-			recVec v = GetHeading(windowID, pContextInfo->currPort);
-			recVec up = {0, 1, 0};
-			recVec result = v*up;
-			std::cout << result << "\n";
-			velocity -= result;
-			if (velocity.length() > 1.0)
-				velocity.normalise();
-			//cameraOffset(-result.x, -result.y, -result.z);
 			break;
 		}
 		case 'w':
 		{
-			pRecContext pContextInfo = getCurrentContext();
-			pContextInfo->camera[pContextInfo->currPort].thirdPerson = false;
-			recVec v = GetHeading(windowID, pContextInfo->currPort);
-			//cameraOffset(v.x, v.y, v.z);
-			if (mod == kShiftDown)
-				v *= 0.05;
-			velocity += v;
-			if (velocity.length() > 1.0)
-				velocity.normalise();
 			break;
 		}			
 		case 's':
 		{
-			pRecContext pContextInfo = getCurrentContext();
-			pContextInfo->camera[pContextInfo->currPort].thirdPerson = false;
-			recVec v = GetHeading(windowID, pContextInfo->currPort);
-			if (mod == kShiftDown)
-				v *= 0.05;
-			velocity -= v;
-			if (velocity.length() > 1.0)
-				velocity.normalise();
-			//cameraOffset(-v.x, -v.y, -v.z);
 			break;
 		}
 		case 'e':
@@ -326,7 +288,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		char fname[255];
 		sprintf(fname, "%s-%d%d%d%d",
 				map.c_str(), (currentFrame/1000)%10, (currentFrame/100)%10, (currentFrame/10)%10, currentFrame%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		currentFrame++;
 		if (currentFrame%frames == 0)
 			exit(0);
@@ -341,7 +303,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	if (viewport == 0)
 	{
-		cameraOffset(velocity.x, velocity.y, velocity.z);
+	  //cameraOffset(velocity.x, velocity.y, velocity.z);
 		
 //		v->OpenGLDraw();
 	}
@@ -367,7 +329,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
 	}

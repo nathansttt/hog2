@@ -36,9 +36,9 @@
 	height = self.frame.size.height;
 	width = self.frame.size.width;
 	pRecContext context = getCurrentContext();
-	context->windowHeight = height;
-	context->windowWidth = width;
-	
+	context->display.windowHeight = height;
+	context->display.windowWidth = width;
+
 	double limit = std::min(self.bounds.size.width, self.bounds.size.height);
 	xoffset = limit/2+(width-limit)/2;
 	yoffset = limit/2+(height-limit)/2;
@@ -305,8 +305,8 @@ const float epsilon = 0.5f; // in screen pixels
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input1(p, 0.f, 0.f);
 	point3d input2(0, 0.f, 0.f);
-	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input1);
-	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[v], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[v], input2);
 	//	if (v == 1)
 	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result1.x+1.0)*width)/2.0-((result2.x+1.0)*width)/2.0;
@@ -317,8 +317,8 @@ const float epsilon = 0.5f; // in screen pixels
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input1(0, p, 0.f);
 	point3d input2(0, 0.f, 0.f);
-	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input1);
-	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[v], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[v], input2);
 	//	if (v == 1)
 	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result1.y+1.0)*height)/2.0-((result2.y+1.0)*height)/2.0;
@@ -329,7 +329,7 @@ const float epsilon = 0.5f; // in screen pixels
 {
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input(x, 0.f, 0.f);
-	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input);
+	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[v], input);
 //	if (v == 1)
 //		printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result.x+1.0)*width)/2.0;
@@ -339,7 +339,7 @@ const float epsilon = 0.5f; // in screen pixels
 {
 	pRecContext pContextInfo = getCurrentContext();
 	point3d input(0.f, y, 0.f);
-	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input);
+	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[v], input);
 //	result.y -= pContextInfo->viewports[v].bounds.bottom;
 //	result.y = pContextInfo->viewports[v].bounds.top - result.y;
 	//	if (v == 1)

@@ -67,7 +67,7 @@ void CreateSimulation(int id)
 {
 	if (screenShot)
 	{
-		SetZoom(id, 3.0);
+	  //SetZoom(id, 3.0);
 		return;
 	}
 	for (int x = 0; x < 10; x++)
@@ -201,7 +201,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (screenShot)
 	{
 		f.OpenGLDrawPlain(b);
-		SaveScreenshot(windowID, screenShotFile);
+		//SaveScreenshot(windowID, screenShotFile);
 		exit(0);
 	}
 	f.OpenGLDraw(b);
@@ -1294,7 +1294,7 @@ void CaptureScreen(unsigned long windowID, tKeyboardModifier mod, char c)
 	static int cnt = 0;
 	char fname[255];
 	sprintf(fname, "/Users/nathanst/Movies/FLING-%d%d%d", (cnt/100)%10, (cnt/10)%10, cnt%10);
-	SaveScreenshot(windowID, fname);
+	//SaveScreenshot(windowID, fname);
 	printf("Saved %s\n", fname);
 	cnt++;
 }

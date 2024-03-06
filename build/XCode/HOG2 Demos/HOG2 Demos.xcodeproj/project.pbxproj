@@ -100,7 +100,6 @@
 		C40CF85B1D8854D8001D9F20 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C40CF85C1D8854D8001D9F20 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C40CF85D1D8854D8001D9F20 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C40CF85E1D8854D8001D9F20 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C40CF85F1D8854D8001D9F20 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C40CF8601D8854D8001D9F20 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C40CF8621D8854D8001D9F20 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -254,7 +253,6 @@
 		C41124C41CE5076300EB20CE /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C41124C51CE5076300EB20CE /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C41124C61CE5076300EB20CE /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C41124C81CE5076300EB20CE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C41124C91CE5076300EB20CE /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C41124CA1CE5076300EB20CE /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C41124CC1CE5076300EB20CE /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -370,7 +368,6 @@
 		C411254C1CE50FBF00EB20CE /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C411254D1CE50FBF00EB20CE /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C411254E1CE50FBF00EB20CE /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C411254F1CE50FBF00EB20CE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C41125501CE50FBF00EB20CE /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C41125511CE50FBF00EB20CE /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C41125531CE50FBF00EB20CE /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -486,7 +483,6 @@
 		C41847E71CD920EA008057D1 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C41847E81CD920EA008057D1 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C41847E91CD920EA008057D1 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C41847EB1CD920EA008057D1 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C41847EC1CD920EA008057D1 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C41847ED1CD920EA008057D1 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C41847EF1CD920EA008057D1 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -602,7 +598,6 @@
 		C418486E1CD9D140008057D1 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C418486F1CD9D140008057D1 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C41848701CD9D140008057D1 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C41848721CD9D140008057D1 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C41848731CD9D140008057D1 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C41848741CD9D140008057D1 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C41848761CD9D140008057D1 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -718,7 +713,6 @@
 		C41D397A1CAEE39C00CB9200 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C41D397B1CAEE39C00CB9200 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C41D397C1CAEE39C00CB9200 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C41D397E1CAEE39C00CB9200 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C41D397F1CAEE39C00CB9200 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C41D39801CAEE39C00CB9200 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C41D39821CAEE39C00CB9200 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -850,7 +844,6 @@
 		C43DA0091DC47DF500F93B29 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C43DA00A1DC47DF500F93B29 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C43DA00B1DC47DF500F93B29 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C43DA00C1DC47DF500F93B29 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C43DA00D1DC47DF500F93B29 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C43DA00E1DC47DF500F93B29 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C43DA0101DC47DF500F93B29 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -970,7 +963,6 @@
 		C43DA0961DCB915500F93B29 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C43DA0971DCB915500F93B29 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C43DA0981DCB915500F93B29 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C43DA0991DCB915500F93B29 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C43DA09A1DCB915500F93B29 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C43DA09B1DCB915500F93B29 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C43DA09D1DCB915500F93B29 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -1088,7 +1080,6 @@
 		C447D3AA1CEA782100F76287 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C447D3AB1CEA782100F76287 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C447D3AC1CEA782100F76287 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C447D3AD1CEA782100F76287 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C447D3AE1CEA782100F76287 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C447D3AF1CEA782100F76287 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C447D3B11CEA782100F76287 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -1204,7 +1195,6 @@
 		C44DE3271CF426B7003266B9 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C44DE3281CF426B7003266B9 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C44DE3291CF426B7003266B9 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C44DE32A1CF426B7003266B9 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C44DE32B1CF426B7003266B9 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C44DE32C1CF426B7003266B9 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C44DE32E1CF426B7003266B9 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -1269,7 +1259,6 @@
 		C4822D711CAA41F1000623FA /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A01CAA41EE000623FA /* MountainCar.cpp */; };
 		C4822D721CAA41F1000623FA /* NaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A21CAA41EE000623FA /* NaryTree.cpp */; };
 		C4822D731CAA41F1000623FA /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
-		C4822D741CAA41F1000623FA /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C4822D751CAA41F1000623FA /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A81CAA41EE000623FA /* PermutationPuzzleEnvironment.cpp */; };
 		C4822D761CAA41F1000623FA /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225AA1CAA41EE000623FA /* RoboticArm.cpp */; };
 		C4822D771CAA41F1000623FA /* RubiksCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225AC1CAA41EE000623FA /* RubiksCube.cpp */; };
@@ -1451,7 +1440,6 @@
 		C4822E9B1CAA48D6000623FA /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C4822E9C1CAA48D6000623FA /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C4822E9D1CAA48D6000623FA /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C4822E9E1CAA48D6000623FA /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C4822E9F1CAA48D6000623FA /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C4822EA01CAA48D6000623FA /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C4822EA21CAA48D6000623FA /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -1567,7 +1555,6 @@
 		C4822F231CAB9B0B000623FA /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C4822F241CAB9B0B000623FA /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C4822F251CAB9B0B000623FA /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C4822F261CAB9B0B000623FA /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C4822F271CAB9B0B000623FA /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C4822F281CAB9B0B000623FA /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C4822F2A1CAB9B0B000623FA /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -1700,7 +1687,6 @@
 		C4D216691D25B2B70039F401 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C4D2166A1D25B2B70039F401 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C4D2166B1D25B2B70039F401 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C4D2166C1D25B2B70039F401 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C4D2166D1D25B2B70039F401 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C4D2166E1D25B2B70039F401 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C4D216701D25B2B70039F401 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -1860,7 +1846,6 @@
 		C4F40B5F1CCE960300721F25 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822D2A1CAA41F1000623FA /* FPUtil.cpp */; };
 		C4F40B601CCE960300721F25 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225751CAA41EE000623FA /* OldSearchEnvironment.cpp */; };
 		C4F40B611CCE960300721F25 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225B61CAA41EE000623FA /* SFBDPancakePuzzle.cpp */; };
-		C4F40B631CCE960300721F25 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */; };
 		C4F40B641CCE960300721F25 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822DF51CAA449B000623FA /* RadiusAbstraction.cpp */; };
 		C4F40B651CCE960300721F25 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822E101CAA449B000623FA /* PRAStar2.cpp */; };
 		C4F40B671CCE960300721F25 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48225A41CAA41EE000623FA /* NQueens.cpp */; };
@@ -2049,6 +2034,14 @@
 		C41D399C1CAEE39C00CB9200 /* idastar */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = idastar; sourceTree = BUILT_PRODUCTS_DIR; };
 		C41D399F1CAEE3DC00CB9200 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C41D39A11CB06C8200CB9200 /* IncrementalIDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IncrementalIDA.h; sourceTree = "<group>"; };
+		C41EDFCB29970B760032798D /* MonoFont.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MonoFont.h; sourceTree = "<group>"; };
+		C41EDFCC29970B770032798D /* ScreenTransition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScreenTransition.cpp; sourceTree = "<group>"; };
+		C41EDFCD29970B770032798D /* ScreenTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScreenTransition.h; sourceTree = "<group>"; };
+		C41EDFCE29970B770032798D /* MonoFont.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MonoFont.cpp; sourceTree = "<group>"; };
+		C41EDFCF29970B770032798D /* Permutations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Permutations.h; sourceTree = "<group>"; };
+		C41EDFD029970B770032798D /* Combinations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Combinations.h; sourceTree = "<group>"; };
+		C41EDFD129970B770032798D /* FixedSizeSet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FixedSizeSet.h; sourceTree = "<group>"; };
+		C41EDFD229970B770032798D /* Table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Table.h; sourceTree = "<group>"; };
 		C428C9BE20B2770800B27666 /* BoundingBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingBox.h; sourceTree = "<group>"; };
 		C428C9BF20B2770800B27666 /* BoundingBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BoundingBox.cpp; sourceTree = "<group>"; };
 		C43DA02D1DC47DF500F93B29 /* MNIST */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MNIST; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2120,7 +2113,6 @@
 		C48225A31CAA41EE000623FA /* NaryTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NaryTree.h; sourceTree = "<group>"; };
 		C48225A41CAA41EE000623FA /* NQueens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NQueens.cpp; sourceTree = "<group>"; };
 		C48225A51CAA41EE000623FA /* NQueens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NQueens.h; sourceTree = "<group>"; };
-		C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PancakePuzzle.cpp; sourceTree = "<group>"; };
 		C48225A71CAA41EE000623FA /* PancakePuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PancakePuzzle.h; sourceTree = "<group>"; };
 		C48225A81CAA41EE000623FA /* PermutationPuzzleEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PermutationPuzzleEnvironment.cpp; sourceTree = "<group>"; };
 		C48225A91CAA41EE000623FA /* PermutationPuzzleEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PermutationPuzzleEnvironment.h; sourceTree = "<group>"; };
@@ -4369,8 +4361,7 @@
 				C40CF8951D885554001D9F20 /* RHRUnit.cpp */,
 				C40CF8961D885554001D9F20 /* RHRUnit.h */,
 			);
-			name = mapalgorithms;
-			path = ../../../../mapalgorithms;
+			path = mapalgorithms;
 			sourceTree = "<group>";
 		};
 		C41124E71CE5078E00EB20CE /* reach */ = {
@@ -4506,8 +4497,8 @@
 				C482257B1CAA41EE000623FA /* demos */,
 			);
 			name = Code;
-			path = "HOG2 Demos";
-			sourceTree = "<group>";
+			path = ../../..;
+			sourceTree = SOURCE_ROOT;
 		};
 		C482256D1CAA41EE000623FA /* algorithms */ = {
 			isa = PBXGroup;
@@ -4527,8 +4518,7 @@
 				C48225791CAA41EE000623FA /* OpenListB.cpp */,
 				C482257A1CAA41EE000623FA /* OpenListB.h */,
 			);
-			name = algorithms;
-			path = ../../../../algorithms;
+			path = algorithms;
 			sourceTree = "<group>";
 		};
 		C482257B1CAA41EE000623FA /* demos */ = {
@@ -4550,8 +4540,7 @@
 				C4822EBE1CAA48F5000623FA /* dijkstra */,
 				C482257C1CAA41EE000623FA /* DFID */,
 			);
-			name = demos;
-			path = ../../../../demos;
+			path = demos;
 			sourceTree = "<group>";
 		};
 		C482257C1CAA41EE000623FA /* DFID */ = {
@@ -4604,7 +4593,6 @@
 				C48225A31CAA41EE000623FA /* NaryTree.h */,
 				C48225A41CAA41EE000623FA /* NQueens.cpp */,
 				C48225A51CAA41EE000623FA /* NQueens.h */,
-				C48225A61CAA41EE000623FA /* PancakePuzzle.cpp */,
 				C48225A71CAA41EE000623FA /* PancakePuzzle.h */,
 				C48225A81CAA41EE000623FA /* PermutationPuzzleEnvironment.cpp */,
 				C48225A91CAA41EE000623FA /* PermutationPuzzleEnvironment.h */,
@@ -4635,8 +4623,7 @@
 				C48225C21CAA41EE000623FA /* WeightedMap2DEnvironment.cpp */,
 				C48225C31CAA41EE000623FA /* WeightedMap2DEnvironment.h */,
 			);
-			name = environments;
-			path = ../../../../environments;
+			path = environments;
 			sourceTree = "<group>";
 		};
 		C48225C41CAA41EE000623FA /* generic */ = {
@@ -4668,8 +4655,7 @@
 				C48225DD1CAA41EF000623FA /* UnitCostBidirectionalBFS.h */,
 				C48225DE1CAA41EF000623FA /* VisualizableGenericSearchAlgorithm.h */,
 			);
-			name = generic;
-			path = ../../../../generic;
+			path = generic;
 			sourceTree = "<group>";
 		};
 		C48225DF1CAA41EF000623FA /* graph */ = {
@@ -4678,8 +4664,7 @@
 				C48225E01CAA41EF000623FA /* Graph.cpp */,
 				C48225E11CAA41EF000623FA /* Graph.h */,
 			);
-			name = graph;
-			path = ../../../../graph;
+			path = graph;
 			sourceTree = "<group>";
 		};
 		C48225E21CAA41EF000623FA /* gui */ = {
@@ -4694,8 +4679,7 @@
 				C48226021CAA41EF000623FA /* Trackball.cpp */,
 				C48226031CAA41EF000623FA /* Trackball.h */,
 			);
-			name = gui;
-			path = ../../../../gui;
+			path = gui;
 			sourceTree = "<group>";
 		};
 		C48226041CAA41EF000623FA /* learning */ = {
@@ -4712,8 +4696,7 @@
 				C482260D1CAA41EF000623FA /* LSSLRTAStar.h */,
 				C482260E1CAA41EF000623FA /* MPLRTAStar.h */,
 			);
-			name = learning;
-			path = ../../../../learning;
+			path = learning;
 			sourceTree = "<group>";
 		};
 		C482260F1CAA41EF000623FA /* maps */ = {
@@ -4734,8 +4717,7 @@
 				C4822C6C1CAA41F1000623FA /* wc3maps */,
 				C4822CC31CAA41F1000623FA /* wc3maps512 */,
 			);
-			name = maps;
-			path = ../../../../maps;
+			path = maps;
 			sourceTree = "<group>";
 		};
 		C48226101CAA41EF000623FA /* bg512 */ = {
@@ -6643,8 +6625,7 @@
 				C4822D111CAA41F1000623FA /* SearchEnvironment.h */,
 				C4822D121CAA41F1000623FA /* TreePermutationPDB.h */,
 			);
-			name = search;
-			path = ../../../../search;
+			path = search;
 			sourceTree = "<group>";
 		};
 		C4822D131CAA41F1000623FA /* simulation */ = {
@@ -6659,13 +6640,20 @@
 				C4822D1A1CAA41F1000623FA /* UnitSimulation.h */,
 				C4822D1B1CAA41F1000623FA /* WeightedUnitGroup.h */,
 			);
-			name = simulation;
-			path = ../../../../simulation;
+			path = simulation;
 			sourceTree = "<group>";
 		};
 		C4822D1C1CAA41F1000623FA /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				C41EDFD029970B770032798D /* Combinations.h */,
+				C41EDFD129970B770032798D /* FixedSizeSet.h */,
+				C41EDFCE29970B770032798D /* MonoFont.cpp */,
+				C41EDFCB29970B760032798D /* MonoFont.h */,
+				C41EDFCF29970B770032798D /* Permutations.h */,
+				C41EDFCC29970B770032798D /* ScreenTransition.cpp */,
+				C41EDFCD29970B770032798D /* ScreenTransition.h */,
+				C41EDFD229970B770032798D /* Table.h */,
 				C4BEEB83209A6682005E8FBD /* Graphics.cpp */,
 				C4BEEB82209A6681005E8FBD /* Graphics.h */,
 				C4735A6E2068CC12003F3CE8 /* Colors.cpp */,
@@ -6734,8 +6722,7 @@
 				C4822D581CAA41F1000623FA /* Timer.h */,
 				C4822D591CAA41F1000623FA /* vectorCache.h */,
 			);
-			name = utils;
-			path = ../../../../utils;
+			path = utils;
 			sourceTree = "<group>";
 		};
 		C4822DB21CAA4223000623FA /* Frameworks */ = {
@@ -6769,8 +6756,7 @@
 				C4822DCC1CAA4387000623FA /* Propagation.cpp */,
 				C4822DCD1CAA4387000623FA /* Propagation.h */,
 			);
-			name = graphalgorithms;
-			path = ../../../../graphalgorithms;
+			path = graphalgorithms;
 			sourceTree = "<group>";
 		};
 		C4822DDC1CAA449B000623FA /* abstraction */ = {
@@ -6805,8 +6791,7 @@
 				C4822DF71CAA449B000623FA /* Width.cpp */,
 				C4822DF81CAA449B000623FA /* Width.h */,
 			);
-			name = abstraction;
-			path = ../../../../abstraction;
+			path = abstraction;
 			sourceTree = "<group>";
 		};
 		C4822DF91CAA449B000623FA /* abstractionalgorithms */ = {
@@ -6845,8 +6830,7 @@
 				C4822E181CAA449B000623FA /* SpreadPRAStar.cpp */,
 				C4822E191CAA449B000623FA /* SpreadPRAStar.h */,
 			);
-			name = abstractionalgorithms;
-			path = ../../../../abstractionalgorithms;
+			path = abstractionalgorithms;
 			sourceTree = "<group>";
 		};
 		C4822EBE1CAA48F5000623FA /* dijkstra */ = {
@@ -6892,8 +6876,7 @@
 				C4D80E2E20ABFEAD0087E08D /* CanonicalReach.cpp */,
 				C4D80E2F20ABFEAD0087E08D /* CanonicalReach.h */,
 			);
-			name = grids;
-			path = ../../../../grids;
+			path = grids;
 			sourceTree = "<group>";
 		};
 		C4F40B821CCE963C00721F25 /* inconsistency-graph */ = {
@@ -7182,6 +7165,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = C482255A1CAA41AC000623FA;
@@ -7313,7 +7297,6 @@
 				C40CF85B1D8854D8001D9F20 /* FPUtil.cpp in Sources */,
 				C40CF85C1D8854D8001D9F20 /* OldSearchEnvironment.cpp in Sources */,
 				C40CF85D1D8854D8001D9F20 /* SFBDPancakePuzzle.cpp in Sources */,
-				C40CF85E1D8854D8001D9F20 /* PancakePuzzle.cpp in Sources */,
 				C40CF85F1D8854D8001D9F20 /* RadiusAbstraction.cpp in Sources */,
 				C40CF8601D8854D8001D9F20 /* PRAStar2.cpp in Sources */,
 				C40CF8621D8854D8001D9F20 /* NQueens.cpp in Sources */,
@@ -7436,7 +7419,6 @@
 				C41124C41CE5076300EB20CE /* FPUtil.cpp in Sources */,
 				C41124C51CE5076300EB20CE /* OldSearchEnvironment.cpp in Sources */,
 				C41124C61CE5076300EB20CE /* SFBDPancakePuzzle.cpp in Sources */,
-				C41124C81CE5076300EB20CE /* PancakePuzzle.cpp in Sources */,
 				C41124C91CE5076300EB20CE /* RadiusAbstraction.cpp in Sources */,
 				C41124CA1CE5076300EB20CE /* PRAStar2.cpp in Sources */,
 				C41124CC1CE5076300EB20CE /* NQueens.cpp in Sources */,
@@ -7563,7 +7545,6 @@
 				C411254D1CE50FBF00EB20CE /* OldSearchEnvironment.cpp in Sources */,
 				C411254E1CE50FBF00EB20CE /* SFBDPancakePuzzle.cpp in Sources */,
 				C41125721CE50FDF00EB20CE /* Driver.cpp in Sources */,
-				C411254F1CE50FBF00EB20CE /* PancakePuzzle.cpp in Sources */,
 				C41125501CE50FBF00EB20CE /* RadiusAbstraction.cpp in Sources */,
 				C41125511CE50FBF00EB20CE /* PRAStar2.cpp in Sources */,
 				C41125531CE50FBF00EB20CE /* NQueens.cpp in Sources */,
@@ -7689,7 +7670,6 @@
 				C41847E81CD920EA008057D1 /* OldSearchEnvironment.cpp in Sources */,
 				C41847E91CD920EA008057D1 /* SFBDPancakePuzzle.cpp in Sources */,
 				C418480D1CD92126008057D1 /* Driver.cpp in Sources */,
-				C41847EB1CD920EA008057D1 /* PancakePuzzle.cpp in Sources */,
 				C41847EC1CD920EA008057D1 /* RadiusAbstraction.cpp in Sources */,
 				C41847ED1CD920EA008057D1 /* PRAStar2.cpp in Sources */,
 				C41847EF1CD920EA008057D1 /* NQueens.cpp in Sources */,
@@ -7814,7 +7794,6 @@
 				C418486E1CD9D140008057D1 /* FPUtil.cpp in Sources */,
 				C418486F1CD9D140008057D1 /* OldSearchEnvironment.cpp in Sources */,
 				C41848701CD9D140008057D1 /* SFBDPancakePuzzle.cpp in Sources */,
-				C41848721CD9D140008057D1 /* PancakePuzzle.cpp in Sources */,
 				C41848731CD9D140008057D1 /* RadiusAbstraction.cpp in Sources */,
 				C41848741CD9D140008057D1 /* PRAStar2.cpp in Sources */,
 				C41848761CD9D140008057D1 /* NQueens.cpp in Sources */,
@@ -7940,7 +7919,6 @@
 				C41D397A1CAEE39C00CB9200 /* FPUtil.cpp in Sources */,
 				C41D397B1CAEE39C00CB9200 /* OldSearchEnvironment.cpp in Sources */,
 				C41D397C1CAEE39C00CB9200 /* SFBDPancakePuzzle.cpp in Sources */,
-				C41D397E1CAEE39C00CB9200 /* PancakePuzzle.cpp in Sources */,
 				C41D397F1CAEE39C00CB9200 /* RadiusAbstraction.cpp in Sources */,
 				C41D39801CAEE39C00CB9200 /* PRAStar2.cpp in Sources */,
 				C41D39821CAEE39C00CB9200 /* NQueens.cpp in Sources */,
@@ -8067,7 +8045,6 @@
 				C43DA0091DC47DF500F93B29 /* FPUtil.cpp in Sources */,
 				C43DA00A1DC47DF500F93B29 /* OldSearchEnvironment.cpp in Sources */,
 				C43DA00B1DC47DF500F93B29 /* SFBDPancakePuzzle.cpp in Sources */,
-				C43DA00C1DC47DF500F93B29 /* PancakePuzzle.cpp in Sources */,
 				C43DA00D1DC47DF500F93B29 /* RadiusAbstraction.cpp in Sources */,
 				C43DA00E1DC47DF500F93B29 /* PRAStar2.cpp in Sources */,
 				C43DA0101DC47DF500F93B29 /* NQueens.cpp in Sources */,
@@ -8193,7 +8170,6 @@
 				C43DA0961DCB915500F93B29 /* FPUtil.cpp in Sources */,
 				C43DA0971DCB915500F93B29 /* OldSearchEnvironment.cpp in Sources */,
 				C43DA0981DCB915500F93B29 /* SFBDPancakePuzzle.cpp in Sources */,
-				C43DA0991DCB915500F93B29 /* PancakePuzzle.cpp in Sources */,
 				C43DA09A1DCB915500F93B29 /* RadiusAbstraction.cpp in Sources */,
 				C43DA09B1DCB915500F93B29 /* PRAStar2.cpp in Sources */,
 				C43DA09D1DCB915500F93B29 /* NQueens.cpp in Sources */,
@@ -8318,7 +8294,6 @@
 				C447D3AA1CEA782100F76287 /* FPUtil.cpp in Sources */,
 				C447D3AB1CEA782100F76287 /* OldSearchEnvironment.cpp in Sources */,
 				C447D3AC1CEA782100F76287 /* SFBDPancakePuzzle.cpp in Sources */,
-				C447D3AD1CEA782100F76287 /* PancakePuzzle.cpp in Sources */,
 				C447D3AE1CEA782100F76287 /* RadiusAbstraction.cpp in Sources */,
 				C447D3AF1CEA782100F76287 /* PRAStar2.cpp in Sources */,
 				C447D3B11CEA782100F76287 /* NQueens.cpp in Sources */,
@@ -8444,7 +8419,6 @@
 				C44DE3271CF426B7003266B9 /* FPUtil.cpp in Sources */,
 				C44DE3281CF426B7003266B9 /* OldSearchEnvironment.cpp in Sources */,
 				C44DE3291CF426B7003266B9 /* SFBDPancakePuzzle.cpp in Sources */,
-				C44DE32A1CF426B7003266B9 /* PancakePuzzle.cpp in Sources */,
 				C44DE32B1CF426B7003266B9 /* RadiusAbstraction.cpp in Sources */,
 				C44DE32C1CF426B7003266B9 /* PRAStar2.cpp in Sources */,
 				C44DE32E1CF426B7003266B9 /* NQueens.cpp in Sources */,
@@ -8570,7 +8544,6 @@
 				C4822D9B1CAA41F1000623FA /* FPUtil.cpp in Sources */,
 				C4822D5D1CAA41F1000623FA /* OldSearchEnvironment.cpp in Sources */,
 				C4822D7C1CAA41F1000623FA /* SFBDPancakePuzzle.cpp in Sources */,
-				C4822D741CAA41F1000623FA /* PancakePuzzle.cpp in Sources */,
 				C4822E291CAA449B000623FA /* RadiusAbstraction.cpp in Sources */,
 				C4822E361CAA449B000623FA /* PRAStar2.cpp in Sources */,
 				C4822D731CAA41F1000623FA /* NQueens.cpp in Sources */,
@@ -8697,7 +8670,6 @@
 				C4822E9B1CAA48D6000623FA /* FPUtil.cpp in Sources */,
 				C4822E9C1CAA48D6000623FA /* OldSearchEnvironment.cpp in Sources */,
 				C4822E9D1CAA48D6000623FA /* SFBDPancakePuzzle.cpp in Sources */,
-				C4822E9E1CAA48D6000623FA /* PancakePuzzle.cpp in Sources */,
 				C4822E9F1CAA48D6000623FA /* RadiusAbstraction.cpp in Sources */,
 				C4822EA01CAA48D6000623FA /* PRAStar2.cpp in Sources */,
 				C4822EA21CAA48D6000623FA /* NQueens.cpp in Sources */,
@@ -8824,7 +8796,6 @@
 				C4822F241CAB9B0B000623FA /* OldSearchEnvironment.cpp in Sources */,
 				C4822F251CAB9B0B000623FA /* SFBDPancakePuzzle.cpp in Sources */,
 				C4822F4A1CAB9DF9000623FA /* Driver.cpp in Sources */,
-				C4822F261CAB9B0B000623FA /* PancakePuzzle.cpp in Sources */,
 				C4822F271CAB9B0B000623FA /* RadiusAbstraction.cpp in Sources */,
 				C4822F281CAB9B0B000623FA /* PRAStar2.cpp in Sources */,
 				C4822F2A1CAB9B0B000623FA /* NQueens.cpp in Sources */,
@@ -8954,7 +8925,6 @@
 				C4D2166A1D25B2B70039F401 /* OldSearchEnvironment.cpp in Sources */,
 				C4D2166B1D25B2B70039F401 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4D2168F1D25B2E40039F401 /* Driver.cpp in Sources */,
-				C4D2166C1D25B2B70039F401 /* PancakePuzzle.cpp in Sources */,
 				C4D2166D1D25B2B70039F401 /* RadiusAbstraction.cpp in Sources */,
 				C4D2166E1D25B2B70039F401 /* PRAStar2.cpp in Sources */,
 				C4D216701D25B2B70039F401 /* NQueens.cpp in Sources */,
@@ -9078,7 +9048,6 @@
 				C4F40B601CCE960300721F25 /* OldSearchEnvironment.cpp in Sources */,
 				C4F40B611CCE960300721F25 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4F40B851CCE963C00721F25 /* Driver.cpp in Sources */,
-				C4F40B631CCE960300721F25 /* PancakePuzzle.cpp in Sources */,
 				C4F40B641CCE960300721F25 /* RadiusAbstraction.cpp in Sources */,
 				C4F40B651CCE960300721F25 /* PRAStar2.cpp in Sources */,
 				C4F40B671CCE960300721F25 /* NQueens.cpp in Sources */,

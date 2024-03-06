@@ -47,8 +47,8 @@ const float FRAMERATE = 1.0f/30.0f;
 	//	initialConditions(pContextInfo);
 	drawingView.display = &pContextInfo->display;
 	//	self.drawingView.display = pContextInfo->display;
-	[self.view.window setContentSize:NSMakeSize(pContextInfo->windowWidth, pContextInfo->windowHeight)];
-	[self.view setFrame:NSMakeRect(0, 0, pContextInfo->windowWidth, pContextInfo->windowHeight)];
+	[self.view.window setContentSize:NSMakeSize(pContextInfo->display.windowWidth, pContextInfo->display.windowHeight)];
+	[self.view setFrame:NSMakeRect(0, 0, pContextInfo->display.windowWidth, pContextInfo->display.windowHeight)];
 }
 
 
@@ -62,9 +62,10 @@ const float FRAMERATE = 1.0f/30.0f;
 -(void)onTick:(NSTimer *)timer {
 	pRecContext pContextInfo = getCurrentContext();
 	pContextInfo->display.StartFrame();
-	for (int x = 0; x < pContextInfo->numPorts; x++)
+	for (int x = 0; x < pContextInfo->display.numViewports; x++)
 	{
-		setViewport(pContextInfo, x);
+		pContextInfo->display.SetViewport(x);
+		//setViewport(pContextInfo, x);
 		//if (pContextInfo->drawing)
 		{
 			// set projection
@@ -79,6 +80,10 @@ const float FRAMERATE = 1.0f/30.0f;
 		if ([tmp length] > 99)
 			tmp = [tmp substringToIndex:99];
 		[messageField setStringValue:tmp];
+		[messageField setHidden:!getTextBufferVisibility()];
+	}
+	else {
+		[messageField setHidden:!getTextBufferVisibility()];
 	}
 }
 

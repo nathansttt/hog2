@@ -4,7 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>DSDWA*.xcscheme_^#shared#^_</key>
+		<key>DSDWA.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>5</integer>
@@ -24,10 +24,25 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
+		<key>Robotic Arm.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
 		<key>Snakebird.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>2</integer>
+		</dict>
+		<key>TOH.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
+		<key>The Witness Editor.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>7</integer>
 		</dict>
 		<key>The Witness.xcscheme_^#shared#^_</key>
 		<dict>
@@ -37,7 +52,17 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>C45A4B8A2B92856200ED3754</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C467498829483B36009BE699</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4F8916629BEE5B300B49BB6</key>
 		<dict>
 			<key>primary</key>
 			<true/>

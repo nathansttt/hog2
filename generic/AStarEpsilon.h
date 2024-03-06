@@ -40,48 +40,56 @@ struct GBFSCompare {
 template <class state, class action, class environment>
 class AStarEpsilon : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	AStarEpsilon(double optimalBound = 2) { ResetNodeCount(); env = 0; bound = optimalBound; theHeuristic = 0;}
+	AStarEpsilon(double optimalBound = 2) {
+		ResetNodeCount(); env = 0; bound = optimalBound; theHeuristic = 0;
+		phi = [optimalBound](double h, double g){ return g/optimalBound+h; };
+	}
 	virtual ~AStarEpsilon() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
 	
-	// uses admissible heuristic (regular A* search)
-	AStarOpenClosed<state, AStarCompare<state>> f;
-	// uses inadmissible heuristic
-	AStarOpenClosed<state, GBFSCompare<state>> focal;
+//	// uses admissible heuristic (regular A* search)
+//	AStarOpenClosed<state, AStarCompare<state>> f;
+//	// uses inadmissible heuristic
+//	AStarOpenClosed<state, GBFSCompare<state>> focal;
 	state goal, start;
 	
 	bool InitializeSearch(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	
-	void ExtractPathToStart(state &node, std::vector<state> &thePath)
-	{ uint64_t theID; focal.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
-	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
-	const state &GetParent(const state &s);
+	void ExtractPathToStart(state &node, std::vector<state> &thePath);
+	void ExtractPathToStartFromID(size_t node, std::vector<state> &thePath);
 	virtual const char *GetName();
 	
-	void PrintStats();
 	uint64_t GetUniqueNodesExpanded() { return uniqueNodesExpanded; }
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; uniqueNodesExpanded = 0; }
-	int GetMemoryUsage();
-	
-	state CheckNextOpenNode();
-	state CheckNextFocalNode();
-	bool GetOpenListGCost(const state &val, double &gCost) const;
-	bool GetFocalListGCost(const state &val, double &gCost) const;
-
-	bool GetClosedListGCost(const state &val, double &gCost) const;
-	bool GetClosedItem(const state &s, AStarOpenClosedData<state> &);
-	unsigned int GetNumOpenItems() { return f.OpenSize(); }
-	unsigned int GetNumFocalItems() { return focal.OpenSize(); }
-	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return f.Lookat(f.GetOpenItem(which)); }
-	inline const AStarOpenClosedData<state> &GetFocalItem(unsigned int which) { return focal.Lookat(focal.GetOpenItem(which)); }
-	inline const int GetNumItems() { return focal.size(); }
-	inline const AStarOpenClosedData<state> &GetItem(unsigned int which) { return focal.Lookat(which); }
-	bool HaveExpandedState(const state &val)
-	{ uint64_t key; return focal.Lookup(env->GetStateHash(val), key) != kNotFound; }
-	dataLocation GetStateLocation(const state &val)
-	{ uint64_t key; return focal.Lookup(env->GetStateHash(val), key); }
+//	int GetMemoryUsage();
+//
+	size_t GetNumItems() const { return allStates.size(); }
+	bool IsOpen(size_t item) const { return allStates[item].open; }
+	bool IsFocal(size_t item) const
+	{ return (flesseq(Phi(allStates[item].hCost, allStates[item].gCost), minf)); }
+	state GetItem(size_t item) const { return allStates[item].s; }
+	float GetItemGCost(size_t item) const { return allStates[item].gCost; }
+	float GetItemHCost(size_t item) const { return allStates[item].hCost; }
+	float GetMinF() const { return minf; }
+	//	state CheckNextOpenNode();
+//	state CheckNextFocalNode();
+//	bool GetOpenListGCost(const state &val, double &gCost) const;
+//	bool GetFocalListGCost(const state &val, double &gCost) const;
+//
+//	bool GetClosedListGCost(const state &val, double &gCost) const;
+//	bool GetClosedItem(const state &s, AStarOpenClosedData<state> &);
+//	unsigned int GetNumOpenItems() { return f.OpenSize(); }
+//	unsigned int GetNumFocalItems() { return focal.OpenSize(); }
+//	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return f.Lookat(f.GetOpenItem(which)); }
+//	inline const AStarOpenClosedData<state> &GetFocalItem(unsigned int which) { return focal.Lookat(focal.GetOpenItem(which)); }
+//	inline const int GetNumItems() { return focal.size(); }
+//	inline const AStarOpenClosedData<state> &GetItem(unsigned int which) { return focal.Lookat(which); }
+//	bool HaveExpandedState(const state &val)
+//	{ uint64_t key; return focal.Lookup(env->GetStateHash(val), key) != kNotFound; }
+//	dataLocation GetStateLocation(const state &val)
+//	{ uint64_t key; return focal.Lookup(env->GetStateHash(val), key); }
 	
 	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; }
 	
@@ -89,30 +97,59 @@ public:
 	uint64_t GetNodesTouched() const { return nodesTouched; }
 	
 	void LogFinalStats(StatCollection *) {}
-	
+//
 	void OpenGLDraw() const;
 	void Draw(Graphics::Display &d) const;
 	
-	void SetOptimalityBound(double w) {bound = w;}
+	void SetPhi(std::function<double(double, double)> p)
+	{
+		phi = p;
+	}
+	double Phi(double h, double g) const
+	{
+		return phi(h, g);
+	}
+	void SetOptimalityBound(double w)
+	{
+		phi = [w](double h, double g){ return g/w+h; };
+		bound = w;
+	}
 	double GetOptimalityBound() { return bound; }
 private:
+	void GetMinFOnOpen() const;
+	size_t GetBestStateOnFocal() const;
+
 	void DrawOpen(Graphics::Display &d) const;
 	void DrawFocal(Graphics::Display &d) const;
-	void ExpandOpen();
-	void ExpandFocal();
+	void Expand(size_t which);
+	void UpdateCost(size_t next, size_t parent);
+	void AddState(const state &s, size_t parent);
+	size_t Lookup(const state &s);
 	uint64_t nodesTouched, nodesExpanded;
 	
+	struct item {
+		state s;
+		float gCost;
+		float hCost;
+		bool open;
+		size_t parent;
+	};
+	std::vector<item> allStates;
+//	std::vector<item> closed;
 	std::vector<state> neighbors;
-	std::vector<uint64_t> neighborID;
-	std::vector<double> edgeCosts;
-	std::vector<dataLocation> neighborLoc;
+//	std::vector<uint64_t> neighborID;
+//	std::vector<double> edgeCosts;
+//	std::vector<dataLocation> neighborLoc;
 
 	std::vector<state> solution;
 	environment *env;
-	double bestSolution;
+//	double bestSolution;
 	double bound;
+	mutable float minf;
 	uint64_t uniqueNodesExpanded;
 	Heuristic<state> *theHeuristic;
+
+	std::function<double(double, double)> phi;
 };
 
 //static const bool verbose = false;
@@ -191,14 +228,17 @@ void AStarEpsilon<state,action,environment>::GetPath(environment *_env, const st
 template <class state, class action, class environment>
 bool AStarEpsilon<state,action,environment>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
-	bestSolution = DBL_MAX;
+//	bestSolution = DBL_MAX;
 	
 	if (theHeuristic == 0)
 		theHeuristic = _env;
 	thePath.resize(0);
 	env = _env;
-	focal.Reset(env->GetMaxHash());
-	f.Reset(env->GetMaxHash());
+//	focal.resize(0);
+	allStates.resize(0);
+//	closed.resize(0);
+//	focal.Reset(env->GetMaxHash());
+//	f.Reset(env->GetMaxHash());
 	solution.clear();
 	ResetNodeCount();
 	start = from;
@@ -209,8 +249,9 @@ bool AStarEpsilon<state,action,environment>::InitializeSearch(environment *_env,
 		return false;
 	}
 	
-	focal.AddOpenNode(start, env->GetStateHash(start), 0, theHeuristic->HCost(start, goal));
-	f.AddOpenNode(start, env->GetStateHash(start), 0, theHeuristic->HCost(start, goal));
+//	focal.AddOpenNode(start, env->GetStateHash(start), 0, theHeuristic->HCost(start, goal));
+//	f.AddOpenNode(start, env->GetStateHash(start), 0, theHeuristic->HCost(start, goal));
+	allStates.push_back({start, 0, (float)theHeuristic->HCost(start, goal), true, 0});
 	
 	return true;
 }
@@ -257,36 +298,53 @@ bool AStarEpsilon<state,action,environment>::DoSingleSearchStep(std::vector<stat
 		thePath = solution;
 		return true;
 	}
-	if (focal.OpenSize() == 0)
+
+	// get minimum f-cost
+	GetMinFOnOpen();
+	if (minf == FLT_MAX)
 	{
 		printf("No path\n");
 		thePath.resize(0); // no path found!
 		return true;
 	}
 	
-	uint64_t nodeOnfocal;
-	uint64_t nodeOnF;
-	// only reopen states taken from f, not fhat
-	bool reopen = true;
-
-	double regularF = f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h;
-	double focalF = focal.Lookat(focal.Peek()).g+focal.Lookat(focal.Peek()).h;
-	printf("Min f: %1.2f; next focal f: %1.2f. Max allowable: %1.2f.", regularF, focalF, regularF*bound);
-	if (flesseq(focalF, bound*regularF))
-	{
-		//printf(" Expanding focal\n");
-		ExpandFocal();
-	}
-	else {
-		//printf(" Expanding open\n");
-		ExpandOpen();
-	}
+	// get state with best epsilon
+	size_t which = GetBestStateOnFocal();
 	
-	if (solution.size() > 0)
+	if (env->GoalTest(allStates[which].s, goal))
 	{
-		thePath = solution;
+		ExtractPathToStartFromID(which, solution);
+		// Path is backwards - reverse
+		reverse(solution.begin(), solution.end());
 		return true;
 	}
+	else {
+		Expand(which);
+	}
+	
+//	uint64_t nodeOnfocal;
+//	uint64_t nodeOnF;
+//	// only reopen states taken from f, not fhat
+//	bool reopen = true;
+//
+//	double regularF = f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h;
+//	double focalF = focal.Lookat(focal.Peek()).g+focal.Lookat(focal.Peek()).h;
+//	printf("Min f: %1.2f; next focal f: %1.2f. Max allowable: %1.2f.", regularF, focalF, regularF*bound);
+//	if (flesseq(focalF, bound*regularF))
+//	{
+//		//printf(" Expanding focal\n");
+//		ExpandFocal();
+//	}
+//	else {
+//		//printf(" Expanding open\n");
+//		ExpandOpen();
+//	}
+//
+//	if (solution.size() > 0)
+//	{
+//		thePath = solution;
+//		return true;
+//	}
 
 //	if (fless(focal.Lookat(focal.Peek()).g+focal.Lookat(focal.Peek()).h, bestSolution))
 //	{
@@ -341,323 +399,114 @@ bool AStarEpsilon<state,action,environment>::DoSingleSearchStep(std::vector<stat
 	return false;
 }
 
+template <class state, class action, class environment>
+void AStarEpsilon<state,action,environment>::GetMinFOnOpen() const
+{
+	minf = FLT_MAX;
+	for (auto &i : allStates)
+	{
+		if (i.open)
+			minf = std::min(minf, i.gCost+i.hCost);
+	}
+}
+
+template <class state, class action, class environment>
+size_t AStarEpsilon<state,action,environment>::GetBestStateOnFocal() const
+{
+	float focalCost = FLT_MAX;
+	size_t which = allStates.size();
+	for (size_t x = 0; x < allStates.size(); x++)
+	{
+		if (allStates[x].open && fless(allStates[x].hCost, focalCost) && (flesseq(Phi(allStates[x].hCost, allStates[x].gCost), minf)))
+		{
+			focalCost = allStates[x].hCost;
+			which = x;
+		}
+	}
+	return which;
+}
+
+template <class state, class action, class environment>
+void AStarEpsilon<state,action,environment>::UpdateCost(size_t next, size_t parent)
+{
+	float newCost = allStates[parent].gCost+env->GCost(allStates[parent].s, allStates[next].s);
+	if (fless(newCost, allStates[next].gCost))
+	{
+		// If we update the cost it's always on open now - TODO: count re-openings
+		allStates[next].open = true;
+		allStates[next].gCost = newCost;
+		allStates[next].parent = parent;
+	}
+}
+
+template <class state, class action, class environment>
+void AStarEpsilon<state,action,environment>::AddState(const state &s, size_t parent)
+{
+	float cost = (float)allStates[parent].gCost+env->GCost(allStates[parent].s, s);
+	allStates.push_back({s, cost, (float)theHeuristic->HCost(s, goal), true, parent});
+}
+
+
 /**
- * Expands a single state from the given open list
+ * Expands a single state from the given open
  * @author Nathan Sturtevant
  * @date 01/27/19
  */
 template <class state, class action, class environment>
-void AStarEpsilon<state,action,environment>::ExpandOpen()
+void AStarEpsilon<state,action,environment>::Expand(size_t which)
 {
-	uint64_t nodeid = f.Close();
-	if (!f.Lookup(nodeid).reopened)
-		uniqueNodesExpanded++;
+	env->GetSuccessors(allStates[which].s, neighbors);
+	allStates[which].open = false;
 	nodesExpanded++;
-	
-	if (env->GoalTest(f.Lookup(nodeid).data, goal))
-	{
-		ExtractPathToStartFromID(nodeid, solution);
-		// Path is backwards - reverse
-		reverse(solution.begin(), solution.end());
-		return;
-	}
-	
-	neighbors.resize(0);
-	edgeCosts.resize(0);
-	neighborID.resize(0);
-	neighborLoc.resize(0);
-	
-	//	std::cout << "Expanding: " << f.Lookup(nodeid).data << " with f:";
-	//	std::cout << f.Lookup(nodeid).g+f.Lookup(nodeid).h << std::endl;
-	
-	env->GetSuccessors(f.Lookup(nodeid).data, neighbors);
-	double bestH = f.Lookup(nodeid).h;
-	double lowHC = DBL_MAX;
-	// 1. load all the children
-	for (unsigned int x = 0; x < neighbors.size(); x++)
-	{
-		uint64_t theID;
-		neighborLoc.push_back(f.Lookup(env->GetStateHash(neighbors[x]), theID));
-		neighborID.push_back(theID);
-		edgeCosts.push_back(env->GCost(f.Lookup(nodeid).data, neighbors[x]));
-	}
-	
-	// iterate again updating costs and writing out to memory
 	for (int x = 0; x < neighbors.size(); x++)
 	{
 		nodesTouched++;
-		
-		switch (neighborLoc[x])
-		{
-			case kClosedList:
-//				if (reopenNodes)
-//				{
-//					if (fless(f.Lookup(nodeid).g+edgeCosts[x], f.Lookup(neighborID[x]).g))
-//					{
-//						f.Lookup(neighborID[x]).parentID = nodeid;
-//						f.Lookup(neighborID[x]).g = f.Lookup(nodeid).g+edgeCosts[x];
-//						f.Reopen(neighborID[x]);
-//						// This line isn't normally needed, but in some state spaces we might have
-//						// equality but different meta information, so we need to make sure that the
-//						// meta information is also copied, since this is the most generic A* implementation
-//						f.Lookup(neighborID[x]).data = neighbors[x];
-//					}
-//				}
-				break;
-			case kOpenList:
-				//edgeCost = env->GCost(f.Lookup(nodeid).data, neighbors[x]);
-				if (fless(f.Lookup(nodeid).g+edgeCosts[x], f.Lookup(neighborID[x]).g))
-				{
-					f.Lookup(neighborID[x]).parentID = nodeid;
-					f.Lookup(neighborID[x]).g = f.Lookup(nodeid).g+edgeCosts[x];
-					// This line isn't normally needed, but in some state spaces we might have
-					// equality but different meta information, so we need to make sure that the
-					// meta information is also copied, since this is the most generic A* implementation
-					f.Lookup(neighborID[x]).data = neighbors[x];
-					f.KeyChanged(neighborID[x]);
-					//					std::cout << " Reducing cost to " << f.Lookup(nodeid).g+edgeCosts[x] << "\n";
-					// TODO: unify the KeyChanged calls.
-				}
-				else {
-					//					std::cout << " no cheaper \n";
-				}
-				break;
-			case kNotFound:
-			{
-				f.AddOpenNode(neighbors[x],
-							  env->GetStateHash(neighbors[x]),
-							  f.Lookup(nodeid).g+edgeCosts[x],
-							  theHeuristic->HCost(neighbors[x], goal),
-							  nodeid);
-			}
-		}
+		size_t next = Lookup(neighbors[x]);
+		if (next < allStates.size())
+			UpdateCost(next, which);
+		else
+			AddState(neighbors[x], which);
 	}
 }
 
-template <class state, class action, class environment>
-void AStarEpsilon<state,action,environment>::ExpandFocal()
+template <class state, class action,class environment>
+size_t AStarEpsilon<state, action,environment>::Lookup(const state &s)
 {
-	uint64_t nodeid = focal.Close();
-	if (!focal.Lookup(nodeid).reopened)
-		uniqueNodesExpanded++;
-	nodesExpanded++;
-	
-	if (env->GoalTest(focal.Lookup(nodeid).data, goal))
-	{
-		ExtractPathToStartFromID(nodeid, solution);
-		// Path is backwards - reverse
-		reverse(solution.begin(), solution.end());
-		return;
-	}
-	
-	neighbors.resize(0);
-	edgeCosts.resize(0);
-	neighborID.resize(0);
-	neighborLoc.resize(0);
-	
-	std::cout << "Expanding: " << focal.Lookup(nodeid).data << " with f:";
-	std::cout << focal.Lookup(nodeid).g+focal.Lookup(nodeid).h << std::endl;
-	
-	env->GetSuccessors(focal.Lookup(nodeid).data, neighbors);
-	double bestH = focal.Lookup(nodeid).h;
-	double lowHC = DBL_MAX;
-	// 1. load all the children
-	for (unsigned int x = 0; x < neighbors.size(); x++)
-	{
-		uint64_t theID;
-		neighborLoc.push_back(focal.Lookup(env->GetStateHash(neighbors[x]), theID));
-		neighborID.push_back(theID);
-		edgeCosts.push_back(env->GCost(focal.Lookup(nodeid).data, neighbors[x]));
-	}
-	
-	// iterate again updating costs and writing out to memory
-	for (int x = 0; x < neighbors.size(); x++)
-	{
-		nodesTouched++;
-		
-		switch (neighborLoc[x])
-		{
-			case kClosedList:
-				break;
-			case kOpenList:
-				//edgeCost = env->GCost(focal.Lookup(nodeid).data, neighbors[x]);
-				if (fless(focal.Lookup(nodeid).g+edgeCosts[x], focal.Lookup(neighborID[x]).g))
-				{
-					focal.Lookup(neighborID[x]).parentID = nodeid;
-					focal.Lookup(neighborID[x]).g = focal.Lookup(nodeid).g+edgeCosts[x];
-					// This line isn't normally needed, but in some state spaces we might have
-					// equality but different meta information, so we need to make sure that the
-					// meta information is also copied, since this is the most generic A* implementation
-					focal.Lookup(neighborID[x]).data = neighbors[x];
-					focal.KeyChanged(neighborID[x]);
-					//					std::cout << " Reducing cost to " << focal.Lookup(nodeid).g+edgeCosts[x] << "\n";
-					// TODO: unify the KeyChanged calls.
-				}
-				else {
-					//					std::cout << " no cheaper \n";
-				}
-				break;
-			case kNotFound:
-			{
-				focal.AddOpenNode(neighbors[x],
-							  env->GetStateHash(neighbors[x]),
-							  focal.Lookup(nodeid).g+edgeCosts[x],
-							  theHeuristic->HCost(neighbors[x], goal),
-							  nodeid);
-			}
-		}
-	}
+	size_t x = 0;
+	for (; x < allStates.size(); x++)
+		if (allStates[x].s == s)
+			break;
+	return x;
 }
-
-/**
- * Returns the next state on the open list (but doesn't pop it off the queue).
- * @author Nathan Sturtevant
- * @date 03/22/06
- *
- * @return The first state in the open list.
- */
-//template <class state, class action, class environment>
-//state AStarEpsilon<state, action,environment>::CheckNextNode()
-//{
-//	uint64_t key = focal.Peek();
-//	return focal.Lookup(key).data;
-//	//assert(false);
-//	//return openQueue.top().currNode;
-//}
-
 
 /**
  * Get the path from a goal state to the start state
  * @author Nathan Sturtevant
  * @date 03/22/06
  *
- * @param goalNode the goal state
+ * @param node the state from which the path is extracted
  * @param thePath will contain the path from goalNode to the start state
  */
 template <class state, class action,class environment>
-void AStarEpsilon<state, action,environment>::ExtractPathToStartFromID(uint64_t node,
-																				 std::vector<state> &thePath)
+void AStarEpsilon<state, action,environment>::ExtractPathToStartFromID(size_t node,
+																	   std::vector<state> &thePath)
 {
 	do {
-		thePath.push_back(focal.Lookup(node).data);
-		node = focal.Lookup(node).parentID;
-	} while (focal.Lookup(node).parentID != node);
-	thePath.push_back(focal.Lookup(node).data);
+		thePath.push_back(allStates[node].s);
+		node = allStates[node].parent;
+	} while (allStates[node].parent != node);
+	// start state
+	thePath.push_back(allStates[node].s);
 }
 
 template <class state, class action,class environment>
-const state &AStarEpsilon<state, action,environment>::GetParent(const state &s)
+void AStarEpsilon<state, action,environment>::ExtractPathToStart(state &node, std::vector<state> &thePath)
 {
-	uint64_t theID;
-	focal.Lookup(env->GetStateHash(s), theID);
-	theID = focal.Lookup(theID).parentID;
-	return focal.Lookup(theID).data;
+	ExtractPathToStartFromID(Lookup(node), thePath);
 }
 
-/**
- * A function that prints the number of states in the closed list and open
- * queue.
- * @author Nathan Sturtevant
- * @date 03/22/06
- */
-template <class state, class action, class environment>
-void AStarEpsilon<state, action,environment>::PrintStats()
-{
-	printf("%u items in closed list\n", (unsigned int)focal.ClosedSize());
-	printf("%u items in open queue\n", (unsigned int)focal.OpenSize());
-}
-
-/**
- * Return the amount of memory used by AStarEpsilon
- * @author Nathan Sturtevant
- * @date 03/22/06
- *
- * @return The combined number of elements in the closed list and open queue
- */
-template <class state, class action, class environment>
-int AStarEpsilon<state, action,environment>::GetMemoryUsage()
-{
-	return focal.size();
-}
-
-/**
- * Get state from the closed list
- * @author Nathan Sturtevant
- * @date 10/09/07
- *
- * @param val The state to lookup in the closed list
- * @gCost The g-cost of the node in the closed list
- * @return success Whether we found the value or not
- * the states
- */
-template <class state, class action, class environment>
-bool AStarEpsilon<state, action,environment>::GetClosedListGCost(const state &val, double &gCost) const
-{
-	uint64_t theID;
-	dataLocation loc = focal.Lookup(env->GetStateHash(val), theID);
-	if (loc == kClosedList)
-	{
-		gCost = focal.Lookat(theID).g;
-		return true;
-	}
-	return false;
-}
-
-template <class state, class action, class environment>
-state AStarEpsilon<state, action,environment>::CheckNextOpenNode()
-{
-	uint64_t key = f.Peek();
-	return f.Lookup(key).data;
-}
-
-template <class state, class action, class environment>
-state AStarEpsilon<state, action,environment>::CheckNextFocalNode()
-{
-	uint64_t key = focal.Peek();
-	return focal.Lookup(key).data;
-}
-
-
-template <class state, class action, class environment>
-bool AStarEpsilon<state, action,environment>::GetOpenListGCost(const state &val, double &gCost) const
-{
-	uint64_t theID;
-	dataLocation loc = f.Lookup(env->GetStateHash(val), theID);
-	if (loc == kOpenList)
-	{
-		gCost = f.Lookat(theID).g;
-		return true;
-	}
-	return false;
-}
-
-template <class state, class action, class environment>
-bool AStarEpsilon<state, action,environment>::GetFocalListGCost(const state &val, double &gCost) const
-{
-	uint64_t theID;
-	dataLocation loc = focal.Lookup(env->GetStateHash(val), theID);
-	if (loc == kOpenList)
-	{
-		gCost = focal.Lookat(theID).g;
-		return true;
-	}
-	return false;
-}
-
-
-template <class state, class action, class environment>
-bool AStarEpsilon<state, action,environment>::GetClosedItem(const state &s, AStarOpenClosedData<state> &result)
-{
-	uint64_t theID;
-	dataLocation loc = focal.Lookup(env->GetStateHash(s), theID);
-	if (loc == kClosedList)
-	{
-		result = focal.Lookat(theID);
-		return true;
-	}
-	return false;
 	
-}
+
 
 
 /**
@@ -670,56 +519,24 @@ template <class state, class action, class environment>
 void AStarEpsilon<state, action,environment>::OpenGLDraw() const
 {
 	double transparency = 1.0;
-	if (focal.size() == 0)
-		return;
-	uint64_t top = -1;
-	double bound = DBL_MAX;
+	//GetMinFOnOpen();
 
-	//	double minf = 1e9, maxf = 0;
-	if (focal.OpenSize() > 0)
+	for (unsigned int x = 0; x < allStates.size(); x++)
 	{
-		top = focal.Peek();
-		const auto &i = f.Lookat(f.Peek());
-		bound = i.g+i.h;
-		printf("Lowest f on open: %f\n", bound);
-	}
-	for (unsigned int x = 0; x < focal.size(); x++)
-	{
-		const auto &data = focal.Lookat(x);
-		if (x == top)
+		if (allStates[x].open)
 		{
-			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->OpenGLDraw(data.data);
-		}
-//		if ((data.where == kClosedList && !fgreater(data.g+data.h/weight, bound)))
-//		{
-//			env->SetColor(0.0, 0.0, 1.0, transparency);
-//			env->OpenGLDraw(data.data);
-//		}
-		else if ((data.where == kOpenList) && (data.reopened))
-		{
-			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		else if (data.where == kOpenList)
-		{
-			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		else if ((data.where == kClosedList) && (data.reopened))
-		{
-			env->SetColor(0.5, 0.0, 0.5, transparency);
-			env->OpenGLDraw(data.data);
-		}
-		else if (data.where == kClosedList)
-		{
-			if (data.parentID == x)
-				env->SetColor(1.0, 0.5, 0.5, transparency);
+			if (flesseq(Phi(allStates[x].hCost, allStates[x].gCost), minf))
+				env->SetColor(0.0, 1.0, 1.0, transparency);
 			else
-				env->SetColor(1.0, 0.0, 0.0, transparency);
-			//			}
-			env->OpenGLDraw(data.data);
+				env->SetColor(0.0, 1.0, 0.0, transparency);
 		}
+		else {
+			env->SetColor(1.0, 0.0, 0.0, transparency);
+		}
+		if (allStates[x].parent == x)
+			env->SetColor(1.0, 0.5, 0.5, transparency);
+		env->OpenGLDraw(allStates[x].s);
+
 	}
 	env->SetColor(1.0, 0.5, 1.0, 0.5);
 	env->OpenGLDraw(goal);
@@ -728,121 +545,28 @@ void AStarEpsilon<state, action,environment>::OpenGLDraw() const
 template <class state, class action, class environment>
 void AStarEpsilon<state, action,environment>::Draw(Graphics::Display &d) const
 {
-	DrawFocal(d);
-	DrawOpen(d);
+	double transparency = 1.0;
+	//float minf = GetMinFOnOpen();
+
+	for (unsigned int x = 0; x < allStates.size(); x++)
+	{
+		if (allStates[x].open)
+		{
+			if (flesseq(Phi(allStates[x].hCost, allStates[x].gCost), minf))
+				env->SetColor(0.0, 1.0, 1.0, transparency); // on focal
+			else
+				env->SetColor(0.0, 1.0, 0.0, transparency); // only on open
+		}
+		else {
+			env->SetColor(1.0, 0.0, 0.0, transparency);
+		}
+		if (allStates[x].parent == x)
+			env->SetColor(1.0, 0.5, 0.5, transparency);
+		env->Draw(d, allStates[x].s);
+
+	}
 	env->SetColor(1.0, 0.5, 1.0, 0.5);
 	env->Draw(d, goal);
 }
 
-template <class state, class action, class environment>
-void AStarEpsilon<state, action,environment>::DrawOpen(Graphics::Display &d) const
-{
-	double transparency = 1.0;
-	if (f.size() == 0)
-		return;
-	uint64_t top = -1;
-	double bound = DBL_MAX;
-	
-	//	double minf = 1e9, maxf = 0;
-	if (f.OpenSize() > 0)
-	{
-		top = f.Peek();
-		const auto &i = f.Lookat(f.Peek());
-		bound = i.g+i.h;
-//		printf("Lowest f on open: %f\n", bound);
-	}
-	for (unsigned int x = 0; x < f.size(); x++)
-	{
-		const auto &data = f.Lookat(x);
-		if (x == top)
-		{
-			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->Draw(d, data.data);
-		}
-//		if ((data.where == kClosedList && !fgreater(data.g+data.h/weight, bound)))
-//		{
-//			env->SetColor(0.0, 0.0, 1.0, transparency);
-//			env->Draw(d, data.data);
-//		}
-		if ((data.where == kOpenList) && (data.reopened))
-		{
-			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->Draw(d, data.data);
-		}
-		else if (data.where == kOpenList)
-		{
-			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->Draw(d, data.data);
-		}
-		else if ((data.where == kClosedList) && (data.reopened))
-		{
-			env->SetColor(0.5, 0.0, 0.5, transparency);
-			env->Draw(d, data.data);
-		}
-		else if (data.where == kClosedList)
-		{
-			if (data.parentID == x)
-				env->SetColor(1.0, 0.5, 0.5, transparency);
-			else
-				env->SetColor(0.0, 0.0, 1.0, transparency);
-			env->Draw(d, data.data);
-		}
-	}
-}
-
-template <class state, class action, class environment>
-void AStarEpsilon<state, action,environment>::DrawFocal(Graphics::Display &d) const
-{
-	double transparency = 1.0;
-	if (focal.size() == 0)
-		return;
-	uint64_t top = -1;
-	double bound = DBL_MAX;
-	
-	//	double minf = 1e9, maxf = 0;
-	if (focal.OpenSize() > 0)
-	{
-		top = focal.Peek();
-		const auto &i = focal.Lookat(focal.Peek());
-		bound = i.g+i.h;
-		//		printf("Lowest f on open: %f\n", bound);
-	}
-	for (unsigned int x = 0; x < focal.size(); x++)
-	{
-		const auto &data = focal.Lookat(x);
-		if (x == top)
-		{
-			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->Draw(d, data.data);
-		}
-		//		if ((data.where == kClosedList && !fgreater(data.g+data.h/weight, bound)))
-		//		{
-		//			env->SetColor(0.0, 0.0, 1.0, transparency);
-		//			env->Draw(d, data.data);
-		//		}
-		if ((data.where == kOpenList) && (data.reopened))
-		{
-			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->Draw(d, data.data);
-		}
-		else if (data.where == kOpenList)
-		{
-			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->Draw(d, data.data);
-		}
-		else if ((data.where == kClosedList) && (data.reopened))
-		{
-			env->SetColor(0.5, 0.0, 0.5, transparency);
-			env->Draw(d, data.data);
-		}
-		else if (data.where == kClosedList)
-		{
-			if (data.parentID == x)
-				env->SetColor(1.0, 0.5, 0.5, transparency);
-			else
-				env->SetColor(1.0, 0.0, 0.0, transparency);
-			env->Draw(d, data.data);
-		}
-	}
-}
 #endif /* AStarEpsilon_h */

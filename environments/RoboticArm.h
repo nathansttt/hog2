@@ -20,6 +20,7 @@
 #include "ReservationProvider.h"
 #include "ConfigEnvironment.h"
 #include "FrontierBFS.h"
+#include "TemplateAStar.h"
 #include <cassert>
 
 //#include "BaseMapOccupancyInterface.h"
@@ -122,13 +123,18 @@ public:
 	uint64_t GetStateHash(const armAngles &node) const;
 	uint64_t GetActionHash(armRotations act) const;
 
+private:
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const armAngles &l) const;
 	virtual void OpenGLDraw(const armAngles &, const armRotations &) const;
 	virtual void OpenGLDraw(const armAngles&, const armAngles&, float) const {}
+public:
 //	virtual void OpenGLDraw(const armAngles &, const armRotations &, GLfloat r, GLfloat g, GLfloat b) const;
 //	virtual void OpenGLDraw(const armAngles &l, GLfloat r, GLfloat g, GLfloat b) const;
-
+	virtual void Draw(Graphics::Display &display) const;
+	virtual void Draw(Graphics::Display &display, const armAngles&) const;
+	virtual void Draw(Graphics::Display &display, const armAngles &, const armRotations &) const;
+	
 	virtual void GetNextState(const armAngles &currents, armRotations dir, armAngles &news) const;
 
 	bool LegalState(armAngles &a) const;
@@ -161,6 +167,7 @@ private:
 
 	std::vector<RoboticArmHeuristic *> heuristics;
 	ConfigEnvironment *ce;
+	mutable TemplateAStar<recVec, line2d, ConfigEnvironment> localAStar;
 };
 
 class ArmToArmHeuristic : public RoboticArmHeuristic {
