@@ -15,6 +15,6 @@ jobs:
     - uses: actions/checkout@v4
     - name: make
       working-directory: ./build/SFML/
-      run:
+      run: |
       sudo apt-get install libsfml-dev
       make
