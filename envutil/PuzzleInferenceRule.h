@@ -9,8 +9,12 @@
 #define HOG2_ENV_UTIL_PUZZLE_INFERENCE_RULE_H
 
 #include <algorithm>
+#include <functional>
+#include <iterator>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
 #include "SearchEnvironment.h"
 
 enum ActionType
@@ -23,13 +27,23 @@ enum ActionType
 
 template<class State, class Action>
 class PuzzleInferenceRuleSet {
-protected:
-    virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env, const State &state,
-                                    std::unordered_map<Action, ActionType> &logics) const
+    using InferenceRule = std::function<ActionType(const SearchEnvironment<State, Action>&,
+            State&, const Action&)>;
+
+public:
+    mutable std::unordered_map<Action, ActionType> logics = {};
+
+    virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env,
+                                    State &state, const std::vector<Action> &actions) const
     {
-        std::for_each(rules.begin(), rules.end(), [&](auto &rule) {
+        logics.clear();
+        std::transform(actions.begin(), actions.end(), std::inserter(logics, logics.end()),
+                       [](const Action &action) { return std::make_pair(action, UNKNOWN); });
+        std::for_each(inferenceRules.begin(), inferenceRules.end(), [&](const auto &r) {
+            if (std::find(disabled.begin(), disabled.end(), r.first) != disabled.end())
+                return;
             std::for_each(logics.begin(), logics.end(), [&](auto &logic) {
-                ActionType t = rule(env, state, logic.first);
+                ActionType t = r.second(env, state, logic.first);
                 if (t == UNKNOWN)
                     return;
                 if (logic.second != UNKNOWN && logic.second != t)
@@ -38,19 +52,53 @@ protected:
             });
         });
     }
-    
-public:
-    std::vector<std::function<ActionType(const SearchEnvironment<State, Action>&, const State&, const Action&)>> rules;
-    std::unordered_map<Action, ActionType> logics;
-    
-    virtual void FilterActions(const SearchEnvironment<State, Action> &env, const State &state,
-                               std::vector<Action> &actions)
+
+    std::unordered_map<int, InferenceRule> inferenceRules;
+    std::vector<int> disabled;
+
+    virtual void SetRules(const std::unordered_map<int, InferenceRule> &rules)
     {
-        logics.clear();
-        std::transform(actions.begin(), actions.end(), std::inserter(logics, logics.end()), [](const Action &action) {
-            return std::make_pair(action, UNKNOWN);
-        });
-        UpdateActionLogics(env, state, logics);
+        inferenceRules = rules;
+        disabled.reserve(rules.size());
+    }
+
+    virtual bool EnableRule(int which)
+    {
+        if (auto it = std::find(disabled.begin(), disabled.end(), which);
+            it != disabled.end())
+        {
+            disabled.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    virtual bool DisableRule(int which)
+    {
+        if (std::find(disabled.begin(), disabled.end(), which) == disabled.end())
+        {
+            disabled.push_back(which);
+            return true;
+        }
+        return false;
+    }
+
+    virtual void EnableAllRules()
+    {
+        disabled.clear();
+    }
+
+    virtual void DisableAllRules()
+    {
+        disabled.clear();
+        std::transform(inferenceRules.begin(), inferenceRules.end(), std::inserter(disabled, disabled.end()),
+                       [](const auto &r) { return r.first; });
+    }
+
+    virtual void FilterActions(const SearchEnvironment<State, Action> &env, State &state,
+                               std::vector<Action> &actions) const
+    {
+        UpdateActionLogics(env, state, actions);
         if (std::count_if(logics.begin(), logics.end(), [](const auto &logic) {
             return logic.second == MUST_TAKE;
         }) > 1 || std::count_if(logics.begin(), logics.end(), [](const auto &logic) {

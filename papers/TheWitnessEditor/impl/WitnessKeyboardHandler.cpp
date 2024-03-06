@@ -5,9 +5,15 @@
 #include "SolutionUtil.h"
 #include "SVGUtil.h"
 
+unsigned gSolutionIndex = 0;
+
+static auto editorAvailable = std::array{ 'e', 'w', 'x', 'v', 'r' };
+
 void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-    if (drawEditor && (key != 'e') && (key != 'x')) return;
+    if (drawEditor && !std::isdigit(key) &&
+        std::find(editorAvailable.cbegin(), editorAvailable.cend(), key) == editorAvailable.cend())
+        return;
     switch (key)
     {
     case 't':
@@ -25,7 +31,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     {
         if (!currentSolutionIndices.empty())
         {
-            iws.ws = allSolutions[currentSolutionIndices[0]];
+            iws.ws = allSolutions[currentSolutionIndices[(gSolutionIndex++) % currentSolutionIndices.size()]];
             iws.currState = InteractiveWitnessState<puzzleWidth, puzzleHeight>::kWaitingRestart;
             solved = true;
         }
@@ -33,12 +39,29 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     }
     case 's':
     {
-        auto ret = std::string(witness);
-//        std::cout << witness.SaveToHashString() << std::endl;
-//        Witness<puzzleWidth, puzzleHeight>().LoadFromHashString(witness.SaveToHashString());
-        std::cout << ret << std::endl;
-//        std::istringstream iss(ret);
-//        Witness<puzzleWidth, puzzleHeight>().Deserialize(iss);
+        auto path = std::filesystem::temp_directory_path().string() + std::string("editor.svg");
+        Graphics::Display &display = GetContext(windowID)->display;
+        MakeSVG(display, path.c_str(), 600, 600, 0);
+        std::cout << "Saved to " << path << std::endl;
+        break;
+    }
+    case 'w':
+    {
+        submitTextToBuffer(std::string(witness).c_str());
+        break;
+    }
+    case 'l':
+    {
+#ifdef __EMSCRIPTEN__
+        std::stringstream ss(getTextBuffer());
+        auto w = Witness<puzzleWidth, puzzleHeight>();
+        ss >> w;
+        witness = w;
+        allSolutions.clear();
+        GetAllSolutions(witness, allSolutions);
+        BuildTree(witness, allSolutions, solutionTree);
+        UpdateSolutionIndices();
+#endif
         break;
     }
     case 'r':
@@ -102,11 +125,13 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
             drawEditor = true;
             iws.Reset();
             solved = false;
-            UpdateSolutionIndicies();
+            UpdateSolutionIndices();
             MoveViewport(windowID, 1, {0.0f, -1.0f, 1.0f, 1.0f});
         }
         else
         {
+            iws.Reset();
+            solved = false;
             MoveViewport(windowID, 1, {1.0f, -1.0f, 2.0f, 1.0f});
             MoveViewport(windowID, 2, {1.0f, 0.0f, 2.0f, 2.0f});
             drawEditor = false;
@@ -117,16 +142,70 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
     case 'x':
     {
         if (drawEditor)
-        {
-            if (selectTetrisPiece != 0)
-            {
-                MoveViewport(windowID, 2, {0.0f, 0.0f, 1.0f, 2.0f});
-            }
-            else
-            {
+            (selectTetrisPiece != 0) ? MoveViewport(windowID, 2, {0.0f, 0.0f, 1.0f, 2.0f}) :
                 MoveViewport(windowID, 2, {1.0f, 0.0f, 2.0f, 2.0f});
+        break;
+    }
+    case 'c':
+    {
+        auto e = GetCurrentEntropy(witness);
+        std::cout << "Entropy of the current state: ("
+            << ((e.value == inf) ? "inf" :to_string_with_precision(e.value, 2))
+            << ", " << e.depth << ")" << std::endl;
+        auto ae = GetCurrentAdvEntropy(witness);
+        std::cout << "Dead-end Entropy of the current state: ("
+            << ((ae.value == inf) ? "inf" : to_string_with_precision(ae.value, 2))
+            << ", " << ae.depth << ")" << std::endl;
+        if (!solutionTree.empty())
+        {
+            auto &actions = *witness.actionCache.getItem();
+            witness.GetActionSequence(iws.ws, actions);
+            int index = 0;
+            for(auto i = 1; i < actions.size(); ++i)
+            {
+                const auto &action = actions[i];
+                index = solutionTree[index].children[static_cast<unsigned>(action)];
+                std::cout << action << ", " << index << std::endl;
+                if (index == -1)
+                {
+                    std::cout << "not in the tree" << std::endl;
+                    break;
+                }
             }
+            witness.actionCache.returnItem(&actions);
         }
+        break;
+    }
+    case '0':
+    {
+        if (entropy.ruleSet.disabled.empty())
+        {
+            entropy.ruleSet.DisableAllRules();
+            std::cout << "All inference rules are disabled." << std::endl;
+        }
+        else
+        {
+            entropy.ruleSet.EnableAllRules();
+            std::cout << "All inference rules are enabled." << std::endl;
+        }
+        UpdateEntropy(witness);
+        break;
+    }
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    {
+        int index = std::stoi(&key) - 1;
+        std::cout << static_cast<WitnessInferenceRule>(index);
+        if (!entropy.ruleSet.DisableRule(index))
+        {
+            (void) entropy.ruleSet.EnableRule(index);
+            std::cout << " enabled" << std::endl;
+        }
+        else std::cout << " disabled" << std::endl;
+        UpdateEntropy(witness);
         break;
     }
     default:

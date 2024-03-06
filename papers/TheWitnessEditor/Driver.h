@@ -8,7 +8,6 @@
  * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
  */
-
 #ifndef THE_WITNESS_EDITOR_DRIVER_H
 #define THE_WITNESS_EDITOR_DRIVER_H
 
@@ -22,7 +21,7 @@ void WitnessKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char 
 
 int WitnessCLHandler(char *argument[], int maxNumArgs);
 
-bool WitnessClickHandler(unsigned long windowID, int viewport, int x, int y, point3d p, tButtonType, tMouseEventType e);
+bool WitnessClickHandler(unsigned long windowID, int viewport, int x, int y, point3d p, tButtonType, tMouseEventType event);
 
 void InstallHandlers();
 

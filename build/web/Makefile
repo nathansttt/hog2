@@ -49,8 +49,6 @@ PROJECTS = \
   papers/DWA \
   papers/TheWitnessEditor
 
-
-
 # Include projects with broken compilation
 PROJECTS_ALL = \
   gui/GL \
@@ -103,7 +101,6 @@ PROJECTS_ALL = \
   papers/ACA \
   papers/DWA \
   papers/TheWitnessEditor
-
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:

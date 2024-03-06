@@ -5,21 +5,9 @@
 //  Created by Nathan Sturtevant on 7/29/17.
 //  Copyright © 2017 NS Software. All rights reserved.
 //
-
 #include "Colors.h"
 
-bool operator!=(const rgbColor &r1, const rgbColor &r2)
-{
-	return !(r1 == r2);
-}
-
-bool operator==(const rgbColor &r1, const rgbColor &r2)
-{
-	return r1.r == r2.r && r1.g == r2.g && r1.b == r2.b;
-}
-
 namespace Colors {
-
 
 rgbColor GetColor(float v, float vmin, float vmax, int type)
 {

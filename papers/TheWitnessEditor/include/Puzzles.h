@@ -16,5 +16,6 @@ void Fig6Puzzle3();
 void Fig6Puzzle4();
 
 void k87fxsr();
+void _27sck7g();
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_PAPERS_PUZZLE_H */

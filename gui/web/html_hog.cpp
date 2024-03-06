@@ -26,11 +26,10 @@ void EMSCRIPTEN_KEEPALIVE SetCanvasSize(int x, int y)
 {
 	canvasWidth = x;
 	canvasHeight = y;
-	
+
 	pRecContext pContextInfo = getCurrentContext();
 	pContextInfo->display.windowHeight = canvasHeight;
 	pContextInfo->display.windowWidth = canvasWidth;
-	
 	canvasScale = std::min(canvasWidth, canvasHeight);
 	canvasXOffset = (canvasWidth>canvasHeight)?(canvasWidth-canvasHeight):0;
 	canvasYOffset = (canvasHeight>canvasWidth)?(canvasHeight-canvasWidth):0;
@@ -111,7 +110,7 @@ float PointXToCanvas(float p, int viewport)
 	//	if (v == 1)
 	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result.x+1.0)*canvasWidth)/2.0;
-	
+
 	// old code
 	//	return ((p+1)*canvasScale/2.0)+canvasXOffset;
 }
@@ -122,7 +121,7 @@ float PointYToCanvas(float p, int viewport)
 	point3d input(0.f, p, 0.f);
 	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->display.viewports[viewport], input);
 	return ((result.y+1.0)*canvasHeight)/2.0;
-	
+
 	// old code
 	//	return ((p+1)*canvasScale/2.0)+canvasYOffset;
 }
@@ -134,7 +133,7 @@ point3d ConvertCanvasToGlobalHOG(int x, int y)
 	p.y = 2.0*y/canvasHeight-1.0;
 	p.z = 0;
 	return p;
-	
+
 }
 
 void PointToCanvas(Graphics::point &p, int viewport)
@@ -155,7 +154,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			int r = o.c.r*255.0;
 			int g = o.c.g*255.0;
 			int b = o.c.b*255.0;
-			
+
 			EM_ASM_({
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
@@ -178,7 +177,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			int r = o.c.r*255.0;
 			int g = o.c.g*255.0;
 			int b = o.c.b*255.0;
-			
+
 			EM_ASM_({
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
@@ -200,7 +199,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			int r = o.c.r*255.0;
 			int g = o.c.g*255.0;
 			int b = o.c.b*255.0;
-			
+
 			EM_ASM_({
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
@@ -316,14 +315,14 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
 				var resolution = 6.283185307/$8;
-				
+
 				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
 				ctx.beginPath();
 				for (var x = 0; x <= $8; x++)
 				{
 					var nextx = $4+Math.sin(resolution*x+$7*0.01745329252)*$6;
 					var nexty = $5+Math.cos(resolution*x+$7*0.01745329252)*$6;
-					
+
 					if (x == 0)
 						ctx.moveTo(nextx, nexty);
 					else
@@ -331,7 +330,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				}
 				ctx.fill();
 			}, which, r,g,b, cx, cy, radius, o.rotate, o.segments);
-			
+
 		}
 	}
 }
@@ -353,8 +352,8 @@ void DrawToCanvas(const Graphics::Display &disp)
 			//printf("Background command %d\n", x);
 			DoDrawCommand(disp.backgroundDrawCommands[x], "bg");
 		}
-		
-		
+
+
 		const char* align[] = {"\"left\"", "\"center\"", "\"right\""};
 		const char* base[] = {"\"top\"", "\"middle\"", "\"bottom\""};
 		for (int x = 0; x < disp.backgroundText.size(); x++)
@@ -396,9 +395,9 @@ void DrawToCanvas(const Graphics::Display &disp)
 					align[alignType], base[baseType]);
 
 		}
-		
+
 	}
-	
+
 	EM_ASM({
 		var c=document.getElementById("fg");
 		var ctx=c.getContext("2d");
@@ -408,7 +407,7 @@ void DrawToCanvas(const Graphics::Display &disp)
 	{
 		DoDrawCommand(disp.drawCommands[x], "fg");
 	}
-	
+
 	const char* align[] = {"left", "center", "right"};
 	const char* base[] = {"top", "middle", "bottom"};
 	for (int x = 0; x < disp.text.size(); x++)
@@ -417,7 +416,7 @@ void DrawToCanvas(const Graphics::Display &disp)
 		int r = i.c.r*255.0;
 		int g = i.c.g*255.0;
 		int b = i.c.b*255.0;
-		
+
 		int alignType = 0;
 		int baseType = 0;
 		switch (i.align)
@@ -452,7 +451,7 @@ void DrawToCanvas(const Graphics::Display &disp)
 				i.typeface.c_str(),
 				align[alignType], base[baseType]);
 
-		
+
 	}
 	static std::vector<Graphics::point> outputPoints;
 	for (int x = 0; x < disp.lineSegments.size(); x++)
@@ -524,9 +523,8 @@ void HOGDoMouse(int x, int y, bool up, bool down, bool drag)
 	pRecContext pContextInfo = getCurrentContext();
 	pContextInfo->display.windowHeight = canvasHeight;
 	pContextInfo->display.windowWidth = canvasWidth;
-	
 	tMouseEventType t = kMouseDown;
-	
+
 	if (up)
 		t = kMouseUp;
 	if (drag && down)
@@ -534,13 +532,13 @@ void HOGDoMouse(int x, int y, bool up, bool down, bool drag)
 	if (!up && !down && drag)
 		t = kMouseMove;
 	//	int viewport = GetViewport(x, y);
-	
+
 	HandleMouse(pContextInfo, ConvertCanvasToGlobalHOG(x, y), kLeftButton, t);
 	//	HandleMouseClick(getCurrentContext(), viewport, x, y, p, kLeftButton, t);
 }
 
 void HOGInit(const char *data)
-{		
+{
 	if (data == 0)
 	{
 		hog_main(0, 0);
@@ -561,7 +559,7 @@ void HOGInit(const char *data)
 		int argc = args.size();
 		hog_main(argc, &(args[0]));
 	}
-	
+
 	pRecContext pContextInfo = getCurrentContext();
 	initialConditions(pContextInfo);
 	HandleWindowEvent(pContextInfo, kWindowCreated);
@@ -580,7 +578,7 @@ recContext context;
 pRecContext pContextInfo = &context;
 
 void updateProjection(pRecContext pContextInfo, int viewPort)
-{	
+{
 }
 
 pRecContext GetContext(unsigned long windowID)
@@ -595,7 +593,7 @@ pRecContext getCurrentContext()
 
 void updateModelView(pRecContext pContextInfo, int currPort)
 {
-	
+
 }
 
 //GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -603,7 +601,7 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 
 void renderScene()
 {
-	
+
 }
 
 void RunHOGGUI(int argc, char* argv[], int windowDimension)
@@ -641,11 +639,10 @@ void submitTextToBuffer(const char *val)
 		strncpy(textBuffer, val, len);
 		textBuffer[len] = 0;
 		//printf("Buffer: '%s'\n", val);
-		
+
 		EM_ASM_({
 			document.getElementById("message").innerHTML = UTF8ToString($0);
 		}, textBuffer);
-		
 	}
 }
 
@@ -663,14 +660,22 @@ void appendTextToBuffer(const char *next)
 	strcpy(&newStr[oldLen], next);
 	delete [] textBuffer;
 	textBuffer = newStr;
-	
+
 	EM_ASM_({
 		document.getElementById("message").innerHTML = UTF8ToString($0);
 	}, textBuffer);
-	
 }
 
 const char *getTextBuffer()
 {
+    char *buffer = (char*)EM_ASM_PTR({
+        return stringToNewUTF8(document.getElementById("message").innerHTML);
+    });
+    delete [] textBuffer;
+    int len = strlen(buffer);
+    textBuffer = new char[len+1];
+    strncpy(textBuffer, buffer, len);
+    textBuffer[len] = 0;
+    free(buffer);
 	return textBuffer;
 }

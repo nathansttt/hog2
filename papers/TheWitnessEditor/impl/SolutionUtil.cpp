@@ -2,9 +2,6 @@
 
 void GetAllSolutions()
 {
-    //	std::vector<WitnessState<puzzleWidth, puzzleHeight>> puzzles;
-    //	GetAllSolutions(puzzles);
-
     std::vector<WitnessState<2, 2>> p1;
     GetAllSolutions(p1);
     std::vector<WitnessState<2, 3>> p2;
@@ -21,16 +18,23 @@ void GetAllSolutions()
     GetAllSolutions(p7);
 }
 
-void UpdateSolutionIndicies()
+void UpdateSolutionIndices()
 {
     currentSolutionIndices.clear();
-    for (size_t i = 0; i < allSolutions.size(); i++)
+    for (auto i = 0; i < allSolutions.size(); ++i)
     {
-        auto &solution = allSolutions[i];
-        if (witness.GoalTest(solution))
-        {
+        if (witness.GoalTest(allSolutions[i]))
             currentSolutionIndices.emplace_back(i);
+    }
+    if (solved)
+    {
+        if (currentSolutionIndices.empty())
+            iws.Reset();
+        else
+        {
+            gSolutionIndex = 0;
+            iws.ws = allSolutions[currentSolutionIndices[0]];
         }
     }
-    gEntropy = GetCurrentEntropy(witness);
+    UpdateEntropy(witness);
 }

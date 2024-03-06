@@ -9,7 +9,9 @@
 #ifndef Colors_h
 #define Colors_h
 
+#include <iomanip>
 #include <string>
+#include <sstream>
 
 /**
  * A color; r/g/b are between 0...1
@@ -50,12 +52,13 @@ public:
 		b = (1-perc)*b+c.b*perc;
 	}
 	std::string hex() const
-	{ char tmp[255];
-		sprintf(tmp, "#%X%X%X%X%X%X",
-				(int(r*255))/16, (int(r*255))%16,
-				(int(g*255))/16, (int(g*255))%16,
-				(int(b*255))/16, (int(b*255))%16);
-		return tmp;
+	{
+        std::stringstream ss;
+        ss << "#" << std::uppercase
+            << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned>(r * 255)
+            << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned>(g * 255)
+            << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned>(b * 255);
+        return ss.str();
 	}
 	void hex(const char *str) // get color from #RRGGBB format
 	{
@@ -68,6 +71,20 @@ public:
 		g = (unhexdigit(str[3])*16+unhexdigit(str[4]))/255.0;
 		b = (unhexdigit(str[5])*16+unhexdigit(str[6]))/255.0;
 	}
+    static std::size_t hash()
+    {
+        return (static_cast<std::size_t>(255) << 16) |
+            (static_cast<std::size_t>(255) << 8) |
+            static_cast<std::size_t>(255);
+    }
+    bool operator==(const rgbColor &other) const
+    {
+        return r == other.r && g == other.g && b == other.b;
+    }
+    bool operator!=(const rgbColor &other) const
+    {
+        return !(*this==other);
+    }
 	float r,g,b;
 private:
 	static float hue2rgb(float p, float q, float t)
@@ -105,8 +122,14 @@ private:
 	}
 };
 
-bool operator==(const rgbColor &r1, const rgbColor &r2);
-bool operator!=(const rgbColor &r1, const rgbColor &r2);
+template<>
+struct std::hash<rgbColor>
+{
+    std::size_t operator()(const rgbColor &color) const noexcept
+    {
+        return color.hash();
+    }
+};
 
 namespace Colors
 {

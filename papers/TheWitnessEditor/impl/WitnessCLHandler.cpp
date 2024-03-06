@@ -1,6 +1,6 @@
 #include "Driver.h"
 
-int WitnessCLHandler(char * /*argument*/[], int /*maxNumArgs*/)
+int WitnessCLHandler(char * /* argument */[], int /* maxNumArgs */)
 {
     //	if (strcmp(argument[0], "-test") == 0)
     //	{

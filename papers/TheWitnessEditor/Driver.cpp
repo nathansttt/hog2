@@ -13,70 +13,81 @@
 #include "Globals.h"
 #include "Puzzles.h"
 #include "SolutionUtil.h"
-#include "WitnessInferenceRule.h"
 
 bool recording = false;
 bool parallel = false;
-bool drawEditor = false;
-int selectTetrisPiece = 0;
 // 2x2 + 5 (interesting)
 // 2x5 + 5 [201/200][149][137/139][82][64][50]
 // 3x4 + 5 [481/471][463!][399!][374! - 373][260][150][146][126]
 unsigned long currBoard = 0;
 
 Witness<puzzleWidth, puzzleHeight> witness;
-Entropy<WitnessState<puzzleWidth, puzzleHeight>, WitnessAction> entropy;
+WitnessPuzzleEntropy<puzzleWidth, puzzleHeight> entropy;
 InteractiveWitnessState<puzzleWidth, puzzleHeight> iws;
 std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+std::vector<SolutionTreeNode> solutionTree;
+auto gInferenceRules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
 
 std::vector<TetrisItem> gTetrisPieces = {};
 
 static void InitTetrisPieces()
 {
-    for (unsigned i = 1; i <= 24; ++i)
+    for (auto i = 1; i <= 24; ++i)
     {
+        auto f = static_cast<float>(i);
         if (i <= 9)
         {
-            Graphics::point p = {(float)(-1.0f + i * 0.2), -0.75f};
-            gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
+            Graphics::point p = {-1.0f + f * 0.2f, -0.75f};
+            gTetrisPieces.push_back({i, p, 0.1f});
         }
         else if (i <= 18)
         {
-            Graphics::point p = {(float)(-1.0f + (i - 9) * 0.2), -0.55f};
-            gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
+            Graphics::point p = {-1.0f + (f - 9) * 0.2f, -0.55f};
+            gTetrisPieces.push_back({i, p, 0.1f});
         }
         else
         {
-            Graphics::point p = {(float)(-1.0f + (i - 18) * 0.2), -0.35f};
-            gTetrisPieces.push_back({static_cast<int>(i), p, 0.1f});
+            Graphics::point p = {-1.0f + (f - 18) * 0.2f, -0.35f};
+            gTetrisPieces.push_back({i, p, 0.1f});
         }
     }
 }
 
-static void AddInferenceRule()
+static void temp()
 {
-    entropy.ruleSet.rules = witnessInferenceRules<puzzleWidth, puzzleHeight>;
+    witness.AddSeparationConstraint(0, 2, Colors::orange);
+    witness.AddSeparationConstraint(2, 3, Colors::orange);
+    witness.AddStarConstraint(1, 1, Colors::magenta);
+    witness.AddStarConstraint(3, 1, Colors::magenta);
+    witness.AddSeparationConstraint(3, 0, Colors::yellow);
+    witness.AddSeparationConstraint(1, 3, Colors::yellow);
+    witness.AddMustCrossConstraint(true, 0, 4);
+    witness.AddMustCrossConstraint(false, 2, 0);
+    witness.AddMustCrossConstraint(false, 3, 1);
+    witness.CountColors();
 }
 
 static void InitPuzzle()
 {
-    k87fxsr();
-    for (size_t i = 0; i < allSolutions.size(); i++)
-    {
-        auto &solution = allSolutions[i];
-        if (witness.GoalTest(solution)) {
-            currentSolutionIndices.emplace_back(i);
-        }
-    }
+    entropy.ruleSet.SetRules(gInferenceRules);
+    GetAllSolutions(witness, allSolutions);
+//    _27sck7g();
+    temp();
+    BuildTree(witness, allSolutions, solutionTree);
+//    PrintTree(solutionTree);
+    UpdateSolutionIndices();
     std::sort(currentSolutionIndices.begin(), currentSolutionIndices.end(), [&](size_t a, size_t b) {
-        return entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[a], gLookahead).value >
-            entropy.SetRelative(gUseRelativeEntropy).Calculate(witness, allSolutions[b], gLookahead).value;
+        return entropy
+            .SetRelative(gUseRelativeEntropy)
+            .Calculate(witness, allSolutions[a], gLookahead, std::nullopt)
+            .value >
+               entropy
+               .SetRelative(gUseRelativeEntropy)
+               .Calculate(witness, allSolutions[b], gLookahead, std::nullopt).value;
     });
     gNumSolutions = currentSolutionIndices.size();
-    AddInferenceRule();
-    gEntropy = GetCurrentEntropy(witness);
+    UpdateEntropy(witness);
 }
-
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -87,32 +98,42 @@ void InstallHandlers()
     InstallKeyboardHandler(WitnessKeyboardHandler, "Test", "Test constraints", kAnyModifier, 't');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Record", "Record a movie", kAnyModifier, 'r');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Save", "Save current puzzle as svg", kAnyModifier, 's');
-    InstallKeyboardHandler(
-        WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+#ifdef __EMSCRIPTEN__
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Print", "Print The Windmill Json representations", kAnyModifier, 'w');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Load", "Load The Windmill Json representations", kAnyModifier, 'l');
+#endif
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Prev Board", "Jump to next found board.", kAnyModifier, '[');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next Board", "Jump to prev found board", kAnyModifier, ']');
-    InstallKeyboardHandler(
-        WitnessKeyboardHandler, "Prev 100 Board", "Jump to next 100 found board.", kAnyModifier, '{');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Prev 100 Board", "Jump to next 100 found board.", kAnyModifier, '{');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Next 100 Board", "Jump to prev 100 found board", kAnyModifier, '}');
 
     InstallKeyboardHandler(WitnessKeyboardHandler, "Editor", "Open editor", kAnyModifier, 'e');
     InstallKeyboardHandler(WitnessKeyboardHandler, "Selection", "Open Tetris pieces panel", kAnyModifier, 'x');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Calculate", "Calculate entropy", kAnyModifier, 'c');
+
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle All Rules", "Enable/Disable Rules", kAnyModifier, '0');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle SPR", "Enable/Disable SeparationRule", kAnyModifier, '1');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle PCR", "Enable/Disable PathConstraintRule", kAnyModifier, '2');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle ISTR", "Enable/Disable InsideSolutionTreeRule", kAnyModifier, '3');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle RCR", "Enable/Disable RegionCompletionRule", kAnyModifier, '4');
+    InstallKeyboardHandler(WitnessKeyboardHandler, "Toggle APR", "Enable/Disable AlongThePathRule", kAnyModifier, '5');
 
     InstallCommandLineHandler(WitnessCLHandler, "-run", "-run", "Runs pre-set experiments.");
     InstallCommandLineHandler(WitnessCLHandler, "-test", "-test", "Basic test with MD heuristic");
 
     InstallWindowHandler(WitnessWindowHandler);
-    InstallMouseClickHandler(
-        WitnessClickHandler, static_cast<tMouseEventType>(kMouseMove | kMouseUp | kMouseDown | kMouseDrag));
+    InstallMouseClickHandler(WitnessClickHandler, static_cast<tMouseEventType>(kMouseMove | kMouseUp | kMouseDown | kMouseDrag));
 }
 
 int main(int argc, char *argv[])
 {
+#ifndef __EMSCRIPTEN__
+    setTextBufferVisibility(false);
+#endif
     InitTetrisPieces();
-    GetAllSolutions(allSolutions);
     InitPuzzle();
     InstallHandlers();
-    std::cout << "size: " << sizeof(iws) << std::endl;
     RunHOGGUI(argc, argv, 1280, 640);
     return 0;
 }

@@ -11,15 +11,13 @@
 #include "Globals.h"
 #include "Timer.h"
 
-void GetAllSolutions();
-
 template<int width, int height>
 int CountSolutions(const Witness<width, height> &wp,
-    const std::vector<WitnessState<width, height>> &allSolutions,
+    const std::vector<WitnessState<width, height>> &solutions,
                    int &len, uint64_t limit)
 {
     int count = 0;
-    for (const auto &i : allSolutions)
+    for (const auto &i: solutions)
     {
         if (wp.GoalTest(i))
         {
@@ -33,33 +31,36 @@ int CountSolutions(const Witness<width, height> &wp,
 
 template<int width, int height>
 int CountSolutions(const Witness<width, height> &w,
-    const std::vector<WitnessState<width, height>> &allSolutions, std::vector<int> &solutions,
+    const std::vector<WitnessState<width, height>> &allSolutions,
+    std::vector<int> &solutions,
     const std::vector<int> &forbidden, int &len, uint64_t limit)
 {
     solutions.resize(0);
     int count = 0;
-    for (int x : forbidden)
+    for (auto x: forbidden)
     {
-        if (w.GoalTest(allSolutions[x])) return 0;
+        if (w.GoalTest(allSolutions[x])) 
+            return 0;
     }
-    for (int x = 0; x < allSolutions.size(); x++)
+    for (auto x = 0; x < allSolutions.size(); ++x)
     {
         if (w.GoalTest(allSolutions[x]))
         {
-            len = (int)allSolutions[x].path.size();
+            len = static_cast<int>(allSolutions[x].path.size());
             count++;
             solutions.push_back(x);
         }
-        if (count > limit) break;
+        if (count > limit) 
+            break;
     }
     return count;
 }
 
 template<int width, int height>
-void DFS(const Witness<width, height> &w, WitnessState<width, height> &s, // NOLINT
-         std::vector <WitnessState<width, height>> &puzzles)
+void DFS(const Witness<width, height> &w, WitnessState<width, height> &s,
+         std::vector<WitnessState<width, height>> &puzzles)
 {
-    std::vector <WitnessAction> acts;
+    std::vector<WitnessAction> acts;
 
     if (w.GoalTest(s))
     {
@@ -77,11 +78,10 @@ void DFS(const Witness<width, height> &w, WitnessState<width, height> &s, // NOL
 }
 
 template<int width, int height>
-void GetAllSolutions(
-        const Witness<width, height> &w, std::vector<WitnessState<width, height>> &puzzles)
+void GetAllSolutions(const Witness<width, height> &w,
+                     std::vector<WitnessState<width, height>> &puzzles)
 {
     WitnessState<width, height> s;
-    s.Reset();
     Timer t;
     t.StartTimer();
     DFS(w, s, puzzles);
@@ -96,6 +96,7 @@ void GetAllSolutions(std::vector<WitnessState<width, height>> &puzzles)
     GetAllSolutions(w, puzzles);
 }
 
-void UpdateSolutionIndicies();
+void GetAllSolutions();
+void UpdateSolutionIndices();
 
 #endif /* THE_WITNESS_EDITOR_INCLUDE_SOLUTION_UTIL_H */
