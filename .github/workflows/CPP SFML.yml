@@ -16,5 +16,5 @@ jobs:
     - name: make
       working-directory: ./build/SFML/
       run:
-      sudo apt-get install SFML
+      sudo apt-get install libsfml-dev
       make
