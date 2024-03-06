@@ -67,7 +67,7 @@ public:
         VerticalWheel,  ///< The vertical mouse wheel
         HorizontalWheel ///< The horizontal mouse wheel
     };
-//static bool isButtonPressed(Button button);
+    static bool isButtonPressed(Button button);
 //static Vector2i getPosition();
 //static Vector2i getPosition(const Window& relativeTo);
 //static void setPosition(const Vector2i& position);

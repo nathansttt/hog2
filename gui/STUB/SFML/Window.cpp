@@ -18,7 +18,7 @@ namespace sf
     bool Window::pollEvent(Event& event) { return false; }
 	void Window::setFramerateLimit(unsigned int limit) {}
     void Window::display() {}
-
+  bool sf::Mouse::isButtonPressed(Button button) { return false; }
 } // namespace sf
 
 
