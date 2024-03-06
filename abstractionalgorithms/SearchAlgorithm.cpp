@@ -17,6 +17,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdint.h>
+#include "Timer.h"
 
 using namespace GraphAbstractionConstants;
 using namespace std;
@@ -62,15 +63,8 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 	
 	// ignoring return value! Leaking memory!
 	
-#ifdef OS_MAC
-	AbsoluteTime startTime = UpTime();
-#else
-	clock_t startTime, endTime;
-	long double duration;
-	startTime = clock();
-	
-#endif
-	
+	Timer t;
+	t.StartTimer();
 	
 	path *p;
 	
@@ -85,16 +79,7 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 	//	//			r1 = getPathStep(r1, r2);
 	
 	
-#ifdef OS_MAC
-	AbsoluteTime stopTime = UpTime();
-	Nanoseconds diff = AbsoluteDeltaToNanoseconds(stopTime, startTime);
-	uint64_t nanosecs = UnsignedWideToUInt64(diff);
-	//cout << nanosecs << " ns elapsed (" << (double)nanosecs/1000000.0 << " ms)" << endl;
-#else
-	endTime = clock();
-	duration=(long double)(endTime-startTime)/CLOCKS_PER_SEC;
-	//cout << duration << " seconds elapsed" << endl;
-#endif
+	t.EndTimer();
 	
 	int cnt = 0;
 	double length = 0;
@@ -110,18 +95,17 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 		cnt++;
 	}
 	
-#ifdef OS_MAC
-	cout << "Steps: " << cnt << ", len: " << length << ", time: " << (double)nanosecs/1000000.0
-		;//<< ",  time/step: " << (double)nanosecs/(1000*cnt) << ", time/unit: " << (double)nanosecs/(1000*length);
+	cout << "Steps: " << cnt << ", len: " << length << ", time: " << t.GetElapsedTime();
+	//<< ",  time/step: " << (double)nanosecs/(1000*cnt) << ", time/unit: " << (double)nanosecs/(1000*length);
 		cout << "ms, h() = " << aMap->h(r1, r2) << ", nodes: " << sa->GetNodesExpanded() << endl;
 		
 		//cout << "DATA\t" << nanosecs << "\t" << length << endl;
 		if (!repeat)
 		{
 			lastLength = length;
-			lastTime = (double)nanosecs;
+			lastTime = t.GetElapsedTime();
 		} else {
-			cout << "Comparison: " << lastLength/length << "x longer; but " << (double)nanosecs/lastTime << "x faster." << endl;
+			cout << "Comparison: " << lastLength/length << "x longer; but " << t.GetElapsedTime()/lastTime << "x faster." << endl;
 		}
 #endif	
 		

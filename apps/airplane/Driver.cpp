@@ -167,14 +167,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		ae.OpenGLDraw(s3, s4, simTime);
 	}
 	
-	if (recording)
+	if (recording) // deprecated
 	{
 		static int index = 0;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/anim-%d%d%d", index/100, (index/10)%10, index%10);
-		SaveScreenshot(windowID, fname);
-		printf("Saving '%s'\n", fname);
-		index++;
+		//sprintf(fname, "/Users/nathanst/anim-%d%d%d", index/100, (index/10)%10, index%10);
+		//SaveScreenshot(windowID, fname);
+		//printf("Saving '%s'\n", fname);
+		//index++;
 	}
 }
 
@@ -269,12 +269,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '[': recording = true; break;
 		case ']': recording = false; break;
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p': break;//unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':

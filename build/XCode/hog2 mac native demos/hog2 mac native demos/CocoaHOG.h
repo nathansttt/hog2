@@ -15,9 +15,10 @@ void updateProjection(pRecContext pContextInfo, int viewPort);
 pRecContext GetContext(unsigned long windowID);
 pRecContext getCurrentContext();
 void updateModelView(pRecContext pContextInfo, int currPort);
+bool getTextBufferVisibility();
 
-extern GLfloat gTrackBallRotation [4];
-extern pRecContext gTrackingContextInfo;
+//extern GLfloat gTrackBallRotation [4];
+//extern pRecContext gTrackingContextInfo;
 
 // In common.h
 //void submitTextToBuffer(const char *val);

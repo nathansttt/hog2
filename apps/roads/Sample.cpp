@@ -259,7 +259,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/graph-%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
 		if (!running && !runningBidirectional)
@@ -291,7 +291,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '|': resetCamera(); break;
+	case '|': break;//resetCamera(); break;
 		case 'r': recording = !recording; break;
 		case '[': if (gStepsPerFrame > 1) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;

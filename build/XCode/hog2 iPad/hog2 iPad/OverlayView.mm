@@ -59,7 +59,7 @@
 	
 	if (_isBackground)
 	{
-		printf("Drawing background\n");
+		//printf("Drawing background\n");
 		for (int x = 0; x < _display->backgroundDrawCommands.size(); x++)
 		{
 			[self drawCommand:&(_display->backgroundDrawCommands[x])];
@@ -72,13 +72,16 @@
 		{
 			// DRAW TEXT HERE
 			NSString *s = [NSString stringWithUTF8String:_display->text[x].s.c_str()];
-			//		NSLog(s);
+	//		NSLog(s);
 			NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 			if (_display->text[x].align == Graphics::textAlignCenter)
 				[style setAlignment:NSTextAlignmentCenter];
 			else if (_display->text[x].align == Graphics::textAlignLeft)
 				[style setAlignment:NSTextAlignmentLeft];
-			UIFont *font = [UIFont fontWithName:(NSString *)@"Courier" size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+			NSString *typeface = [NSString stringWithUTF8String:_display->text[x].typeface.c_str()];
+			CGFloat adjustedHeight = [self hogHeightToScreen:_display->text[x].size viewport:_display->text[x].viewport];
+			UIFont *font = [UIFont fontWithName:(NSString *)typeface //size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+										   size:adjustedHeight];
 			NSDictionary *textAttributes =
 			@{NSFontAttributeName: font,//[NSFont monospacedDigitSystemFontOfSize:_display->text[x].size*height/2.0 weight:1.0],
 			  NSForegroundColorAttributeName: [UIColor colorWithRed:_display->text[x].c.r green:_display->text[x].c.g blue:_display->text[x].c.b alpha:1.0],
@@ -87,12 +90,58 @@
 			CGPoint p;
 			p.x = [self hogToScreenX:_display->text[x].loc.x viewport:_display->text[x].viewport];
 			p.y = [self hogToScreenY:_display->text[x].loc.y viewport:_display->text[x].viewport];
+			switch (_display->text[x].base)
+			{
+				case Graphics::textBaselineBottom: break;
+				case Graphics::textBaselineTop:
+					p.y -= adjustedHeight;
+					break;
+				case Graphics::textBaselineMiddle:
+					p.y -= adjustedHeight/2;
+					break;
+			}
+			CGSize stringWidth = [s sizeWithAttributes:textAttributes];
+			switch(_display->text[x].align)
+			{
+				case Graphics::textAlignLeft:
+					break;
+				case Graphics::textAlignRight:
+					p.x-=stringWidth.width;
+					break;
+				case Graphics::textAlignCenter:
+					p.x -= stringWidth.width/2;
+					break;
+			}
 			//NSLog(@"%f %f", p.x, p.y);
-			if (_display->text[x].align == Graphics::textAlignLeft)
+	//		if (_display->text[x].align == Graphics::textAlignLeft)
 				[s drawAtPoint:p withAttributes:textAttributes];
-			else
-				[s drawInRect:CGRectMake(p.x-width, p.y-_display->text[x].size*height/4.0, 2*width, _display->text[x].size*height/2.0) withAttributes:textAttributes];
+	//		else
+	//			[s drawInRect:CGRectMake(p.x-width, p.y-adjustedHeight, 2*width, adjustedHeight) withAttributes:textAttributes];
 		}
+			//		{
+//			// DRAW TEXT HERE
+//			NSString *s = [NSString stringWithUTF8String:_display->text[x].s.c_str()];
+//			//		NSLog(s);
+//			NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+//			if (_display->text[x].align == Graphics::textAlignCenter)
+//				[style setAlignment:NSTextAlignmentCenter];
+//			else if (_display->text[x].align == Graphics::textAlignLeft)
+//				[style setAlignment:NSTextAlignmentLeft];
+//			UIFont *font = [UIFont fontWithName:(NSString *)@"Courier" size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+//			NSDictionary *textAttributes =
+//			@{NSFontAttributeName: font,//[NSFont monospacedDigitSystemFontOfSize:_display->text[x].size*height/2.0 weight:1.0],
+//			  NSForegroundColorAttributeName: [UIColor colorWithRed:_display->text[x].c.r green:_display->text[x].c.g blue:_display->text[x].c.b alpha:1.0],
+//			  NSParagraphStyleAttributeName: style
+//			  };
+//			CGPoint p;
+//			p.x = [self hogToScreenX:_display->text[x].loc.x viewport:_display->text[x].viewport];
+//			p.y = [self hogToScreenY:_display->text[x].loc.y viewport:_display->text[x].viewport];
+//			//NSLog(@"%f %f", p.x, p.y);
+//			if (_display->text[x].align == Graphics::textAlignLeft)
+//				[s drawAtPoint:p withAttributes:textAttributes];
+//			else
+//				[s drawInRect:CGRectMake(p.x-width, p.y-_display->text[x].size*height/4.0, 2*width, _display->text[x].size*height/2.0) withAttributes:textAttributes];
+//		}
 	}
 	else {
 		for (int x = 0; x < _display->drawCommands.size(); x++)
@@ -107,13 +156,16 @@
 		{
 			// DRAW TEXT HERE
 			NSString *s = [NSString stringWithUTF8String:_display->text[x].s.c_str()];
-			//		NSLog(s);
+	//		NSLog(s);
 			NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 			if (_display->text[x].align == Graphics::textAlignCenter)
 				[style setAlignment:NSTextAlignmentCenter];
 			else if (_display->text[x].align == Graphics::textAlignLeft)
 				[style setAlignment:NSTextAlignmentLeft];
-			UIFont *font = [UIFont fontWithName:(NSString *)@"Courier" size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+			NSString *typeface = [NSString stringWithUTF8String:_display->text[x].typeface.c_str()];
+			CGFloat adjustedHeight = [self hogHeightToScreen:_display->text[x].size viewport:_display->text[x].viewport];
+			UIFont *font = [UIFont fontWithName:(NSString *)typeface //size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+										   size:adjustedHeight];
 			NSDictionary *textAttributes =
 			@{NSFontAttributeName: font,//[NSFont monospacedDigitSystemFontOfSize:_display->text[x].size*height/2.0 weight:1.0],
 			  NSForegroundColorAttributeName: [UIColor colorWithRed:_display->text[x].c.r green:_display->text[x].c.g blue:_display->text[x].c.b alpha:1.0],
@@ -122,159 +174,59 @@
 			CGPoint p;
 			p.x = [self hogToScreenX:_display->text[x].loc.x viewport:_display->text[x].viewport];
 			p.y = [self hogToScreenY:_display->text[x].loc.y viewport:_display->text[x].viewport];
+			switch (_display->text[x].base)
+			{
+				case Graphics::textBaselineBottom: break;
+				case Graphics::textBaselineTop:
+					p.y -= adjustedHeight;
+					break;
+				case Graphics::textBaselineMiddle:
+					p.y -= adjustedHeight/2;
+					break;
+			}
+			CGSize stringWidth = [s sizeWithAttributes:textAttributes];
+			switch(_display->text[x].align)
+			{
+				case Graphics::textAlignLeft:
+					break;
+				case Graphics::textAlignRight:
+					p.x-=stringWidth.width;
+					break;
+				case Graphics::textAlignCenter:
+					p.x -= stringWidth.width/2;
+					break;
+			}
 			//NSLog(@"%f %f", p.x, p.y);
-			if (_display->text[x].align == Graphics::textAlignLeft)
+	//		if (_display->text[x].align == Graphics::textAlignLeft)
 				[s drawAtPoint:p withAttributes:textAttributes];
-			else
-				[s drawInRect:CGRectMake(p.x-width, p.y-_display->text[x].size*height/4.0, 2*width, _display->text[x].size*height/2.0) withAttributes:textAttributes];
+	//		else
+	//			[s drawInRect:CGRectMake(p.x-width, p.y-adjustedHeight, 2*width, adjustedHeight) withAttributes:textAttributes];
 		}
 	}
 }
-//{
-//	CGContextRef context = UIGraphicsGetCurrentContext();
-//	if (_display == 0)
-//		return;
-//
-//	// Filled Rects
-//	for (int x = 0; x < _display->filledRects.size(); x++)
-//	{
-//		Graphics::Display::drawInfo &o = _display->filledRects[x];
-//		CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-//		CGContextSetLineWidth(context, o.width);
-//		Graphics::rect &tmp = o.r;
-//		CGContextFillRect(context, [self makeRect:tmp]);
-//	}
-//
-//	// Framed Rects
-//	for (int x = 0; x < _display->framedRects.size(); x++)
-//	{
-//		Graphics::Display::drawInfo &o = _display->framedRects[x];
-//		CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-//		CGContextSetLineWidth(context, o.width);
-//		CGContextSetLineCap(context, kCGLineCapRound);
-//		Graphics::rect &tmp = o.r;
-//		CGContextStrokeRect(context, [self makeRect:tmp]);
-//	}
-//
-//	// Filled Circles
-//	for (int x = 0; x < _display->filledCircles.size(); x++)
-//	{
-//		Graphics::Display::drawInfo &o = _display->filledCircles[x];
-//		CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-//		CGContextSetLineWidth(context, o.width);
-//		Graphics::rect &tmp = o.r;
-//		CGContextFillEllipseInRect(context, [self makeRect:tmp]);
-//	}
-//
-//	// Framed Circles
-//	for (int x = 0; x < _display->framedCircles.size(); x++)
-//	{
-//		Graphics::Display::drawInfo &o = _display->filledCircles[x];
-//
-//		CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-//		CGContextSetLineWidth(context, o.width);
-//		CGContextSetLineCap(context, kCGLineCapRound);
-//		Graphics::rect &tmp = o.r;
-//		CGContextFillEllipseInRect(context, [self makeRect:tmp]);
-//	}
-//
-//	// Lines
-//	for (int x = 0; x < _display->lines.size(); x++)
-//	{
-//		Graphics::Display::lineInfo &o = _display->lines[x];
-//		CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-//		CGContextSetLineWidth(context, o.width);
-//		CGContextSetLineCap(context, kCGLineCapRound);
-//		CGContextMoveToPoint(context, o.start.x*xscale+xoffset, o.start.y*yscale+yoffset);
-//		CGContextAddLineToPoint(context, o.end.x*xscale+xoffset, o.end.y*yscale+yoffset);
-//		CGContextStrokePath(context);
-//	}
-//
-//
-///*
-//	// UI Line
-//	if (x1 != -1)
-//	{
-//		printf("Drawing line from (%f, %f) to (%f, %f)\n", x1, y1, x2, y2);
-//		CGContextSetRGBStrokeColor(context, 0.0, 1.0, 0.0, 0.75);
-//		CGContextSetLineWidth(context, 4.0);
-//		CGContextSetLineCap(context, kCGLineCapRound);
-//		CGContextMoveToPoint(context, x1, y1);
-//		CGContextAddLineToPoint(context, x2, y2);
-//		CGContextStrokePath(context);
-//	}*/
-//}
-/*
-- (bool)setLineStartX:(float)x1s StartY:(float)y1s EndX:(float)x2g EndY:(float)y2g
-{
-	x1 = x1s;
-	x2 = x2g;
-	y1 = y1s;
-	y2 = y2g;
-	return true;
-}
 
--(void)clearLine
-{
-	if (x1 != -1)
-	{
-		x1 = -1;
-	}
-}
-*/
 - (void)drawRect:(CGRect)rect {
 	[self drawCurrentPath];
 }
-/*
-- (void)addLine:(Graphics::point)start lineEnd:(Graphics::point)end lineColor:(rgbColor)c lineWeight:(float)w;
-{
-	drawLines.push_back({start, end, c, w});
-}
-- (void)clear
-{
-	drawLines.clear();
-	drawRects.clear();
-	frameRects.clear();
-	drawCircle.clear();
-	frameCircle.clear();
-}
-
-- (void)addRect:(Graphics::rect)r color:(rgbColor)c
-{
-	drawRects.push_back({r, c});
-}
-
-- (void)addFramedRect:(Graphics::rect)r color:(rgbColor)c
-{
-	frameRects.push_back({r, c});
-}
-
-- (void)addCircle:(Graphics::rect)r color:(rgbColor)c
-{
-	drawCircle.push_back({r, c});
-}
-
-- (void)addFramedCircle:(Graphics::rect)r color:(rgbColor)c
-{
-	frameCircle.push_back({r, c});
-}
-*/
 
 -(void)drawSegments:(Graphics::Display::segments*)seg
 {
-	CGContextRef context = UIGraphicsGetCurrentContext();//[UIGraphicsContext currentContext].CGContext;
+	CGContextRef context = UIGraphicsGetCurrentContext();//[NSGraphicsContext currentContext].CGContext;
 	Graphics::Display::segments &s = *seg;
 	int port = s.viewport;
 	if (s.points.size() == 0)
 		return;
 	CGContextSetRGBStrokeColor(context, s.c.r, s.c.g, s.c.b, 1.0);
-	CGContextSetLineWidth(context, s.size);
+	CGContextSetLineWidth(context, [self hogWidthToScreen:s.size viewport:port]);
 	CGContextMoveToPoint(context, [self hogToScreenX:s.points[0].x viewport:port], [self hogToScreenY:s.points[0].y viewport:port]);
 	for (int y = 1; y < s.points.size(); y++)
 	{
 		CGContextAddLineToPoint(context, [self hogToScreenX:s.points[y].x viewport:port], [self hogToScreenY:s.points[y].y viewport:port]);
 	}
-	CGContextStrokePath(context);
+	if (s.fill)
+		CGContextFillPath(context);
+	else
+		CGContextStrokePath(context);
 }
 
 -(void)drawCommand:(Graphics::Display::data*)dat
@@ -288,7 +240,8 @@
 		{
 			Graphics::Display::lineInfo &o = d.line;
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			//CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			CGContextSetLineCap(context, kCGLineCapRound);
 //			printf("Line to (%f, %f)\n", [self hogToScreenX:o.start.x viewport:port],
 //				   [self hogToScreenY:o.start.y viewport:port]);
@@ -316,7 +269,7 @@
 		{
 			Graphics::Display::drawInfo &o = d.shape;
 			CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			Graphics::rect &tmp = o.r;
 			CGContextFillRect(context, [self makeRect:tmp viewport:port]);
 			break;
@@ -325,7 +278,7 @@
 		{
 			Graphics::Display::drawInfo &o = d.shape;
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			CGContextSetLineCap(context, kCGLineCapRound);
 			Graphics::rect &tmp = o.r;
 			CGContextStrokeRect(context, [self makeRect:tmp viewport:port]);
@@ -358,7 +311,7 @@
 		{
 			Graphics::Display::drawInfo &o = d.shape;
 			CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			Graphics::rect &tmp = o.r;
 			CGContextFillEllipseInRect(context, [self makeRect:tmp viewport:port]);
 			break;
@@ -368,7 +321,8 @@
 			Graphics::Display::drawInfo &o = d.shape;
 			
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width*50.0f);
+//			CGContextSetLineWidth(context, o.width*50.0f);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			CGContextSetLineCap(context, kCGLineCapRound);
 			Graphics::rect &tmp = o.r;
 			CGContextStrokeEllipseInRect(context, [self makeRect:tmp viewport:port]);
@@ -405,6 +359,30 @@ const float epsilon = 0.5f; // in screen pixels
 - (CGRect)makeRect:(Graphics::rect)r
 {
 	return CGRectMake(r.left*xscale+xoffset-epsilon, r.top*yscale+yoffset+epsilon, (r.right-r.left)*xscale+2*epsilon, (r.bottom-r.top)*yscale+2*epsilon);
+}
+
+-(CGFloat)hogWidthToScreen:(CGFloat)p viewport:(int)v
+{
+	pRecContext pContextInfo = getCurrentContext();
+	point3d input1(p, 0.f, 0.f);
+	point3d input2(0, 0.f, 0.f);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	//	if (v == 1)
+	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
+	return ((result1.x+1.0)*width)/2.0-((result2.x+1.0)*width)/2.0;
+}
+
+-(CGFloat)hogHeightToScreen:(CGFloat)p viewport:(int)v
+{
+	pRecContext pContextInfo = getCurrentContext();
+	point3d input1(0, p, 0.f);
+	point3d input2(0, 0.f, 0.f);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	//	if (v == 1)
+	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
+	return ((result1.y+1.0)*height)/2.0-((result2.y+1.0)*height)/2.0;
 }
 
 -(CGFloat)hogToScreenX:(CGFloat)x viewport:(int)v

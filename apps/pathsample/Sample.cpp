@@ -213,8 +213,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	if (bSaveAndQuit)
 	{
-		SaveScreenshot(windowID, gDefaultMap);
-		exit(0);
+	  //SaveScreenshot(windowID, gDefaultMap);
+	  exit(0);
 	}
 }
 
@@ -266,12 +266,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':

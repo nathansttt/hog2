@@ -275,11 +275,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	
 	if (recording && viewport == GetNumPorts(windowID)-1)
-	{
+	  { // deprecated
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		cnt++;
 	}
 }
@@ -346,12 +346,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			unitSims[windowID]->GetStats()->ClearAllStats();
 			break;
 		case 'q':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
@@ -499,8 +493,8 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	
 	for (int x = 0; x < 4; x++)
 	{ //break;
-		cameraMoveTo(a1, b1, c1-600*r1, 1.0, x);
-		cameraLookAt(a1, b1, c1, 1.0, x);
+	  //	cameraMoveTo(a1, b1, c1-600*r1, 1.0, x);
+	  //	cameraLookAt(a1, b1, c1, 1.0, x);
 	}
 	stepsPerFrame = 1.0/30.0;//1.0/120.0;
 	int lookAheadSize = 10;
@@ -565,7 +559,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	unitSims[windowID]->GetStats()->EnablePrintOutput(true);
 	unitSims[windowID]->SetTrialLimit(50000);
 	
-	SetNumPorts(windowID, 1+(unitSims[windowID]->GetNumUnits()-1)%MAXPORTS);
+	//SetNumPorts(windowID, 1+(unitSims[windowID]->GetNumUnits()-1)%MAXPORTS);
 
 }
 

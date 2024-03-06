@@ -155,7 +155,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	char messageString[255];
 	switch (key)
 	{
-		case '|': resetCamera(); break;
+	case '|': break;//resetCamera(); break;
 		case 'r': recording = !recording; break;
 		case '8': sectorSize = 8; LoadMap(whichMap); break;
 		case '9': sectorSize = 16; LoadMap(whichMap); break;

@@ -253,6 +253,7 @@ void UpdateActiveSnake()
 
 void UpdateLevelLink()
 {
+	setTextBufferVisibility(false);
 	std::string str = "<input type=\"text\" value=\"https://movingai.com/snakebird/play.html#";
 	str += sb.EncodeLevel();
 	str += "\" id=\"playableurl\">";
@@ -1335,14 +1336,14 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 			}
 			break;
 		case '\t':
-				if (mod != kShiftDown)
-					SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-				
-					else
-					{
-						SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-					}
-					break;
+//				if (mod != kShiftDown)
+//					SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+//				
+//					else
+//					{
+//						SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+//					}
+//					break;
 				default:
 					break;
 				}

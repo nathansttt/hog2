@@ -1196,7 +1196,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
-		SaveScreenshot(windowID, fname);
+		//SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
 	}
@@ -1253,7 +1253,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '|': resetCamera(); break;
+	case '|': break;//resetCamera(); break;
 		case 'r': recording = !recording; break;
 		case '0': jps->SetJumpLimit(-1); break;
 		case '1': jps->SetJumpLimit(1); break;
@@ -1286,12 +1286,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '{':
 		case '}':
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p': //unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused());
 			paused = 1-paused;
