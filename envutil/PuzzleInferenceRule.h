@@ -12,7 +12,6 @@
 #include <functional>
 #include <iterator>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "SearchEnvironment.h"
@@ -32,6 +31,8 @@ class PuzzleInferenceRuleSet {
 
 public:
     mutable std::unordered_map<Action, ActionType> logics = {};
+
+    virtual ~PuzzleInferenceRuleSet() = default;
 
     virtual void UpdateActionLogics(const SearchEnvironment<State, Action> &env,
                                     State &state, const std::vector<Action> &actions) const
@@ -62,9 +63,9 @@ public:
         disabled.reserve(rules.size());
     }
 
-    virtual bool EnableRule(int which)
+    virtual bool EnableRule(const int which)
     {
-        if (auto it = std::find(disabled.begin(), disabled.end(), which);
+        if (const auto it = std::find(disabled.begin(), disabled.end(), which);
             it != disabled.end())
         {
             disabled.erase(it);
@@ -73,7 +74,7 @@ public:
         return false;
     }
 
-    virtual bool DisableRule(int which)
+    virtual bool DisableRule(const int which)
     {
         if (std::find(disabled.begin(), disabled.end(), which) == disabled.end())
         {
@@ -124,7 +125,7 @@ public:
                     break;
                 }
                 default:
-                    it++;
+                    ++it;
             }
         }
     }

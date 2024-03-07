@@ -274,7 +274,8 @@ enum WitnessRegionConstraintType {
     kNegativeTetris = 4,
     kTriangle = 5,
     kEraser = 6,
-    kRegionConstraintCount = 7
+    kUnknownRegionConstraint = 7,
+    kRegionConstraintCount = 8
 };
 
 /**
@@ -541,7 +542,8 @@ enum WitnessPathConstraintType {
     kNoPathConstraint = 0,
     kMustCross = 1,
     kCannotCross = 2,
-    kPathConstraintCount = 3
+    kUnknownPathConstraint = 3,
+    kPathConstraintCount = 4
 };
 
 template<int width, int height>
@@ -591,6 +593,8 @@ public:
     std::array<std::array<WitnessRegionConstraint, height>, width> regionConstraints;
     //	constraint constraints[width][height];
     std::array<int, (int)kRegionConstraintCount> constraintCount;
+    std::vector<int> unknownRegionConstraints;
+    std::vector<int> unknownPathConstraints;
     mutable std::unordered_map<rgbColor, std::vector<int>> colorMap;
 
     // TODO: merge these
@@ -643,7 +647,7 @@ public:
         return *this;
     }
 
-    void Reset()
+    void Clear()
     {
         for (int c = 0; c < kRegionConstraintCount; c++)
             constraintCount[c] = 0;
@@ -693,27 +697,23 @@ public:
                         std::make_pair(p, Graphics::rect{p, 0.05});
             }
         }
+    }
 
-        //		mustCrossConstraints.clear();
-        //		mustCrossEdgeConstraints.clear();
-        //		cannotCrossConstraints.clear();
-        //		cannotCrossEdgeConstraints.clear();
+    void Reset()
+    {
+        Clear();
         start.clear();
         start.emplace_back(0, 0);
         SetGoal(width, height + 1);
-        //		goal.clear();
-        //		goal.push_back({width,height});
-        //		goal.push_back({width-1,height});
-        //		goal.push_back({width,height-1});
     }
 
     void GetSuccessors(
             const WitnessState<width, height> &nodeID, std::vector <WitnessState<width, height>> &neighbors) const;
 
     void GetActions(const WitnessState<width, height> &nodeID, std::vector <WitnessAction> &actions) const;
-    
+
     void GetLeftRightRegions(const WitnessState<width, height> &state) const;
-    
+
     void GetActionSequence(const WitnessState<width, height> &state, std::vector<WitnessAction> &actions) const;
 
     void ApplyAction(WitnessState<width, height> &s, WitnessAction a) const;
@@ -781,7 +781,7 @@ public:
     {
         return regionConstraints[x][y];
     }
-    
+
     const WitnessRegionConstraint& GetRegionConstraint(int r) const
     {
         auto [x, y] = GetRegionXYFromIndex(r);
@@ -860,6 +860,53 @@ public:
     void AddCannotCrossConstraint(int);  // { cannotCrossConstraints.push_back({x, y});}
     void RemoveCannotCrossConstraint(bool horiz, int x, int y);  // { cannotCrossEdgeConstraints.pop_back();}
     void RemoveCannotCrossConstraint(int x, int y);  // { cannotCrossConstraints.pop_back();}
+
+    bool GetUnknownPathConstraint(int which) const;
+    bool GetUnknownPathConstraint(int x, int y) const;
+    bool GetUnknownPathConstraint(bool horiz, int x, int y) const;
+
+    void AddUnknownPathConstraint(int which);
+    void AddUnknownPathConstraint(int x, int y);
+    void AddUnknownPathConstraint(bool horiz, int x, int y);
+
+    void RemoveUnknownPathConstraint(int which);
+    void RemoveUnknownPathConstraint(int x, int y);
+    void RemoveUnknownPathConstraint(bool horiz, int x, int y);
+
+    void AddPathConstraint(int which, WitnessPathConstraintType t)
+    {
+        pathConstraints[which] = t;
+    }
+    void AddPathConstraint(int x, int y, WitnessPathConstraintType t)
+    {
+        AddPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x, t);
+    }
+    void AddPathConstraint(bool horiz, int x, int y, WitnessPathConstraintType t)
+    {
+        if (horiz)
+            AddPathConstraint(y * width + x, t);
+        else
+            AddPathConstraint(width * (height + 1) + x * height + y, t);
+    }
+
+    void RemovePathConstraint(int which)
+    {
+        if (pathConstraints[which] == kUnknownPathConstraint)
+            RemoveUnknownPathConstraint(which);
+        else
+            pathConstraints[which] = kNoPathConstraint;
+    }
+    void RemovePathConstraint(int x, int y)
+    {
+        RemovePathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+    }
+    void RemovePathConstraint(bool horiz, int x, int y)
+    {
+        if (horiz)
+            RemovePathConstraint(y * width + x);
+        else
+            RemovePathConstraint(width * (height + 1) + x * height + y);
+    }
 
     void ClearInnerConstraints()
     {
@@ -972,6 +1019,70 @@ public:
     //{ auto &i = separationConstraints[which]; i.color = c; i.valid = true; separationCount++;}
     {
         AddEraserConstraint(GetRegionFromX(which), GetRegionFromY(which));
+    }
+
+    void AddUnknownRegionConstraint(int x, int y)
+    {
+        constraintCount[regionConstraints[x][y].type]--;
+        constraintCount[kUnknownRegionConstraint]++;
+        regionConstraints[x][y].type = kUnknownRegionConstraint;
+    }
+
+    void AddUnknownRegionConstraint(int which)
+    {
+        AddUnknownRegionConstraint(GetRegionFromX(which), GetRegionFromY(which));
+    }
+
+    void UpdateUnknownConstraints()
+    {
+        unknownRegionConstraints.clear();
+        for (int x = 0; x < width; ++x)
+        {
+            for (int y = 0; y < height; ++y)
+            {
+                if (regionConstraints[x][y].type == kUnknownRegionConstraint)
+                    unknownRegionConstraints.push_back(GetRegionIndex(x, y));
+            }
+        }
+        unknownPathConstraints.clear();
+        for (int i = 0; i < pathConstraints.size(); ++i)
+        {
+            if (pathConstraints[i] == kUnknownPathConstraint)
+                unknownPathConstraints.push_back(i);
+        }
+    }
+
+    auto GetNumUnknownRegionConstraints() const { return unknownRegionConstraints.size(); }
+    auto GetNumUnknownPathConstraints() const { return unknownPathConstraints.size(); }
+    auto GetNumUnknownConstraints()
+    {
+        UpdateUnknownConstraints();
+        return GetNumUnknownRegionConstraints() + GetNumUnknownPathConstraints();
+    }
+
+    void RemoveUnknownConstraints(const std::vector<unsigned> &rc,
+                                  const std::vector<unsigned> &pc,
+                                  const std::vector<rgbColor> &colors) {
+        UpdateUnknownConstraints();
+        for (auto i = 0; i < rc.size(); ++i)
+            switch (rc[i])
+            {
+                case 0:
+                case 1:
+                case 2:
+                    AddRegionConstraint(
+                        unknownRegionConstraints[i],
+                        WitnessRegionConstraint{kTriangle, static_cast<int>(rc[i] + 1)});
+                    break;
+                default:
+                    AddRegionConstraint(
+                        unknownRegionConstraints[i],
+                        WitnessRegionConstraint{(rc[i] - 3) % 2 == 0 ? kSeparation : kStar, 0,
+                                                colors[static_cast<std::size_t>((rc[i] - 3) / 2)]});
+            }
+        for (auto i = 0; i < pc.size(); ++i)
+            AddPathConstraint(unknownPathConstraints[i],
+                              static_cast<WitnessPathConstraintType>(pc[i]));
     }
 
     // TODO: Not yet complete - don't handle tilted
@@ -1157,6 +1268,9 @@ public:
             case kEraser:
                 AddEraserConstraint(x, y);
                 break;
+            case kUnknownRegionConstraint:
+                AddUnknownRegionConstraint(x, y);
+                break;
             default: // kNoRegionConstraint, kRegionConstraintCount
                 break;
         }
@@ -1166,18 +1280,15 @@ public:
     {
         AddRegionConstraint(GetRegionFromX(which), GetRegionFromY(which), constraint);
     }
-    
+
     void CountColors() const
     {
+        colorMap.clear();
         for (auto i = 0; i < width; ++i)
-        {
             for (auto j = 0; j < height; ++j)
-            {
-                const auto &constraint = regionConstraints[i][j];
-                if (constraint.type == kSeparation || constraint.type == kStar)
+                if (const auto &constraint = regionConstraints[i][j];
+                    constraint.type == kSeparation || constraint.type == kStar)
                     colorMap[constraint.color].emplace_back(GetRegionIndex(i, j));
-            }
-        }
     }
 
     std::vector<std::pair<int, int>> start;
@@ -1340,8 +1451,8 @@ public:
         for (auto i = std::sregex_iterator(entities.begin(), entities.end(), es_r); i != std::sregex_iterator(); ++i)
         {
             const auto& match = *i;
-            int type = std::stoi(match[1].str());
-            switch (type) {
+            switch (const int type = std::stoi(match[1].str());
+                type) {
                 case 3:
                 case 4: // only support single start and goal currently
                 {
@@ -1355,13 +1466,13 @@ public:
                                 else
                                 {
                                     if (x == 0)
-                                        SetGoal(--x, y);
+                                        SetGoal(x - 1, y);
                                     else if (x == width)
-                                        SetGoal(++x, y);
+                                        SetGoal(x + 1, y);
                                     else if (y == 0)
-                                        SetGoal(x, --y);
+                                        SetGoal(x, y - 1);
                                     else if (y == height)
-                                        SetGoal(x, ++y);
+                                        SetGoal(x, y + 1);
                                 }
                                 break;
                             }
@@ -1764,7 +1875,7 @@ public:
             std::cout << std::endl;
         }
     }
-    
+
     mutable vectorCache<WitnessAction> actionCache;
 };
 
@@ -1785,10 +1896,9 @@ void Witness<width, height>::GetActions(
         return;
     }
 
-    int currX = nodeID.path.back().first;
-    int currY = nodeID.path.back().second;
+    const auto [currX, currY] = nodeID.path.back();
 
-    if (currX > width || currY > height) return;
+    if (currX < 0 || currX > width || currY < 0 || currY > height) return;
 
     // TODO: Only works with one exit going from lower left to upper right
     if (goalMap[GetPathIndex(currX, currY)] != 0) actions.push_back(kEnd);
@@ -1888,7 +1998,7 @@ void Witness<width, height>::GetActionSequence(const WitnessState<width, height>
         x0 = x1;
         y0 = y1;
     }
-    
+
 }
 
 template<int width, int height>
@@ -3195,6 +3305,69 @@ void Witness<width, height>::RemoveCannotCrossConstraint(int x, int y) // { cann
     RemoveCannotCrossConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
 }
 
+template<int width, int height>
+bool Witness<width, height>::GetUnknownPathConstraint(int which) const
+{
+    return pathConstraints[which] == kUnknownPathConstraint;
+}
+
+template<int width, int height>
+bool Witness<width, height>::GetUnknownPathConstraint(int x, int y) const
+{
+    return GetUnknownPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+}
+
+template<int width, int height>
+bool Witness<width, height>::GetUnknownPathConstraint(bool horiz, int x, int y) const
+{
+    if (horiz)
+        return GetUnknownPathConstraint(y * width + x);
+    else
+        return GetUnknownPathConstraint(width * (height + 1) + x * height + y);
+}
+
+template<int width, int height>
+void Witness<width, height>::AddUnknownPathConstraint(int which)
+{
+    pathConstraints[which] = kUnknownPathConstraint;
+}
+
+template<int width, int height>
+void Witness<width, height>::AddUnknownPathConstraint(int x, int y)
+{
+    AddUnknownPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+}
+
+template<int width, int height>
+void Witness<width, height>::AddUnknownPathConstraint(bool horiz, int x, int y)
+{
+    if (horiz)
+        AddUnknownPathConstraint(y * width + x);
+    else
+        AddUnknownPathConstraint(width * (height + 1) + x * height + y);
+}
+
+template<int width, int height>
+void Witness<width, height>::RemoveUnknownPathConstraint(int which)
+{
+    pathConstraints[which] = kNoPathConstraint;
+}
+
+template<int width, int height>
+void Witness<width, height>::RemoveUnknownPathConstraint(int x, int y) // { cannotCrossConstraints.pop_back();}
+{
+    RemoveUnknownPathConstraint(width * (height + 1) + (width + 1) * height + (width + 1) * y + x);
+}
+
+template<int width, int height>
+void Witness<width, height>::RemoveUnknownPathConstraint(bool horiz, int x, int y)
+{
+    if (horiz)
+        RemoveUnknownPathConstraint(y * width + x);
+    else
+        RemoveUnknownPathConstraint(width * (height + 1) + x * height + y);
+}
+
 #pragma mark -
 #pragma mark Solver Helper Functions
 #pragma mark -
@@ -3656,6 +3829,13 @@ void Witness<width, height>::DrawRegionConstraint(
     }
     case kEraser:
         break;
+    case kUnknownRegionConstraint:
+    {
+        Graphics::point p = p3;
+        display.DrawText("?", p, Colors::black, lineWidth * 4,
+                         Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+        break;
+    }
     case kRegionConstraintCount:
         break;
     }
@@ -3725,14 +3905,11 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
     {
         for (int y = 0; y < height + 1; y++)
         {
+            Graphics::point pt = GetScreenCoord(x, y);
             if (GetMustCrossConstraint(x, y))
-            {
-                Graphics::point pt = GetScreenCoord(x, y);
                 display.FillNGon(pt, lineWidth * 0.9f, 6, 30, Colors::black);
-            }
             else if (GetCannotCrossConstraint(x, y))
             {
-                Graphics::point pt = GetScreenCoord(x, y);
                 Graphics::rect r(pt, lineWidth);
                 display.FillSquare(pt, lineWidth, backColor);
                 if (x > 0)
@@ -3772,47 +3949,42 @@ void Witness<width, height>::Draw(Graphics::Display &display) const
                     r2 |= r;
                     display.FillRect(r2, backColor);
                 }
-            }
+            } else if (GetUnknownPathConstraint(x, y))
+                display.DrawText("?", pt, Colors::black, lineWidth * 2,
+                                 Graphics::textAlignCenter, Graphics::textBaselineMiddle);
         }
     }
     for (int x = 0; x < width; x++)
     {
         for (int y = 0; y <= height; y++)
         {
+            Graphics::point p1 = GetScreenCoord(x, y);
+            Graphics::point p2 = GetScreenCoord(x + 1, y);
+            Graphics::point pt = (p1 + p2) * 0.5;
             if (GetMustCrossConstraint(true, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x + 1, y);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillNGon(pt, lineWidth * 0.9f, 6, 30, Colors::black);
-            }
             else if (GetCannotCrossConstraint(true, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x + 1, y);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillSquare(pt, lineWidth, backColor);
-            }
+            else if (GetUnknownPathConstraint(true, x, y))
+                display.DrawText("?", pt, Colors::black, lineWidth * 2,
+                                 Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+
         }
     }
     for (int x = 0; x <= width; x++)
     {
         for (int y = 0; y < height; y++)
         {
+            Graphics::point p1 = GetScreenCoord(x, y);
+            Graphics::point p2 = GetScreenCoord(x, y + 1);
+            Graphics::point pt = (p1 + p2) * 0.5;
             if (GetMustCrossConstraint(false, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x, y + 1);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillNGon(pt, lineWidth * 0.9f, 6, 30, Colors::black);
-            }
             else if (GetCannotCrossConstraint(false, x, y))
-            {
-                Graphics::point p1 = GetScreenCoord(x, y);
-                Graphics::point p2 = GetScreenCoord(x, y + 1);
-                Graphics::point pt = (p1 + p2) * 0.5;
                 display.FillSquare(pt, lineWidth, backColor);
-            }
+            else if (GetUnknownPathConstraint(false, x, y))
+                display.DrawText("?", pt, Colors::black, lineWidth * 2,
+                                 Graphics::textAlignCenter, Graphics::textBaselineMiddle);
         }
     }
 
