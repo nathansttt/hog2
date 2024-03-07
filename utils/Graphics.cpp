@@ -304,7 +304,7 @@ void Graphics::Display::MoveViewport(int port, const Graphics::rect &newLocation
 	viewports[port].finalBound = newLocation;
 }
 
-float Graphics::Display::GlobalHOGToViewportX(float x, int v)
+float Graphics::Display::GlobalHOGToViewportX(float x, int v) const
 {
 	Graphics::point input(x, 0.f, 0.f);
 	Graphics::point input2(0, 0.f, 0.f);
@@ -314,7 +314,7 @@ float Graphics::Display::GlobalHOGToViewportX(float x, int v)
 	//	return ((result.x+1.0)*pContextInfo->windowWidth)/2.0;
 }
 
-float Graphics::Display::ViewportToGlobalHOGX(float x, int v)
+float Graphics::Display::ViewportToGlobalHOGX(float x, int v) const
 {
 	Graphics::point input(x, 0.f, 0.f);
 	Graphics::point input2(0, 0.f, 0.f);
@@ -336,29 +336,29 @@ float Graphics::Display::ViewportToGlobalHOGX(float x, int v)
 //	return -((result.y-1.0)*pContextInfo->windowHeight)/2.0;
 //}
 
-Graphics::point Graphics::Display::GlobalHOGToViewport(Graphics::point where, int viewport)
+Graphics::point Graphics::Display::GlobalHOGToViewport(Graphics::point where, int viewport) const
 {
 	return GlobalHOGToViewport(viewports[viewport], where);
 }
 
-Graphics::point Graphics::Display::ViewportToGlobalHOG(Graphics::point where, int viewport)
+Graphics::point Graphics::Display::ViewportToGlobalHOG(Graphics::point where, int viewport) const
 {
 	return ViewportToGlobalHOG(viewports[viewport], where);
 }
 
-Graphics::rect Graphics::Display::GlobalHOGToViewport(const Graphics::rect &loc, int port)
+Graphics::rect Graphics::Display::GlobalHOGToViewport(const Graphics::rect &loc, int port) const
 {
 	return Graphics::rect(GlobalHOGToViewport(viewports[port], {loc.left, loc.top}),
 						  GlobalHOGToViewport(viewports[port], {loc.right, loc.bottom}));
 }
 
-Graphics::rect Graphics::Display::ViewportToGlobalHOG(const Graphics::rect &loc, int port)
+Graphics::rect Graphics::Display::ViewportToGlobalHOG(const Graphics::rect &loc, int port) const
 {
 	return Graphics::rect(ViewportToGlobalHOG(viewports[port], {loc.left, loc.top}),
 						  ViewportToGlobalHOG(viewports[port], {loc.right, loc.bottom}));
 }
 
-Graphics::point Graphics::Display::GlobalHOGToViewport(const viewport &v, Graphics::point where)
+Graphics::point Graphics::Display::GlobalHOGToViewport(const viewport &v, Graphics::point where) const
 {
 	if (v.type == kScaleToFill) 		// just scale regular -1/1 axes into the rectangle
 	{
@@ -403,7 +403,7 @@ Graphics::point Graphics::Display::GlobalHOGToViewport(const viewport &v, Graphi
 	}
 }
 
-Graphics::point Graphics::Display::ViewportToGlobalHOG(const viewport &v, Graphics::point where)
+Graphics::point Graphics::Display::ViewportToGlobalHOG(const viewport &v, Graphics::point where) const
 {
 	if (v.type == kScaleToFill)
 	{
