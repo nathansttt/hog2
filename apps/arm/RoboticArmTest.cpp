@@ -33,7 +33,8 @@
 #include "FrontierBFS.h"
 
 #include "RoboticArm.h"
-
+#include "FileUtil.h"
+#include "SVGUtil.h"
 
 //#define RUN_RANDOM_TESTS
 //#define HEURISTIC_TABLES
@@ -62,7 +63,7 @@ int absType = 0;
 int stepsPerFrame = 100;
 
 std::vector<std::vector<bool> > configSpace;
-void BuildConfigSpace();
+void BuildConfigSpace(bool fast = false);
 
 bool recording = false;
 
@@ -139,6 +140,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyKeyHandler, "Config", "Build Configuration Space", kNoModifier, 'c');
 	InstallKeyboardHandler(MyKeyHandler, "Clear", "Clear Configuration Space", kNoModifier, '|');
 	InstallKeyboardHandler(MyKeyHandler, "Record", "Start recording frames to a file", kNoModifier, 'r');
+	InstallKeyboardHandler(MyKeyHandler, "Save", "Save a screen capture", kNoModifier, '&');
 	InstallKeyboardHandler(MyKeyHandler, "0-9", "select segment", kNoModifier, '0', '9');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CW", kNoModifier, 'a');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CCW", kNoModifier, 's');
@@ -167,6 +169,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		CreateSimulation(windowID);
 		ReinitViewports(windowID, {-1, -1, 0, 1}, kScaleToSquare);
 		AddViewport(windowID, {0, -1, 1, 1}, kScaleToSquare);
+		setTextBufferVisibility(false);
 	}
 }
 
@@ -177,7 +180,6 @@ void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 	{
 		static int currFrame = 0;
 		currFrame++;
-
 		r->Draw(display);
 		if (!validSearch)
 		{
@@ -230,81 +232,143 @@ void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 	}
 	if (viewport == 1)
 	{
+		// TODO: draw into background when config space changes
+		display.FillRect({-1, -1, 1, 1}, Colors::black);
 		rgbColor c;
-		float ratio = 2.0/512.0;
-		float size = 2.0/512.0;
-		if (configSpace.size() == 512)
+		if (configSpace.size() != 0)
 		{
-			for (int x = 0; x < 512; x++)
+			float ratio = 2.0/configSpace.size();
+			float size = 2.0/configSpace.size();
+			for (int x = 0; x < configSpace.size(); x++)
 			{
-//				glBegin(GL_QUADS);
-				for (int y = 0; y < 512; y++)
+				int start = -1;
+				for (int y = 0; y < configSpace[x].size(); y++)
 				{
-					bool draw = false;
-					bool big = false;
-					if (!validSearch && ourPath.size() == 0 && config.GetAngle(0) == x*2 && config.GetAngle(1) == y*2)
+					if (configSpace[x][y] == false)
 					{
-						c = Colors::white;
-//						glColor3f(1, 1, 1);
-						draw = true;
-						big = true;
+						if (start == -1)
+							start = y;
 					}
-					if (!validSearch && ourPath.size() != 0 && ourPath[(pathLoc)%ourPath.size()].GetAngle(0) == x*2 && ourPath[(pathLoc)%ourPath.size()].GetAngle(1) == y*2)
-					{
-						c = Colors::white;
-//						glColor3f(1, 1, 1);
-						draw = true;
-						big = true;
+					else {
+						if (start != -1)
+						{
+							Graphics::rect r(-1+float(x)*size, -1+float(start)*size,
+											 -1+float(x+1)*size, -1+float(y+1)*size);
+							display.FillRect(r, Colors::red);
+						}
+						start = -1;
 					}
-					if (validSearch && astar.CheckNextNode().GetAngle(0) == x*2 && astar.CheckNextNode().GetAngle(1) == y*2)
+				}
+				if (start != -1)
+				{
+					Graphics::rect r(-1+float(x)*size, -1+float(start)*size,
+									 -1+float(x+1)*size, -1+float(configSpace[x].size()+1)*size);
+					display.FillRect(r, Colors::red);
+				}
+			}
+		}
+
+		// Draw cursors, etc
+		{
+			float size = 4.0f/512.0f;
+
+			//if (!validSearch)
+			{
+				double x, y;
+				if (validSearch)
+				{
+					x = 2*astar.CheckNextNode().GetAngle(0)/1024.0-1;
+					y = 2*astar.CheckNextNode().GetAngle(1)/1024.0-1;
+					c = Colors::lightgreen;
+				}
+				else {
+					if (ourPath.size() == 0)
 					{
+						x = 2*config.GetAngle(0)/1024.0-1;
+						y = 2*config.GetAngle(1)/1024.0-1;
+						c = Colors::white;
+					}
+					else {
+						x = 2*ourPath[(pathLoc)%ourPath.size()].GetAngle(0)/1024.0-1;
+						y = 2*ourPath[(pathLoc)%ourPath.size()].GetAngle(1)/1024.0-1;
 						c = Colors::green;
-//						glColor3f(0, 1, 0);
-						draw = true;
-						big = true;
-					}
-					else if (!configSpace[x][y])
-					{
-						c = Colors::red;
-//						glColor3f(1, 0, 0);
-						draw = true;
-					}
-					if (draw)
-					{
-						float currSize = size;
-						if (big) currSize*=4;
-						
-						display.FillRect(Graphics::rect({-1+float(x)*ratio, -1+float(y)*ratio}, currSize), c);
-//						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio, big?-0.01:0);
-//						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio, big?-0.01:0);
-//						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio+currSize, big?-0.01:0);
-//						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio+currSize, big?-0.01:0);
 					}
 				}
-//				glEnd();
+				//double x, y;
+				//r->GetTipPosition(config, x, y);
+				Graphics::rect rec(point3d(x, y), 1.5f*size);
+				display.FillRect(rec, c);
+
+//				c = Colors::white;
+//				draw = true;
+//				big = true;
 			}
+//			{
+//				{
+//					bool draw = false;
+//					bool big = false;
+//					if (!validSearch && ourPath.size() == 0 && config.GetAngle(0) == x*2 && config.GetAngle(1) == y*2)
+//					{
+//						c = Colors::white;
+////						glColor3f(1, 1, 1);
+//						draw = true;
+//						big = true;
+//					}
+//					if (!validSearch && ourPath.size() != 0 && ourPath[(pathLoc)%ourPath.size()].GetAngle(0) == x*2 && ourPath[(pathLoc)%ourPath.size()].GetAngle(1) == y*2)
+//					{
+//						c = Colors::white;
+////						glColor3f(1, 1, 1);
+//						draw = true;
+//						big = true;
+//					}
+//					if (validSearch && astar.CheckNextNode().GetAngle(0) == x*2 && astar.CheckNextNode().GetAngle(1) == y*2)
+//					{
+//						c = Colors::green;
+////						glColor3f(0, 1, 0);
+//						draw = true;
+//						big = true;
+//					}
+//					else if (!configSpace[x][y])
+//					{
+//						c = Colors::red;
+////						glColor3f(1, 0, 0);
+//						draw = true;
+//					}
+//					if (draw)
+//					{
+//						float currSize = size;
+//						if (big) currSize*=4;
+//						
+//						display.FillRect(Graphics::rect({-1+float(x)*ratio, -1+float(y)*ratio}, currSize), c);
+//					}
+//				}
+//			}
 			
-			char txt[16];
-//			glColor3f(1.0, 1.0, 1.0);
-			for (double x = 0; x <= 1024; x+=1024.0/(2.0*4))
+			// labeling axes (needs to be updated)
+			if (0)
 			{
-				if (x != 512)
+				char txt[16];
+				//			glColor3f(1.0, 1.0, 1.0);
+				for (double x = 0; x <= 1024; x+=1024.0/(2.0*4))
 				{
-//					sprintf(txt, "%d", int(360.0*x/1024.0));
-//					DrawTextCentered(2.0*x/1024.0-1, -1.05, 0, .1, txt);
+					if (x != 512)
+					{
+						//					sprintf(txt, "%d", int(360.0*x/1024.0));
+						//					DrawTextCentered(2.0*x/1024.0-1, -1.05, 0, .1, txt);
+					}
 				}
-			}
-			for (double y = 0; y <= 1024; y+=1024.0/(2.0*4))
-			{
-				if (y != 512)
+				for (double y = 0; y <= 1024; y+=1024.0/(2.0*4))
 				{
-//					sprintf(txt, "%d", int(360.0*y/1024.0));
-//					DrawTextCentered(-1.05, 2.0*y/1024.0-1, 0, .1, txt);
+					if (y != 512)
+					{
+						//					sprintf(txt, "%d", int(360.0*y/1024.0));
+						//					DrawTextCentered(-1.05, 2.0*y/1024.0-1, 0, .1, txt);
+					}
 				}
+				//			glColor3f(0.0, 1.0, 1.0);
+				//			DrawTextCentered(0, -1.05, 0, .15, "A1");
+				//			DrawTextCentered(-1.05, 0, 0, .15, "A2");
 			}
-//			glColor3f(0.0, 1.0, 1.0);
-//			DrawTextCentered(0, -1.05, 0, .15, "A1");
-//			DrawTextCentered(-1.05, 0, 0, .15, "A2");
 		}
 	}
 //	if (recording && viewport == GetNumPorts((int)id)-1)
@@ -350,10 +414,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //				unitSims[windowID]->SetPaused(true);
 //			}
 			break;
-		case ']': stepsPerFrame *= 2;//absType = (absType+1)%3; break;
-		case '[': if (stepsPerFrame > 50) stepsPerFrame /= 2;//absType = (absType+4)%3; break;
-			//		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
-			//		case '}': unitSim->offsetDisplayTime(0.5); break;
+		case ']': stepsPerFrame *= 2; break;//absType = (absType+1)%3; break;
+		case '[': if (stepsPerFrame > 50) stepsPerFrame /= 2;
+			break;
 		default:
 			break;
 	}
@@ -438,7 +501,22 @@ void MyKeyHandler(unsigned long wid, tKeyboardModifier mod, char key)
 	{
 		r->PopObstacle();
 		//		SetNumPorts((int)wid, 2);
-//		BuildConfigSpace();
+		BuildConfigSpace();
+	}
+	if (key == '&')
+	{
+		int index = 0;
+		char fname[255];
+		while (1)
+		{
+			sprintf(fname, "/Users/nathanst/Pictures/SVG/robot-%d%d%d%d.svg", index/1000, (index/100)%10, (index/10)%10, index%10);
+			
+			if (!FileExists(fname))
+				break;
+			index++;
+		}
+		MakeSVG(GetContext(wid)->display, fname, 1024, 512, -1);
+		printf("Saved: '%s'\n", fname);
 	}
 	if (key == 'r')
 	{
@@ -527,7 +605,7 @@ bool MyClickHandler(unsigned long , int viewport, int x, int y, point3d loc, tBu
 		drag = true;
 		line2d l(s, e);
 		r->AddObstacle(l);
-		BuildConfigSpace();
+		BuildConfigSpace(true);
 	}
 	if ((mouseEvent == kMouseDrag) && (whichButton == kLeftButton) && drag)
 	{
@@ -537,7 +615,7 @@ bool MyClickHandler(unsigned long , int viewport, int x, int y, point3d loc, tBu
 		e.z = 0;
 		line2d l(s, e);
 		r->AddObstacle(l);
-		BuildConfigSpace();
+		BuildConfigSpace(true);
 	}
 	if ((mouseEvent == kMouseUp) && (whichButton == kLeftButton) && drag)
 	{
@@ -595,22 +673,29 @@ bool MyClickHandler(unsigned long , int viewport, int x, int y, point3d loc, tBu
 	return true;
 }
 
-void BuildConfigSpace()
+void BuildConfigSpace(bool fast)
 {
+	int resolution = 512;
+	if (fast)
+	{
+		resolution = 128;
+	}
+	int multiplier = 1024/resolution;
+
 	configSpace.resize(0);
-	configSpace.resize(512);
-	for (int x = 0; x < 512; x++)
-		configSpace[x].resize(512);
+	configSpace.resize(resolution);
+	for (int x = 0; x < resolution; x++)
+		configSpace[x].resize(resolution);
 
 	armAngles a;
 	a.SetNumArms(2);
-	for (int x = 0; x < 512; x++)
+	for (int x = 0; x < 1024; x+=multiplier)
 	{
-		a.SetAngle(0, x*2);
-		for (int y = 0; y < 512; y++)
+		a.SetAngle(0, x);
+		for (int y = 0; y < 1024; y+=multiplier)
 		{
-			a.SetAngle(1, y*2);
-			configSpace[x][y] = r->LegalState(a);
+			a.SetAngle(1, y);
+			configSpace[x/multiplier][y/multiplier] = r->LegalState(a);
 		}
 	}
 }

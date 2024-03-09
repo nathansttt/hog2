@@ -1457,8 +1457,8 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 		a.bird = snake;
 		a.pushed = 0;
 		// kDown - can never push any object down due to gravity
-		if (!(kGroundMask == (world[loc+1]&kGroundMask)) && // not ground or spikes
-			GetY(loc)+1 < height && // not off screen
+		if (GetY(loc)+1 < height && // not off screen
+			!(kGroundMask == (world[loc+1]&kGroundMask)) && // not ground or spikes
 			!(kSnakeMask == (render[loc+1]&kSnakeMask)) && // not snake
 			!(kBlockMask == (render[loc+1]&kBlockMask))) // not block
 		{
@@ -1471,8 +1471,8 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 
 		a.pushed = 0;
 		// kUp
-		if (!(kGroundMask == (world[loc-1]&kGroundMask)) && // not ground or spikes
-			GetY(loc) > 0 && // not off screen
+		if (GetY(loc) > 0 && // not off screen
+			!(kGroundMask == (world[loc-1]&kGroundMask)) && // not ground or spikes
 			render[loc-1] != obj[snake]) // not self
 		{
 			// check if snake or object which can be pushed
@@ -1493,8 +1493,8 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 
 		a.pushed = 0;
 		// right
-		if (!(kGroundMask == (world[loc+height]&kGroundMask)) && // not ground or spikes
-			GetX(loc)+1 < width && // not off screen
+		if (GetX(loc)+1 < width && // not off screen
+			!(kGroundMask == (world[loc+height]&kGroundMask)) && // not ground or spikes
 			render[loc+height] != obj[snake]) // not self
 		{
 			// check if snake or object which can be pushed
@@ -1515,8 +1515,8 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 		
 		a.pushed = 0;
 		// left
-		if (!(kGroundMask == (world[loc-height]&kGroundMask)) && // not ground or spikes
-			GetX(loc)-1 >= 0 && // not off screen
+		if (GetX(loc)-1 >= 0 && // not off screen
+			!(kGroundMask == (world[loc-height]&kGroundMask)) && // not ground or spikes
 			render[loc-height] != obj[snake]) // not self
 		{
 			// check if snake or object which can be pushed

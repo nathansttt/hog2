@@ -227,6 +227,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//MyDisplayHandler(windowID, kNoModifier, 'o');
 		ge->SetNodeScale(20);
 		
+		setTextBufferVisibility(false);
 	}
 }
 
@@ -468,13 +469,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/1/idastar-%d%d%d%d%d.svg",
+//		sprintf(fname, "/Users/nathanst/Pictures/SVG/1/idastar-%d%d%d%d%d.svg",
+//				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+//		std::string s = "f: "+std::to_string(ida.GetCurrentFLimit())+" nodes "+std::to_string(nodesInTree);
+//		MakeSVG(display, fname, 1024, 1024, 0, s.c_str());
+		sprintf(fname, "/Users/nathanst/Pictures/SVG/idastar-%d%d%d%d%d.svg",
 				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		std::string s = "f: "+std::to_string(ida.GetCurrentFLimit())+" nodes "+std::to_string(nodesInTree);
-		MakeSVG(display, fname, 1024, 1024, 0, s.c_str());
-		sprintf(fname, "/Users/nathanst/Movies/tmp/2/idastar-%d%d%d%d%d.svg",
-				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		MakeSVG(display, fname, 1024, 1024, kStateView);
+		MakeSVG(display, fname, 1024, 512);
 		//		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		frameCnt++;

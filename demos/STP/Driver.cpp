@@ -19,6 +19,7 @@
 #include "IDAStar.h"
 #include "PermutationPDB.h"
 #include "LexPermutationPDB.h"
+#include "SVGUtil.h"
 
 IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
 Heuristic<MNPuzzleState<4, 4>> h;
@@ -60,7 +61,7 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-//	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Picture", "Take a picture", kAnyModifier, '&');
 	InstallKeyboardHandler(MyDisplayHandler, "Randomize", "Get Random State", kAnyModifier, 's');
 //	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallWindowHandler(MyWindowHandler);
@@ -193,6 +194,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 //		case 'h': //whichHeuristic = (whichHeuristic+1)%16; break;
+		case '&':
+#ifndef __EMSCRIPTEN__
+			MakeSVG(GetContext(windowID)->display, "/Users/nathanst/Pictures/SVG/STP.svg", 500, 500);
+			break;
+#endif
 		case 's':
 		{
 			submitTextToBuffer("");

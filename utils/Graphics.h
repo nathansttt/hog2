@@ -300,14 +300,22 @@ public:
 	void MoveViewport(int viewport, const Graphics::rect &newLocation);
 
 	Graphics::point ViewportToGlobalHOG(Graphics::point where, int viewport) const;
+	Graphics::point ViewportToGlobalHOG(Graphics::point where, int viewport, int wWidth, int wHeight) const;
 	Graphics::rect  ViewportToGlobalHOG(const Graphics::rect &loc, int viewport) const;
+	Graphics::rect  ViewportToGlobalHOG(const Graphics::rect &loc, int viewport, int wWidth, int wHeight) const;
 	Graphics::point ViewportToGlobalHOG(const viewport &v, Graphics::point where) const;
+	Graphics::point ViewportToGlobalHOG(const viewport &v, Graphics::point where, int wWidth, int wHeight) const;
 	float ViewportToGlobalHOGX(float x, int v) const;
+	float ViewportToGlobalHOGX(float x, int v, int wWidth, int wHeight) const;
 	Graphics::point GlobalHOGToViewport(const viewport &v, Graphics::point where) const;
+	Graphics::point GlobalHOGToViewport(const viewport &v, Graphics::point where, int wWidth, int wHeight) const;
 	Graphics::point GlobalHOGToViewport(Graphics::point where, int viewport) const;
+	Graphics::point GlobalHOGToViewport(Graphics::point where, int viewport, int wWidth, int wHeight) const;
 	Graphics::rect GlobalHOGToViewport(const Graphics::rect &loc, int viewport) const;
+	Graphics::rect GlobalHOGToViewport(const Graphics::rect &loc, int viewport, int wWidth, int wHeight) const;
 	float GlobalHOGToViewportX(float x, int v) const;
-	
+	float GlobalHOGToViewportX(float x, int v, int wWidth, int wHeight) const;
+
 	uint8_t currViewport;
 	uint8_t numViewports;
 	std::vector<viewport> viewports;

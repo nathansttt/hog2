@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 
+/*
 //<svg height="500" width="500">
 //<defs>
 //<radialGradient id="grad1" cx="60%" cy="40%" r="50%" fx="70%" fy="40%">
@@ -20,7 +21,7 @@
 //<ellipse cx="200" cy="200" rx="55" ry="55" fill="url(#grad1)" />
 //Sorry, your browser does not support inline SVG.
 //</svg>
-
+*/
 
 std::string SVGGetRGB(rgbColor c)
 {
@@ -55,6 +56,27 @@ std::string SVGFrameCircle(double x, double y, double radius, double border, rgb
 	s += "\" cy=\"" + to_string_with_precision(y);
 	s += "\" r=\""+to_string_with_precision(radius)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c)+";stroke-width:"+to_string_with_precision(border)+"\" />";
 	return s;
+}
+
+std::string SVGDrawEllipse(Graphics::rect &r, rgbColor c)
+{
+	return SVGDrawEllipse((r.right+r.left)*0.5, (r.top+r.bottom)*0.5f, (r.right-r.left)*0.5f, (r.bottom-r.top)*0.5f, c);
+}
+
+std::string SVGDrawEllipse(double x, double y, double rx, double ry, rgbColor c)
+{
+	//double epsilon = 0.5;
+	std::string s;
+	s += "<ellipse cx=\"" + to_string_with_precision(x);
+	s += "\" cy=\"" + to_string_with_precision(y);
+	s += "\" rx=\""+to_string_with_precision(rx);
+	s += "\" ry=\""+to_string_with_precision(ry);
+	s += "\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
+	return s;
+
+//	s += "<circle cx=\"" + std::to_string(10*x);
+//	s += "\" cy=\"" + std::to_string(10*y);
+//	s += "\" r=\""+std::to_string(radius*10)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
 }
 
 std::string SVGDrawCircle(double x, double y, double radius, rgbColor c)
@@ -94,6 +116,11 @@ std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c)
 	s += "\" width=\""+to_string_with_precision(width+2*epsilon, 8)+"\" height=\""+to_string_with_precision(height+2*epsilon, 8)+"\" style=\"fill:"+SVGGetRGB(c)+";\" />";
 //	s += "\" width=\""+to_string_with_precision(width+2*epsilon, 8)+"\" height=\""+to_string_with_precision(height+2*epsilon, 8)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke:"+SVGGetRGB(c)+";stroke-width:5%\" />";
 	return s;
+}
+
+std::string SVGFrameRect(const Graphics::rect &r, float border, rgbColor c)
+{
+	return SVGFrameRect(r.left, r.top, r.right-r.left, r.bottom-r.top, border, c);
 }
 
 std::string SVGFrameRect(float x, float y, float width, float height, float border, rgbColor c)
@@ -242,10 +269,10 @@ std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double 
 		s += typeface;
 	else
 		s += "Helvetica";
-	s += ", sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
+	s += ", sans-serif; font-size:"+std::to_string(size)+"px\"";
 	switch (base) {
 		case SVG::kBottom:
-			s += " dominant-baseline=\"baseline\">";
+			s += " dominant-baseline=\"auto\">";
 			break;
 		case SVG::kTop:
 			s += " dominant-baseline=\"hanging\">";
@@ -276,152 +303,229 @@ std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, 
 
 float WidthToSVG(float w, float xMultiplier, float yMultiplier)
 {
-	return std::min(xMultiplier, yMultiplier)*((w+1)/2.0-(0+1)/2.0);
+//	return std::min(xMultiplier, yMultiplier)*w;
+	return xMultiplier*((w+1)/2.0f-1.0f/2.0f);
 }
 
 float PointToSVG(float p, float multiplier)
 {
-	return (p+1)*multiplier/2.0;
+	return (p+1)*multiplier/2.0f;
 }
 
 void PointToSVG(Graphics::point &p, float xmultiplier, float ymultiplier)
 {
-	p.x = (p.x+1)*xmultiplier/2.0;
-	p.y = (p.y+1)*ymultiplier/2.0;
+	p.x = (p.x+1)*xmultiplier/2.0f;
+	p.y = (p.y+1)*ymultiplier/2.0f;
 }
 
+void RectToSVG(Graphics::rect &r, float xmultiplier, float ymultiplier)
+{
+	Graphics::point p1(r.left, r.top);
+	Graphics::point p2(r.right, r.bottom);
+	PointToSVG(p1, xmultiplier, ymultiplier);
+	PointToSVG(p2, xmultiplier, ymultiplier);
+	r.left = p1.x;
+	r.right = p2.x;
+	r.top = p1.y;
+	r.bottom = p2.y;
+}
 
-void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std::string &s, int width, int height, int viewport)
+void DrawLineCommand(const Graphics::Display &disp, const std::vector<Graphics::Display::data> &drawCommands, int height, std::string &s, int viewport, int width, size_t &x) {
+	if (viewport == -1)
+	{
+		s += SVGBeginLinePath(WidthToSVG(disp.ViewportToGlobalHOGX(drawCommands[x].line.width, drawCommands[x].viewport, width, height), width, height), drawCommands[x].line.c);
+	}
+	else {
+		s += SVGBeginLinePath(WidthToSVG(drawCommands[x].line.width, width, height), drawCommands[x].line.c);
+	}
+	bool first = true;
+	while (drawCommands[x].what == Graphics::Display::kLine &&
+		   (first ||
+			(drawCommands[x].line.width == drawCommands[x-1].line.width &&
+			 drawCommands[x].line.c == drawCommands[x-1].line.c)))
+	{
+		const Graphics::Display::lineInfo &o = drawCommands[x].line; //disp.lines[x];
+		if (first)
+		{
+			if (viewport == -1)
+			{
+				Graphics::point p1 = o.start, p2 = o.end;
+				p1 = disp.ViewportToGlobalHOG(p1, drawCommands[x].viewport, width, height);
+				p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+				s += SVGAddLinePath(PointToSVG(p1.x, width), PointToSVG(p1.y, height),
+									PointToSVG(p2.x, width), PointToSVG(p2.y, height));
+			}
+			else {
+				s += SVGAddLinePath(PointToSVG(o.start.x, width), PointToSVG(o.start.y, height),
+									PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+			}
+			first = false;
+		}
+		else if (drawCommands[x-1].line.end == o.start)
+		{
+			if (viewport == -1)
+			{
+				Graphics::point p2 = o.end;
+				p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+				s += SVGAddLinePath(PointToSVG(p2.x, width), PointToSVG(p2.y, height));
+			}
+			else {
+				s += SVGAddLinePath(PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+			}
+		}
+		else {
+			if (viewport == -1)
+			{
+				Graphics::point p1 = o.start, p2 = o.end;
+				p1 = disp.ViewportToGlobalHOG(p1, drawCommands[x].viewport, width, height);
+				p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+				s += SVGAddLinePath(PointToSVG(p1.x, width), PointToSVG(p1.y, height),
+									PointToSVG(p2.x, width), PointToSVG(p2.y, height));
+			}
+			else {
+				s += SVGAddLinePath(PointToSVG(o.start.x, width), PointToSVG(o.start.y, height),
+									PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+			}
+		}
+		//					s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
+		if (o.arrow)
+		{
+			Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
+			Graphics::point p1 = o.end-o.start;
+			Graphics::point p2 = o.start;
+			p2.z = 1;
+			p2 = p1*p2;
+			p2.normalise();
+			p2 *= (o.end-newEnd).length();
+			if (viewport == -1)
+			{
+				p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+			}
+			s += SVGAddLinePath(PointToSVG(newEnd.x+p2.x, width), PointToSVG(newEnd.y+p2.y, height),
+								PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+			s += SVGAddLinePath(PointToSVG(newEnd.x-p2.x, width), PointToSVG(newEnd.y-p2.y, height),
+								PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+		}
+		x++;
+	}
+	x--;
+	s += SVGEndLinePath();
+}
+
+void FillRectCommand(const Graphics::Display &disp, const std::vector<Graphics::Display::data> &drawCommands, int height, std::string &s, int viewport, int width, size_t &x)
+{
+	{
+		const Graphics::Display::drawInfo &o = drawCommands[x].shape;
+		// If we have multiple rects of the same style, group them together
+		// to make the .svg file smaller
+		if (drawCommands.size() > x+1 && drawCommands[x+1].what == Graphics::Display::kFillRectangle &&
+			drawCommands[x+1].shape.c == o.c)
+		{
+			s += "<g style=\"fill:"+SVGGetRGB(o.c)+";\">\n";
+			
+			while (true)
+			{
+				const Graphics::Display::drawInfo &o1 = drawCommands[x].shape;
+				Graphics::rect r = o1.r;
+				if (viewport == -1)
+				{
+					r = disp.ViewportToGlobalHOG(r, drawCommands[x].viewport, width, height);
+				}
+				float x1 = PointToSVG(r.left, width);
+				float y1 = PointToSVG(r.top, height);
+				float w1 = PointToSVG(r.right, width)-PointToSVG(r.left, width);
+				float h1 = PointToSVG(r.bottom, height)-PointToSVG(r.top, height);
+				s += " <rect x=\"" + to_string_with_precision(x1);
+				s += "\" y=\"" + to_string_with_precision(y1);
+				s += "\" width=\""+to_string_with_precision(w1)+"\" height=\""+to_string_with_precision(h1)+"\"/>\n";
+				
+				x++;
+				if (drawCommands.size() > x && drawCommands[x].what == Graphics::Display::kFillRectangle &&
+					drawCommands[x].shape.c == o.c)
+				{
+					
+				}
+				else {
+					x--;
+					break;
+				}
+			}
+			s += "</g>";
+		}
+		else {
+			Graphics::rect r = o.r;
+			if (viewport == -1)
+			{
+				r = disp.ViewportToGlobalHOG(r, drawCommands[x].viewport, width, height);
+			}
+			
+			s += SVGDrawRect(PointToSVG(r.left, width), PointToSVG(r.top, height),
+							 PointToSVG(r.right, width)-PointToSVG(r.left, width),
+							 PointToSVG(r.bottom, height)-PointToSVG(r.top, height),
+							 o.c);
+		}
+	}
+}
+
+void HandleCommand(const Graphics::Display &disp, const std::vector<Graphics::Display::data> &drawCommands, std::string &s, int width, int height, int viewport)
 {
 	for (size_t x = 0; x < drawCommands.size(); x++)
 	{
-		if (drawCommands[x].viewport != viewport)
+		if ((drawCommands[x].viewport != viewport) && (viewport != -1))
+			continue;
+		if (disp.viewports[drawCommands[x].viewport].active == false)
 			continue;
 		switch (drawCommands[x].what)
 		{
 			case Graphics::Display::kLine:
-			{
-				//WidthToSVG(i.size, width, height)
-				s += SVGBeginLinePath(WidthToSVG(drawCommands[x].line.width, width, height), drawCommands[x].line.c);
-				bool first = true;
-				while (drawCommands[x].what == Graphics::Display::kLine &&
-					   (first ||
-						(drawCommands[x].line.width == drawCommands[x-1].line.width &&
-						 drawCommands[x].line.c == drawCommands[x-1].line.c)))
-				{
-					const Graphics::Display::lineInfo &o = drawCommands[x].line; //disp.lines[x];
-					if (first)
-					{
-						s += SVGAddLinePath(PointToSVG(o.start.x, width), PointToSVG(o.start.y, height),
-											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
-						first = false;
-					}
-					else if (drawCommands[x-1].line.end == o.start)
-					{
-						s += SVGAddLinePath(PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
-					}
-					else {
-						s += SVGAddLinePath(PointToSVG(o.start.x, width), PointToSVG(o.start.y, height),
-											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
-					}
-//					s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
-					if (o.arrow)
-					{
-						
-						Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
-						Graphics::point p1 = o.end-o.start;
-						Graphics::point p2 = o.start;
-						p2.z = 1;
-						p2 = p1*p2;
-						p2.normalise();
-						p2 *= (o.end-newEnd).length();
-
-						s += SVGAddLinePath(PointToSVG(newEnd.x+p2.x, width), PointToSVG(newEnd.y+p2.y, height),
-											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
-						s += SVGAddLinePath(PointToSVG(newEnd.x-p2.x, width), PointToSVG(newEnd.y-p2.y, height),
-											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
-					}
-					x++;
-				}
-				x--;
-				s += SVGEndLinePath();
-				//		if (o.arrow)
-				//		{
-				//			Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
-				//			Graphics::point p1 = o.end-o.start;
-				//			Graphics::point p2 = o.start;
-				//			p2.z = 1;
-				//			p2 = p1*p2;
-				//			p2.normalise();
-				//			p2 *= (o.end-newEnd).length();
-				//			CGContextMoveToPoint(context, ((o.end.x)*xscale+xoffset), height-(o.end.y*yscale+yoffset));
-				//			CGContextAddLineToPoint(context, ((newEnd.x+p2.x)*xscale+xoffset), height-((newEnd.y+p2.y)*yscale+yoffset));
-				//			CGContextMoveToPoint(context, ((o.end.x)*xscale+xoffset), height-(o.end.y*yscale+yoffset));
-				//			CGContextAddLineToPoint(context, ((newEnd.x-p2.x)*xscale+xoffset), height-((newEnd.y-p2.y)*yscale+yoffset));
-				//		}
-				
+				DrawLineCommand(disp, drawCommands, height, s, viewport, width, x);
 				break;
-			}
 			case Graphics::Display::kFillRectangle:
-			{
-				const Graphics::Display::drawInfo &o = drawCommands[x].shape;
-				if (drawCommands.size() > x+1 && drawCommands[x+1].what == Graphics::Display::kFillRectangle &&
-					drawCommands[x+1].shape.c == o.c)
-				{
-					s += "<g style=\"fill:"+SVGGetRGB(o.c)+";\">\n";
-					
-					while (true)
-					{
-						const Graphics::Display::drawInfo &o1 = drawCommands[x].shape;
-						float x1 = PointToSVG(o1.r.left, width);
-						float y1 = PointToSVG(o1.r.top, height);
-						float w1 = PointToSVG(o1.r.right, width)-PointToSVG(o1.r.left, width);
-						float h1 = PointToSVG(o1.r.bottom, height)-PointToSVG(o1.r.top, height);
-						s += " <rect x=\"" + to_string_with_precision(x1);
-						s += "\" y=\"" + to_string_with_precision(y1);
-						s += "\" width=\""+to_string_with_precision(w1)+"\" height=\""+to_string_with_precision(h1)+"\"/>\n";
-						
-						x++;
-						if (drawCommands.size() > x && drawCommands[x].what == Graphics::Display::kFillRectangle &&
-							drawCommands[x].shape.c == o.c)
-						{
-							
-						}
-						else {
-							x--;
-							break;
-						}
-					}
-					s += "</g>";
-				}
-				else {
-					s += SVGDrawRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
-									 PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
-									 PointToSVG(o.r.bottom, height)-PointToSVG(o.r.top, height),
-									 o.c);
-				}
+				FillRectCommand(disp, drawCommands, height, s, viewport, width, x);
 				break;
-			}
 			case Graphics::Display::kFrameRectangle:
 			{
 				const Graphics::Display::drawInfo &o = drawCommands[x].shape;
-				s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
-								  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
-								  PointToSVG(o.r.bottom, height)-PointToSVG(o.r.top, height),
-								  WidthToSVG(o.width, width, height), o.c);
+				Graphics::rect r = o.r;
+				float w = o.width;
+				if (viewport == -1)
+				{
+					r = disp.ViewportToGlobalHOG(r, drawCommands[x].viewport, width, height);
+					w = disp.ViewportToGlobalHOGX(w, drawCommands[x].viewport, width, height);
+				}
+				RectToSVG(r, width, height);
+				s += SVGFrameRect(r, WidthToSVG(w, width, height), o.c);
+//				s += SVGFrameRect(PointToSVG(r.left, width), PointToSVG(r.top, height),
+//								  PointToSVG(r.right, width)-PointToSVG(r.left, width),
+//								  PointToSVG(r.bottom, height)-PointToSVG(r.top, height),
+//								  WidthToSVG(w, width, height), o.c);
 				break;
 			}
 			case Graphics::Display::kFillOval:
 			{
 				const Graphics::Display::drawInfo &o = drawCommands[x].shape;
-				s += SVGDrawCircle(((o.r.left+o.r.right)/2.0+1)*width/2.0, ((o.r.top+o.r.bottom)/2.0+1)*height/2.0, width*(o.r.right-o.r.left)/4.0, o.c);
+				Graphics::rect r = o.r;
+				if (viewport == -1)
+				{
+					r = disp.ViewportToGlobalHOG(r, drawCommands[x].viewport, width, height);
+				}
+				RectToSVG(r, width, height);
+				s += SVGDrawEllipse(r, o.c);
+//				s += SVGDrawCircle(((r.left+r.right)/2.0+1)*width/2.0, ((r.top+r.bottom)/2.0+1)*height/2.0, width*(r.right-r.left)/4.0, o.c);
 				break;
 			}
 			case Graphics::Display::kFrameOval:
 			{
 				const Graphics::Display::drawInfo &o = drawCommands[x].shape;
-				s += SVGFrameCircle(((o.r.left+o.r.right)/2.0+1)*width/2.0, ((o.r.top+o.r.bottom)/2.0+1)*height/2.0, width*(o.r.right-o.r.left)/4.0,
-									WidthToSVG(o.width, width, height), o.c);
+				Graphics::rect r = o.r;
+				float w = o.width;
+				if (viewport == -1)
+				{
+					r = disp.ViewportToGlobalHOG(r, drawCommands[x].viewport, width, height);
+					w = disp.ViewportToGlobalHOGX(w, drawCommands[x].viewport, width, height);
+				}
+				s += SVGFrameCircle(((r.left+r.right)/2.0+1)*width/2.0, ((r.top+r.bottom)/2.0+1)*height/2.0, width*(r.right-r.left)/4.0,
+									WidthToSVG(w, width, height), o.c);
 				
 				break;
 			}
@@ -429,8 +533,18 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 			{
 				const Graphics::Display::shapeInfo &i = drawCommands[x].polygon;
 				Graphics::point p = i.center;
+				Graphics::point p2 = i.center;
+				p2.x += i.radius;
+				//int w = i.radius;
+				if (viewport == -1)
+				{
+					p = disp.ViewportToGlobalHOG(p, drawCommands[x].viewport, width, height);
+					p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+//					w = disp.ViewportToGlobalHOGX(w, drawCommands[x].viewport, width, height);
+				}
 				PointToSVG(p, width, height);
-				s += SVGDrawNGon(p.x, p.y, width*i.radius/2.0, i.segments, i.rotate, i.c);
+				PointToSVG(p2, width, height);
+				s += SVGDrawNGon(p.x, p.y, p2.x-p.x, i.segments, i.rotate, i.c);
 				//				s += SVGDrawNGon(i.center.x, i.center.y, i.radius, i.segments, i.rotate, i.c);
 				break;
 			}
@@ -438,8 +552,16 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 			{
 				const Graphics::Display::shapeInfo &i = drawCommands[x].polygon;
 				Graphics::point p = i.center;
+				Graphics::point p2 = i.center;
+				p2.x += i.radius;
+				if (viewport == -1)
+				{
+					p = disp.ViewportToGlobalHOG(p, drawCommands[x].viewport, width, height);
+					p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+				}
 				PointToSVG(p, width, height);
-				s += SVGFrameNGon(p.x, p.y, width*i.radius/2.0, i.segments, i.rotate, 1/*border*/, i.c);
+				PointToSVG(p2, width, height);
+				s += SVGFrameNGon(p.x, p.y, p2.x-p.x, i.segments, i.rotate, 1/*border*/, i.c);
 				break;
 			}
 			case Graphics::Display::kFrameTriangle:
@@ -449,6 +571,12 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 				p1 = i.p1;
 				p2 = i.p2;
 				p3 = i.p3;
+				if (viewport == -1)
+				{
+					p1 = disp.ViewportToGlobalHOG(p1, drawCommands[x].viewport, width, height);
+					p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+					p3 = disp.ViewportToGlobalHOG(p3, drawCommands[x].viewport, width, height);
+				}
 				PointToSVG(p1, width, height);
 				PointToSVG(p2, width, height);
 				PointToSVG(p3, width, height);
@@ -468,6 +596,12 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 				p1 = i.p1;
 				p2 = i.p2;
 				p3 = i.p3;
+				if (viewport == -1)
+				{
+					p1 = disp.ViewportToGlobalHOG(p1, drawCommands[x].viewport, width, height);
+					p2 = disp.ViewportToGlobalHOG(p2, drawCommands[x].viewport, width, height);
+					p3 = disp.ViewportToGlobalHOG(p3, drawCommands[x].viewport, width, height);
+				}
 				PointToSVG(p1, width, height);
 				PointToSVG(p2, width, height);
 				PointToSVG(p3, width, height);
@@ -513,26 +647,44 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 
 //	s += SVGDrawRect(0, 0, width, height, Colors::white);
 	
-	HandleCommand(disp.backgroundDrawCommands, s, width, height, viewport);
-	HandleCommand(disp.drawCommands, s, width, height, viewport);
+	HandleCommand(disp, disp.backgroundDrawCommands, s, width, height, viewport);
+	HandleCommand(disp, disp.drawCommands, s, width, height, viewport);
 
 	for (size_t x = 0; x < disp.text.size(); x++)
 	{
 		const auto &i = disp.text[x];
-		if (i.viewport == viewport)
+		if (i.viewport == viewport || viewport == -1)
 		{
+			Graphics::point p;
+			float w;
+			if (viewport == -1)
+			{
+				p = disp.ViewportToGlobalHOG(i.loc, i.viewport, width, height);
+				w = disp.ViewportToGlobalHOGX(i.size, i.viewport, width, height);
+			}
+			else {
+				p = i.loc;
+				w = i.size;
+			}
+			w = WidthToSVG(w, width, height);
 			if (i.align == Graphics::textAlignLeft)
-				s += SVGDrawText(PointToSVG(i.loc.x, width),
-								 PointToSVG(i.loc.y, height),
-								 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str(), SVG::kLeft);
+			{
+				s += SVGDrawText(PointToSVG(p.x, width),
+								 PointToSVG(p.y, height), // TODO - size is not being converted properly
+								 i.s.c_str(), i.c, w, i.typeface.c_str(), SVG::kLeft);
+				// was i.size*width/2.0
+			}
 			else if (i.align == Graphics::textAlignCenter)
-				s += SVGDrawText(PointToSVG(i.loc.x, width),
-								 PointToSVG(i.loc.y, height),
-								 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str(), SVG::kCenter);
-			else
-				s += SVGDrawText(PointToSVG(i.loc.x, width),
-								 PointToSVG(i.loc.y, height),
-								 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str(), SVG::kRight);
+			{
+				s += SVGDrawText(PointToSVG(p.x, width),
+								 PointToSVG(p.y, height),
+								 i.s.c_str(), i.c, w, i.typeface.c_str(), SVG::kCenter);
+			}
+			else {
+				s += SVGDrawText(PointToSVG(p.x, width),
+								 PointToSVG(p.y, height),
+								 i.s.c_str(), i.c, w, i.typeface.c_str(), SVG::kRight);
+			}
 			s += "\n";
 		}
 	}
@@ -540,11 +692,15 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 	for (size_t x = 0; x < disp.lineSegments.size(); x++)
 	{
 		const auto &i = disp.lineSegments[x];
-		if (i.viewport == viewport)
+		if (i.viewport == viewport || viewport == -1)
 		{
 			outputPoints = i.points;
 			for (auto &j : outputPoints)
+			{
+				if (viewport == -1)
+					j = disp.ViewportToGlobalHOG(j, i.viewport, width, height);
 				PointToSVG(j, width, height);
+			}
 //			s += SVGDrawLineSegments(outputPoints, i.size, i.c);
 			s += SVGDrawLineSegments(outputPoints, WidthToSVG(i.size, width, height), i.c);
 			

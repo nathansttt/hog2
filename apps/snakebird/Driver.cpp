@@ -138,7 +138,7 @@ void StepForwardStoredSolution();
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv, 640, 640);
+	RunHOGGUI(argc, argv, 800, 400);
 	return 0;
 }
 
@@ -167,7 +167,7 @@ void InstallHandlers()
 #ifndef __EMSCRIPTEN__
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Level", "Goto nth level", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Toggle", "Toggle 0..9 loading regular/primer levels", kAnyModifier, '/');
-	InstallKeyboardHandler(GamePlayKeyboardHandler, "Print", "Print screen to file", kAnyModifier, 'p');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Print", "Print screen to file", kAnyModifier, '&');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Movie", "Record movie frames", kAnyModifier, 'o');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Solve", "Build solution", kAnyModifier, 'b');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Step", "Take next step in solution", kAnyModifier, ']');
@@ -1098,6 +1098,27 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 	static std::vector<SnakeBird::SnakeBirdAction> acts;
 	//	a.bird = snakeControl;
 	
+	// always be able to print screen
+	if (key == '&')
+	{
+		Graphics::Display &d = getCurrentContext()->display;
+		
+		//Graphics::Display d;
+		//sb.Draw(d);
+		//sb.Draw(d, globalTime);
+		//sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
+		//			std::string fname = "/Users/nathanst/Desktop/SVG/sb_";
+		std::string fname = "/Users/nathanst/Pictures/SVG/sb_";
+		int count = 0;
+		while (fileExists((fname+std::to_string(count)+".svg").c_str()))
+		{
+			count++;
+		}
+		printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
+		MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 800, 400, -1, sb.EncodeLevel().c_str(), true);
+	}
+
+	
 	// ignore key presses in edit mode
 	if (gEditMap && key != 't')
 		return;
@@ -1261,23 +1282,6 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 			GetLevelSolution(gNodeLimit);
 			break;
 		}
-		case 'p':
-		{
-			Graphics::Display d;
-			sb.Draw(d);
-			sb.Draw(d, globalTime);
-			sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
-//			std::string fname = "/Users/nathanst/Desktop/SVG/sb_";
-			std::string fname = "/Users/nathanst/Pictures/SVG/sb_";
-			int count = 0;
-			while (fileExists((fname+std::to_string(count)+".svg").c_str()))
-			{
-				count++;
-			}
-			printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
-			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0, sb.EncodeLevel().c_str(), true);
-		}
-			break;
 		case 'o':
 			recording = !recording;
 			break;

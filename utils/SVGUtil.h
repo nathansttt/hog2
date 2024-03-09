@@ -35,6 +35,8 @@ std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c)
 std::string SVGDrawRect(float x, float y, float width, float height, const char *gradient);
 std::string SVGFrameCircle(double x, double y, double radius, double border, rgbColor c);
 std::string SVGDrawCircle(double x, double y, double radius, rgbColor c);
+std::string SVGDrawEllipse(double x, double y, double rx, double ry, rgbColor c);
+std::string SVGDrawEllipse(Graphics::rect &r, rgbColor c);
 
 std::string SVGFrameNGon(double x, double y, double radius, int segments, float rotation, int border, rgbColor c);
 std::string SVGDrawNGon(double x, double y, double radius, int segments, float rotation, rgbColor c);
@@ -53,7 +55,7 @@ std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, 
 
 std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbColor c2, const char *name);
 
-std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport = 0, const char *comment = 0, bool crisp = true);
-void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport = 0, const char *comment = 0, bool crisp = true);
+std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport = -1, const char *comment = 0, bool crisp = true);
+void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport = -1, const char *comment = 0, bool crisp = true);
 
 #endif /* SVGUtil_hpp */

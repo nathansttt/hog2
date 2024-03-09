@@ -136,12 +136,30 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (viewport == 1)
 	{
 		plot.Draw(display);
+
+		if (recording)//&& viewport == GetNumPorts(windowID)-1)
+		{
+			char fname[255];
+			sprintf(fname, "/Users/nathanst/Pictures/SVG/NBS-%d%d%d%d.svg",
+					(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+			
+			MakeSVG(display, fname, 800, 800, -1, "", true);
+			printf("Saved %s\n", fname);
+			frameCnt++;
+			sprintf(fname, "/Users/nathanst/Pictures/SVG/NBS-%d%d%d%d.svg",
+					(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+			MakeSVG(display, fname, 800, 800, 0, "", true);
+			printf("Saved %s\n", fname);
+			frameCnt++;
+ 
+		}
 		return;
 	}
-
 	if (mapChange)
 	{
 		display.StartBackground();
+		display.FillRect(display.GlobalHOGToViewport(Graphics::rect{-1.f, -1.f, 1.f, 0.5f}, 0), Colors::black);
+		//display.FillRect({-2, -2, 2, 2}, Colors::black);
 		me->Draw(display);
 		display.EndBackground();
 		mapChange = false;
@@ -281,24 +299,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 		}
 	}
-	if (recording )//&& viewport == GetNumPorts(windowID)-1)
-	{
-		char fname[255];
-		sprintf(fname, "/Users/nathanst/Pictures/SVG/NBS-%d%d%d%d.svg",
-				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		
-		MakeSVG(display, fname, 800, 800);
-		
-		printf("Saved %s\n", fname);
-		frameCnt++;
-//		if (path.size() == 0)
-//		{
-//			MyDisplayHandler(windowID, kNoModifier, 'o');
-//		}
-//		else {
-//			recording = false;
-//		}
-	}
+
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)

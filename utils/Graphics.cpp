@@ -306,22 +306,30 @@ void Graphics::Display::MoveViewport(int port, const Graphics::rect &newLocation
 
 float Graphics::Display::GlobalHOGToViewportX(float x, int v) const
 {
+	return GlobalHOGToViewportX(x, v, windowWidth, windowHeight);
+}
+
+float Graphics::Display::GlobalHOGToViewportX(float x, int v, int width, int height) const
+{
 	Graphics::point input(x, 0.f, 0.f);
 	Graphics::point input2(0, 0.f, 0.f);
-	Graphics::point result = ViewportToGlobalHOG(input, v);
-	Graphics::point result2 = ViewportToGlobalHOG(input2, v);
+	Graphics::point result = GlobalHOGToViewport(input, v, width, height);
+	Graphics::point result2 = GlobalHOGToViewport(input2, v, width, height);
 	return result.x-result2.x;
-	//	return ((result.x+1.0)*pContextInfo->windowWidth)/2.0;
 }
 
 float Graphics::Display::ViewportToGlobalHOGX(float x, int v) const
 {
+	return ViewportToGlobalHOGX(x, v, windowWidth, windowHeight);
+}
+
+float Graphics::Display::ViewportToGlobalHOGX(float x, int v, int width, int height) const
+{
 	Graphics::point input(x, 0.f, 0.f);
 	Graphics::point input2(0, 0.f, 0.f);
-	Graphics::point result = ViewportToGlobalHOG(input, v);
-	Graphics::point result2 = ViewportToGlobalHOG(input2, v);
+	Graphics::point result = ViewportToGlobalHOG(input, v, width, height);
+	Graphics::point result2 = ViewportToGlobalHOG(input2, v, width, height);
 	return result.x-result2.x;
-	//	return ((result.x+1.0)*pContextInfo->windowWidth)/2.0;
 }
 
 // This code doesn't look to be correct
@@ -338,60 +346,85 @@ float Graphics::Display::ViewportToGlobalHOGX(float x, int v) const
 
 Graphics::point Graphics::Display::GlobalHOGToViewport(Graphics::point where, int viewport) const
 {
-	return GlobalHOGToViewport(viewports[viewport], where);
+	return GlobalHOGToViewport(where, viewport, windowWidth, windowHeight);
+}
+
+Graphics::point Graphics::Display::GlobalHOGToViewport(Graphics::point where, int viewport, int width, int height) const
+{
+	return GlobalHOGToViewport(viewports[viewport], where, width, height);
 }
 
 Graphics::point Graphics::Display::ViewportToGlobalHOG(Graphics::point where, int viewport) const
 {
-	return ViewportToGlobalHOG(viewports[viewport], where);
+	return ViewportToGlobalHOG(where, viewport, windowWidth, windowHeight);
+}
+
+Graphics::point Graphics::Display::ViewportToGlobalHOG(Graphics::point where, int viewport, int width, int height) const
+{
+	return ViewportToGlobalHOG(viewports[viewport], where, width, height);
 }
 
 Graphics::rect Graphics::Display::GlobalHOGToViewport(const Graphics::rect &loc, int port) const
 {
-	return Graphics::rect(GlobalHOGToViewport(viewports[port], {loc.left, loc.top}),
-						  GlobalHOGToViewport(viewports[port], {loc.right, loc.bottom}));
+	return GlobalHOGToViewport(loc, port, windowWidth, windowHeight);
+}
+
+Graphics::rect Graphics::Display::GlobalHOGToViewport(const Graphics::rect &loc, int port, int width, int height) const
+{
+	return Graphics::rect(GlobalHOGToViewport(viewports[port], {loc.left, loc.top}, width, height),
+						  GlobalHOGToViewport(viewports[port], {loc.right, loc.bottom}, width, height));
 }
 
 Graphics::rect Graphics::Display::ViewportToGlobalHOG(const Graphics::rect &loc, int port) const
 {
-	return Graphics::rect(ViewportToGlobalHOG(viewports[port], {loc.left, loc.top}),
-						  ViewportToGlobalHOG(viewports[port], {loc.right, loc.bottom}));
+	return ViewportToGlobalHOG(loc, port, windowWidth, windowHeight);
+}
+
+Graphics::rect Graphics::Display::ViewportToGlobalHOG(const Graphics::rect &loc, int port, int width, int height) const
+{
+	return Graphics::rect(ViewportToGlobalHOG(viewports[port], {loc.left, loc.top}, width, height),
+						  ViewportToGlobalHOG(viewports[port], {loc.right, loc.bottom}, width, height));
 }
 
 Graphics::point Graphics::Display::GlobalHOGToViewport(const viewport &v, Graphics::point where) const
+{
+	return GlobalHOGToViewport(v, where, windowWidth, windowHeight);
+}
+
+Graphics::point Graphics::Display::GlobalHOGToViewport(const viewport &v, Graphics::point where, int width, int height) const
 {
 	if (v.type == kScaleToFill) 		// just scale regular -1/1 axes into the rectangle
 	{
 		// gets offset into rect
 		where.x -= v.bounds.left;
 		where.x /= (v.bounds.right-v.bounds.left);
-		where.x = where.x*2.0-1.0;
+		where.x = where.x*2.0f-1.0f;
 		where.y -= v.bounds.bottom;
 		where.y /= (v.bounds.top-v.bounds.bottom);
-		where.y = -where.y*2.0+1.0;
+		where.y = -where.y*2.0f+1.0f;
 		return where;
 	}
 	else if (v.type == kScaleToSquare)
 	{
-		double localWidth = v.bounds.right-v.bounds.left;
-		double localHeight = v.bounds.bottom-v.bounds.top;
-		double actualWidth = windowWidth*localWidth;
-		double actualHeight = windowHeight*localHeight;
-		double xRatio = actualWidth/actualHeight;
-		double yRatio = actualHeight/actualWidth;
-		xRatio = std::max(xRatio, 1.);
-		yRatio = std::max(yRatio, 1.);
+		float localWidth = v.bounds.right-v.bounds.left;
+		float localHeight = v.bounds.bottom-v.bounds.top;
+		float actualWidth = windowWidth*localWidth;
+		float actualHeight = windowHeight*localHeight;
+		float xRatio = actualWidth/actualHeight;
+		float yRatio = actualHeight/actualWidth;
+		xRatio = std::max(xRatio, 1.f);
+		yRatio = std::max(yRatio, 1.f);
 		
 		where.x *= xRatio;
 		where.x -= v.bounds.left;
 		where.x /= (v.bounds.right-v.bounds.left);
-		where.x = where.x*2.0-1.0;
+		where.x = where.x*2.0f-1.0f;
 
 		
 		where.y *= yRatio;
 		where.y -= v.bounds.bottom;
 		where.y /= (v.bounds.top-v.bounds.bottom);
-		where.y = (-where.y)*2.0+1.0;
+		where.y = (-where.y)*2.0f+1.0f;
 
 		
 		return where;
@@ -405,36 +438,39 @@ Graphics::point Graphics::Display::GlobalHOGToViewport(const viewport &v, Graphi
 
 Graphics::point Graphics::Display::ViewportToGlobalHOG(const viewport &v, Graphics::point where) const
 {
+	return ViewportToGlobalHOG(v, where, windowWidth, windowHeight);
+}
+
+Graphics::point Graphics::Display::ViewportToGlobalHOG(const viewport &v, Graphics::point where, int wWidth, int wHeight) const
+{
 	if (v.type == kScaleToFill)
 	{
-		where.x = (where.x+1.0)/2.0;
+		where.x = (where.x+1.0f)/2.0f;
 		where.x *= (v.bounds.right-v.bounds.left);
 		where.x += v.bounds.left;
 
-		where.y = -(where.y-1.0)/2.0;
+		where.y = -(where.y-1.0f)/2.0f;
 		where.y *= (v.bounds.top-v.bounds.bottom);
 		where.y += v.bounds.bottom;
 		return where;
 	}
 	else if (v.type == kScaleToSquare)
 	{
-		double localWidth = v.bounds.right-v.bounds.left;
-		double localHeight = v.bounds.bottom-v.bounds.top;
-		double actualWidth = windowWidth*localWidth;
-		double actualHeight = windowHeight*localHeight;
-//		double xRatio = pContextInfo->windowWidth*localWidth/pContextInfo->windowHeight*localHeight;
-//		double yRatio = pContextInfo->windowHeight*localHeight/pContextInfo->windowWidth*localWidth;
-		double xRatio = actualWidth/actualHeight;
-		double yRatio = actualHeight/actualWidth;
-		xRatio = std::max(xRatio, 1.);
-		yRatio = std::max(yRatio, 1.);
+		float localWidth = v.bounds.right-v.bounds.left;
+		float localHeight = v.bounds.bottom-v.bounds.top;
+		float actualWidth = wWidth*localWidth;
+		float actualHeight = wHeight*localHeight;
+		float xRatio = actualWidth/actualHeight;
+		float yRatio = actualHeight/actualWidth;
+		xRatio = std::max(xRatio, 1.f);
+		yRatio = std::max(yRatio, 1.f);
 		
-		where.x = (where.x+1.0)/2.0;
+		where.x = (where.x+1.0f)/2.0f;
 		where.x *= (v.bounds.right-v.bounds.left);
 		where.x += v.bounds.left;
 		where.x /= xRatio;
 		
-		where.y = -(where.y-1.0)/2.0;
+		where.y = -(where.y-1.0f)/2.0f;
 		where.y *= (v.bounds.top-v.bounds.bottom);
 		where.y += v.bounds.bottom;
 		where.y /= yRatio;
