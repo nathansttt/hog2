@@ -961,6 +961,29 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 	float yOrigin = (0-((float)height)/2.0f)*squareSize;
 	char txt[10];
 	display.FillRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::gray);
+	// background stiple
+	{
+		float t = 0;
+		while (fless(t, (width)*squareSize+(height)*squareSize))
+		{
+			float xLoc1 = xOrigin+t;
+			float yLoc1 = yOrigin;
+			if (t > (width)*squareSize)
+			{
+				yLoc1 += t - (width)*squareSize;
+				xLoc1 = xOrigin + (width)*squareSize;
+			}
+			float xLoc2 = xOrigin;
+			float yLoc2 = yOrigin+t;
+			if (t > (height)*squareSize)
+			{
+				xLoc2 += t - (height)*squareSize;
+				yLoc2 = yOrigin + (height)*squareSize;
+			}
+			display.DrawLine({xLoc1, yLoc1}, {xLoc2, yLoc2}, 0.04f*squareSize, Colors::darkgray);
+			t+=0.15f*squareSize;
+		}
+	}
 	display.FrameRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::lightgray, 0.04*squareSize);
 	for (unsigned int y = 0; y < height; y++)
 	{
@@ -969,12 +992,20 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 			if (s.puzzle[x+y*width] != 0)
 			{
 				sprintf(txt, "%d", s.puzzle[x+y*width]);
-				display.FillRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::white);
-				display.FrameRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::darkblue, 0.01*squareSize);
+				Graphics::rect bound(xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize);
+				display.FillRect(bound, Colors::white);
+				display.FrameRect(bound, Colors::darkblue, 0.01f*squareSize);
+				bound = bound.inset(0.02f*squareSize);
+				display.FrameRect(bound, Colors::lightgray, 0.02f*squareSize);
 				if (s.puzzle[x+y*width] > 0)
+				{
+					display.DrawText(txt,
+									 {xOrigin+x*squareSize+1.03f*squareSize/2.f, yOrigin+y*squareSize+1.03f*squareSize/2.f},
+									 Colors::lightblue, squareSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 					display.DrawText(txt,
 									 {xOrigin+x*squareSize+squareSize/2.f, yOrigin+y*squareSize+squareSize/2.f},
 									 Colors::blue, squareSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+				}
 			}
 		}
 	}
@@ -1040,7 +1071,30 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 	float yOrigin = (0-((float)height)/2.0f)*squareSize;
 	char txt[10];
 	display.FillRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::gray);
-	display.FrameRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::lightgray, 0.04*squareSize);
+	// background stiple
+	{
+		float t = 0;
+		while (fless(t, (width)*squareSize+(height)*squareSize))
+		{
+			float xLoc1 = xOrigin+t;
+			float yLoc1 = yOrigin;
+			if (t > (width)*squareSize)
+			{
+				yLoc1 += t - (width)*squareSize;
+				xLoc1 = xOrigin + (width)*squareSize;
+			}
+			float xLoc2 = xOrigin;
+			float yLoc2 = yOrigin+t;
+			if (t > (height)*squareSize)
+			{
+				xLoc2 += t - (height)*squareSize;
+				yLoc2 = yOrigin + (height)*squareSize;
+			}
+			display.DrawLine({xLoc1, yLoc1}, {xLoc2, yLoc2}, 0.04f*squareSize, Colors::darkgray);
+			t+=0.15f*squareSize;
+		}
+	}
+	display.FrameRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::lightgray, 0.04f*squareSize);
 	for (unsigned int y = 0; y < height; y++)
 	{
 		for (unsigned int x = 0; x < width; x++)
@@ -1050,10 +1104,16 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 				if (s1.puzzle[x+y*width] != 0)
 				{
 					sprintf(txt, "%d", s1.puzzle[x+y*width]);
-					display.FillRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::white);
-					display.FrameRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::darkblue, 0.01*squareSize);
+					Graphics::rect bound(xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize);
+					display.FillRect(bound, Colors::white);
+					display.FrameRect(bound, Colors::darkblue, 0.01f*squareSize);
+					bound = bound.inset(0.02f*squareSize);
+					display.FrameRect(bound, Colors::lightgray, 0.02f*squareSize);
 					if (s1.puzzle[x+y*width] > 0)
+					{
+						display.DrawText(txt, {xOrigin+x*squareSize+1.03f*squareSize/2.f, yOrigin+y*squareSize+1.03f*squareSize/2.f}, Colors::lightblue, squareSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 						display.DrawText(txt, {xOrigin+x*squareSize+squareSize/2.f, yOrigin+y*squareSize+squareSize/2.f}, Colors::blue, squareSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+					}
 				}
 			}
 			else if (s1.puzzle[x+y*width] != 0)
@@ -1078,11 +1138,17 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 					default: assert(!"action not found");
 				}
 				sprintf(txt, "%d", s1.puzzle[x+y*width]);
-				display.FillRect({p1.x*v+p2.x*(1-v), p1.y*v+p2.y*(1-v), p1.x*v+p2.x*(1-v)+squareSize, p1.y*v+p2.y*(1-v)+squareSize}, Colors::white);
-				display.FrameRect({p1.x*v+p2.x*(1-v), p1.y*v+p2.y*(1-v), p1.x*v+p2.x*(1-v)+squareSize, p1.y*v+p2.y*(1-v)+squareSize}, Colors::darkblue, 0.01*squareSize);
+				Graphics::rect bound(p1.x*v+p2.x*(1-v), p1.y*v+p2.y*(1-v), p1.x*v+p2.x*(1-v)+squareSize, p1.y*v+p2.y*(1-v)+squareSize);
+				display.FillRect(bound, Colors::white);
+				display.FrameRect(bound, Colors::darkblue, 0.01f*squareSize);
+				bound = bound.inset(0.02f*squareSize);
+				display.FrameRect(bound, Colors::lightgray, 0.02f*squareSize);
 
 				if (s1.puzzle[x+y*width] > 0)
+				{
+					display.DrawText(txt, {p1.x*v+p2.x*(1-v)+1.03f*squareSize/2.f, p1.y*v+p2.y*(1-v)+1.03f*squareSize/2.f}, Colors::lightblue, squareSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 					display.DrawText(txt, {p1.x*v+p2.x*(1-v)+squareSize/2.f, p1.y*v+p2.y*(1-v)+squareSize/2.f}, Colors::blue, squareSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
+				}
 			}
 		}
 	}
