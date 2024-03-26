@@ -484,13 +484,26 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			}
 			if (m == kMoveNodes)
 			{
-				from = to = FindClosestNode(g, loc)->GetNum();
-				currLoc = ge->GetLocation(from);
+				node *n = FindClosestNode(g, loc);
+				if (n)
+				{
+					from = to = n->GetNum();
+					currLoc = ge->GetLocation(from);
+				}
+				else {
+					from = to = -1;
+					printf("Error, no closest node to (%f, %f)\n", loc.x, loc.y);
+				}
 			}
 			return true;
 		}
 		case kMouseDrag:
 		{
+			if (from != -1)
+			{
+				printf("Invalid from\n");
+				break;
+			}
 			if (m == kAddEdges || m == kFindPath)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
@@ -515,6 +528,11 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 		case kMouseUp:
 		{
 			printf("UnHit at (%f, %f, %f)\n", loc.x, loc.y, loc.z);
+			if (from == -1)
+			{
+				printf("Invalid source; skipping\n");
+				break;
+			}
 			if (m == kAddEdges)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
