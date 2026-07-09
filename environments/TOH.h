@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <cstdint>
+#include <cassert>
 #include <math.h>
 #include "SearchEnvironment.h"
 #include "PDBHeuristic.h"
@@ -22,36 +23,36 @@ struct TOHMove {
 	uint8_t dest;
 };
 
-template <int numDisks>
+template <int numDisks, int numPegs = 4>
 struct TOHState {
 	TOHState()
 	{
-		for (int x = 0; x < 4; x++)
+		for (int x = 0; x < numPegs; x++)
 		{
 			counts[x] = 0;
 		}
 		for (int x = 0; x < numDisks; x++)
 		{
-			disks[3][x] = numDisks-x;
+			disks[numPegs-1][x] = numDisks-x;
 		}
-		counts[3] = numDisks;
+		counts[numPegs-1] = numDisks;
 	}
-	
+
 	void Reset()
 	{
-		for (int x = 0; x < 4; x++)
+		for (int x = 0; x < numPegs; x++)
 		{
 			counts[x] = 0;
 		}
 		for (int x = 0; x < numDisks; x++)
 		{
-			disks[3][x] = numDisks-x;
+			disks[numPegs-1][x] = numDisks-x;
 		}
-		counts[3] = numDisks;
+		counts[numPegs-1] = numDisks;
 	}
 	void StandardStart()
 	{
-		for (int x = 0; x < 4; x++)
+		for (int x = 0; x < numPegs; x++)
 		{
 			counts[x] = 0;
 		}
@@ -61,14 +62,17 @@ struct TOHState {
 		}
 		counts[0] = numDisks;
 	}
-	
+
 	int GetDiskCountOnPeg(int whichPeg) const
 	{
+		assert(whichPeg >= 0 && whichPeg < numPegs);
 		return counts[whichPeg];
 	}
-	
+
 	int GetDiskOnPeg(int whichPeg, int whichDisk) const
 	{
+		assert(whichPeg >= 0 && whichPeg < numPegs);
+		assert(whichDisk >= 0 && whichDisk < counts[whichPeg]);
 		return disks[whichPeg][whichDisk];
 	}
 
@@ -76,20 +80,21 @@ struct TOHState {
 	// avoid the "if" statement.
 	int GetSmallestDiskOnPeg(int whichPeg) const
 	{
+		assert(whichPeg >= 0 && whichPeg < numPegs);
 		int count = GetDiskCountOnPeg(whichPeg);
 		if (count == 0)
 			return numDisks+1;
 		return GetDiskOnPeg(whichPeg, count-1);
 	}
 
-	uint8_t disks[4][numDisks];
-	uint8_t counts[4];
+	uint8_t disks[numPegs][numDisks];
+	uint8_t counts[numPegs];
 };
 
-template <int D>
-static std::ostream &operator<<(std::ostream &out, const TOHState<D> &s)
+template <int D, int numPegs>
+static std::ostream &operator<<(std::ostream &out, const TOHState<D, numPegs> &s)
 {
-	for (int x = 0; x < 4; x++)
+	for (int x = 0; x < numPegs; x++)
 	{
 		out << "(" << x << ") ";
 		for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
@@ -98,9 +103,9 @@ static std::ostream &operator<<(std::ostream &out, const TOHState<D> &s)
 	return out;
 }
 
-template <int D>
-static bool operator==(const TOHState<D> &l1, const TOHState<D> &l2) {
-	for (int x = 0; x < 4; x++)
+template <int D, int numPegs>
+static bool operator==(const TOHState<D, numPegs> &l1, const TOHState<D, numPegs> &l2) {
+	for (int x = 0; x < numPegs; x++)
 	{
 		if (l1.GetDiskCountOnPeg(x) != l2.GetDiskCountOnPeg(x))
 			return false;
@@ -113,8 +118,8 @@ static bool operator==(const TOHState<D> &l1, const TOHState<D> &l2) {
 	return true;
 }
 
-template <int D>
-static bool operator!=(const TOHState<D> &l1, const TOHState<D> &l2) {
+template <int D, int numPegs>
+static bool operator!=(const TOHState<D, numPegs> &l1, const TOHState<D, numPegs> &l2) {
 	return !(l1 == l2);
 }
 
@@ -128,62 +133,68 @@ static bool operator==(const TOHMove &m1, const TOHMove &m2) {
 	return m1.source == m2.source && m1.dest == m2.dest;
 }
 
+// integer exponentiation - used to build the base-numPegs hash of a TOHState
+static inline uint64_t TOHIntPow(uint64_t base, int exponent)
+{
+	uint64_t result = 1;
+	for (int i = 0; i < exponent; i++)
+		result *= base;
+	return result;
+}
 
-template <int disks>
-class TOH : public SearchEnvironment<TOHState<disks>, TOHMove> {
+template <int numDisks, int numPegs = 4>
+class TOH : public SearchEnvironment<TOHState<numDisks, numPegs>, TOHMove> {
 public:
-	TOH() :pruneActions(false) {}
+	TOH() {}
 	~TOH() {}
-	void GetSuccessors(const TOHState<disks> &nodeID, std::vector<TOHState<disks>> &neighbors) const;
-	void GetActions(const TOHState<disks> &nodeID, std::vector<TOHMove> &actions) const;
-	void ApplyAction(TOHState<disks> &s, TOHMove a) const;
+	void GetSuccessors(const TOHState<numDisks, numPegs> &nodeID, std::vector<TOHState<numDisks, numPegs>> &neighbors) const;
+	void GetActions(const TOHState<numDisks, numPegs> &nodeID, std::vector<TOHMove> &actions) const;
+	void ApplyAction(TOHState<numDisks, numPegs> &s, TOHMove a) const;
 	bool InvertAction(TOHMove &a) const;
 
 	/** Heuristic value between two arbitrary nodes. **/
-	double HCost(const TOHState<disks> &node1, const TOHState<disks> &node2) const;
-	double GCost(const TOHState<disks> &node1, const TOHState<disks> &node2) const { return 1; }
-	double GCost(const TOHState<disks> &node, const TOHMove &act) const { return 1; }
-	bool GoalTest(const TOHState<disks> &node, const TOHState<disks> &goal) const;
+	double HCost(const TOHState<numDisks, numPegs> &node1, const TOHState<numDisks, numPegs> &node2) const;
+	double GCost(const TOHState<numDisks, numPegs> &node1, const TOHState<numDisks, numPegs> &node2) const { return 1; }
+	double GCost(const TOHState<numDisks, numPegs> &node, const TOHMove &act) const { return 1; }
+	bool GoalTest(const TOHState<numDisks, numPegs> &node, const TOHState<numDisks, numPegs> &goal) const;
 
-	uint64_t GetStateHash(const TOHState<disks> &node) const;
-	void GetStateFromHash(uint64_t parent, TOHState<disks> &s) const;
-	uint64_t GetMaxHash() const { return (1ull)<<(disks*2ull); }
-	uint64_t GetNumStates(TOHState<disks> &s) const;
+	uint64_t GetStateHash(const TOHState<numDisks, numPegs> &node) const;
+	void GetStateFromHash(uint64_t parent, TOHState<numDisks, numPegs> &s) const;
+	uint64_t GetMaxHash() const { return TOHIntPow(numPegs, numDisks); }
+	uint64_t GetNumStates(TOHState<numDisks, numPegs> &s) const;
 	uint64_t GetActionHash(TOHMove act) const;
 
-	std::string GetName() { return "TOH("+std::to_string(disks)+")"; }
-//	void OpenGLDraw() const;
-//	void OpenGLDraw(const TOHState<disks>&) const;
-//	/** Draw the transition at some percentage 0...1 between two TOHState<disks>s */
-//	void OpenGLDraw(const TOHState<disks>&, const TOHState<disks>&, float) const;
-//	void OpenGLDraw(const TOHState<disks>&, const TOHMove&) const;
+	std::string GetName() { return "TOH("+std::to_string(numDisks)+","+std::to_string(numPegs)+")"; }
+  
+  // x-coordinate of the center of the given peg; pegs are evenly spaced
+  // across the [-1, 1] range of the display, one per numPegs-wide region
+  float GetPegLocation(int peg) const;
 
     void Draw(Graphics::Display &display, std::string str) const; // draws text
 	void Draw(Graphics::Display &display) const; // draws the base and lines
-	void Draw(Graphics::Display &display, const TOHState<disks> &s) const; // draws the disks when not animating
-	void Draw(Graphics::Display &display, const TOHState<disks> &l1, const TOHState<disks> &l2, float v) const; // animation for optimal solution
-    void Draw(Graphics::Display &display, const TOHState<disks> &l1, int selectedPeg, int nextPeg, float v) const; // vertical animation for when user is solving
-    void Draw(Graphics::Display &display, const TOHState<disks> &l1, int startPeg, float px); // horizontal animation for when user is solving
-    void Draw(Graphics::Display &display, const TOHState<disks>&, TOHMove&) const;
-    
+	void Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &s) const; // draws the disks when not animating
+	void Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &l1, const TOHState<numDisks, numPegs> &l2, float v) const; // animation for optimal solution
+    void Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &l1, int selectedPeg, int nextPeg, float v) const; // vertical animation for when user is solving
+    void Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &l1, int startPeg, float px); // horizontal animation for when user is solving
+    void Draw(Graphics::Display &display, const TOHState<numDisks, numPegs>&, TOHMove&) const;
+
     bool Click(int &peg, float px);
     int GetHoveredPeg(const float &px);
-    bool Drag(const TOHState<disks> &currState, int peg);
-    bool Release(const TOHState<disks> &currState, int &peg, point3d loc, TOHState<disks> &nextState, int &userMoveCount);
-	
-	bool pruneActions;
+    bool Drag(const TOHState<numDisks, numPegs> &currState, int peg);
+    bool Release(const TOHState<numDisks, numPegs> &currState, int &peg, point3d loc, TOHState<numDisks, numPegs> &nextState, int &userMoveCount);
+
 protected:
 private:
 	// caches
 	mutable std::vector<TOHMove> acts;
-	mutable TOHState<disks> tmp;
+	mutable TOHState<numDisks, numPegs> tmp;
 
 };
 
 
 
-template <int disks>
-void TOH<disks>::GetSuccessors(const TOHState<disks> &nodeID, std::vector<TOHState<disks>> &neighbors) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::GetSuccessors(const TOHState<numDisks, numPegs> &nodeID, std::vector<TOHState<numDisks, numPegs>> &neighbors) const
 {
 	neighbors.resize(0);
 	GetActions(nodeID, acts);
@@ -194,92 +205,38 @@ void TOH<disks>::GetSuccessors(const TOHState<disks> &nodeID, std::vector<TOHSta
 	}
 }
 
-template <int disks>
-void TOH<disks>::GetActions(const TOHState<disks> &s, std::vector<TOHMove> &actions) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::GetActions(const TOHState<numDisks, numPegs> &s, std::vector<TOHMove> &actions) const
 {
-	bool goalOrdered = false;
-	if (pruneActions)
+	actions.resize(0);
+	for (int i = 0; i < numPegs; i++)
 	{
-		goalOrdered = true;
-		for (int x = 0; x < s.GetDiskCountOnPeg(3); x++)
+		for (int j = i+1; j < numPegs; j++)
 		{
-			if (s.GetDiskOnPeg(3, x) != disks-x)
+			if (s.GetSmallestDiskOnPeg(i) < s.GetSmallestDiskOnPeg(j))
 			{
-				goalOrdered = false;
-				break;
+				if (s.GetDiskCountOnPeg(i) > 0)
+					actions.push_back(TOHMove(i, j));
+			}
+			else {
+				if (s.GetDiskCountOnPeg(j) > 0)
+					actions.push_back(TOHMove(j, i));
 			}
 		}
-	}
-	
-	actions.resize(0);
-	if (s.GetSmallestDiskOnPeg(0) < s.GetSmallestDiskOnPeg(1))
-	{
-		if (s.GetDiskCountOnPeg(0) > 0)
-			actions.push_back(TOHMove(0, 1));
-	}
-	else {
-		if (s.GetDiskCountOnPeg(1) > 0)
-			actions.push_back(TOHMove(1, 0));
-	}
-	if (s.GetSmallestDiskOnPeg(0) < s.GetSmallestDiskOnPeg(2))
-	{
-		if (s.GetDiskCountOnPeg(0) > 0)
-			actions.push_back(TOHMove(0, 2));
-	}
-	else {
-		if (s.GetDiskCountOnPeg(2) > 0)
-			actions.push_back(TOHMove(2, 0));
-	}
-	
-	if (s.GetSmallestDiskOnPeg(0) < s.GetSmallestDiskOnPeg(3))
-	{
-		if (s.GetDiskCountOnPeg(0) > 0)
-			actions.push_back(TOHMove(0, 3));
-	}
-	else {
-		if (s.GetDiskCountOnPeg(3) > 0 && !goalOrdered)
-			actions.push_back(TOHMove(3, 0));
-	}
-	if (s.GetSmallestDiskOnPeg(1) < s.GetSmallestDiskOnPeg(2))
-	{
-		if (s.GetDiskCountOnPeg(1) > 0)
-			actions.push_back(TOHMove(1, 2));
-	}
-	else {
-		if (s.GetDiskCountOnPeg(2) > 0)
-			actions.push_back(TOHMove(2, 1));
-	}
-	if (s.GetSmallestDiskOnPeg(1) < s.GetSmallestDiskOnPeg(3))
-	{
-		if (s.GetDiskCountOnPeg(1) > 0)
-			actions.push_back(TOHMove(1, 3));
-	}
-	else {
-		if (s.GetDiskCountOnPeg(3) > 0 && !goalOrdered)
-			actions.push_back(TOHMove(3, 1));
-	}
-	if (s.GetSmallestDiskOnPeg(2) < s.GetSmallestDiskOnPeg(3))
-	{
-		if (s.GetDiskCountOnPeg(2) > 0)
-			actions.push_back(TOHMove(2, 3));
-	}
-	else {
-		if (s.GetDiskCountOnPeg(3) > 0 && !goalOrdered)
-			actions.push_back(TOHMove(3, 2));
 	}
 }
 
 
-template <int disks>
-void TOH<disks>::ApplyAction(TOHState<disks> &s, TOHMove m) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::ApplyAction(TOHState<numDisks, numPegs> &s, TOHMove m) const
 {
 	s.disks[m.dest][s.counts[m.dest]] = s.disks[m.source][s.counts[m.source]-1];
 	s.counts[m.dest]++;
 	s.counts[m.source]--;
 }
 
-template <int disks>
-bool TOH<disks>::InvertAction(TOHMove &a) const
+template <int numDisks, int numPegs>
+bool TOH<numDisks, numPegs>::InvertAction(TOHMove &a) const
 {
 	uint8_t tmp = a.source;
 	a.source = a.dest;
@@ -289,195 +246,114 @@ bool TOH<disks>::InvertAction(TOHMove &a) const
 
 
 /** Heuristic value between two arbitrary nodes. **/
-template <int disks>
-double TOH<disks>::HCost(const TOHState<disks> &node1, const TOHState<disks> &node2) const
+template <int numDisks, int numPegs>
+double TOH<numDisks, numPegs>::HCost(const TOHState<numDisks, numPegs> &node1, const TOHState<numDisks, numPegs> &node2) const
 {
 	// NOTE: this is using the standard goal state; arbitrary goal states
 	// are more expensive to check
-	return disks - node1.GetDiskCountOnPeg(3);
+	return numDisks - node1.GetDiskCountOnPeg(numPegs-1);
 }
 
-template <int disks>
-bool TOH<disks>::GoalTest(const TOHState<disks> &node, const TOHState<disks> &goal) const
+template <int numDisks, int numPegs>
+bool TOH<numDisks, numPegs>::GoalTest(const TOHState<numDisks, numPegs> &node, const TOHState<numDisks, numPegs> &goal) const
 {
 	// NOTE: This goal test is only from standard start to standard goal
-	return (node.GetDiskCountOnPeg(3) == disks && node.GetDiskOnPeg(3, 0) == disks);
-//	return (node.GetDiskCountOnPeg(3) == 1 && node.GetDiskOnPeg(3, 0) == disks);
+	return (node.GetDiskCountOnPeg(numPegs-1) == numDisks && node.GetDiskOnPeg(numPegs-1, 0) == numDisks);
 	// NOTE: this is using the standard goal state; arbitrary goal states
 	// are more expensive to check
 	return (node == goal);
-	//return (node.GetDiskCountOnPeg(3)==disks);
 }
 
 
-template <int disks>
-uint64_t TOH<disks>::GetStateHash(const TOHState<disks> &node) const
+template <int numDisks, int numPegs>
+uint64_t TOH<numDisks, numPegs>::GetStateHash(const TOHState<numDisks, numPegs> &node) const
 {
 	uint64_t hash = 0;
-	for (int x = 0; x < 4; x++)
+	for (int x = 0; x < numPegs; x++)
 	{
 		for (int y = 0; y < node.GetDiskCountOnPeg(x); y++)
 		{
-			hash |= (uint64_t(x)<<(2*(node.GetDiskOnPeg(x, y)-1)));
+			hash += static_cast<uint64_t>(x) * TOHIntPow(numPegs, node.GetDiskOnPeg(x, y)-1);
 		}
 	}
 	return hash;
 }
 
-template <int disks>
-uint64_t TOH<disks>::GetNumStates(TOHState<disks> &s) const
+template <int numDisks, int numPegs>
+uint64_t TOH<numDisks, numPegs>::GetNumStates(TOHState<numDisks, numPegs> &s) const
 {
-	return 1ull<<(2*disks);
+	return TOHIntPow(numPegs, numDisks);
 }
 
-template <int disks>
-void TOH<disks>::GetStateFromHash(uint64_t hash, TOHState<disks> &s) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::GetStateFromHash(uint64_t hash, TOHState<numDisks, numPegs> &s) const
 {
-	for (int x = 0; x < 4; x++)
+	for (int x = 0; x < numPegs; x++)
 		s.counts[x] = 0;
-	for (int x = disks-1; x >= 0; x--)
+	for (int x = numDisks-1; x >= 0; x--)
 	{
-		int nextPeg = (hash>>(2*x))&0x3;
+		int nextPeg = (hash / TOHIntPow(numPegs, x)) % numPegs;
 		s.disks[nextPeg][s.counts[nextPeg]] = x+1;
 		s.counts[nextPeg]++;
 	}
 }
 
-template <int disks>
-uint64_t TOH<disks>::GetActionHash(TOHMove act) const
+template <int numDisks, int numPegs>
+uint64_t TOH<numDisks, numPegs>::GetActionHash(TOHMove act) const
 {
 	return (act.source<<8)|act.dest;
 }
 
-//template <int disks>
-//void TOH<disks>::OpenGLDraw() const
-//{
-//	glColor3f(0.5, 0.5, 0.5);
-//	DrawCylinder(-0.75, 0, 0, 0, 0.01, 0.8);
-//	DrawCylinder(-0.25, 0, 0, 0, 0.01, 0.8);
-//	DrawCylinder( 0.25, 0, 0, 0, 0.01, 0.8);
-//	DrawCylinder( 0.75, 0, 0, 0, 0.01, 0.8);
-//	glColor3f(0.6, 0.4, 0.2);
-//	glPushMatrix();
-//	glScalef(1.0, 0.05, 0.25);
-//	DrawBox(0, 0.4/0.05+1, 0, 1.0);
-//	glPopMatrix();
-//	//	DrawBox(0, 0, 0, 0.5);
-//}
-//
-//template <int disks>
-//void TOH<disks>::OpenGLDraw(const TOHState<disks>&s) const
-//{
-//	glColor3f(0.0, 0.0, 1.0);
-//	double offset[4] = {-0.75, -0.25, 0.25, 0.75};
-//	for (int x = 0; x < 4; x++)
-//	{
-//		for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
-//		{
-//			int which = s.GetDiskOnPeg(x, y);
-//			glColor3f(0.0, 1.0-float(which)/float(disks), 1.0);
-//			DrawCylinder(offset[x], 0.4-0.4/(1+float(disks))-y*0.8/(1+float(disks)), 0,
-//						 0.02, 0.04+0.2*which/float(disks), 0.8/(1+float(disks)));
-//		}
-//	}
-//}
-//
-///** Draw the transition at some percentage 0...1 between two TOHState<disks>s */
-//template <int disks>
-//void TOH<disks>::OpenGLDraw(const TOHState<disks>&s, const TOHState<disks>&s2, float interval) const
-//{
-//	TOHMove m = this->GetAction(s, s2);
-//	int animatingDisk = s.GetSmallestDiskOnPeg(m.source);
-//	int initialHeight = s.GetDiskCountOnPeg(m.source)-1;
-//	int finalHeight = s.GetDiskCountOnPeg(m.dest);
-//	
-//	glColor3f(0.0, 0.0, 1.0);
-//	double offset[4] = {-0.75, -0.25, 0.25, 0.75};
-//	for (int x = 0; x < 4; x++)
-//	{
-//		for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
-//		{
-//			int which = s.GetDiskOnPeg(x, y);
-//			if (which != animatingDisk)
-//			{
-//				glColor3f(0.0, 1.0-float(which)/float(disks), 1.0);
-//				DrawCylinder(offset[x], 0.4-0.4/(1+float(disks))-y*0.8/(1+float(disks)), 0,
-//							 0.02, 0.04+0.2*which/float(disks), 0.8/(1+float(disks)));
-//			}
-//		}
-//	}
-//	glColor3f(0.0, 1.0-float(animatingDisk)/float(disks), 1.0);
-//	if (interval <= 0.333)
-//	{
-//		interval *= 3;
-//		DrawCylinder(offset[m.source], 0.4-0.4/(1+float(disks))-initialHeight*0.8/(1+float(disks)) - (interval)*(disks+1-initialHeight)*0.8/(1+float(disks)), 0,
-//					 0.02, 0.04+0.2*animatingDisk/float(disks), 0.8/(1+float(disks)));
-//	}
-//	else if (interval <= 0.666)
-//	{
-//		interval *= 3;
-//		DrawCylinder((2-interval)*offset[m.source]+(interval-1)*offset[m.dest], 0.4-0.4/(1+float(disks))-0.8-0.2*sin((interval-1)*PI), 0,
-//					 0.02, 0.04+0.2*animatingDisk/float(disks), 0.8/(1+float(disks)));
-//	}
-//	else {
-//		DrawCylinder(offset[m.dest], 0.4-0.4/(1+float(disks))-finalHeight*0.8/(1+float(disks)) -
-//					 ((1.0-interval)/0.334)*(disks+1-finalHeight)*0.8/(1+float(disks)), 0,
-//					 0.02, 0.04+0.2*animatingDisk/float(disks), 0.8/(1+float(disks)));
-//	}
-//}
-//
-//template <int disks>
-//void TOH<disks>::OpenGLDraw(const TOHState<disks>&, const TOHMove&) const
-//{
-//	
-//}
-
-
 // Draw for text area
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display, std::string str) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display, std::string str) const
 {
     Graphics::rect r1(-1, -1, 1, -0.8); // background for text area
     display.FillRect(r1, Colors::lightgray);
-    
+
     display.DrawText(str.c_str(), Graphics::point{-0.9, -0.9}, Colors::black, 0.075,
                      Graphics::textAlignLeft, Graphics::textBaselineMiddle);
 }
 
-// Draw for pegs and base
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display) const
+template <int numDisks, int numPegs>
+float TOH<numDisks, numPegs>::GetPegLocation(int peg) const
 {
-	Graphics::rect r1(-0.75-0.01, 0, -0.75+0.01, 0.9); // peg
+	// the screen spans [-1, 1] (2 units); divide it into numPegs regions
+	// and place the peg at the center of its region
+	return -1.0f + (2.0f*peg+1.0f)/numPegs;
+}
 
-	display.FillRect(r1, Colors::gray);
-    
-	r1.left += 0.5; r1.right += 0.5; // adds margin of space to the left and right
-	display.FillRect(r1, Colors::gray);
-	r1.left += 0.5; r1.right += 0.5;
-	display.FillRect(r1, Colors::gray);
-	r1.left += 0.5; r1.right += 0.5;
-	display.FillRect(r1, Colors::gray);
-	r1.left += 0.5; r1.right += 0.5;
-    
+// Draw for pegs and base
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display) const
+{
+	for (int p = 0; p < numPegs; p++)
+	{
+		float loc = GetPegLocation(p);
+		Graphics::rect r1(loc-0.01, 0, loc+0.01, 0.9); // peg
+		display.FillRect(r1, Colors::gray);
+	}
+
     display.FillRect({-1, 0.8, 1, 0.92}, {0.6, 0.4, 0.2}); // brown base
 }
 
 // Draw for still state
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks> &s) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &s) const
 {
-	double offset[4] = {-0.75, -0.25, 0.25, 0.75};
-	for (int x = 0; x < 4; x++)
+	for (int x = 0; x < numPegs; x++)
 	{
+		float loc = GetPegLocation(x);
 		for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
 		{
 			int which = s.GetDiskOnPeg(x, y);
-			rgbColor color(0.0, 1.0-float(which)/float(disks), 1.0);
-			Graphics::rect r(offset[x]-0.04-0.2*which/float(disks),
-							 -y*0.8/(1+float(disks))-0.8/(1+float(disks))+0.8,
-							 offset[x]+0.04+0.2*which/float(disks),
-							 -y*0.8/(1+float(disks))+0.8);
+			float halfwidth = (0.9f*(2.0f/numPegs)/2.0f)*((which+1)/float(numDisks));
+
+			rgbColor color(0.0, 1.0-float(which)/float(numDisks), 1.0);
+			Graphics::rect r(loc-halfwidth,
+							 -y*0.8/(1+float(numDisks))-0.8/(1+float(numDisks))+0.8,
+					 loc+halfwidth,
+							 -y*0.8/(1+float(numDisks))+0.8);
 
 			display.FillRect(r, color);
 		}
@@ -485,137 +361,139 @@ void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks> &s) cons
 }
 
 // Draw for animating optimal solve
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks> &s, const TOHState<disks> &s2, float v) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &s, const TOHState<numDisks, numPegs> &s2, float v) const
 {
     TOHMove m = this->GetAction(s, s2);
-    
+
     int animatingDisk = s.GetSmallestDiskOnPeg(m.source);
     int finalHeight = s.GetDiskCountOnPeg(m.dest);
-    
-    float offset[4] = {-0.75, -0.25, 0.25, 0.75}; // x-positions of the pegs
-    for (int x = 0; x < 4; x++)
+
+    for (int x = 0; x < numPegs; x++)
     {
+        float loc = GetPegLocation(x);
         for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
         {
             int which = s.GetDiskOnPeg(x, y);
-            float halfwidth = 0.04+0.2*which/float(disks);
+	    float halfwidth = (0.9f*(2.0f/numPegs)/2.0f)*((which+1)/float(numDisks));
             if (which != animatingDisk) // first, draws every disk except for the animating one
             {
-                display.FillRect({static_cast<float>(offset[x]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-y*0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(disks)))}, {0.0, static_cast<float>(1.0-float(which)/float(disks)), 1.0});
+                display.FillRect({static_cast<float>(loc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-y*0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(numDisks)))}, {0.0, static_cast<float>(1.0-float(which)/float(numDisks)), 1.0});
             }
             else {
                 int targetPeg = m.dest;
+                float targetLoc = GetPegLocation(targetPeg);
                 Graphics::rect r1;
                 Graphics::rect r2;
-                
+
                 if (v <= 0.333) { // up
                     v *= 3;
-                    r1 = {static_cast<float>(offset[x]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-y*0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(disks)))};
-                    
-                    r2 = {static_cast<float>(offset[x]-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(-0.5)};
+                    r1 = {static_cast<float>(loc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-y*0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(numDisks)))};
+
+                    r2 = {static_cast<float>(loc-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(-0.5)};
                 }
                 else if (v <= 0.666) { // horizontal
                     v = (v - 0.333) * 3;
-                    r1 = {static_cast<float>(offset[x]-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(-0.5)};
-                    
-                    r2 = {static_cast<float>(offset[targetPeg]-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(offset[targetPeg]+halfwidth), static_cast<float>(-0.5)};
+                    r1 = {static_cast<float>(loc-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(-0.5)};
+
+                    r2 = {static_cast<float>(targetLoc-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(targetLoc+halfwidth), static_cast<float>(-0.5)};
                 }
                 else { // down
                     v = (v - 0.666) * 3;
-                    r1 = {static_cast<float>(offset[targetPeg]-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(offset[targetPeg]+halfwidth), static_cast<float>(-0.5)};
-                    
-                    r2 = {static_cast<float>(offset[targetPeg]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-finalHeight*0.8/(1+float(disks))), static_cast<float>(offset[targetPeg]+halfwidth), static_cast<float>(0.8-finalHeight*0.8/(1+float(disks)))};
+                    r1 = {static_cast<float>(targetLoc-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(targetLoc+halfwidth), static_cast<float>(-0.5)};
+
+                    r2 = {static_cast<float>(targetLoc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-finalHeight*0.8/(1+float(numDisks))), static_cast<float>(targetLoc+halfwidth), static_cast<float>(0.8-finalHeight*0.8/(1+float(numDisks)))};
                 }
-                
+
                 r1.lerp(r2, v);
                 display.FillRect(r1, Colors::purple);
             }
         }
     }
 
-   
+
 }
 
 // Draw for vertical animation when user is solving
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks> &s, int selectedPeg, int nextPeg, float v) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &s, int selectedPeg, int nextPeg, float v) const
 {
     int animatingDisk = s.GetSmallestDiskOnPeg(selectedPeg);
     int finalHeight = s.GetDiskCountOnPeg(nextPeg);
-    
-    float offset[4] = {-0.75, -0.25, 0.25, 0.75};
-    for (int x = 0; x < 4; x++)
+
+    for (int x = 0; x < numPegs; x++)
     {
+        float loc = GetPegLocation(x);
         for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
         {
             int which = s.GetDiskOnPeg(x, y);
-            float halfwidth = 0.04+0.2*which/float(disks);
+	    float halfwidth = (0.9f*(2.0f/numPegs)/2.0f)*((which+1)/float(numDisks));
             if (which != animatingDisk) // first, draws every disk except for the animating one
             {
-                display.FillRect({static_cast<float>(offset[x]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-y*0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(disks)))}, {0.0, static_cast<float>(1.0-float(which)/float(disks)), 1.0});
+                display.FillRect({static_cast<float>(loc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-y*0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(numDisks)))}, {0.0, static_cast<float>(1.0-float(which)/float(numDisks)), 1.0});
             }
             else {
+                float nextLoc = GetPegLocation(nextPeg);
                 Graphics::rect r1;
                 Graphics::rect r2;
-                
+
                 if (v <= 0.333) { // up for the first third
                     v *= 3;
-                    r1 = {static_cast<float>(offset[x]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-y*0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(disks)))};
-                    
-                    r2 = {static_cast<float>(offset[x]-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(-0.5)};
+                    r1 = {static_cast<float>(loc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-y*0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(numDisks)))};
+
+                    r2 = {static_cast<float>(loc-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(-0.5)};
                 }
                 else { // down for the last third. the second third is animated by Draw(display, s, startPeg, px)
                     v = (v - 0.666) * 3;
-                    r1 = {static_cast<float>(offset[nextPeg]-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(offset[nextPeg]+halfwidth), static_cast<float>(-0.5)};
-                    
-                    r2 = {static_cast<float>(offset[nextPeg]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-finalHeight*0.8/(1+float(disks))), static_cast<float>(offset[nextPeg]+halfwidth), static_cast<float>(0.8-finalHeight*0.8/(1+float(disks)))};
+                    r1 = {static_cast<float>(nextLoc-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(nextLoc+halfwidth), static_cast<float>(-0.5)};
+
+                    r2 = {static_cast<float>(nextLoc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-finalHeight*0.8/(1+float(numDisks))), static_cast<float>(nextLoc+halfwidth), static_cast<float>(0.8-finalHeight*0.8/(1+float(numDisks)))};
                 }
-                
+
                 r1.lerp(r2, v);
                 display.FillRect(r1, Colors::purple);
             }
         }
     }
 
-   
+
 }
 
 // Draw for horizontal animation when user is solving
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks> &s, int startPeg, float px)
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display, const TOHState<numDisks, numPegs> &s, int startPeg, float px)
 {
     int animatingDisk = s.GetSmallestDiskOnPeg(startPeg);
-    
-    float offset[4] = {-0.75, -0.25, 0.25, 0.75}; // the x-positions for each peg
-    
+
     // if the mouse is hovering over a peg, highlight that peg
     int hoveredPeg = GetHoveredPeg(px);
     if (hoveredPeg != -1)
     {
-        Graphics::rect p(offset[hoveredPeg]-0.01, 0, offset[hoveredPeg]+0.01, 0.8);
-        
+        float hoveredLoc = GetPegLocation(hoveredPeg);
+        Graphics::rect p(hoveredLoc-0.01, 0, hoveredLoc+0.01, 0.8);
+
         // highlight invalid pegs in red and valid pegs in purple
         if (s.GetSmallestDiskOnPeg(startPeg) > s.GetSmallestDiskOnPeg(hoveredPeg))
             display.FillRect(p, Colors::red);
         else
             display.FillRect(p, Colors::purple);
-        
+
     }
 
-    for (int x = 0; x < 4; x++)
+    for (int x = 0; x < numPegs; x++)
     {
+        float loc = GetPegLocation(x);
         for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
         {
             int which = s.GetDiskOnPeg(x, y);
-            float halfwidth = 0.04+0.2*which/float(disks);
+            float halfwidth = 0.04+0.2*which/float(numDisks);
             if (which != animatingDisk) // first, draws every disk except for the animating one
             {
-                display.FillRect({static_cast<float>(offset[x]-halfwidth), static_cast<float>(0.8-0.8/(1+float(disks))-y*0.8/(1+float(disks))), static_cast<float>(offset[x]+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(disks)))}, {0.0, static_cast<float>(1.0-float(which)/float(disks)), 1.0});
+                display.FillRect({static_cast<float>(loc-halfwidth), static_cast<float>(0.8-0.8/(1+float(numDisks))-y*0.8/(1+float(numDisks))), static_cast<float>(loc+halfwidth), static_cast<float>(0.8-y*0.8/(1+float(numDisks)))}, {0.0, static_cast<float>(1.0-float(which)/float(numDisks)), 1.0});
             }
             else
             { // draws the animating disk
-                Graphics::rect r1 = {static_cast<float>(px-halfwidth), static_cast<float>(-0.5-0.8/(1+float(disks))), static_cast<float>(px+halfwidth), -0.5f};
+                Graphics::rect r1 = {static_cast<float>(px-halfwidth), static_cast<float>(-0.5-0.8/(1+float(numDisks))), static_cast<float>(px+halfwidth), -0.5f};
                 display.FillRect(r1, Colors::purple);
             }
         }
@@ -623,97 +501,88 @@ void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks> &s, int 
 
 }
 
-template <int disks>
-void TOH<disks>::Draw(Graphics::Display &display, const TOHState<disks>&, TOHMove&) const
+template <int numDisks, int numPegs>
+void TOH<numDisks, numPegs>::Draw(Graphics::Display &display, const TOHState<numDisks, numPegs>&, TOHMove&) const
 {
 	// nothing here as in OpenGLDraw
 }
 
-template <int disks>
-bool TOH<disks>::Click(int &peg, float px) 
+template <int numDisks, int numPegs>
+bool TOH<numDisks, numPegs>::Click(int &peg, float px)
 {
     peg = GetHoveredPeg(px);
-    
+
     return true;
 }
 
-template <int disks>
-int TOH<disks>::GetHoveredPeg(const float &px)
+template <int numDisks, int numPegs>
+int TOH<numDisks, numPegs>::GetHoveredPeg(const float &px)
 {
-    int peg = -1;
-    
-    if (-0.75-0.1 <= px && px <= -0.75+0.1) // area accepted as "peg" goes a little beyond peg boundary
+    // area accepted as "peg" goes a little beyond the peg's exact location,
+    // proportionally to how wide each peg's region is
+    float tolerance = 0.4f/numPegs;
+    for (int p = 0; p < numPegs; p++)
     {
-        peg = 0;
+        float loc = GetPegLocation(p);
+        if (loc-tolerance <= px && px <= loc+tolerance)
+            return p;
     }
-    else if (-0.25-0.1 <= px && px <= -0.25+0.1)
-    {
-        peg = 1;
-    }
-    else if (0.25-0.1 <= px && px <= 0.25+0.1)
-    {
-        peg = 2;
-    }
-    else if (0.75-0.1 <= px && px <= 0.75+0.1)
-    {
-        peg = 3;
-    }
-    
-    return peg;
+
+    return -1;
 }
 
 
-template <int disks>
-bool TOH<disks>::Drag(const TOHState<disks> &currState, int peg)
+template <int numDisks, int numPegs>
+bool TOH<numDisks, numPegs>::Drag(const TOHState<numDisks, numPegs> &currState, int peg)
 {
     if (peg == -1) // if in empty space
         return false;
-    
+
     if (currState.GetDiskCountOnPeg(peg) == 0) // if the peg has no disks
         return false;
-    
+
     return true;
 }
 
-template <int disks>
-bool TOH<disks>::Release(const TOHState<disks> &currState, int &peg, point3d loc, TOHState<disks> &nextState, int &userMoveCount)
+template <int numDisks, int numPegs>
+bool TOH<numDisks, numPegs>::Release(const TOHState<numDisks, numPegs> &currState, int &peg, point3d loc, TOHState<numDisks, numPegs> &nextState, int &userMoveCount)
 {
     if (peg == -1) // no disk to release
         return false;
-    
+
     int nextPeg = GetHoveredPeg(loc.x);
-        
+
     nextState = currState;
-    
+
     if (peg == nextPeg)
         return true;
-        
+
     if (nextPeg != -1 && currState.GetSmallestDiskOnPeg(peg) < currState.GetSmallestDiskOnPeg(nextPeg)) // if the next peg is actually a valid next peg
     {
         TOHMove m = TOHMove(peg, nextPeg);
         ApplyAction(nextState, m);
         userMoveCount++;
-        
+
         return true;
     }
-    
+
     return false;
 }
 
 
-template <int patternDisks, int totalDisks, int offset=0>
-class TOHPDB : public PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>> {
+template <int patternDisks, int totalDisks, int offset=0, int numPegs=4, uint64_t pdbBits=8>
+class TOHPDB : public PDBHeuristic<TOHState<patternDisks, numPegs>, TOHMove, TOH<patternDisks, numPegs>, TOHState<totalDisks, numPegs>, pdbBits> {
 public:
-	TOHPDB(TOH<patternDisks> *e, const TOHState<totalDisks> &s)
-	:PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>>(e) { this->SetGoal(s); }
+	TOHPDB(TOH<patternDisks, numPegs> *e, const TOHState<totalDisks, numPegs> &s)
+	:PDBHeuristic<TOHState<patternDisks, numPegs>, TOHMove, TOH<patternDisks, numPegs>, TOHState<totalDisks, numPegs>, pdbBits>(e) { this->SetGoal(s); }
 	virtual ~TOHPDB() {}
 
-	TOHState<totalDisks> GetStateFromAbstractState(TOHState<patternDisks> &start) const
+	TOHState<totalDisks, numPegs> GetStateFromAbstractState(TOHState<patternDisks, numPegs> &start) const
 	{
 		int diff = totalDisks - patternDisks;
-		
-		TOHState<totalDisks> tmp;
-		for (int x = 0; x < 4; x++)
+
+		TOHState<totalDisks, numPegs> tmp;
+		for (int x = 0; x < numPegs; x++)
 		{
 			tmp.counts[x] = start.counts[x];
 			for (int y = 0; y < tmp.counts[x]; y++)
@@ -731,17 +600,17 @@ public:
 	// 2
 	//
 	// 1
-	virtual uint64_t GetAbstractHash(const TOHState<totalDisks> &s, int threadID = 0) const
+	virtual uint64_t GetAbstractHash(const TOHState<totalDisks, numPegs> &s, int threadID = 0) const
 	{
 		int diff = totalDisks - patternDisks;
 		uint64_t hash = 0;
-		for (int x = 0; x < 4; x++)
+		for (int x = 0; x < numPegs; x++)
 		{
 			for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
 			{
 				// 6 total 2 pattern
 				if ((s.GetDiskOnPeg(x, y) > diff-offset) && (s.GetDiskOnPeg(x, y) <= totalDisks-offset))
-					hash |= (uint64_t(x)<<(2*(s.GetDiskOnPeg(x, y)-1-diff+offset)));
+					hash += static_cast<uint64_t>(x) * TOHIntPow(numPegs, s.GetDiskOnPeg(x, y)-1-diff+offset);
 			}
 		}
 		return hash;
@@ -749,17 +618,17 @@ public:
 
 	virtual uint64_t GetPDBSize() const
 	{
-		return 1ull<<(2*patternDisks);
+		return TOHIntPow(numPegs, patternDisks);
 	}
-	virtual uint64_t GetPDBHash(const TOHState<patternDisks> &s, int threadID = 0) const
+	virtual uint64_t GetPDBHash(const TOHState<patternDisks, numPegs> &s, int threadID = 0) const
 	{
 		return this->env->GetStateHash(s);
 	}
-	virtual void GetStateFromPDBHash(uint64_t hash, TOHState<patternDisks> &s, int threadID = 0) const
+	virtual void GetStateFromPDBHash(uint64_t hash, TOHState<patternDisks, numPegs> &s, int threadID = 0) const
 	{
 		this->env->GetStateFromHash(hash, s);
 	}
-	
+
 	virtual bool Load(const char *prefix)
 	{
 		return false;
@@ -772,14 +641,14 @@ public:
 			fprintf(stderr, "Error saving");
 			return;
 		}
-		PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>>::Save(f);
+		PDBHeuristic<TOHState<patternDisks, numPegs>, TOHMove, TOH<patternDisks, numPegs>, TOHState<totalDisks, numPegs>, pdbBits>::Save(f);
 		fclose(f);
 	}
-	
+
 	virtual std::string GetFileName(const char *prefix)
 	{
 		std::string s = prefix;
-		s += "TOH4+"+std::to_string(patternDisks)+"+"+std::to_string(totalDisks)+".pdb";
+		s += "TOH"+std::to_string(numPegs)+"+"+std::to_string(patternDisks)+"+"+std::to_string(totalDisks)+".pdb";
 		return s;
 	}
 };
