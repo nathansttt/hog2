@@ -244,6 +244,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 			   depth, timer.EndTimer(), total, entries, COUNT);
 		depth++;
+		assert(depth < ((1<<pdbBits)-1)); // Hit max PDB size
 	} while (entries != COUNT);
 	
 	printf("%1.2fs elapsed\n", t.EndTimer());
@@ -360,6 +361,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 				   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
+		assert(depth < ((1<<pdbBits)-1)); // Hit max PDB size
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	
@@ -451,6 +453,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
+		assert(depth < ((1<<pdbBits)-1)); // Hit max PDB size
 	} while (entries != COUNT);
 	
 	printf("%1.2fs elapsed\n", t.EndTimer());
@@ -569,6 +572,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		if (COUNT-entries <= total) // If we wrote more entries than there are left, switch directions
 			searchForward = false;
 		depth++;
+		assert(depth < ((1<<pdbBits)-1)); // Hit max PDB size
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	if (verbose)
@@ -951,6 +955,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		printf("Depth %d complete; %1.2fs elapsed. %" PRId64 " new states written; %" PRId64 " of %" PRId64 " total\n",
 			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
+		assert(depth < ((1<<pdbBits)-1)); // Hit max PDB size
 		coarseOpenCurr.swap(coarseOpenNext);
 
 //		if (total == 0)
